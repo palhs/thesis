@@ -24,6 +24,7 @@
 - [[concepts/problem-statement]] — Thesis title, the three-gap motivation, four objectives, scope (in/out), assumptions/limitations, success criteria. Entry point for Chapter 1 framing.
 - [[concepts/research-questions]] — RQ1–RQ5 with primary metrics and independent variables; maps each RQ to the family axis it stresses and to the downstream tasks that consume it.
 - [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[17]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
+- [[concepts/evaluation-metrics]] — Unified metric schema (latency / throughput / overhead / reliability); reported literature ranges; adversarial and delay axes; metric → RQ map; simulator instrumentation contract.
 
 ## Sources
 
