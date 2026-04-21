@@ -22,7 +22,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 - `[x]` **S0** `H` Researcher — Import BFT Foundation concepts
   _Source:_ `resources/00_BFT_Foundation.md` · _Target:_ `wiki/concepts/{byzantine-generals,flp-impossibility,cap-theorem,consensus-properties,synchrony-models,fault-model,quorum-arithmetic,consensus-families}.md` · _Verify:_ S1–S4 wikilink targets resolve
-- `[?]` **S1** `H` Researcher — Import PBFT deep-dive notes
+- `[x]` **S1** `H` Researcher — Import PBFT deep-dive notes
   _Source:_ `resources/01_PBFT_DeepDive.md` · _Target:_ `wiki/algorithms/pbft.md` · _Verify:_ T2 outcomes covered
 - `[ ]` **S2** `H` Researcher — Import PoS finality deep-dive notes
   _Source:_ <path> · _Target:_ `wiki/algorithms/pos.md` · _Verify:_ T3 outcomes covered
