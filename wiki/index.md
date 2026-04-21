@@ -8,6 +8,7 @@
 
 - [[algorithms/pbft]] — PBFT-family (Castro–Liskov, HotStuff, Tendermint): three-phase commit under partial synchrony; `3f+1` replicas; view change as liveness recovery.
 - [[algorithms/pos]] — PoS-finality (Casper FFG, Gasper): BFT finality gadget over a chain; two-round justify→finalise at epoch granularity; stake-weighted `3f+1` with slashing-based accountable safety.
+- [[algorithms/avalanche]] — Avalanche family (Slush → Snowflake → Snowball → DAG-Avalanche; production: Snowman): BFT via repeated random `k`-peer subsampling; probabilistic finality `1 − ε` with `ε < (1 − α_c/K)^β`; per-validator cost `O(K·β)` independent of `n`.
 
 ## Concepts
 
