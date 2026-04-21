@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 66 · Sync tasks: 10 · Lint checkpoints: 5
-- Completed: 19 · In Review: 1 · In Progress: 0 · Not Started: 61 · Blocked: 0
+- Completed: 20 · In Review: 0 · In Progress: 0 · Not Started: 61 · Blocked: 0
 
 ## Legend
 
@@ -38,7 +38,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Source:_ `resources/Evaluation_Metrics.md` · _Target:_ `wiki/concepts/evaluation-metrics.md` · _Verify:_ T9
 - `[x]` **S8** `M` Researcher — Generate initial `wiki/index.md` and `wiki/log.md`
   _Outcome:_ Index reflects S1–S7 pages; log has one retroactive entry per import · _Artifact:_ `wiki/index.md`, `wiki/log.md`
-- `[?]` **S9** `M` Linter — Sync completeness check
+- `[x]` **S9** `M` Linter — Sync completeness check
   _Outcome:_ Confirm every W1–W2 completed task (T1–T10) has a corresponding wiki artifact · _Artifact:_ `wiki/lint/<date>_sync-report.md`
 
 ---
