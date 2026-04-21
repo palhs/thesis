@@ -13,6 +13,7 @@
 
 ## Concepts
 
+- [[concepts/consensus-overview]] — Introductory framing: what a blockchain is, how blocks are created, why consensus is needed, why it is hard. Upstream of all other Concepts pages; recommended first read.
 - [[concepts/byzantine-generals]] — Lamport–Shostak–Pease BGP formulation; `n ≥ 3f+1` solvability bound; origin of the two-thirds supermajority.
 - [[concepts/flp-impossibility]] — Fischer–Lynch–Paterson: no deterministic async consensus with even one crash fault; motivates partial-sync, randomization, and layered relaxations.
 - [[concepts/cap-theorem]] — Under partition, blockchains choose Consistency (PBFT, PoS-finality) or Availability (Avalanche); `P` is non-negotiable.

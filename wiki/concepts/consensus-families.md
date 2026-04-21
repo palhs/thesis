@@ -1,5 +1,10 @@
 # Consensus Families — Design Space Map
 
+> Prerequisite for this page: [[concepts/consensus-overview]] (what a
+> blockchain is, how blocks are made, why consensus is needed, why it is
+> hard). This page assumes that framing and jumps straight to the
+> comparative positioning of the four families.
+
 The four families evaluated in this thesis, positioned along the axes
 introduced in [[concepts/consensus-properties]],
 [[concepts/synchrony-models]], [[concepts/fault-model]], and
