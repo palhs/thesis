@@ -34,7 +34,7 @@ each branch is expanded in its own algorithm page.
  quorum-based,             stake-weighted +          random
  partial sync              economic                  subsampling
      |                           |                           |
- [[algorithms/pbft]]       PoS-finality              [[algorithms/avalanche]]
+ [[algorithms/pbft]]       [[algorithms/pos]]        [[algorithms/avalanche]]
  PBFT, HotStuff,           Casper FFG /              Snowball -> Snowflake
  Tendermint                Gasper / LMD              -> Avalanche
      |                           |                           |
@@ -52,11 +52,10 @@ each branch is expanded in its own algorithm page.
   `3f+1` replicas; view-change recovers liveness after GST. Streamlined by
   HotStuff (linearised, pipelined) and Tendermint (round-robin leaders).
 
-- **PoS-finality.** Conventional blockchain substrate overlaid with a BFT
-  finality gadget (Casper FFG, Gasper). Two sequential supermajority votes
-  finalise a checkpoint irreversibly. `3f+1`-by-stake; slashing deters
-  equivocators economically as well as cryptographically. `TODO(link)`: add
-  `[[algorithms/pos]]` once ingested (S2).
+- **[[algorithms/pos]] family.** Conventional blockchain substrate overlaid
+  with a BFT finality gadget (Casper FFG, Gasper). Two sequential
+  supermajority votes finalise a checkpoint irreversibly. `3f+1`-by-stake;
+  slashing deters equivocators economically as well as cryptographically.
 
 - **[[algorithms/avalanche]] family.** Abandons quorums in favour of repeated
   random subsampling; confidence accumulates as repeated sample agreement is
