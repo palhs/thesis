@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 66 · Sync tasks: 10 · Lint checkpoints: 5
-- Completed: 10 · In Review: 1 · In Progress: 0 · Not Started: 56 · Blocked: 0
+- Completed: 10 · In Review: 2 · In Progress: 0 · Not Started: 55 · Blocked: 0
 
 ## Legend
 
@@ -22,7 +22,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 - `[x]` **S0** `H` Researcher — Import BFT Foundation concepts
   _Source:_ `resources/00_BFT_Foundation.md` · _Target:_ `wiki/concepts/{byzantine-generals,flp-impossibility,cap-theorem,consensus-properties,synchrony-models,fault-model,quorum-arithmetic,consensus-families}.md` · _Verify:_ S1–S4 wikilink targets resolve
-- `[ ]` **S1** `H` Researcher — Import PBFT deep-dive notes
+- `[?]` **S1** `H` Researcher — Import PBFT deep-dive notes
   _Source:_ `resources/01_PBFT_DeepDive.md` · _Target:_ `wiki/algorithms/pbft.md` · _Verify:_ T2 outcomes covered
 - `[ ]` **S2** `H` Researcher — Import PoS finality deep-dive notes
   _Source:_ <path> · _Target:_ `wiki/algorithms/pos.md` · _Verify:_ T3 outcomes covered
