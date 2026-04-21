@@ -23,8 +23,22 @@
 - [[concepts/consensus-families]] — Design-space table + BGP propagation tree; one-line framing per family. Central navigation hub for comparative work.
 - [[concepts/problem-statement]] — Thesis title, the three-gap motivation, four objectives, scope (in/out), assumptions/limitations, success criteria. Entry point for Chapter 1 framing.
 - [[concepts/research-questions]] — RQ1–RQ5 with primary metrics and independent variables; maps each RQ to the family axis it stresses and to the downstream tasks that consume it.
+- [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[17]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
 
 ## Sources
+
+- [[sources/2026-04-21_lamport-shostak-pease-bgp-1982]] — [1] BGP formulation; deterministic agreement iff `n ≥ 3f+1`, round floor `f+1`; signatures relax to `f+1`.
+- [[sources/2026-04-21_flp-impossibility-1985]] — [2] FLP: no deterministic async consensus with even one crash fault; motivates the four families' relaxations.
+- [[sources/2026-04-21_dwork-lynch-stockmeyer-partial-sync-1988]] — [3] Partial-synchrony model; consensus under `f < n/3`; safety-always / liveness-after-GST separation.
+- [[sources/2026-04-21_castro-liskov-pbft-1999]] — [4] PBFT: first practical BFT SMR; three-phase commit + view change; `O(n²)` normal / `O(n³)` view change.
+- [[sources/2026-04-21_yin-hotstuff-2019]] — [5] HotStuff: linearises view change to `O(n)` via threshold signatures; responsive leader rotation.
+- [[sources/2026-04-21_buchman-tendermint-2018]] — [6] Tendermint: round-robin leader BFT with locking rule; Cosmos SDK deployment basis.
+- [[sources/2026-04-21_buterin-griffith-casper-ffg-2017]] — [7] Casper FFG: BFT finality gadget; two-round justify→finalise; accountable safety via slashing.
+- [[sources/2026-04-21_team-rocket-avalanche-2019]] — [9] Avalanche: subsampled-voting cascade Slush→Snowflake→Snowball→Avalanche; probabilistic `1 − ε` finality; per-node `O(K·β)`.
+- [[sources/2026-04-21_danezis-narwhal-tusk-2022]] — [11] Narwhal+Tusk: DAG mempool + zero-overhead consensus; decouples data availability from ordering; `O(n)` messages.
+- [[sources/2026-04-21_spiegelman-bullshark-2022]] — [12] Bullshark: partial-sync fast path + async fallback DAG BFT; simplifies Narwhal+Tusk in ~200 LoC.
+- [[sources/2026-04-21_babel-mysticeti-2023]] — [13] Mysticeti: uncertified DAG at the 3-round BFT latency lower bound; deployed in Sui.
+- [[sources/2026-04-21_bano-sok-consensus-2019]] — [14] SoK taxonomy of blockchain consensus families; taxonomic anchor for Ch. 2 and for [[concepts/consensus-families]].
 
 ## Experiments
 

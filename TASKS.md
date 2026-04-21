@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 66 · Sync tasks: 10 · Lint checkpoints: 5
-- Completed: 16 · In Review: 0 · In Progress: 0 · Not Started: 66 · Blocked: 0
+- Completed: 16 · In Review: 1 · In Progress: 0 · Not Started: 65 · Blocked: 0
 
 ## Legend
 
@@ -32,7 +32,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Source:_ `resources/04_DAG_Based_DeepDive.md` · _Target:_ `wiki/algorithms/dag-based.md` · _Verify:_ T5 outcomes covered
 - `[x]` **S5** `H` Researcher — Import problem statement + research questions
   _Source:_ <path> · _Target:_ `wiki/concepts/problem-statement.md`, `wiki/concepts/research-questions.md` · _Verify:_ T7, T10
-- `[ ]` **S6** `H` Researcher — Import annotated bibliography + 8–12 source pages
+- `[x]` **S6** `H` Researcher — Import annotated bibliography + 8–12 source pages
   _Source:_ <path + raw PDFs> · _Target:_ `wiki/sources/*.md`, `wiki/concepts/annotated-bibliography.md` · _Verify:_ T8
 - `[ ]` **S7** `H` Researcher — Import evaluation metrics notes
   _Source:_ <path> · _Target:_ `wiki/concepts/evaluation-metrics.md` · _Verify:_ T9
@@ -226,3 +226,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 ## Backlog
 
 Agents append here when they notice out-of-scope issues during a task.
+
+- **Bibliography: dedicated source pages for [8], [10], [15]–[17].** S6 imported 12 of 17 entries as `wiki/sources/` pages; the remaining five are catalogued with full IEEE citations on `wiki/concepts/annotated-bibliography.md` but lack their own dedicated page. Candidate owner: T8 follow-up. Priority: M — not blocking any Week 3+ task but needed before Writer tasks cite these entries.
+- **Bibliography: algorithm-page numbering reconciliation.** `wiki/algorithms/{pbft,pos,avalanche,dag-based}.md` each carry a **local** `[1]–[3]` footnote list that predates `wiki/concepts/annotated-bibliography.md` and the citation-policy rule (single consolidated `[N]` numbering across the whole thesis, per the legend CSV). A bookkeeping pass is needed to rewrite each algorithm page's inline `[N]` citations to the consolidated IEEE numbers ([4]–[6] for PBFT, [7]–[8] for PoS, [9]–[10] for Avalanche, [11]–[13] for DAG-based) and delete the per-page footnote blocks in favour of links to `wiki/concepts/annotated-bibliography`. Priority: M — blocks L-W2 (linter will flag inconsistent numbering) and Writer tasks T11/T12. Good candidate for a lint-triage pass rather than a standalone task.
+- **Dashboard arithmetic.** `TASKS.md` dashboard line previously read "Not Started: 66" when the actual sum was 65 after S0–S5 and T1–T10 completions (total 81 slots across T-tasks + S-tasks + L-tasks, minus 16 completed = 65). Fixed incidentally as part of the S6 flip (now 65 Not Started, 1 In Progress). Watch for re-drift during future flips.

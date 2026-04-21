@@ -1,0 +1,11 @@
+Annotated Bibliography — Legend and Summary,
+,
+Scope,"17 canonical papers covering Layer-1 consensus: foundational distributed-systems results, protocol papers for PBFT / PoS-finality / Avalanche / DAG-based families, two surveys, and one empirical-methodology precedent."
+,
+Category colours,Yellow = Foundational; Green = Protocol; Blue = Survey; Orange = Empirical methodology.
+,
+Citation scheme,IEEE numeric; same [n] numbering is reused in the thesis chapters for a single consolidated bibliography.
+,
+Counts,Foundational: 3 | Protocol: 10 | Survey: 3 | Empirical: 1
+,
+Notes on quantitative claims,All throughput / latency figures cited in the thesis are attributed to the specific paper in this bibliography (IEEE number). Survey papers are used only for taxonomic framing; every numeric comparison uses primary sources.
