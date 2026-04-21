@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 66 · Sync tasks: 10 · Lint checkpoints: 5
-- Completed: 12 · In Review: 1 · In Progress: 0 · Not Started: 53 · Blocked: 0
+- Completed: 12 · In Review: 2 · In Progress: 0 · Not Started: 52 · Blocked: 0
 
 ## Legend
 
@@ -28,8 +28,8 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Source:_ `resources/02_PoS_Finality_DeepDive.md` · _Target:_ `wiki/algorithms/pos.md` · _Verify:_ T3 outcomes covered
 - `[x]` **S3** `H` Researcher — Import Avalanche deep-dive notes
   _Source:_ `resources/03_Avalanche_DeepDive.md` · _Target:_ `wiki/algorithms/avalanche.md` · _Verify:_ T4 outcomes covered
-- `[ ]` **S4** `H` Researcher — Import DAG-based deep-dive notes
-  _Source:_ <path> · _Target:_ `wiki/algorithms/dag-based.md` · _Verify:_ T5 outcomes covered
+- `[?]` **S4** `H` Researcher — Import DAG-based deep-dive notes
+  _Source:_ `resources/04_DAG_Based_DeepDive.md` · _Target:_ `wiki/algorithms/dag-based.md` · _Verify:_ T5 outcomes covered
 - `[ ]` **S5** `H` Researcher — Import problem statement + research questions
   _Source:_ <path> · _Target:_ `wiki/concepts/problem-statement.md`, `wiki/concepts/research-questions.md` · _Verify:_ T7, T10
 - `[ ]` **S6** `H` Researcher — Import annotated bibliography + 8–12 source pages
