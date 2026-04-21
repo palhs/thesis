@@ -22,11 +22,15 @@ Fixed rules inherited from the source legend
   through this bibliography. Linter sweeps flag these; see
   `docs/lint-protocol.md`.
 
-Known drift: algorithm pages [[algorithms/pbft]], [[algorithms/pos]],
-[[algorithms/avalanche]], [[algorithms/dag-based]] currently carry
-**local** `[1]–[3]` footnote lists (written before this page existed).
-Reconciling those to the consolidated numbering is a bookkeeping pass,
-filed to the Backlog.
+Known drift: resolved under S9. The four algorithm pages
+[[algorithms/pbft]], [[algorithms/pos]], [[algorithms/avalanche]], and
+[[algorithms/dag-based]] previously carried **local** `[1]–[3]` footnote
+lists written before this page existed; they now use the consolidated
+`[4]–[13]` numbering below, and the per-page `## Sources` blocks have
+been collapsed into one-line pointers back here. The sole exception is
+a non-bibliography `[ava-docs]` marker on [[algorithms/avalanche]] that
+references Ava Labs production documentation for details unavailable in
+primary papers; see that page's `## Sources` section for the URL.
 
 ## Scope
 
@@ -93,10 +97,10 @@ anchors for that implementation.
   gadget overlaid on a blockchain; accountable safety via slashing.
   Canonical reference for the finality-gadget module.
 - **[8]** Buterin et al., *Combining GHOST and Casper* (Gasper),
-  arXiv:2003.03052, 2020. LMD-GHOST fork choice + Casper FFG finality;
-  full Ethereum 2 PoS. Reference for fork-choice/finality interaction in
-  PoS experiments (T34, T54). Dedicated source page deferred; covered for
-  framing in [[algorithms/pos]].
+  arXiv:2003.03052, 2020. → [[sources/2026-04-21_buterin-gasper-2020]].
+  LMD-GHOST fork choice + Casper FFG finality; full Ethereum 2 PoS.
+  Reference for fork-choice/finality interaction in PoS experiments
+  (T34, T54).
 
 ### Avalanche family → [[algorithms/avalanche]]
 
@@ -107,10 +111,11 @@ anchors for that implementation.
   → Avalanche cascade; probabilistic BFT via repeated random subsampling.
   Canonical reference for the Avalanche-style simulator module.
 - **[10]** Amores-Sesar, Cachin & Schneider, *An Analysis of Avalanche
-  Consensus*, arXiv:2401.02811, 2024. Identifies conditions under which
-  liveness degrades more than [9] claims. Required companion to [9] for a
-  balanced treatment of Avalanche safety/liveness in Ch. 2. Dedicated
-  source page deferred; summarised in [[algorithms/avalanche]] §weaknesses.
+  Consensus*, arXiv:2401.02811, 2024. →
+  [[sources/2026-04-21_amores-sesar-avalanche-analysis-2024]]. Identifies
+  conditions under which liveness degrades more than [9] claims. Required
+  companion to [9] for a balanced treatment of Avalanche safety/liveness
+  in Ch. 2.
 
 ### DAG-based family → [[algorithms/dag-based]]
 
@@ -139,34 +144,35 @@ Taxonomic framing for Ch. 2; no numeric claim in the thesis cites a survey.
   for [[concepts/consensus-families]] and Ch. 2 literature framing.
 - **[15]** Xiao, Zhang, Lou & Hou, *A Survey of Distributed Consensus
   Protocols for Blockchain Networks*, IEEE Commun. Surveys & Tutorials
-  22(2), 2020. Comparative metric ranges across families. Pre-dates
-  Narwhal/Tusk/Mysticeti; numeric ranges are aggregates, used only as a
-  framing reference. Dedicated source page deferred.
+  22(2), 2020. → [[sources/2026-04-21_xiao-survey-2020]]. Comparative
+  metric ranges across families. Pre-dates Narwhal/Tusk/Mysticeti;
+  numeric ranges are aggregates, used only as a framing reference.
 - **[16]** Cachin & Vukolić, *Blockchain Consensus Protocols in the Wild*,
-  arXiv:1707.01873, 2017. Qualitative review of permissioned-chain BFT;
-  methodologically motivates formal models and public review. Dedicated
-  source page deferred.
+  arXiv:1707.01873, 2017. →
+  [[sources/2026-04-21_cachin-vukolic-blockchain-wild-2017]]. Qualitative
+  review of permissioned-chain BFT; methodologically motivates formal
+  models and public review.
 
 ## Empirical methodology (1)
 
 - **[17]** Gervais, Karame, Wüst, Glykantzis, Ritzdorf & Capkun, *On the
-  Security and Performance of Proof of Work Blockchains*, CCS 2016.
-  Quantitative PoW simulation framework; studies block size and
-  propagation delay against throughput and selfish-mining profitability.
-  Methodological precedent for the simulation-based, metrics-instrumented
-  comparative approach this thesis applies to BFT families
-  (see [[concepts/problem-statement]] §method). Dedicated source page
-  deferred.
+  Security and Performance of Proof of Work Blockchains*, CCS 2016. →
+  [[sources/2026-04-21_gervais-pow-security-2016]]. Quantitative PoW
+  simulation framework; studies block size and propagation delay against
+  throughput and selfish-mining profitability. Methodological precedent
+  for the simulation-based, metrics-instrumented comparative approach
+  this thesis applies to BFT families (see
+  [[concepts/problem-statement]] §method).
 
-## Coverage of this batch (S6)
+## Coverage
 
-Twelve dedicated source pages were created in this import: the three
-foundational papers [1]–[3], one primary protocol per algorithm family
-plus the PBFT-family variants [4]–[7], [9], [11]–[13], and the principal
-survey [14]. Entries [8], [10], [15]–[17] are cataloged here with full
-IEEE citations and downstream links; their dedicated source pages are
-deferred to a later Researcher task (candidate: T8 follow-up). Every
-`[N]` citation currently used in the wiki resolves to an entry above.
+All 17 canonical entries `[1]–[17]` have dedicated
+[[sources/|source pages]]. S6 created 12 pages (the three foundational
+papers [1]–[3], one primary protocol per family plus PBFT-family variants
+[4]–[7], [9], [11]–[13], and the principal survey [14]); S9 added the
+remaining five ([8], [10], [15]–[17]). Every `[N]` citation used
+anywhere in the wiki resolves to an entry above and through to a source
+page.
 
 ## Full IEEE bibliography
 

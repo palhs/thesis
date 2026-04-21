@@ -35,12 +35,21 @@
 - [[sources/2026-04-21_yin-hotstuff-2019]] — [5] HotStuff: linearises view change to `O(n)` via threshold signatures; responsive leader rotation.
 - [[sources/2026-04-21_buchman-tendermint-2018]] — [6] Tendermint: round-robin leader BFT with locking rule; Cosmos SDK deployment basis.
 - [[sources/2026-04-21_buterin-griffith-casper-ffg-2017]] — [7] Casper FFG: BFT finality gadget; two-round justify→finalise; accountable safety via slashing.
+- [[sources/2026-04-21_buterin-gasper-2020]] — [8] Gasper: LMD-GHOST fork choice + Casper FFG finality; the deployed Ethereum PoS protocol.
 - [[sources/2026-04-21_team-rocket-avalanche-2019]] — [9] Avalanche: subsampled-voting cascade Slush→Snowflake→Snowball→Avalanche; probabilistic `1 − ε` finality; per-node `O(K·β)`.
+- [[sources/2026-04-21_amores-sesar-avalanche-analysis-2024]] — [10] Rigorous formal re-analysis of Avalanche; tightens safety bounds and identifies async-liveness gap vs [9]'s informal claims.
 - [[sources/2026-04-21_danezis-narwhal-tusk-2022]] — [11] Narwhal+Tusk: DAG mempool + zero-overhead consensus; decouples data availability from ordering; `O(n)` messages.
 - [[sources/2026-04-21_spiegelman-bullshark-2022]] — [12] Bullshark: partial-sync fast path + async fallback DAG BFT; simplifies Narwhal+Tusk in ~200 LoC.
 - [[sources/2026-04-21_babel-mysticeti-2023]] — [13] Mysticeti: uncertified DAG at the 3-round BFT latency lower bound; deployed in Sui.
 - [[sources/2026-04-21_bano-sok-consensus-2019]] — [14] SoK taxonomy of blockchain consensus families; taxonomic anchor for Ch. 2 and for [[concepts/consensus-families]].
+- [[sources/2026-04-21_xiao-survey-2020]] — [15] Survey of blockchain consensus protocols with aggregated throughput / latency / fault-tolerance ranges across families; framing-only citation.
+- [[sources/2026-04-21_cachin-vukolic-blockchain-wild-2017]] — [16] Qualitative review of permissioned-chain BFT; methodological anchor for formal models + public review; motivates the simulator-based approach.
+- [[sources/2026-04-21_gervais-pow-security-2016]] — [17] PoW simulation framework for security + performance; methodological precedent for this thesis's BFT-family simulator.
 
 ## Experiments
+
+## Lint reports
+
+- [[lint/2026-04-21_sync-report]] — S9 sync-completeness pass: T1 artifact `consensus-overview.md` missing on disk and from index; all other W0–W2 completed tasks check out.
 
 ## Drafts

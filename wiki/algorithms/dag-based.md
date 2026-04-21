@@ -5,9 +5,9 @@ Byzantine Generals Problem with a *structural* reorganisation rather
 than a new voting scheme: observe that classical BFT cost is dominated
 by (a) reliably disseminating transaction batches and (b) agreeing on
 their order, and that entangling the two is the source of latency and
-bandwidth inefficiency. Narwhal [1] separates data availability from
+bandwidth inefficiency. Narwhal [11] separates data availability from
 consensus by maintaining a reliably-broadcast DAG of transaction
-batches; Bullshark [2] and Mysticeti [3] then derive a total order
+batches; Bullshark [12] and Mysticeti [13] then derive a total order
 *from the DAG* without additional communication in the common case.
 
 DAG-based protocols occupy the high-throughput, asynchrony-tolerant
@@ -25,9 +25,9 @@ differ in how aggressively they elide explicit voting:
 
 | Protocol | Source | Role |
 | :---- | :---- | :---- |
-| **Narwhal + Tusk** | Danezis et al., EuroSys 2022 [1] | Reference mempool + ordering — establishes the DAG + anchor-commit pattern. |
-| **Bullshark** | Spiegelman et al., CCS 2022 [2] | Narwhal DAG + two-round fast path in synchrony; message-free async fallback. |
-| **Mysticeti** | Babel et al., 2023 [3] | **Uncertified** DAG; implicit references replace the certification step; three-round theoretical lower bound. |
+| **Narwhal + Tusk** | Danezis et al., EuroSys 2022 [11] | Reference mempool + ordering — establishes the DAG + anchor-commit pattern. |
+| **Bullshark** | Spiegelman et al., CCS 2022 [12] | Narwhal DAG + two-round fast path in synchrony; message-free async fallback. |
+| **Mysticeti** | Babel et al., 2023 [13] | **Uncertified** DAG; implicit references replace the certification step; three-round theoretical lower bound. |
 
 For this thesis the simulator target is simplified **Narwhal + Tusk** —
 it is the clearest decomposition of the two-layer structure and the
@@ -79,24 +79,24 @@ that deferral is what allows parallel per-validator block construction.
 
 ### Tusk and Bullshark — zero-message ordering
 
-On top of the Narwhal DAG, **Tusk** [1] derives a total order via a
+On top of the Narwhal DAG, **Tusk** [11] derives a total order via a
 deterministic leader schedule: every `r` rounds, a designated **anchor**
 certificate is nominated; a validator commits the anchor (and thus a
 total order on *all* its DAG ancestors) if a supermajority of
-certificates in a subsequent round reference it. **Bullshark** [2]
+certificates in a subsequent round reference it. **Bullshark** [12]
 refines this with a two-round fast path during synchronous periods and
 a fall-back protocol for asynchrony — both require **no extra messages
 beyond the DAG itself**.
 
 ### Mysticeti — uncertified DAGs for minimum latency
 
-**Mysticeti** [3] removes the explicit certification step: blocks are
+**Mysticeti** [13] removes the explicit certification step: blocks are
 broadcast without waiting for `2f+1` signatures, and the DAG edges
 themselves serve as implicit availability proofs. The commit rule is
 strengthened so every block can in principle be committed without
 delay, reaching the **three-round theoretical lower bound** for BFT
 consensus. Mysticeti reports WAN latency of ~0.5 s for consensus commit
-at throughput exceeding 200,000 transactions per second [3].
+at throughput exceeding 200,000 transactions per second [13].
 
 ### DAG structure
 
@@ -185,9 +185,9 @@ is violable only above it.
 
 | Protocol | Per-block msgs | Latency (rounds) | Throughput (reported) |
 | :---- | :---- | :---- | :---- |
-| **Narwhal + Tusk** [1] | `O(n)` certs + refs | ~5–7 to commit | ~140 ktps [1] |
-| **Bullshark** [2] | `O(n)` (same DAG) | 2 (fast path) | ~125 ktps [2] |
-| **Mysticeti** [3] | `O(n)` implicit refs | 3 (theoretical lower bound) | >200 ktps, ~0.5 s WAN [3] |
+| **Narwhal + Tusk** [11] | `O(n)` certs + refs | ~5–7 to commit | ~140 ktps [11] |
+| **Bullshark** [12] | `O(n)` (same DAG) | 2 (fast path) | ~125 ktps [12] |
+| **Mysticeti** [13] | `O(n)` implicit refs | 3 (theoretical lower bound) | >200 ktps, ~0.5 s WAN [13] |
 
 The structural advantage: **ordering adds no new message class on top
 of the DAG itself** — the same messages that provide data availability
@@ -254,18 +254,8 @@ Hypotheses to evaluate in the results chapter:
 
 ## Sources
 
-- [1] G. Danezis, L. Kokoris-Kogias, A. Sonnino, and A. Spiegelman,
-  "Narwhal and Tusk: A DAG-based Mempool and Efficient BFT Consensus,"
-  in *Proc. 17th European Conference on Computer Systems (EuroSys)*,
-  2022, pp. 34–50.
-- [2] A. Spiegelman, N. Giridharan, A. Sonnino, and L. Kokoris-Kogias,
-  "Bullshark: DAG BFT Protocols Made Practical," in *Proc. ACM
-  Conference on Computer and Communications Security (CCS)*, 2022,
-  pp. 2705–2718.
-- [3] K. Babel, A. Chursin, G. Danezis, L. Kokoris-Kogias, and A.
-  Sonnino, "Mysticeti: Reaching the Latency Limits with Uncertified
-  DAGs," arXiv:2310.14821, 2023.
-
-Dedicated `wiki/sources/` pages for [1]–[3] will be created under T8
-(annotated bibliography). Citations are carried inline here in the
-interim.
+Citations `[11]`, `[12]`, `[13]` resolve via
+[[concepts/annotated-bibliography]] to the dedicated source pages
+[[sources/2026-04-21_danezis-narwhal-tusk-2022]],
+[[sources/2026-04-21_spiegelman-bullshark-2022]], and
+[[sources/2026-04-21_babel-mysticeti-2023]] respectively.

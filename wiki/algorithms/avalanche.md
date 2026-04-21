@@ -6,11 +6,11 @@ rather than collecting a supermajority, each validator repeatedly polls a
 small random sample of peers and accumulates confidence over many short
 rounds. The family — Slush → Snowflake → Snowball → Avalanche — was
 introduced by "Team Rocket" (Rocket, Yin, Sekniqi, van Renesse, Sirer)
-and later formalised at Cornell [1]; it is deployed in production as the
+and later formalised at Cornell [9]; it is deployed in production as the
 Avalanche network's consensus layer, where a linearised variant called
 **Snowman** replaced the original DAG protocol on all three primary
 chains (C-Chain, P-Chain, and — since the Cortina upgrade in April 2023
-— X-Chain) [3]. Subsequent formal analysis [2] sharpens the resilience
+— X-Chain) [ava-docs]. Subsequent formal analysis [10] sharpens the resilience
 claims and tightens the adversary model.
 
 Avalanche occupies the probabilistic, no-quorum corner of the design
@@ -28,16 +28,16 @@ a fifth layer on top:
 
 | Protocol | Source | Role |
 | :---- | :---- | :---- |
-| **Slush** | [1] | Minimal subsampling; flip colour if `α`-of-`k` disagree. |
-| **Snowflake** | [1] | Slush + consecutive-agreement counter `β` before deciding. |
-| **Snowball** | [1] | Snowflake + persistent preference informed by all prior `α`-majorities. |
-| **Avalanche** | [1] | Snowball lifted onto a DAG of conflicting transactions. |
-| **Snowman** | [3] | Linearised production variant; Snowball engine on a totally-ordered chain. Operates on C-Chain, P-Chain, and post-Cortina X-Chain. |
+| **Slush** | [9] | Minimal subsampling; flip colour if `α`-of-`k` disagree. |
+| **Snowflake** | [9] | Slush + consecutive-agreement counter `β` before deciding. |
+| **Snowball** | [9] | Snowflake + persistent preference informed by all prior `α`-majorities. |
+| **Avalanche** | [9] | Snowball lifted onto a DAG of conflicting transactions. |
+| **Snowman** | [ava-docs] | Linearised production variant; Snowball engine on a totally-ordered chain. Operates on C-Chain, P-Chain, and post-Cortina X-Chain. |
 
 For this thesis Snowman is the production reference point (because its
 chain structure is directly comparable to PBFT and PoS-finality);
-DAG-Avalanche [1] remains the canonical theoretical object and the
-target of the formal analyses in [1] and [2].
+DAG-Avalanche [9] remains the canonical theoretical object and the
+target of the formal analyses in [9] and [10].
 
 ## Model and assumptions
 
@@ -51,8 +51,8 @@ target of the formal analyses in [1] and [2].
   *not* a fixed `1/3` — for production parameters (`K=20`,
   `α_c ≈ 0.8K`, `β ≈ 15`) the safety-violation probability stays
   negligible while the Byzantine fraction remains well below the
-  critical threshold [3]. Formal bounds under various adversary models
-  live in [1] and [2].
+  critical threshold [ava-docs]. Formal bounds under various adversary models
+  live in [9] and [10].
 - **Random peer sampling.** Each validator samples uniformly at random
   from a reasonably-known peer set without persistent bias. Sybil
   resistance is **external** — on AVAX it is stake-weighted sampling.
@@ -60,7 +60,7 @@ target of the formal analyses in [1] and [2].
   exceeds a threshold; the probability of later reversal decays
   exponentially in `β`. There is no hard finality — only a tunable `ε`.
 - **Global parameters.** `K`, `α_p`, `α_c`, `β` are network-wide.
-  Heterogeneous parameters cause consensus failures [3]; the simulator
+  Heterogeneous parameters cause consensus failures [ava-docs]; the simulator
   respects this constraint.
 
 ## The subsampling cascade
@@ -105,7 +105,7 @@ via Snowball on the contested vertex.
 ### Snowman — linearised production
 
 Same Snowball engine, operating on a totally-ordered chain instead of a
-DAG. The deployed variant [3]. The official documentation splits what
+DAG. The deployed variant [ava-docs]. The official documentation splits what
 the original paper called `α` into two thresholds:
 
 - **`AlphaPreference` (`α_p`)** — sample-majority threshold that
@@ -115,7 +115,7 @@ the original paper called `α` into two thresholds:
 
 In the original Snowball these were equal. The production decoupling
 lets preference volatility and finality probability be tuned
-independently [3].
+independently [ava-docs].
 
 ### Sampling round
 
@@ -136,7 +136,7 @@ independently [3].
 ## Probabilistic safety
 
 The Avalanche documentation states the safety-violation probability for
-two honest validators accepting conflicting blocks as [3]:
+two honest validators accepting conflicting blocks as [ava-docs]:
 
 ```
   P(safety violation)  <  ( 1 − α_c / K ) ^ β
@@ -145,7 +145,7 @@ two honest validators accepting conflicting blocks as [3]:
 Exponential in `β`. Finality approaches `1 − ε` for arbitrarily small
 `ε` as `β` grows — the production defaults drive `ε` well below
 operationally observable thresholds, which is the basis for the "sub-
-second, immutable" finality claim in [3].
+second, immutable" finality claim in [ava-docs].
 
 Unlike PBFT's deterministic safety derived from the `3f+1` quorum
 intersection (see [[concepts/quorum-arithmetic]]), Avalanche's safety is
@@ -170,9 +170,9 @@ Avalanche degrades gracefully under delay. Two effects to distinguish:
   cannot contribute to the `α`-majority. Finality stalls without a
   safety risk.
 
-The recent formal analysis [2] showed that in worst-case asynchrony the
+The recent formal analysis [10] showed that in worst-case asynchrony the
 protocol can experience extended periods of liveness degradation that
-were underestimated in the original informal treatment [1]. The
+were underestimated in the original informal treatment [9]. The
 simulator probes this gap by injecting heavy asynchronous delay and
 measuring time-to-accept at high Byzantine fractions.
 
@@ -193,7 +193,7 @@ are statistical, not structural (the operational taxonomy lives in
   validators' preferences. Delays but does not prevent convergence.
 - **Sample-partitioning.** The adversary attempts to split honest
   validators into two preference clusters that each see only their own
-  preference in sampled replies. Bounded in [1]; [2] refines these
+  preference in sampled replies. Bounded in [9]; [10] refines these
   bounds under stronger network adversaries.
 
 Unlike PBFT, safety in Avalanche is **probabilistic rather than
@@ -203,7 +203,7 @@ below any target `ε` by sufficiently many rounds.
 
 ## Parameters and communication complexity
 
-Four production parameters drive the whole protocol [3]:
+Four production parameters drive the whole protocol [ava-docs]:
 
 | Parameter | Role | Typical | Cost impact |
 | :---- | :---- | :---- | :---- |
@@ -221,7 +221,7 @@ and the direct contrast with PBFT's `O(n²)` per-block cost (see
 ## Simulator mapping
 
 The thesis implements a simplified **Snowman** variant (the linearised
-production form in [3]) exposing `K`, `α_p`, `α_c`, `β`, and the
+production form in [ava-docs]) exposing `K`, `α_p`, `α_c`, `β`, and the
 random-sampling seed as first-class experiment parameters. Full
 DAG-Avalanche is out of scope — Snowman keeps the implementation
 directly comparable to PBFT, PoS-finality, and DAG-based protocols
@@ -243,7 +243,7 @@ baseline/delay/adversarial experiment batteries in Weeks 8–10.
 Hypotheses to evaluate in the results chapter:
 
 - **Time-to-finality is essentially invariant to `n`**, holding `K`
-  and `β` fixed — matching the sub-second production claim [3] and
+  and `β` fixed — matching the sub-second production claim [ava-docs] and
   directly contrasting with PBFT's `O(n²)`.
 - **Empirical safety-violation rate matches `(1 − α_c/K)^β`** at low
   Byzantine fractions and diverges predictably as the adversary
@@ -265,22 +265,27 @@ Hypotheses to evaluate in the results chapter:
   simulator treats parameter sweeps as a first-class experiment.
 - **Sybil resistance is external.** Random sampling assumes an honest
   peer distribution; the protocol itself does not establish one.
-  Production systems graft stake-weighted sampling [3] onto this.
-- **Async-liveness gap.** [2] shows the original informal claims
+  Production systems graft stake-weighted sampling [ava-docs] onto this.
+- **Async-liveness gap.** [10] shows the original informal claims
   under asynchrony were optimistic. The simulator surfaces this by
   measuring time-to-accept under worst-case asynchronous adversaries.
 
 ## Sources
 
-- [1] Team Rocket, M. Yin, K. Sekniqi, R. van Renesse, and E. G. Sirer,
-  "Scalable and Probabilistic Leaderless BFT Consensus through
-  Metastability," arXiv:1906.08936, 2019.
-- [2] I. Amores-Sesar, C. Cachin, and P. Schneider, "An Analysis of
-  Avalanche Consensus," arXiv:2401.02811, 2024.
-- [3] Ava Labs, "Consensus Protocols — Avalanche Builder Hub," official
+Citations `[9]`, `[10]` resolve via [[concepts/annotated-bibliography]]
+to the dedicated source pages
+[[sources/2026-04-21_team-rocket-avalanche-2019]] and
+[[sources/2026-04-21_amores-sesar-avalanche-analysis-2024]] respectively.
+
+`[ava-docs]` is a non-bibliography URL citation used on this page for
+production-variant details that are only documented in Ava Labs'
+operational docs:
+
+- Ava Labs, "Consensus Protocols — Avalanche Builder Hub," official
   documentation, `build.avax.network/docs/nodes/architecture/consensus`
   (accessed Apr. 2026).
 
-Dedicated `wiki/sources/` pages for [1]–[3] will be created under T8
-(annotated bibliography). Citations are carried inline here in the
-interim.
+Per [[concepts/annotated-bibliography]] §citation-policy, quantitative
+claims must ultimately cite a primary paper; any `[ava-docs]`-backed
+performance number is therefore a weaker citation pending replacement or
+corroboration from [9] or [10].

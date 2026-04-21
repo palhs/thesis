@@ -4,8 +4,8 @@ BFT as a finality gadget over a chain of blocks. PoS-finality protocols
 split consensus into two layers: a block-proposal layer produces a
 constantly-growing chain of candidate blocks, while a BFT gadget
 periodically anoints certain blocks as irreversibly final. The canonical
-instance is Casper FFG [1] and the full Ethereum integration is Gasper,
-combining LMD-GHOST fork choice with Casper-style finality [2]. It sits
+instance is Casper FFG [7] and the full Ethereum integration is Gasper,
+combining LMD-GHOST fork choice with Casper-style finality [8]. It sits
 between [[algorithms/pbft]] (deterministic, single-slot finality) and
 [[algorithms/avalanche]] (probabilistic finality) on the spectrum of how
 aggressively a protocol commits — see [[concepts/consensus-families]] for
@@ -22,8 +22,8 @@ differ in what the underlying chain looks like:
 
 | Protocol | Source | Role |
 | :---- | :---- | :---- |
-| **Casper FFG** | Buterin & Griffith, 2017 [1] | Pure finality gadget; agnostic to the block-proposal layer. |
-| **Gasper** | Buterin et al., 2020 [2] | Casper FFG + LMD-GHOST fork choice; the deployed Ethereum variant. |
+| **Casper FFG** | Buterin & Griffith, 2017 [7] | Pure finality gadget; agnostic to the block-proposal layer. |
+| **Gasper** | Buterin et al., 2020 [8] | Casper FFG + LMD-GHOST fork choice; the deployed Ethereum variant. |
 
 ## Model and assumptions
 
@@ -97,7 +97,7 @@ The two-round structure gives the same quorum-intersection guarantee as
 PBFT (see [[concepts/quorum-arithmetic]]) — applied to stake rather than
 replica count. What PoS-finality adds on top is **accountable safety**:
 
-Casper's accountable-safety theorem [1] shows that, if two conflicting
+Casper's accountable-safety theorem [7] shows that, if two conflicting
 checkpoints are ever finalised, at least one-third of total stake must
 have signed a slashable message. The culprits are identifiable, and
 their deposits are destroyed. Safety violations are therefore not only
@@ -119,7 +119,7 @@ is an epoch, not a block.
   time-to-finality lengthens. In Ethereum's 32-slot epochs, a one-epoch
   delay in finalisation already adds ~6.4 minutes to time-to-finality.
 - **LMD-GHOST reorgs.** Gasper's fork choice operates on the latest
-  attestation from each validator [2]. Under delay, stale attestations
+  attestation from each validator [8]. Under delay, stale attestations
   can survive long enough to bias fork choice toward a chain that FFG
   will ultimately refuse to finalise — producing short-lived forks that
   reorg when attestations catch up.
@@ -217,12 +217,7 @@ Hypotheses to evaluate in the results chapter:
 
 ## Sources
 
-- [1] V. Buterin and V. Griffith, "Casper the Friendly Finality Gadget,"
-  arXiv:1710.09437, 2017.
-- [2] V. Buterin, D. Hernandez, T. Kamphefner, K. Pham, Z. Qiao, D. Ryan,
-  J. Sin, Y. Wang, and Y. X. Zhang, "Combining GHOST and Casper,"
-  arXiv:2003.03052, 2020.
-
-Dedicated `wiki/sources/` pages for [1]–[2] will be created under T8
-(annotated bibliography). Citations are carried inline here in the
-interim.
+Citations `[7]`, `[8]` resolve via [[concepts/annotated-bibliography]]
+to the dedicated source pages
+[[sources/2026-04-21_buterin-griffith-casper-ffg-2017]] and
+[[sources/2026-04-21_buterin-gasper-2020]] respectively.

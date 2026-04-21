@@ -16,9 +16,9 @@ but make different cost tradeoffs:
 
 | Protocol | Source | Key change vs. classical PBFT |
 | :---- | :---- | :---- |
-| **PBFT** | Castro & Liskov, OSDI 1999 [1] | Original three-phase commit; `O(n²)` normal, `O(n³)` view change. |
-| **Tendermint** | Buchman, Kwon & Milosevic, 2018 [3] | Round-robin primaries; `O(n²)` view change; deployed in Cosmos SDK. |
-| **HotStuff** | Yin et al., PODC 2019 [2] | Linearised view change `O(n)` via threshold signatures; phases pipelined across consecutive blocks. |
+| **PBFT** | Castro & Liskov, OSDI 1999 [4] | Original three-phase commit; `O(n²)` normal, `O(n³)` view change. |
+| **Tendermint** | Buchman, Kwon & Milosevic, 2018 [6] | Round-robin primaries; `O(n²)` view change; deployed in Cosmos SDK. |
+| **HotStuff** | Yin et al., PODC 2019 [5] | Linearised view change `O(n)` via threshold signatures; phases pipelined across consecutive blocks. |
 
 ## Model and assumptions
 
@@ -107,9 +107,9 @@ pays for handling a faulty or stalled primary.
   the new view and the three-phase commit resumes.
 - **Cost.** `O(n³)` messages in classical PBFT — the single most expensive
   operation in the protocol. HotStuff reduces this to `O(n)` by attaching
-  threshold signatures to each evidence slot [2]; Tendermint keeps view
+  threshold signatures to each evidence slot [5]; Tendermint keeps view
   change at `O(n²)` but makes it cheap by rotating primaries round-robin
-  so no single replica is structurally privileged [3].
+  so no single replica is structurally privileged [6].
 
 ## Behaviour under network delay
 
@@ -164,9 +164,9 @@ intersection, not for disjoint quorums.
 
 | Protocol | Normal-case per block | View change | Latency (rounds) |
 | :---- | :---- | :---- | :---- |
-| **PBFT** [1] | `O(n²)` | `O(n³)` | 3 |
-| **Tendermint** [3] | `O(n²)` | `O(n²)` | 3 |
-| **HotStuff** [2] | `O(n)` | `O(n)` | 3 (pipelined) |
+| **PBFT** [4] | `O(n²)` | `O(n³)` | 3 |
+| **Tendermint** [6] | `O(n²)` | `O(n²)` | 3 |
+| **HotStuff** [5] | `O(n)` | `O(n)` | 3 (pipelined) |
 
 The trend is a progressive reduction in message complexity via threshold
 signatures (single aggregated vote instead of `n` individual votes) and
@@ -212,15 +212,8 @@ Hypotheses to evaluate in the results chapter:
 
 ## Sources
 
-- [1] M. Castro and B. Liskov, "Practical Byzantine Fault Tolerance," in
-  *Proc. 3rd USENIX Symposium on Operating Systems Design and
-  Implementation (OSDI)*, 1999, pp. 173–186.
-- [2] M. Yin, D. Malkhi, M. K. Reiter, G. G. Gueta, and I. Abraham,
-  "HotStuff: BFT Consensus with Linearity and Responsiveness," in *Proc.
-  ACM Symposium on Principles of Distributed Computing (PODC)*, 2019,
-  pp. 347–356.
-- [3] E. Buchman, J. Kwon, and Z. Milosevic, "The latest gossip on BFT
-  consensus," arXiv:1807.04938, 2018.
-
-Dedicated `wiki/sources/` pages for [1]–[3] will be created under T8
-(annotated bibliography). Citations are carried inline here in the interim.
+Citations `[4]`, `[5]`, `[6]` resolve via
+[[concepts/annotated-bibliography]] to the dedicated source pages
+[[sources/2026-04-21_castro-liskov-pbft-1999]],
+[[sources/2026-04-21_yin-hotstuff-2019]], and
+[[sources/2026-04-21_buchman-tendermint-2018]] respectively.

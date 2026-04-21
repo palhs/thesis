@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 66 · Sync tasks: 10 · Lint checkpoints: 5
-- Completed: 19 · In Review: 0 · In Progress: 0 · Not Started: 62 · Blocked: 0
+- Completed: 19 · In Review: 1 · In Progress: 0 · Not Started: 61 · Blocked: 0
 
 ## Legend
 
@@ -38,7 +38,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Source:_ `resources/Evaluation_Metrics.md` · _Target:_ `wiki/concepts/evaluation-metrics.md` · _Verify:_ T9
 - `[x]` **S8** `M` Researcher — Generate initial `wiki/index.md` and `wiki/log.md`
   _Outcome:_ Index reflects S1–S7 pages; log has one retroactive entry per import · _Artifact:_ `wiki/index.md`, `wiki/log.md`
-- `[ ]` **S9** `M` Linter — Sync completeness check
+- `[?]` **S9** `M` Linter — Sync completeness check
   _Outcome:_ Confirm every W1–W2 completed task (T1–T10) has a corresponding wiki artifact · _Artifact:_ `wiki/lint/<date>_sync-report.md`
 
 ---
@@ -56,7 +56,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 - `[x]` **T5** `M` Researcher — Study DAG-based consensus (Narwhal/Tusk, Mysticeti)
   _Outcome:_ Notes on DAG construction, parallel proposals, ordering · _Artifact:_ `wiki/algorithms/dag-based.md`
 - `[x]` **T6** `H` Researcher — Summarize each algorithm in 1–2 pages
-  _Outcome:_ 4 summaries covering mechanism, guarantees, assumptions, weaknesses
+  _Outcome:_ 4 summaries covering mechanism, guarantees, assumptions, weaknesses · _Artifact:_ collective: `wiki/algorithms/{pbft,pos,avalanche,dag-based}.md` (Mechanism / Safety / Weaknesses-to-foreground sections on each)
 - `[x]` **T7** `H` Researcher — Draft initial problem statement
   _Outcome:_ 1-page statement identifying the gap · _Artifact:_ `wiki/concepts/problem-statement.md`
 
@@ -227,6 +227,5 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 Agents append here when they notice out-of-scope issues during a task.
 
-- **Bibliography: dedicated source pages for [8], [10], [15]–[17].** S6 imported 12 of 17 entries as `wiki/sources/` pages; the remaining five are catalogued with full IEEE citations on `wiki/concepts/annotated-bibliography.md` but lack their own dedicated page. Candidate owner: T8 follow-up. Priority: M — not blocking any Week 3+ task but needed before Writer tasks cite these entries.
-- **Bibliography: algorithm-page numbering reconciliation.** `wiki/algorithms/{pbft,pos,avalanche,dag-based}.md` each carry a **local** `[1]–[3]` footnote list that predates `wiki/concepts/annotated-bibliography.md` and the citation-policy rule (single consolidated `[N]` numbering across the whole thesis, per the legend CSV). A bookkeeping pass is needed to rewrite each algorithm page's inline `[N]` citations to the consolidated IEEE numbers ([4]–[6] for PBFT, [7]–[8] for PoS, [9]–[10] for Avalanche, [11]–[13] for DAG-based) and delete the per-page footnote blocks in favour of links to `wiki/concepts/annotated-bibliography`. Priority: M — blocks L-W2 (linter will flag inconsistent numbering) and Writer tasks T11/T12. Good candidate for a lint-triage pass rather than a standalone task.
 - **Dashboard arithmetic.** `TASKS.md` dashboard line previously read "Not Started: 66" when the actual sum was 65 after S0–S5 and T1–T10 completions (total 81 slots across T-tasks + S-tasks + L-tasks, minus 16 completed = 65). Fixed incidentally as part of the S6 flip (now 65 Not Started, 1 In Progress). Watch for re-drift during future flips.
+- **Ava Labs documentation as a non-bibliography citation** (introduced by S9 reconciliation). [[algorithms/avalanche]] uses a `[ava-docs]` marker for production-variant details (Snowman, C-Chain / P-Chain / X-Chain, production parameters `K=20, α_c≈0.8K, β≈15`, "sub-second" finality). Per the citation policy, any quantitative claim should ultimately cite a primary paper; the Ava Labs URL is currently the only available source for some production details. Priority: L — watch for Writer tasks quoting `[ava-docs]`-backed performance numbers and flag them; ideally replace with primary-paper corroboration from [9] or [10] when possible.
