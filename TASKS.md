@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 67 · Sync tasks: 10 · Lint checkpoints: 5
-- Completed: 21 · In Review: 0 · In Progress: 1 · Not Started: 60 · Blocked: 0
+- Completed: 21 · In Review: 1 · In Progress: 0 · Not Started: 59 · Blocked: 0
 
 ## Legend
 
@@ -70,7 +70,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ Metric list: latency, throughput, communication overhead, fault tolerance, finality time, fork rate · _Artifact:_ `wiki/concepts/evaluation-metrics.md`
 - `[x]` **T10** `H` Researcher — Define research questions and thesis objectives
   _Outcome:_ RQ1–RQ5 finalized, measurable scope · _Artifact:_ `wiki/concepts/research-questions.md`
-- `[~]` **T11** `H` Writer — Write Chapter 1 draft (Introduction)
+- `[x]` **T11** `H` Writer — Write Chapter 1 draft (Introduction)
   _Outcome:_ 3–5 pages: background, motivation, problem statement, objectives, RQs · _Artifact:_ `drafts/ch1_intro.md`
 - `[ ]` **T12** `H` Writer — Write initial Chapter 2 draft (Literature Review)
   _Outcome:_ 3–5 pages on blockchain basics, consensus families, existing evaluations · _Artifact:_ `drafts/ch2_litreview.md`

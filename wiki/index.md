@@ -54,3 +54,5 @@
 - [[lint/2026-04-21_sync-report]] — S9 sync-completeness pass: T1 artifact `consensus-overview.md` missing on disk and from index; all other W0–W2 completed tasks check out.
 
 ## Drafts
+
+- [[drafts/ch1_intro]] — Chapter 1 Introduction: background, motivation, problem statement, operational performance/security definitions, scope and assumptions, RQ1–RQ5, contributions, and chapter roadmap.
