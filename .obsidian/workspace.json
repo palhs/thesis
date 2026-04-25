@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "drafts/ch1_intro.md",
+                "file": "resources/00_BFT_Foundation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ch1_intro"
+              "title": "00_BFT_Foundation"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "drafts/ch1_intro.md",
+                "file": "resources/00_BFT_Foundation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for ch1_intro"
+              "title": "Backlinks for 00_BFT_Foundation"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "drafts/ch1_intro.md",
+                "file": "resources/00_BFT_Foundation.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from ch1_intro"
+              "title": "Outgoing links from 00_BFT_Foundation"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "drafts/ch1_intro.md",
+                "file": "resources/00_BFT_Foundation.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of ch1_intro"
+              "title": "Outline of 00_BFT_Foundation"
             }
           }
         ]
@@ -184,20 +184,21 @@
   },
   "active": "6ac520f0755f7763",
   "lastOpenFiles": [
-    "TASKS.md.tmp.37796.1776850521218",
-    "TASKS.md.tmp.37796.1776800902095",
-    "TASKS.md.tmp.37796.1776800900538",
-    "wiki/log.md.tmp.37796.1776800896842",
-    "wiki/index.md.tmp.37796.1776800854706",
-    "drafts/ch1_intro.md.tmp.37796.1776800697719",
-    "wiki/concepts/problem-statement.md",
+    "TASKS.md.tmp.37796.1777128848331",
+    "TASKS.md.tmp.37796.1777128844822",
+    "TASKS.md.tmp.37796.1777108875132",
+    "TASKS.md.tmp.37796.1777108870138",
+    "wiki/log.md.tmp.37796.1777108864283",
+    "wiki/index.md.tmp.37796.1777108816281",
+    "drafts/ch2_litreview.md",
+    "drafts/ch2_litreview.md.tmp.37796.1777108807758",
+    "resources/ielts_line_graph_trend_practice.docx",
+    "resources/Unconfirmed 287765.crdownload",
+    "resources/IELTS-103.-Lecture-1.-Line-Graphs-Recap.pdf",
+    "resources/Unconfirmed 284272.crdownload",
     "drafts/ch1_intro.md",
+    "wiki/concepts/problem-statement.md",
     "resources/00_BFT_Foundation.md",
-    "drafts/ch1_intro.md.tmp.37796.1776800016934",
-    "drafts/ch1_intro.md.tmp.37796.1776800010540",
-    "drafts/ch1_intro.md.tmp.37796.1776800003661",
-    "drafts/ch1_intro.md.tmp.37796.1776799984947",
-    "drafts/ch1_intro.md.tmp.37796.1776799979941",
     "wiki/concepts/consensus-overview.md",
     "wiki/concepts/cap-theorem.md",
     "wiki/concepts/consensus-properties.md",

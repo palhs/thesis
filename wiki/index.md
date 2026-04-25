@@ -56,3 +56,4 @@
 ## Drafts
 
 - [[drafts/ch1_intro]] — Chapter 1 Introduction: background, motivation, problem statement, operational performance/security definitions, scope and assumptions, RQ1–RQ5, contributions, and chapter roadmap.
+- [[drafts/ch2_litreview]] — Chapter 2 Literature Review: blockchain & the consensus problem, the four-family design space (Figure 2.1), per-family survey on a uniform mechanism / guarantees / adversarial-weakness / RQ-role skeleton (Table 2.1), and the metric-vocabulary fragmentation that obstructs cross-family comparison (Table 2.2). Establishes the unified-harness gap as a literature-level claim and hands off to Chapter 3.
