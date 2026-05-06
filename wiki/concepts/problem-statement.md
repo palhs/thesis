@@ -162,10 +162,9 @@ all downstream chapters and experiments.
 ## Source
 
 Imported from `resources/Problem_Statement_and_RQs.md` §§1–2, 4–8 (Phase 3
-— Thesis Framing). Bracketed numbers `[N]` follow the annotated-bibliography
-numbering carried forward from Phase 2; dedicated `wiki/sources/` pages for
-[1]–[17] are produced under S6/T8. `TODO(cite)`: link bracketed refs to
-source pages once S6 lands.
+— Thesis Framing). Bracketed numbers `[N]` follow the
+[[concepts/annotated-bibliography]] numbering carried forward from Phase 2;
+dedicated `wiki/sources/` pages for [1]–[17] are produced under S6/T8.
 
 ## Revisions
 

@@ -1,7 +1,8 @@
 # FLP Impossibility
 
-No deterministic protocol can guarantee agreement in an asynchronous network
-with even a single crash-faulty process.
+Fischer, Lynch, and Paterson (1985) `[2]` proved that no deterministic
+protocol can guarantee agreement in an asynchronous network with even a
+single crash-faulty process.
 
 ## Intuition
 
@@ -31,8 +32,7 @@ FLP is the reason the simulator must vary network synchrony as an independent
 axis: the boundary between "progress" and "stall" is where each family's
 relaxation strategy earns or loses its guarantees.
 
-## Source
+## Sources
 
-- Fischer, M. J., Lynch, N. A., and Paterson, M. S. "Impossibility of
-  Distributed Consensus with One Faulty Process." *JACM*, 32(2): 374–382, 1985.
-  `TODO(cite)` — confirm full bibliographic record.
+Citation `[2]` resolves via [[concepts/annotated-bibliography]] to the
+dedicated source page [[sources/2026-04-21_flp-impossibility-1985]].
