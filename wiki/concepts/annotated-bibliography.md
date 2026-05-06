@@ -34,7 +34,7 @@ primary papers; see that page's `## Sources` section for the URL.
 
 ## Scope
 
-17 canonical entries covering Layer-1 consensus: foundational distributed-
+18 canonical entries covering Layer-1 consensus: foundational distributed-
 systems results, protocol papers for the four algorithm families evaluated
 in the thesis ([[algorithms/pbft]], [[algorithms/pos]],
 [[algorithms/avalanche]], [[algorithms/dag-based]]), surveys supplying
@@ -42,13 +42,14 @@ taxonomic framing for [[concepts/consensus-families]], and one empirical-
 methodology precedent motivating the simulator-based comparative approach
 used here (see [[concepts/problem-statement]] §method).
 
-Category counts: Foundational 3 · Protocol 10 · Survey 3 · Empirical 1.
+Category counts: Foundational 4 · Protocol 10 · Survey 3 · Empirical 1.
 
-## Foundational (3)
+## Foundational (4)
 
-Theoretical underpinnings every family inherits. All three motivate the
+Theoretical underpinnings every family inherits. All four motivate the
 design constraints in [[concepts/quorum-arithmetic]],
-[[concepts/synchrony-models]], and [[concepts/flp-impossibility]].
+[[concepts/synchrony-models]], [[concepts/flp-impossibility]], and
+[[concepts/cap-theorem]].
 
 - **[1]** Lamport, Shostak & Pease, *The Byzantine Generals Problem*, ACM
   TOPLAS 4(3), 1982. → [[sources/2026-04-21_lamport-shostak-pease-bgp-1982]].
@@ -66,6 +67,14 @@ design constraints in [[concepts/quorum-arithmetic]],
   [[sources/2026-04-21_dwork-lynch-stockmeyer-partial-sync-1988]]. Defines
   the partial-synchrony model and proves consensus under `f < n/3`. The
   assumption adopted by PBFT, HotStuff, Tendermint, and Casper FFG.
+- **[18]** Gilbert & Lynch, *Brewer's Conjecture and the Feasibility of
+  Consistent, Available, Partition-Tolerant Web Services*, ACM SIGACT
+  News 33(2), 2002. →
+  [[sources/2026-05-06_gilbert-lynch-cap-2002]]. Formal proof of the CAP
+  conjecture: no atomic-consistent + available distributed register
+  exists under partition; partial synchrony admits only `t-eventual`
+  consistency. Anchor for the CP/AP partition-behaviour split on
+  [[concepts/cap-theorem]].
 
 ## Protocol (10)
 
@@ -166,13 +175,14 @@ Taxonomic framing for Ch. 2; no numeric claim in the thesis cites a survey.
 
 ## Coverage
 
-All 17 canonical entries `[1]–[17]` have dedicated
-[[sources/|source pages]]. S6 created 12 pages (the three foundational
-papers [1]–[3], one primary protocol per family plus PBFT-family variants
-[4]–[7], [9], [11]–[13], and the principal survey [14]); S9 added the
-remaining five ([8], [10], [15]–[17]). Every `[N]` citation used
-anywhere in the wiki resolves to an entry above and through to a source
-page.
+All 18 canonical entries `[1]–[18]` have dedicated
+[[sources/|source pages]]. S6 created 12 pages (the three original
+foundational papers [1]–[3], one primary protocol per family plus
+PBFT-family variants [4]–[7], [9], [11]–[13], and the principal survey
+[14]); S9 added the next five ([8], [10], [15]–[17]); L-W2.2 added [18]
+(Gilbert–Lynch CAP proof) to close the L1 finding from the L-W2 lint
+pass. Every `[N]` citation used anywhere in the wiki resolves to an
+entry above and through to a source page.
 
 ## Full IEEE bibliography
 
@@ -230,3 +240,6 @@ final thesis bibliography.
   and S. Capkun, "On the Security and Performance of Proof of Work
   Blockchains," in *Proc. ACM Conf. Computer and Communications
   Security (CCS)*, 2016, pp. 3–16.
+- [18] S. Gilbert and N. Lynch, "Brewer's Conjecture and the
+  Feasibility of Consistent, Available, Partition-Tolerant Web
+  Services," *ACM SIGACT News*, vol. 33, no. 2, pp. 51–59, 2002.

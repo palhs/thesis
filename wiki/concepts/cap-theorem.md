@@ -1,8 +1,10 @@
 # CAP Theorem
 
-A networked system cannot simultaneously provide **Consistency**,
-**Availability**, and **Partition-tolerance**. Under a network partition the
-system must choose between remaining consistent (C) or remaining available (A).
+Brewer's CAP conjecture, formalised by Gilbert and Lynch (2002) [18],
+states that a networked system cannot simultaneously provide
+**Consistency**, **Availability**, and **Partition-tolerance**. Under a
+network partition the system must choose between remaining consistent
+(C) or remaining available (A).
 
 ## Application to blockchain systems
 
@@ -27,7 +29,10 @@ The CAP choice determines what metric matters under delay: for CP families,
 it is finality latency and the size of the stall; for AP families, it is the
 reconvergence time and the probability of a still-divergent commit.
 
-## Source
+## Sources
 
-- Brewer, E. A. "Towards Robust Distributed Systems." PODC 2000 keynote.
-  `TODO(cite)` — add Gilbert & Lynch's 2002 proof of the conjecture.
+- E. A. Brewer, "Towards Robust Distributed Systems," PODC 2000 keynote
+  — original conjecture, not in the consolidated bibliography.
+- Citation [18] resolves via [[concepts/annotated-bibliography]] to the
+  dedicated source page
+  [[sources/2026-05-06_gilbert-lynch-cap-2002]] (formal proof).

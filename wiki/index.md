@@ -24,7 +24,7 @@
 - [[concepts/consensus-families]] — Design-space table + BGP propagation tree; one-line framing per family. Central navigation hub for comparative work.
 - [[concepts/problem-statement]] — Thesis title, the three-gap motivation, four objectives, scope (in/out), assumptions/limitations, success criteria, finalized status (T13, W2 KPI). Entry point for Chapter 1 framing.
 - [[concepts/research-questions]] — RQ1–RQ5 with primary metrics and independent variables; maps each RQ to the family axis it stresses and to the downstream tasks that consume it.
-- [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[17]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
+- [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[18]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
 - [[concepts/evaluation-metrics]] — Unified metric schema (latency / throughput / overhead / reliability); reported literature ranges; adversarial and delay axes; metric → RQ map; simulator instrumentation contract.
 
 ## Sources
@@ -46,6 +46,7 @@
 - [[sources/2026-04-21_xiao-survey-2020]] — [15] Survey of blockchain consensus protocols with aggregated throughput / latency / fault-tolerance ranges across families; framing-only citation.
 - [[sources/2026-04-21_cachin-vukolic-blockchain-wild-2017]] — [16] Qualitative review of permissioned-chain BFT; methodological anchor for formal models + public review; motivates the simulator-based approach.
 - [[sources/2026-04-21_gervais-pow-security-2016]] — [17] PoW simulation framework for security + performance; methodological precedent for this thesis's BFT-family simulator.
+- [[sources/2026-05-06_gilbert-lynch-cap-2002]] — [18] Formal proof of Brewer's CAP conjecture; atomic-consistent + available distributed register impossible under partition; partial-sync admits only `t-eventual` consistency.
 
 ## Experiments
 

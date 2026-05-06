@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 67 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 25 · In Review: 1 · In Progress: 0 · Not Started: 58 · Blocked: 0
+- Completed: 25 · In Review: 2 · In Progress: 0 · Not Started: 57 · Blocked: 0
 
 ## Legend
 
@@ -80,7 +80,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ Triaged report of orphans, missing pages, contradictions, index drift · _Artifact:_ `wiki/lint/<date>_report.md`
 - `[x]` **L-W2.1** `M` Researcher — Resolve stale `TODO(cite)` markers superseded by S6/S9 (M2 from L-W2)
   _Outcome:_ Three foundation pages carry `TODO(cite)` markers asking for source-page resolution that S6/S9 already completed. Replace each with the appropriate `[[sources/...]]` wikilink (or rewrite as a pointer to `[[concepts/annotated-bibliography]]`): (i) `wiki/concepts/byzantine-generals.md:36` → `[[sources/2026-04-21_lamport-shostak-pease-bgp-1982]]` ([1]); (ii) `wiki/concepts/flp-impossibility.md:38` → `[[sources/2026-04-21_flp-impossibility-1985]]` ([2]); (iii) `wiki/concepts/problem-statement.md:167` — the "once S6 lands" sentence is now factual; rewrite as a pointer to the bibliography page or delete. · _Artifact:_ updated `wiki/concepts/{byzantine-generals,flp-impossibility,problem-statement}.md` · _Verify:_ M2 in `wiki/lint/2026-05-06_report.md` resolved — zero `TODO(cite)` markers remain on the three pages; replacement wikilinks resolve on disk
-- `[ ]` **L-W2.2** `L` Researcher — Ingest Gilbert–Lynch 2002 CAP proof as `[18]` (L1 from L-W2)
+- `[x]` **L-W2.2** `L` Researcher — Ingest Gilbert–Lynch 2002 CAP proof as `[18]` (L1 from L-W2)
   _Outcome:_ Add Gilbert & Lynch's 2002 formal proof of the CAP conjecture to the consolidated bibliography as new entry `[18]`; create the dedicated source page following the S6 template; replace the `TODO(cite)` on `wiki/concepts/cap-theorem.md:33` with the new `[[sources/...]]` wikilink. Sweep for any places that hard-code `[1]–[17]` as a closed range and update to `[1]–[18]`. · _Artifact:_ `wiki/sources/<date>_gilbert-lynch-cap-2002.md`, updated `wiki/concepts/{annotated-bibliography,cap-theorem}.md`, `wiki/index.md` · _Verify:_ L1 in `wiki/lint/2026-05-06_report.md` resolved — `[18]` resolves to a source page; `cap-theorem.md` cites the formal proof; bibliography upper-bound text reads `[1]–[18]`
 
 ## Week 3 — System modeling
