@@ -22,7 +22,7 @@
 - [[concepts/fault-model]] — Crash / omission / Byzantine classes; static vs adaptive adversary timing. Theoretical taxonomy only; operational simulator adversary is T18.
 - [[concepts/quorum-arithmetic]] — Derivation of `n ≥ 3f+1` from safety (quorum intersection) + liveness (unresponsive tolerance) constraints. Applies to 3 of 4 families.
 - [[concepts/consensus-families]] — Design-space table + BGP propagation tree; one-line framing per family. Central navigation hub for comparative work.
-- [[concepts/problem-statement]] — Thesis title, the three-gap motivation, four objectives, scope (in/out), assumptions/limitations, success criteria. Entry point for Chapter 1 framing.
+- [[concepts/problem-statement]] — Thesis title, the three-gap motivation, four objectives, scope (in/out), assumptions/limitations, success criteria, finalized status (T13, W2 KPI). Entry point for Chapter 1 framing.
 - [[concepts/research-questions]] — RQ1–RQ5 with primary metrics and independent variables; maps each RQ to the family axis it stresses and to the downstream tasks that consume it.
 - [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[17]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
 - [[concepts/evaluation-metrics]] — Unified metric schema (latency / throughput / overhead / reliability); reported literature ranges; adversarial and delay axes; metric → RQ map; simulator instrumentation contract.

@@ -138,6 +138,27 @@ The thesis is complete when:
 4. The simulator and dataset are archived in a form that permits third-party
    reproduction.
 
+## Status
+
+T13 (Week 2 KPI checkpoint, *Finalize thesis title and scope*) locks the
+title and the In/Out scope table on this page as the working contract for
+all downstream chapters and experiments.
+
+- **Title** (§ *Thesis title* above): finalized 2026-04-25. No changes vs.
+  the S5 import.
+- **Scope** (§ *Scope* table above): finalized 2026-04-25. No changes vs.
+  the S5 import — the four-family in-scope set
+  ([[algorithms/pbft]], [[algorithms/pos]], [[algorithms/avalanche]],
+  [[algorithms/dag-based]]) and the out-of-scope items (PoW as subject of
+  comparison, L2 protocols, real testnets, validator economics, crypto
+  primitive performance, governance) all carry forward.
+- **Supervisor sign-off**: pending from Giang Anh Tuan; confirmation
+  request prepared 2026-04-25. Replace this line with
+  `Confirmed YYYY-MM-DD by Giang Anh Tuan` once received.
+- **Subsequent edits**: any later contradiction of the locked title or
+  scope must be recorded under `## Revisions` below, not silently
+  overwritten (per `docs/wiki-spec.md` § *Revisions rule*).
+
 ## Source
 
 Imported from `resources/Problem_Statement_and_RQs.md` §§1–2, 4–8 (Phase 3
