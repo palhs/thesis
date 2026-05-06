@@ -52,6 +52,7 @@
 ## Lint reports
 
 - [[lint/2026-04-21_sync-report]] — S9 sync-completeness pass: T1 artifact `consensus-overview.md` missing on disk and from index; all other W0–W2 completed tasks check out.
+- [[lint/2026-05-06_report]] — L-W2 end-of-Week-2 lint pass: H1 dashboard arithmetic drift in `TASKS.md`; M1 three forward-reference missing pages owned by W3 (T16/T18/T19); M2 stale `TODO(cite)` markers superseded by S6/S9; plus 4 Low findings. Orphans / index drift / stale-status artifacts / draft citations / draft dead links / contradictions all clean.
 
 ## Drafts
 
