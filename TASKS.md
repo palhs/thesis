@@ -74,7 +74,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ 3–5 pages: background, motivation, problem statement, objectives, RQs · _Artifact:_ `drafts/ch1_intro.md`
 - `[x]` **T12** `H` Writer — Write initial Chapter 2 draft (Literature Review)
   _Outcome:_ 3–5 pages on blockchain basics, consensus families, existing evaluations · _Artifact:_ `drafts/ch2_litreview.md`
-- `[?]` **T13** `H` Researcher — Finalize thesis title and scope
+- `[x]` **T13** `H` Researcher — Finalize thesis title and scope
   _Outcome:_ Confirmed title, included/excluded scope, supervisor sign-off · _Artifact:_ update `wiki/concepts/problem-statement.md` · _KPI checkpoint_
 - `[ ]` **L-W2** `M` Linter — Wiki lint pass (end of Week 2)
   _Outcome:_ Triaged report of orphans, missing pages, contradictions, index drift · _Artifact:_ `wiki/lint/<date>_report.md`
