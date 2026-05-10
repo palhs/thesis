@@ -26,6 +26,7 @@
 - [[concepts/research-questions]] — RQ1–RQ5 with primary metrics and independent variables; maps each RQ to the family axis it stresses and to the downstream tasks that consume it.
 - [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[18]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
 - [[concepts/evaluation-metrics]] — Unified metric schema (latency / throughput / overhead / reliability); reported literature ranges; adversarial and delay axes; metric → RQ map; simulator instrumentation contract.
+- [[concepts/node-model]] — Validator (`Node`) design contract: two-layer commitment (shared lifecycle + per-protocol FSMs); inbound (`on_message` / `on_timer`) + outbound (`send` / `broadcast` / `set_timer` / `emit` / `rng`) APIs; determinism (T27 hook); T18 adversary attachment surface; reference sketch + open-to-revision discipline.
 
 ## Sources
 
