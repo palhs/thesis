@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 28 · In Review: 1 · In Progress: 0 · Not Started: 56 · Blocked: 0
+- Completed: 29 · In Review: 0 · In Progress: 0 · Not Started: 56 · Blocked: 0
 
 ## Legend
 
@@ -89,7 +89,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 - `[x]` **T14** `H` Engineer — Define node model (validator states, roles)
   _Outcome:_ Node class design; states (idle, proposing, voting, committed); role assignment · _Artifact:_ `wiki/concepts/node-model.md`
-- `[?]` **T15** `H` Engineer — Define network model (delays, packet loss)
+- `[x]` **T15** `H` Engineer — Define network model (delays, packet loss)
   _Outcome:_ Uniform/normal/exponential delay, configurable drop rate, jitter params · _Artifact:_ `wiki/concepts/network-model.md` (split: also `wiki/concepts/network-model-phases.md` per `docs/wiki-spec.md` § Page size)
 - `[ ]` **T16** `H` Engineer — Define message types and protocol rounds
   _Outcome:_ Catalog: Propose, Vote, Commit, Finalize, Query with fields/sizes · _Artifact:_ `wiki/concepts/message-types.md`
