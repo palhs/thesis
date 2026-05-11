@@ -27,6 +27,8 @@
 - [[concepts/annotated-bibliography]] — Consolidated IEEE bibliography `[1]–[18]`; citation policy (unified numbering across chapters; surveys for framing only); resolver to `wiki/sources/` pages.
 - [[concepts/evaluation-metrics]] — Unified metric schema (latency / throughput / overhead / reliability); reported literature ranges; adversarial and delay axes; metric → RQ map; simulator instrumentation contract.
 - [[concepts/node-model]] — Validator (`Node`) design contract: two-layer commitment (shared lifecycle + per-protocol FSMs); inbound (`on_message` / `on_timer`) + outbound (`send` / `broadcast` / `set_timer` / `emit` / `rng`) APIs; determinism (T27 hook); T18 adversary attachment surface; reference sketch + open-to-revision discipline.
+- [[concepts/network-model]] — Network (`Network`) design contract: latency-only full-mesh delivery; T14 seam (`Message` envelope + `NodeId → endpoint` registry); at-most-once delivery, no order guarantee, no retries; outbound API integration; honest-infrastructure adversary boundary; reference sketch; open-to-revision register spanning both halves of T15.
+- [[concepts/network-model-phases]] — Companion to `network-model`: phase-driven runtime mechanics (delay distributions, drop model, partition expression, phase timeline rules) plus the network-level determinism contract (network-scoped RNG, sampling order, forbidden surfaces). Split per `docs/wiki-spec.md` § Page size.
 
 ## Sources
 
