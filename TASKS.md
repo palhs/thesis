@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 25 · In Review: 3 · In Progress: 0 · Not Started: 57 · Blocked: 0
+- Completed: 28 · In Review: 0 · In Progress: 0 · Not Started: 57 · Blocked: 0
 
 ## Legend
 
@@ -87,7 +87,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 ## Week 3 — System modeling
 
-- `[?]` **T14** `H` Engineer — Define node model (validator states, roles)
+- `[x]` **T14** `H` Engineer — Define node model (validator states, roles)
   _Outcome:_ Node class design; states (idle, proposing, voting, committed); role assignment · _Artifact:_ `wiki/concepts/node-model.md`
 - `[ ]` **T15** `H` Engineer — Define network model (delays, packet loss)
   _Outcome:_ Uniform/normal/exponential delay, configurable drop rate, jitter params · _Artifact:_ `wiki/concepts/network-model.md`
