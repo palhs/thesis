@@ -49,7 +49,8 @@ shared layer.
   (see table below).
 - **`endpoint`** — opaque address consumed by
   [[concepts/network-model]] (T15) for delivery; not introspected at
-  the shared layer.
+  the shared layer. T15 owns the `NodeId → endpoint` resolution
+  table; the §7 outbound API addresses peers by `NodeId` only.
 
 Construction is driven by the experiment config (T19) and the
 reproducibility harness (T27); the shared layer specifies only the
@@ -60,7 +61,7 @@ attribute surface, not how values are sourced.
 | Protocol | Threshold arithmetic | Per-validator weight | Mutability across run |
 | :-- | :-- | :-- | :-- |
 | **PBFT** | Count, `n = 3f+1` ([[concepts/quorum-arithmetic]]) | `1.0` (uniform) | Static |
-| **Casper FFG** | Stake share, `f < 1/3` of total stake | Per-validator stake (epoch-effective) | Mutable across epochs; managed by the FSM, not the lifecycle |
+| **Casper FFG** | Stake share, `f < 1/3` of total stake | Per-validator stake at genesis (epoch-effective stake lives in the FSM) | Static at shared layer; Casper FSM tracks epoch-effective stake separately |
 | **Snowman** | Count of sample responses (`α_p`, `α_c` over `K`) | Stake (drives sampling probability only) | Static in this thesis's simulator |
 | **Narwhal+Tusk** | Count, `n = 3f+1` | `1.0` (uniform) | Static |
 
@@ -149,7 +150,7 @@ arguments) live on the algorithm pages and are not duplicated here.
 | **PBFT** | `(view, seq)` | `idle → pre_prepared → prepared → committed` | `committed` | `value=request_digest, instance_id=(view, seq)` |
 | **Casper FFG** | `epoch` | `unjustified → justified → finalised` | `finalised` | `value=checkpoint_root, instance_id=epoch` |
 | **Snowman** | `block_id` | `polling → accepted`; scalar `(preference, counter ∈ [0, β])` mutates within `polling` | `accepted` | `value=block_hash, instance_id=block_id` |
-| **Narwhal+Tusk** | `(round, validator)` for certificates; `anchor_id` for commit | certificates: `proposing → certified → referenced`; anchor: `nominated → committed` | `committed` (anchor) | `value=anchor_cert_id, instance_id=(anchor_round, anchor_id)` |
+| **Narwhal+Tusk** | `(round, validator)` for certificates; `(anchor_round, anchor_id)` for commit | certificates: `proposing → certified → referenced`; anchor: `nominated → committed` | `committed` (anchor) | `value=anchor_cert_id, instance_id=(anchor_round, anchor_id)` |
 
 Algorithm-page back-references for mechanism:
 
@@ -215,7 +216,7 @@ T40), not the shared `Node` layer.
 | Protocol | Roles | Rotation | Notes |
 | :-- | :-- | :-- | :-- |
 | **PBFT** | `primary` (1 per view), `replica` (all `n`, including current primary) | Per view; deterministic schedule (e.g., `view mod n`); view change advances the schedule | All validators eligible; primary is also a replica |
-| **Casper FFG** | `attester` (all validators in epoch committee), `proposer` (1 per slot) | Slot proposer drawn deterministically from current epoch's validator set | Simulator does not model RANDAO; proposer schedule is seeded from `(global_seed, epoch)` per §8 |
+| **Casper FFG** | `attester` (all validators in epoch committee), `proposer` (1 per slot) | Slot proposer drawn deterministically from current epoch's validator set | Simulator does not model RANDAO; the Casper FSM derives the per-epoch proposer schedule deterministically from `(global_seed, epoch)` — an FSM-level derivation identical on every `Node`, independent of `self.rng` (which is `Node`-local per §8) |
 | **Snowman** | None | — | Every validator uniform; no consensus role differentiation |
 | **Narwhal+Tusk** | `primary` (every validator, every round), `anchor_leader` (1, rotates every `r` rounds) | Primaries do not rotate; anchor leader on a deterministic schedule | Workers (Narwhal mempool batch sources) subsumed into primary at the simulator level — see §11 |
 
