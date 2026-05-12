@@ -14,6 +14,29 @@ and methodological critique [16] both identify this vocabulary
 fragmentation as the principal obstacle to comparative evaluation. A unified
 schema is the obstacle-removal step; see [[concepts/problem-statement]].
 
+## Four-protocol scope
+
+The thesis instantiates the schema against four concrete protocols, one
+per family:
+
+- **PBFT** ([[algorithms/pbft]], [4]) — partial-sync, per-block
+  deterministic finality.
+- **Casper FFG** ([[algorithms/pos]], [7]) — partial-sync, per-epoch
+  deterministic finality with accountable safety.
+- **Snowman** ([[algorithms/avalanche]], [9] / [ava-docs]) — async-tolerant,
+  per-block probabilistic finality on a totally-ordered chain.
+- **Narwhal+Tusk** ([[algorithms/dag-based]], [11]) — async-safe,
+  per-anchor-batch deterministic finality over a DAG mempool.
+
+This page states the canonical metric definitions in family-agnostic
+form. Concrete per-protocol formulas — including the four structural
+asymmetries (linear-chain vs DAG output, per-block vs per-epoch vs
+per-anchor-batch finality, Narwhal mempool/consensus split, Snowman
+parameter rescaling at thesis-scale `n`) — live in the companion page
+[[concepts/metric-reconciliation]]. That page is normative for the T40
+CSV schema and for cross-protocol comparison; this page is normative for
+metric *names, units, and meaning*.
+
 ## Schema structure
 
 Four metric families. Each family contains 2–5 metrics; each metric has a
@@ -27,20 +50,49 @@ point in `src/` (see §Simulator instrumentation).
 | **Overhead** | Messages, bytes, and per-validator state required to operate the protocol. |
 | **Reliability** | Whether the protocol preserves safety and liveness under delay and adversary. |
 
+## Time anchors
+
+Every latency metric below uses a single protocol-agnostic start-of-clock:
+**"tx submit"** is the wall-clock moment the workload generator emits the
+transaction, *before* it reaches any validator. End-of-clock is
+protocol-specific and pinned per metric below (and per protocol in
+[[concepts/metric-reconciliation#latency]]).
+
+For protocols with a separate mempool layer (Narwhal+Tusk in scope here),
+the time the transaction spends traversing the mempool is **counted in**
+`commit_latency_ms` and `finality_latency_ms` — not stripped out.
+Treating mempool admission as "free" would hide the cost of Narwhal's
+data-availability layer and bias the latency comparison.
+
+**Wall-clock** throughout this page and its companion refers to the
+simulator's *model time* as advanced by the event scheduler
+([[concepts/simulation-design]] — T17, forward link); no simulator number
+is a real-hardware claim. The literature numbers in §"Reported ranges in
+the literature" below are real-hardware and are not directly comparable
+to simulator output — see §Caveat.
+
 ## Latency metrics
 
 - **End-to-end commit latency.** Wall-clock time from transaction
   submission to first inclusion in a committed block, averaged over a
   stable-state measurement window. Sources: [4], [11], [17].
 - **Time-to-finality.** Wall-clock time from transaction submission to
-  *finality*. "Finality" resolves differently per family: deterministic
-  `2f+1` commit acknowledgments in [[algorithms/pbft]], epoch-granularity
-  justify → finalise in [[algorithms/pos]], or a probabilistic confidence
-  threshold `β` being reached in [[algorithms/avalanche]]. Sources: [4],
-  [7], [9], [13].
-- **Round latency.** Time to complete one protocol round — one PBFT phase,
-  one FFG epoch boundary, or one Avalanche sampling round. Sources: [4],
-  [5], [9].
+  *finality*. "Finality" resolves to four distinct events across the
+  scoped protocols — `2f+1` `COMMIT` quorum in PBFT [4], epoch-granularity
+  justify → finalise in Casper FFG [7], counter `β` reached with
+  operational `ε` in Snowman [9] / [ava-docs], anchor-commit of a DAG
+  sub-graph in Narwhal+Tusk [11]. Per-protocol formulas in
+  [[concepts/metric-reconciliation#finality-semantics]]. Sources: [4],
+  [7], [9], [11], [13].
+- **Round latency.** Time to complete one protocol round. The "round"
+  unit dispatches per protocol: one of three PBFT phases, one slot in
+  Casper FFG, one Snowball poll of `K` peers in Snowman, one DAG round
+  in Narwhal+Tusk. Per-protocol rows in
+  [[concepts/metric-reconciliation#latency]]. Sources: [4], [5], [7],
+  [9], [11].
+
+→ Per-protocol formulas for every latency metric:
+[[concepts/metric-reconciliation#latency]].
 
 ## Throughput metrics
 
@@ -48,29 +100,71 @@ point in `src/` (see §Simulator instrumentation).
   unit wall-clock time, averaged over a stable-state window. Sources:
   [11]–[13], [15], [17].
 - **Goodput.** tps restricted to transactions that survive to finality;
-  excludes transactions in reorganised forks. Distinct from tps for
-  families that can reorg before finality ([[algorithms/pos]]) or admit
-  fork races ([[algorithms/dag-based]] orphan DAG vertices). Sources: [8],
+  excludes transactions in reorganised forks. Identical to tps for PBFT
+  (no reorg-before-finality) and Snowman (post-`β` reorgs bounded by
+  `ε`, reported separately); distinct from tps for Casper FFG (LMD-GHOST
+  reorgs before checkpoint finalisation [8]) and Narwhal+Tusk (orphan
+  certificates not referenced by any committed anchor). Sources: [8],
   [17].
-- **Peak throughput.** Maximum sustained tps before queueing delay
-  diverges — the per-family saturation point. Sources: [11], [13], [15].
+- **Peak throughput.** Maximum sustained tps before commit-latency
+  diverges — the per-family saturation point. Operational definition:
+  run an offered-load rate ramp where the workload generator's
+  submission rate increases monotonically through a configured grid
+  (T19 to pin the grid); at each rate, hold for a measurement window of
+  ≥ `W` simulator seconds; declare the rate "sustained" iff
+  `commit_latency_p99` over the window stays within a factor of `1.5`
+  of its value at the previous rate. Peak throughput is the highest
+  sustained rate. The `1.5` factor and the holding window `W` are
+  sensitivity-sweep candidates (see
+  [[concepts/metric-reconciliation#sensitivity-sweep-policy]]). Sources:
+  [11], [13], [15].
+- **Mempool throughput (`mempool_tps`).** For protocols with a separate
+  mempool layer that commits transactions for *availability* before
+  consensus orders them, the count of mempool-admitted transactions per
+  unit wall-clock time. Defined for Narwhal+Tusk (certificate-included
+  tx count / window); **zero by construction** for PBFT, Casper FFG, and
+  Snowman, which have no separate mempool. Asymmetric counterpart to
+  `mempool_msgs_per_acu` under §Overhead; reporting only consensus tps
+  hides Narwhal's central architectural claim that mempool capacity
+  decouples from consensus capacity. Sources: [11].
+
+→ Per-protocol formulas for every throughput metric:
+[[concepts/metric-reconciliation#throughput]].
 
 ## Overhead metrics
 
 - **Messages per block.** Protocol messages transmitted per committed
-  block. Exposes the scaling-exponent difference the thesis tests under
-  RQ3: `O(n²)` for [[algorithms/pbft]], `O(n)` for [[algorithms/dag-based]],
-  per-validator `O(K·β)` independent of `n` for [[algorithms/avalanche]].
+  unit. The unit is "block" for PBFT/Casper FFG/Snowman and "anchor-batch"
+  for Narwhal+Tusk — the per-protocol *atomic commit unit* is defined in
+  [[concepts/metric-reconciliation#unit-of-progress]]. Exposes the
+  scaling-exponent difference RQ3 tests: `O(n²)` for [[algorithms/pbft]],
+  per-validator `O(K·β)` independent of `n` for Snowman, and a *two-layer
+  split* for [[algorithms/dag-based]] — `O(n²)` mempool messages per round
+  plus zero additional consensus messages at anchor commit
+  ([[concepts/metric-reconciliation#narwhal-mempool-consensus-message-split]]).
   Sources: [4], [5], [11].
 - **Bytes per block.** Total byte footprint of protocol messages per
   block — absolute bandwidth, not just message count. Signature bytes
   dominate in [[algorithms/pbft]] and [[algorithms/pos]]; payload bytes
-  dominate in the DAG mempool of [[algorithms/dag-based]]. Sources: [15],
-  [17].
+  dominate in the DAG mempool of [[algorithms/dag-based]]. The signature
+  scheme and aggregation model (ECDSA vs BLS, individual vs aggregated
+  attestations) is **T16's contract** ([[concepts/message-types]] —
+  forward link); `bytes_per_acu` is computed against the T16-pinned
+  scheme and is undefined without it. This matters specifically for the
+  FFG-vs-PBFT bytes comparison: BLS aggregation collapses Casper FFG's
+  per-epoch attestation cost from `O(n)` individual signatures to one
+  aggregate signature + bit-vector, a factor-of-`n` swing depending on
+  T16's choice. Sources: [15], [17].
 - **Per-validator state size.** Storage required per validator to operate
-  the protocol: DAG retention window in [[algorithms/dag-based]],
-  attestation buffers in [[algorithms/pos]], vote caches in
-  [[algorithms/pbft]]. Sources: [11], [13].
+  the protocol: full DAG retention in Narwhal+Tusk (the largest of the
+  four — the structural tradeoff against PBFT's per-block message cost),
+  attestation buffers per slot in Casper FFG, vote caches in PBFT,
+  Snowball preference + counter (independent of `n`) in Snowman. Sources:
+  [11], [13].
+
+→ Per-protocol formulas for every overhead metric, including the
+Narwhal mempool/consensus message split:
+[[concepts/metric-reconciliation#overhead]].
 
 ## Reliability metrics
 
@@ -86,16 +180,28 @@ point in `src/` (see §Simulator instrumentation).
 - **View-change / reorg frequency.** Count of view changes
   ([[algorithms/pbft]]) or reorgs ([[algorithms/pos]]) per unit wall-clock
   time. Tracks liveness disruption invisible to success rate alone.
-  Sources: [4], [5], [8].
+  `N/A` for Snowman (no view changes; pre-`β` preference flips logged
+  separately) and Narwhal+Tusk (no view changes; failed-anchor-commit
+  events logged separately as pipeline-extension events). Sources: [4],
+  [5], [8].
 - **Safety-violation probability (`ε`).** Empirical probability that two
-  honest validators commit conflicting values. Primary metric for
-  [[algorithms/avalanche]] (parameter-dependent:
-  `ε < (1 − α_c/K)^β`); detected but expected to be zero for the `3f+1`
-  deterministic-finality families. Sources: [9], [10].
+  honest validators commit conflicting values. *Primary* metric for
+  Snowman (parameter-dependent: `ε ≤ (1 − α_c/K)^β` [9]; report both
+  analytical bound and empirical rate); zero by construction below
+  threshold for PBFT, Casper FFG, and Narwhal+Tusk (measured above
+  threshold). Sources: [9], [10].
 - **Fault-tolerance threshold (`f_max`).** Empirically largest adversarial
-  fraction (by count or stake) under which the protocol preserves safety
-  *in the simulator*. Compared against the theoretical bound in
-  [[concepts/quorum-arithmetic]]. Sources: [1], [3], [7], [14].
+  fraction under which the protocol preserves safety *in the simulator*.
+  Reported as **two CSV columns**: `f_max_count` (PBFT, Snowman,
+  Narwhal+Tusk — by validator count) and `f_max_stake` (Casper FFG — by
+  stake fraction). Exactly one column is populated per row; the other
+  is `NaN`. Compared against the theoretical bound in
+  [[concepts/quorum-arithmetic]] — `< n/3` for PBFT and Narwhal+Tusk,
+  `< 1/3` of stake for Casper FFG, parameter-dependent (driven by
+  `α_c/K` and `β`) for Snowman. Sources: [1], [3], [7], [14].
+
+→ Per-protocol formulas for every reliability metric:
+[[concepts/metric-reconciliation#reliability]].
 
 ## Reported ranges in the literature
 
@@ -172,7 +278,10 @@ implementation under `src/` must populate. Concretely:
 The simulator runner aggregates these across trials and writes one
 comparative CSV per scenario, whose columns match the metric names above.
 The concrete CSV schema lands under T40
-(`wiki/concepts/output-format.md`, forward link).
+(`wiki/concepts/output-format.md`, forward link); the per-protocol
+formulas it must compute, plus the column set derived from this schema,
+are pinned in
+[[concepts/metric-reconciliation#t40-csv-schema-implications]].
 
 This is the methodological practice recommended by [14] and critiqued as
 missing in [16] — applied uniformly to all four families.
@@ -207,6 +316,18 @@ time, fork rate) are all represented — communication overhead spans the
 three metrics under §Overhead; finality time is the time-to-finality
 metric under §Latency; fault tolerance is `f_max` under §Reliability;
 fork rate is its own reliability metric.
+
+T9.1 extension: §Four-protocol scope added; the time-to-finality,
+round-latency, messages-per-block, goodput, per-validator-state-size,
+view-change/reorg-frequency, safety-violation `ε`, and `f_max` bullets
+tightened to instantiate against PBFT, Casper FFG, Snowman, and
+Narwhal+Tusk explicitly. Per-protocol formulas (and `N/A` notes where
+applicable) live on the companion page
+[[concepts/metric-reconciliation]]; this page remains the canonical
+metric-definition source. Reported-ranges table left intact for Chapter 2
+breadth; the four scoped rows are PBFT (LAN), PoS (Casper FFG / Gasper),
+Avalanche (Snowman is the deployed linearised variant of this family),
+and Narwhal + Tusk.
 
 ## Revisions
 
