@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 29 · In Review: 0 · In Progress: 0 · Not Started: 56 · Blocked: 0
+- Completed: 30 · In Review: 0 · In Progress: 0 · Not Started: 55 · Blocked: 0
 
 ## Legend
 
@@ -68,7 +68,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ Annotated bibliography with contribution/method/limitations · _Artifact:_ `wiki/sources/`, `wiki/concepts/annotated-bibliography.md`
 - `[x]` **T9** `H` Researcher — Identify common evaluation metrics from literature
   _Outcome:_ Metric list: latency, throughput, communication overhead, fault tolerance, finality time, fork rate · _Artifact:_ `wiki/concepts/evaluation-metrics.md`
-- `[ ]` **T9.1** `H` Researcher — Cross-protocol metric reconciliation
+- `[x]` **T9.1** `H` Researcher — Cross-protocol metric reconciliation
   _Outcome:_ Extend `evaluation-metrics.md` to handle the asymmetries introduced by the four-protocol scope (PBFT / Casper FFG / Snowman / Narwhal+Tusk): (i) linear-chain vs DAG output structure; (ii) per-block (PBFT, Snowman) vs per-epoch (Casper FFG) vs per-anchor-batch (Tusk) finality semantics; (iii) mempool-vs-consensus message-count split for Narwhal; (iv) Snowman parameter rescaling rule (`K`, `α_c`, `β`) at thesis-scale `n`. Defines the unified metric schema T40 will implement in code. · _Artifact:_ updated `wiki/concepts/evaluation-metrics.md`; new `wiki/concepts/metric-reconciliation.md` if needed; update `wiki/index.md` · _Verify:_ T40 CSV schema can be expressed in terms defined here; every metric in `evaluation-metrics.md` carries an explicit per-protocol definition or an explicit "not applicable" note; protocol-scope decisions captured here trace back to `[7]`/`[9]`/`[11]` in the bibliography
 - `[x]` **T10** `H` Researcher — Define research questions and thesis objectives
   _Outcome:_ RQ1–RQ5 finalized, measurable scope · _Artifact:_ `wiki/concepts/research-questions.md`
