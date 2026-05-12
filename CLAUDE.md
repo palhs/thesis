@@ -24,6 +24,7 @@ thesis drafts. Agents operate one task at a time; humans review every merge.
 @docs/retrieval.md
 @docs/roles.md
 @docs/lint-protocol.md
+@docs/chat-style.md
 
 ## Orientation
 
