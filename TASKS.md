@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 31 · In Review: 0 · In Progress: 0 · Not Started: 54 · Blocked: 0
+- Completed: 31 · In Review: 1 · In Progress: 0 · Not Started: 53 · Blocked: 0
 
 ## Legend
 
@@ -93,7 +93,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ Uniform/normal/exponential delay, configurable drop rate, jitter params · _Artifact:_ `wiki/concepts/network-model.md` (split: also `wiki/concepts/network-model-phases.md` per `docs/wiki-spec.md` § Page size)
 - `[x]` **T16** `H` Engineer — Define message types and protocol rounds
   _Outcome:_ Catalog: Propose, Vote, Commit, Finalize, Query with fields/sizes · _Artifact:_ `wiki/concepts/message-types.md`
-- `[ ]` **T17** `H` Engineer — Define event-driven simulation logic
+- `[?]` **T17** `H` Engineer — Define event-driven simulation logic
   _Outcome:_ Event scheduler design: queue, time advancement, callback registration · _Artifact:_ `wiki/concepts/simulation-design.md`
 - `[ ]` **T18** `H` Engineer — Define adversarial behavior categories (per-protocol)
   _Outcome:_ Adversary catalog spanning the four-protocol scope (PBFT / Casper FFG / Snowman / Narwhal+Tusk), in two layers. **(1) Four generic categories** — delayer, equivocator, non-participant, leader-disruptor — each given an explicit per-protocol semantics row or marked `N/A` with justification (leader-disruptor is `N/A` for Snowman; Snowman equivocation reduces to a weaker "lying responder" form and must be flagged as such). **(2) Protocol-specific adversaries** — at minimum: Snowman colluding sub-sampler (coordinated query responses biasing `α_c` counts); Narwhal+Tusk data-availability withholding (worker certifies header but withholds batch contents); Casper FFG slashable equivocation refinements (surround vote, double vote with explicit slashing semantics). Each entry specifies: adversary action, victim protocol(s), measurable effect on safety vs liveness, configuration knobs (% of stake/nodes affected, intensity), and the invariant to be verified by simulator instrumentation. · _Artifact:_ `wiki/concepts/adversary-model.md` + update `wiki/index.md` · _Verify:_ every generic adversary has a per-protocol semantics row or an `N/A` justification; every protocol-specific adversary traces to its source paper (`[4]` / `[7]` / `[9]` / `[11]`); T51–T53 (Week 10 adversarial experiments) can be expressed as `(adversary_id, protocol_id, intensity)` triples drawn from this catalog without gaps
@@ -105,7 +105,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 ## Week 4 — Simulator skeleton
 
 - `[ ]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
-  _Outcome:_ Working scheduler passing 3+ unit tests · _Artifact:_ `src/scheduler/` + `wiki/experiments/<date>_scheduler-baseline.md`
+  _Outcome:_ Working scheduler passing 3+ unit tests · _Design:_ `wiki/concepts/simulation-design.md`, `wiki/concepts/simulation-design-runtime.md` · _Spec:_ `docs/superpowers/specs/2026-05-13-t17-scheduler-design.md` · _Artifact:_ `src/scheduler/` + `wiki/experiments/<date>_scheduler-baseline.md`
 - `[ ]` **T22** `H` Engineer — Implement node objects with state management
   _Outcome:_ Node class with transitions, message handling, honest/adversarial hooks · _Artifact:_ `src/nodes/`
 - `[ ]` **T23** `H` Engineer — Implement message passing with configurable delay

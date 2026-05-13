@@ -206,6 +206,25 @@ scheduling is the scheduler's responsibility
 ([[concepts/node-model]] §6 / §7's `set_timer`), and timer-fired
 callbacks (`on_timer`) do not interact with the `Network` at all.
 
+### Bootstrap kickoff
+
+Beyond the per-`Node` binding above, the `Network` exposes one
+construction-time kickoff method:
+
+```
+Network.start() -> None
+```
+
+Called once by the experiment harness during bootstrap phase 5
+(after §3.2 endpoint registration; before `Scheduler.run()`).
+Schedules a `PhaseAdvance(phase_id)` event on the scheduler at each
+`phase[i].t_end` boundary so the active phase rolls over without
+per-pop polling. Internal-only; not part of the Node-facing API.
+Added by T17 ([[concepts/simulation-design]] §7.1); see
+[[diagrams/scheduler/bootstrap]] phase 5 for the bootstrap sequence
+and [[concepts/network-model-phases]] §5 for the phase timeline
+contract this method realises.
+
 ## 6. Adversary boundary
 
 T18 ([[concepts/adversary-model]]) owns all operational adversary
@@ -396,3 +415,16 @@ semantics are deferred to the protocol pages and to
 - [[concepts/output-format]] (T40) — consumes delivery events
   (`t_sent`, `t_delivered`) for latency metrics
   ([[concepts/evaluation-metrics]] T9.1).
+
+## Revisions
+
+### 2026-05-13 — §5 outbound API integration extended with `Network.start()`
+
+T17 ([[concepts/simulation-design]] §7.1) requires `Network` to
+schedule its phase-boundary `PhaseAdvance` events on the scheduler
+at bootstrap time, so the active phase rolls over deterministically
+without per-pop polling. Added `Network.start() -> None` as a
+construction-time kickoff method invoked once during bootstrap
+phase 5. Internal-only; the §5 outbound binding for `send` /
+`broadcast` is unchanged, and the honest-infrastructure adversary
+boundary (§6) is unchanged.

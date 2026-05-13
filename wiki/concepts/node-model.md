@@ -245,9 +245,20 @@ the two are orthogonal and live in different slots.
 
 ## Inbound hook surface
 
-The scheduler (T17, T21) drives a `running` `Node` by invoking two
-callbacks. The hook surface is intentionally minimal: every other
-form of activity flows through the outbound API (§7).
+The scheduler (T17, T21) drives a `running` `Node` by invoking three
+callbacks (one one-shot lifecycle entry, two recurring): `start`,
+`on_message`, and `on_timer`. The hook surface is intentionally
+minimal: every other form of activity flows through the outbound API
+(§7).
+
+### `start(t: SimTime) -> None`
+
+Invoked exactly once per `Node` during simulator bootstrap, before
+the first event is popped, with `t == 0`. The Node's FSM uses this
+to schedule its initial timers and emit its first messages —
+without `start`, the heap can never be populated before `run()`
+begins. Added by T17 ([[concepts/simulation-design]] §7.1); see
+[[diagrams/scheduler/bootstrap]] phase 5 for the bootstrap sequence.
 
 ### `on_message(msg: Message, t: SimTime) -> None`
 
@@ -296,8 +307,10 @@ In a discrete-event simulator (T17), time advances to the next
 scheduled event; there is no clock heartbeat. Anything periodic —
 Casper slot boundaries, Narwhal round timeouts, Snowman poll
 intervals — is expressed as a recurring self-registered timer (§7),
-not a tick. This keeps the inbound surface to two callbacks and
-eliminates the per-protocol question of what a tick means.
+not a tick. This keeps the recurring inbound surface to two
+callbacks (`on_message`, `on_timer`) and eliminates the per-protocol
+question of what a tick means. The one-shot `start` hook is separate
+and fires only at bootstrap.
 
 ## Outbound API
 
@@ -619,3 +632,17 @@ are deferred to the algorithm pages, which carry the bibliography.
   YAML config; consumes the §8 determinism contract.
 - [[concepts/output-format]] (T40) — unified CSV row schema across
   protocols; consumes §3 `halted` and §4 `decided` events.
+
+## Revisions
+
+### 2026-05-13 — §6 inbound hook surface extended with `start(t)`
+
+T17 ([[concepts/simulation-design]] §7.1) requires a per-`Node`
+kickoff hook called once during bootstrap phase 5 to populate the
+scheduler heap before `run()` begins. Added `start(t: SimTime) -> None`
+as a third inbound callback alongside `on_message` and `on_timer`.
+Updated the §6 intro from "two callbacks" to "three callbacks (one
+one-shot lifecycle entry, two recurring)" and the `No on_tick`
+subsection's closing language to reflect that the *recurring*
+inbound surface remains two callbacks. Outbound API (§7),
+determinism rules (§8), and adversary attachment (§9) are unchanged.
