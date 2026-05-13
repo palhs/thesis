@@ -1,27 +1,19 @@
 # Diagrams
 
 > Standalone folder for thesis diagrams. Each diagram lives in its own
-> Markdown file containing a diagram source block plus per-step
-> elaboration. Two source languages are used:
->
-> - **Mermaid** — renders natively in Obsidian and GitHub. Used by the
->   simulator-runtime diagrams (the macro view).
-> - **Swimlanes.io** — renders via [swimlanes.io](https://swimlanes.io)
->   paste-and-render or the swimlanes CLI. Used by the T17
->   scheduler-contract diagrams (the contract view).
->
-> Both are sequence-diagram families; choice is per-diagram and noted
-> in the catalogue line below.
+> Markdown file containing a Swimlanes.io source block plus per-step
+> elaboration. Swimlanes.io blocks render via
+> [swimlanes.io](https://swimlanes.io) paste-and-render or the CLI.
 >
 > This page is the navigation entry point. Wiki pages that need a
-> diagram link here via `[[diagrams/<slug>]]`. New diagrams append to
-> the appropriate catalogue section.
+> diagram link here via `[[diagrams/<group>/<slug>]]`. New diagram
+> groups append a new catalogue section below.
 
 ## Legend
 
 Notation conventions used across the diagram set.
 
-### Swimlanes.io conventions (T17 scheduler diagrams)
+### Swimlanes.io syntax
 
 | Symbol | Meaning |
 | :-- | :-- |
@@ -37,16 +29,6 @@ Notation conventions used across the diagram set.
 | `autonumber` | Auto-numbers every message line. |
 | `order: A, B, C` | Locks lifeline order left-to-right. |
 
-### Mermaid conventions (simulator-runtime diagrams)
-
-| Symbol | Meaning |
-| :-- | :-- |
-| `A->>B: msg` | Solid arrow. |
-| `A-->>B: msg` | Dashed arrow / return. |
-| `Note over A,B: text` | Multi-actor note. |
-| `loop ... end` | Iteration. |
-| `alt ... else ... end` | Alternation. |
-
 ### Lifeline glossary
 
 The same role can appear under different names depending on the
@@ -56,11 +38,11 @@ diagram-set abstraction level.
 | :-- | :-- | :-- |
 | `Node` | Validator | [[concepts/node-model]] |
 | `Network` | Network | [[concepts/network-model]] |
-| `Scheduler` | Scheduler | [[concepts/simulation-design]] (forthcoming) |
+| `Scheduler` | Scheduler | [[concepts/simulation-design]] |
 | `Harness` | Harness | T19 / T27 (forthcoming) |
 | `Logger` / `EventSink` | Logger | T24 (forthcoming) |
 | `AdversaryProfile` | Adversary | T18 (forthcoming) |
-| `Heap`, `Registry`, `SeqPer` | (internal scheduler state) | this diagram set |
+| `Heap`, `Registry`, `SeqPer` | (internal scheduler state) | [[concepts/simulation-design]] §4 |
 
 `Heap`, `Registry`, and `SeqPer` are not separate classes — they are
 the scheduler's internal data fields. They appear as lifelines in the
@@ -75,7 +57,7 @@ The five diagrams below together compress the scheduler design
 contract. A reader who reads only these diagrams should be able to
 reconstruct the API surface, the determinism guarantees, the cancel
 semantics, the stop conditions, and the failure modes — without
-reading the wiki page. Source language: **Swimlanes.io**.
+reading the wiki page.
 
 - [[diagrams/scheduler/bootstrap]] — the cast and how the harness
   wires them. Six phases from construction to run. Establishes the
@@ -96,40 +78,12 @@ reading the wiki page. Source language: **Swimlanes.io**.
   boundary, RNG ownership, metric-computation ownership, wallclock
   prohibition, four fail-fast validation gates.
 
-### Simulator runtime — how the models work together
-
-These two diagrams sit one abstraction level above the T17 contract.
-They answer: *what calls what, in what order, to take a YAML config
-and produce one row of `results.csv`?* The T17 set zooms into the
-Scheduler lifeline of these two. Source language: **Mermaid**.
-
-- [[diagrams/simulator-runtime-outer]] — **outer view.** One
-  experiment run, end to end. Six phases (init → workload → run loop
-  → stop → flush → output). Lifelines: Harness, Config, Scheduler,
-  Network, Validator, Protocol FSM, Logger.
-- [[diagrams/simulator-runtime-tick]] — **inner view.** One event
-  tick — what happens between two `Scheduler.pop()` calls. Shows the
-  four-verb Validator outbound API.
-
 ## How to read them
 
-Two reading paths depending on what you want.
-
-**Path A — "what is the simulator?"** Start with
-[[diagrams/simulator-runtime-outer]] for the experiment-level view,
-then drill into [[diagrams/simulator-runtime-tick]] for the per-tick
-mechanics. These two were drafted before T17 and operate at the
-"runtime" abstraction level.
-
-**Path B — "what is the scheduler contract?"** Read the five T17
-diagrams in order: bootstrap → enqueue → dispatch → timer-lifecycle →
-constraints. The first three together cover the API surface and the
-run loop. The fourth covers a subtle internal pattern. The fifth pins
-what is *not* in the scheduler.
-
-If you read both paths, the relationship is: the T17 set is a zoom-in
-on the `S` (Scheduler) lifeline of the runtime set. They do not
-overlap; they compose.
+Read the five T17 diagrams in order: bootstrap → enqueue → dispatch →
+timer-lifecycle → constraints. The first three together cover the
+API surface and the run loop. The fourth covers a subtle internal
+pattern. The fifth pins what is *not* in the scheduler.
 
 ## What is *not* drawn (yet)
 
@@ -141,22 +95,26 @@ overlap; they compose.
   *where* adversaries attach. The catalogue of *which* adversaries
   exist and how each one distorts the four Node outbound calls is T18
   ([[concepts/adversary-model]]).
-- **Experiment matrix.** The outer-loop sketch in
-  [[diagrams/simulator-runtime-outer]] gestures at it; full coverage
-  is T19 ([[concepts/experiment-matrix]]).
+- **Experiment matrix.** The harness-level cell × seed iteration
+  shape is T19 ([[concepts/experiment-matrix]]).
+- **Simulator-runtime macro view.** A higher-level "from YAML config
+  to one row of `results.csv`" sequence — six phases (init →
+  workload → run loop → stop → flush → output) — would sit one
+  abstraction level above the T17 contract set and zoom into the
+  Scheduler lifeline of the T17 diagrams. Earlier Mermaid drafts of
+  this view were removed during the T17 review cycle; if re-added it
+  would slot in as a new catalogue section at the macro abstraction
+  level.
 
 ## Status
 
-The two simulator-runtime diagrams (Mermaid) were drafted as
-scaffolding before T17 picked up. The five T17 contract diagrams
-(Swimlanes.io) were authored during T17
-([[concepts/simulation-design]], In Progress as of 2026-05-13). When
-T17 lands and is approved, the contract diagrams become permanent
-reference material for [[concepts/simulation-design]] and the
-implementation work in T21.
+The five T17 contract diagrams (Swimlanes.io) were authored during
+T17 ([[concepts/simulation-design]], In Review as of 2026-05-13). When
+T17 merges, they become permanent reference material for
+[[concepts/simulation-design]] and the implementation work in T21.
 
 Forward wikilinks to unwritten pages
-([[concepts/simulation-design]], [[concepts/adversary-model]],
-[[concepts/reproducibility]], [[concepts/output-format]]) are
-deliberately left dead and will resolve when T17, T18, T27, and T40
+([[concepts/adversary-model]], [[concepts/reproducibility]],
+[[concepts/output-format]], [[concepts/experiment-matrix]]) are
+deliberately left dead and will resolve when T18, T27, T40, and T19
 land — same pattern S5 and S7 used during the Week 2 imports.
