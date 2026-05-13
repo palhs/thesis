@@ -200,7 +200,7 @@ a random sub-sample per query; the other three families operate over
 fixed quorums (PBFT replica set, Casper validator set per epoch,
 Narwhal committee). Coordination is "shared parameters + derived RNG
 seed" per
-[[concepts/adversary-model-runtime#determinism-interaction-with-t27]].
+[[concepts/adversary-model-runtime#5-determinism-interaction-with-t27]].
 
 ### 7.2 Narwhal+Tusk data-availability withholding
 
