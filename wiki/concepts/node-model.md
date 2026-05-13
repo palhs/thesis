@@ -646,3 +646,19 @@ one-shot lifecycle entry, two recurring)" and the `No on_tick`
 subsection's closing language to reflect that the *recurring*
 inbound surface remains two callbacks. Outbound API (§7),
 determinism rules (§8), and adversary attachment (§9) are unchanged.
+
+### 2026-05-13 — §9 scope contracts to attachment surface only
+
+T18 ([[concepts/adversary-model]]) now owns adversary binding
+semantics. §9 retains the attachment-surface declaration (per-protocol
+FSM/outbound touchpoint matrix, `self.adversary` slot, protocol-
+specific slot list) but no longer owns the cross-protocol semantic
+detail. Per-cell binding semantics (mechanism, intensity range,
+safety/liveness classification, invariant) live in
+[[concepts/adversary-model]] §§3–7. The §9 matrix here remains as the
+declaration of *which* `Node` method each capability gates; the
+binding details for *what* the gated method does in each protocol are
+on the adversary-model page.
+
+No other §s are affected. Determinism rules (§8), inbound API (§6),
+outbound API (§7), and role taxonomy (§5) are unchanged.
