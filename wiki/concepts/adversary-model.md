@@ -28,7 +28,10 @@ in replicas; Casper FFG in stake; Snowman in validators (full mapping
 in [[concepts/adversary-model-runtime]] §2). Attachment is owned by
 [[concepts/node-model#adversary-attachment]] (`self.adversary` slot +
 per-protocol FSM touchpoint matrix); this page owns binding semantics
-per cell. Effect columns reuse [[concepts/evaluation-metrics]].
+per cell. Effect columns reuse [[concepts/evaluation-metrics]]. Total
+surface: **18 valid `(adversary_id, protocol_id)` pairs** = (4
+capabilities × 4 protocols − 1 structural `N/A`) + 3 protocol-specific
+surfaces; T51–T53 sizes its experiment matrix against this count.
 
 ## 2. Generic capability × protocol matrix
 
