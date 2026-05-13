@@ -173,6 +173,88 @@ formulation.
 
 ## 7. Protocol-specific surfaces
 
+Three adversaries are structurally unique to one protocol because they
+exploit a property the other three families do not share (sampled
+quorum; two-layer availability/ordering split; on-chain slashing). They
+live here rather than in the §2 matrix because the matrix exists for
+cross-protocol comparison; single-protocol attacks would be 3-`N/A`
+rows.
+
+### 7.1 Snowman colluding sub-sampler
+
+**Action.** Multiple `Node`s' adversary profiles coordinate
+`QUERY-RESPONSE` colours to bias `α_c` counts in honest validators'
+samples per
+[[algorithms/avalanche#behaviour-under-adversarial-conditions]]
+(sample-partitioning).
+
+**Victim protocol.** Snowman only.
+**Intensity range.** f ∈ [0, 0.33] of validators in the colluding pool.
+**S/L.** Safety (probabilistic).
+**Invariant checked.** Empirical safety-violation rate ≤ theoretical
+bound `(1 − α_c/K)^β` from [[algorithms/avalanche#probabilistic-safety]].
+**Source.** [9].
+
+**Structural uniqueness.** Snowman is the only family member that draws
+a random sub-sample per query; the other three families operate over
+fixed quorums (PBFT replica set, Casper validator set per epoch,
+Narwhal committee). Coordination is "shared parameters + derived RNG
+seed" per
+[[concepts/adversary-model-runtime#determinism-interaction-with-t27]].
+
+### 7.2 Narwhal+Tusk data-availability withholding
+
+**Action.** Adversary worker certifies the header (gathers `2f+1`
+signatures) but refuses to serve batch contents on subsequent `send`
+requests per
+[[algorithms/dag-based#behaviour-under-adversarial-conditions]] and
+[[concepts/node-model]] §9 ll. 483–485.
+
+**Victim protocol.** Narwhal+Tusk only.
+**Intensity range.** f ∈ [0, 0.33] of n replicas.
+**S/L.** Liveness (consensus stalls when missing batches block ordering).
+**Invariant checked.** Batch availability rate ≥ honest baseline minus f.
+**Source.** [11].
+
+**Structural uniqueness.** Only Narwhal+Tusk separates data
+availability from ordering. PBFT, Casper FFG, and Snowman all carry
+payload in the consensus messages themselves; there is no
+"certify but withhold" gap because there is no distinct availability
+layer to attack.
+
+### 7.3 Casper FFG slashable-equivocation refinements
+
+**Action.** Surround vote (`<S₁, T₁>` surrounding own `<S₂, T₂>` with
+`S₁ < S₂ < T₂ < T₁`) and double vote (two distinct votes with the same
+target epoch), each with an explicit slashing-evidence payload per
+[[algorithms/pos#slashing-conditions]].
+
+**Victim protocol.** Casper FFG only.
+**Intensity range.** f ∈ [0, 0.33] of stake.
+**S/L.** Safety above threshold; cost-bounded.
+**Invariant checked.** Successful safety violation → ≥1/3 stake
+slashable (accountable-safety theorem per
+[[algorithms/pos#accountable-safety]]).
+**Source.** [7].
+
+**Structural uniqueness.** Casper is the only family with on-chain
+slashing. PBFT equivocation triggers a view change with no economic
+penalty; Narwhal equivocation is blocked at certificate formation;
+Snowman has no inter-message intersection to detect equivocation
+against.
+
 ## 8. Revisions
 
+Reserved per the W3 design-contract precedent
+([[concepts/node-model#revisions]] established the pattern). Initially
+empty.
+
 ## 9. Sources
+
+Citations `[4]`, `[7]`, `[9]`, `[11]` resolve via
+[[concepts/annotated-bibliography]] to:
+
+- [[sources/2026-04-21_castro-liskov-pbft-1999]] (`[4]`)
+- [[sources/2026-04-21_buterin-griffith-casper-ffg-2017]] (`[7]`)
+- [[sources/2026-04-21_team-rocket-avalanche-2019]] (`[9]`)
+- [[sources/2026-04-21_danezis-narwhal-tusk-2022]] (`[11]`)
