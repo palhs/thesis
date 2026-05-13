@@ -97,8 +97,187 @@ failure.
 
 ## 4. AdversaryProfile reference sketch
 
+Per the W3 design-contract style established for this thesis's hand-off
+to W4 code (precedent: [[concepts/node-model]] §Reference sketch,
+[[concepts/network-model]] §7, [[concepts/simulation-design-runtime]]
+§4), this sketch is **not a specification**. It exists so T22 (`src/nodes/`)
+has a starting shape and so a reader scanning this page cold can
+picture the artifact. T22 may diverge; divergences land as
+`## Revisions` entries per `docs/wiki-spec.md` §revisions-rule.
+
+```python
+# Reference sketch — illustrative, non-binding.
+# Implementation (T22) may diverge; document via Revisions register.
+
+from dataclasses import dataclass, field
+from typing import Protocol, Optional
+from enum import Enum
+
+class AdversaryKind(Enum):
+    DELAY = 0
+    WITHHOLD = 1
+    EQUIVOCATE = 2
+    DISRUPT_LEADER = 3
+    SNOWMAN_COLLUSION = 4
+    NARWHAL_DATA_WITHHOLD = 5
+    CASPER_SLASHING = 6
+
+class AdversaryProfile(Protocol):
+    kind: AdversaryKind
+    nodes: tuple[int, ...]      # NodeIds; fixed at sim-start
+    intensity: float            # per-protocol natural unit (see §2)
+
+@dataclass(frozen=True)
+class DelayProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    delay_ms_min: float
+    delay_ms_max: float
+    kind: AdversaryKind = AdversaryKind.DELAY
+
+@dataclass(frozen=True)
+class WithholdProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    kind: AdversaryKind = AdversaryKind.WITHHOLD
+
+@dataclass(frozen=True)
+class EquivocateProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    target_phase: str           # protocol-specific: 'pre-prepare', 'attest', 'header'
+    partition_strategy: str     # 'half-half', 'one-vs-rest'
+    kind: AdversaryKind = AdversaryKind.EQUIVOCATE
+
+@dataclass(frozen=True)
+class DisruptLeaderProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    action: str                 # 'silent', 'equivocate-proposal', 'anchor-withhold'
+    kind: AdversaryKind = AdversaryKind.DISRUPT_LEADER
+
+@dataclass(frozen=True)
+class SnowmanCollusionProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    target_colour: int          # the colour the collusion biases toward
+    shared_rng_seed: int        # derived from sim seed; pins coordination
+    kind: AdversaryKind = AdversaryKind.SNOWMAN_COLLUSION
+
+@dataclass(frozen=True)
+class NarwhalDataWithholdProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    kind: AdversaryKind = AdversaryKind.NARWHAL_DATA_WITHHOLD
+
+@dataclass(frozen=True)
+class CasperSlashingProfile:
+    nodes: tuple[int, ...]
+    intensity: float
+    violation: str              # 'double-vote' | 'surround-vote'
+    kind: AdversaryKind = AdversaryKind.CASPER_SLASHING
+```
+
+**Attachment.** [[concepts/node-model#node-level-slot]] declares the
+`self.adversary: Optional[AdversaryProfile]` slot. When non-`None`, the
+FSM module routes outbound emissions and state-mutation decisions
+through the profile before honest behaviour. The
+per-protocol attachment matrix lives at
+[[concepts/node-model#generic-adversary-attachment-matrix]]; the
+protocol-specific slots (Snowman colluding sub-sampler, Narwhal+Tusk
+data-availability withholding, Casper FFG slashable equivocation) are
+pinned at [[concepts/node-model#protocol-specific-adversary-slots]].
+
+**Static-only contract.** Profile fields are read once at relevant
+emission points; there is no `on_observe()` callback (per the catalog's
+static-only contract — see [[concepts/adversary-model#1-framing-and-scope]]
+and design-spec §3 D2). T22 implements `self.adversary` as an opaque
+strategy slot reading these fields; T18 fills the slot.
+
 ## 5. Determinism interaction with T27
+
+The static-only profile contract (§4) gives the determinism rule for
+free: identical `(config, seed)` produces byte-identical
+adversary-injected events at byte-identical times.
+
+**Per-Node adversary RNG.** Each `Node`'s RNG is seeded from the sim
+seed per [[concepts/node-model#per-node-rng-seeding]]
+(`seed = hash((global_seed, node_id))`). When the FSM dispatches
+through `self.adversary`, any randomness (e.g. choosing which subset
+to send equivocating messages to, sampling a delay from
+`(delay_ms_min, delay_ms_max)`) draws from this per-Node RNG, not from
+a global source. The forbidden-surfaces list at
+[[concepts/node-model#forbidden-surfaces]] binds the adversary path
+identically to the honest path.
+
+**Colluding-group seed derivation.** Adversaries that coordinate
+across multiple `Node`s (e.g. `SnowmanCollusionProfile`) derive a
+shared RNG seed from `hash(sim_seed, group_id)`, where `group_id` is
+fixed at sim-start. Two colluding nodes drawing from the same derived
+seed in the same order make identical decisions without runtime
+coordination, so the static-only contract holds.
+
+**Replay invariant.** A run with `(config, seed)` produces an event
+log byte-identical to any other run with the same `(config, seed)`.
+Adversary-injected events are part of the log; the invariant covers
+them. Cross-links: [[concepts/node-model#determinism-and-reproducibility]],
+[[concepts/simulation-design-runtime]] §1.
 
 ## 6. Open to revision
 
+The catalog deliberately leaves the following items open for
+downstream tasks. Each promotes to a `## Revisions` entry on this
+page (or on [[concepts/adversary-model]]) when resolved.
+
+- **Adversary timing.** Static-only for T18. Promote to
+  bounded-adaptive only if T22 implementation or T51 results expose a
+  specific gap (an attack class with no static analogue). Revisions
+  discipline applies.
+- **Coordination protocol for Snowman colluding sub-sampler.**
+  Currently "shared params + derived RNG seed" (§5). If T51 surfaces
+  stale-state attacks (e.g. coordinated lag in adopting a new round
+  number), the coordination model may need a richer shared-state
+  surface.
+- **Intensity range bounds per cell.** All cells in
+  [[concepts/adversary-model]] §§3–7 carry `f ∈ [0, 0.33]` as a
+  placeholder. T51–T53 calibration will tighten per-cell ranges; some
+  attacks may have tighter or wider operational ranges than the naive
+  Byzantine threshold.
+- **`AdversaryProfile` final type.** `typing.Protocol` now (§4). T22
+  may promote to `abc.ABC` if dispatch needs concrete inheritance —
+  but the static-only contract makes this unlikely.
+- **Safety-cost-budget column.** Currently lives in
+  [[concepts/evaluation-metrics]]. T40 (CSV finalisation) may move it
+  to a dedicated effect-schema slot; defer to T40.
+- **LMD-GHOST reorg-inducer.** The brainstorm audit subsumed it under
+  `delay-emission` ([[concepts/adversary-model#3-delay-emission]]).
+  If W10 Casper results show structurally-distinct reorg dynamics,
+  promote to a fourth protocol-specific entry under
+  [[concepts/adversary-model#7-protocol-specific-surfaces]] §7.4.
+- **Bullshark / Mysticeti out-of-scope.** Reaffirmed by spec §3 D5.
+  Revisit only if family scope widens past Narwhal+Tusk (no current
+  plan).
+- **Snowman `α_p` vs `α_c` boundary exploit.** Audit subsumed under
+  colluding-sub-sampler. If T51 results expose a distinct attack at
+  the preference-flip threshold, promote to
+  [[concepts/adversary-model#7-protocol-specific-surfaces]] §7.4.
+- **Undefined metric column names in §3 effect schema.** The §3
+  per-capability table references column names that are not yet
+  defined in [[concepts/evaluation-metrics]] or
+  [[concepts/metric-reconciliation]] (current CSV header lists
+  `commit_latency_ms`, `finality_latency_ms`, `view_change_or_reorg_count`,
+  `success_rate`, `fork_rate`, `empirical_epsilon`, `f_max_count`,
+  `f_max_stake`, etc., but not these). T40 (CSV finalisation) must
+  either define them or remap §3 onto the existing schema. The
+  unresolved names: `time_to_finality_p50`, `time_to_finality_p95`,
+  `liveness_failures`, `finality_lag_epochs`, `throughput_per_validator`,
+  `safety_violations`, `slashing_events`, `view_changes`,
+  `equivocations_blocked`, `anchor_commit_lag`,
+  `block_proposal_failures`, `accept_time_p95`,
+  `batch_availability_rate`, `consensus_stall_events`,
+  `safety_cost_stake_burned`.
+
 ## 7. Sources
+
+Inherits the bibliography of [[concepts/adversary-model#9-sources]].
+No additional sources are introduced on this page.
