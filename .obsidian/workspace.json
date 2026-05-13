@@ -4,24 +4,39 @@
     "type": "split",
     "children": [
       {
-        "id": "23073453007f98cf",
+        "id": "70d442f5e5500108",
         "type": "tabs",
         "children": [
           {
-            "id": "95d83fe387abb646",
+            "id": "99f1e9d0aa9f5886",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "wiki/concepts/node-model.md",
+                "file": "wiki/concepts/metric-reconciliation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "node-model"
+              "title": "metric-reconciliation"
+            }
+          },
+          {
+            "id": "117730cc4ba635f9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "wiki/concepts/message-types.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "message-types"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -95,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "wiki/concepts/node-model.md",
+                "file": "wiki/concepts/message-types.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +120,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for node-model"
+              "title": "Backlinks for message-types"
             }
           },
           {
@@ -114,12 +129,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "wiki/concepts/node-model.md",
+                "file": "wiki/concepts/message-types.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from node-model"
+              "title": "Outgoing links from message-types"
             }
           },
           {
@@ -166,7 +181,8 @@
               "title": "Outline of 00_BFT_Foundation"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -183,10 +199,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "d8dcdf786eaab85f",
+  "active": "117730cc4ba635f9",
   "lastOpenFiles": [
+    "wiki/concepts/metric-reconciliation.md",
+    "wiki/diagrams/index.md",
+    "wiki/diagrams/simulator-runtime-tick.md",
+    "wiki/diagrams/simulator-runtime-outer.md",
+    "wiki/diagrams",
+    "wiki/concepts/message-types.md",
+    "docs/chat-style.md",
+    "wiki/concepts/evaluation-metrics.md",
+    "wiki/sources/2026-04-21_danezis-narwhal-tusk-2022.md",
     "wiki/concepts/node-model.md",
+    "wiki/concepts/network-model.md",
+    "wiki/concepts/network-model-phases.md",
     "concepts/network-model.md",
+    "wiki/algorithms/dag-based.md",
+    "wiki/concepts/synchrony-models.md",
+    "concepts/experiment-matrix.md",
     "resources/04_DAG_Based_DeepDive.md",
     "resources/03_Avalanche_DeepDive.md",
     "resources/02_PoS_Finality_DeepDive.md",
@@ -201,23 +231,11 @@
     "TASKS.md.tmp.37796.1777129209767",
     "TASKS.md.tmp.37796.1777128848331",
     "TASKS.md.tmp.37796.1777128844822",
-    "TASKS.md.tmp.37796.1777108875132",
     "drafts/ch2_litreview.md",
     "drafts/ch1_intro.md",
     "wiki/concepts/problem-statement.md",
     "wiki/concepts/consensus-overview.md",
     "wiki/concepts/cap-theorem.md",
-    "wiki/concepts/consensus-properties.md",
-    "wiki/concepts/flp-impossibility.md",
-    "wiki/concepts/consensus-families.md",
-    "wiki/sources/2026-04-21_gervais-pow-security-2016.md",
-    "wiki/sources/2026-04-21_cachin-vukolic-blockchain-wild-2017.md",
-    "wiki/sources/2026-04-21_xiao-survey-2020.md",
-    "wiki/sources/2026-04-21_amores-sesar-avalanche-analysis-2024.md",
-    "wiki/sources/2026-04-21_buterin-gasper-2020.md",
-    "wiki/lint/2026-04-21_sync-report.md",
-    "wiki/concepts/evaluation-metrics.md",
-    "resources/Evaluation_Metrics.md",
-    "concepts/message-types.md"
+    "wiki/concepts/consensus-properties.md"
   ]
 }
