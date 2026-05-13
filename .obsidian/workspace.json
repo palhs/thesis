@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "wiki/concepts/message-types.md",
+                "file": "wiki/diagrams/index.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "message-types"
+              "title": "index"
             }
           }
         ],
@@ -110,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "wiki/concepts/message-types.md",
+                "file": "wiki/diagrams/index.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for message-types"
+              "title": "Backlinks for index"
             }
           },
           {
@@ -129,12 +129,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "wiki/concepts/message-types.md",
+                "file": "wiki/diagrams/index.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from message-types"
+              "title": "Outgoing links from index"
             }
           },
           {
@@ -201,12 +201,31 @@
   },
   "active": "117730cc4ba635f9",
   "lastOpenFiles": [
-    "wiki/concepts/metric-reconciliation.md",
+    "wiki/concepts/simulation-design-runtime.md",
+    "wiki/concepts/simulation-design.md",
+    "docs/superpowers/specs/2026-05-13-t17-scheduler-design.md",
+    "docs/superpowers/specs",
+    "docs/superpowers",
+    "wiki/diagrams/docs/superpowers/specs",
+    "wiki/diagrams/docs/superpowers",
+    "wiki/diagrams/docs",
+    "wiki/diagrams/scheduler/constraints.md",
     "wiki/diagrams/index.md",
+    "wiki/diagrams/scheduler/timer-lifecycle.md",
+    "wiki/diagrams/scheduler/event-dispatch.md",
+    "wiki/concepts/metric-reconciliation.md",
+    "wiki/diagrams/scheduler/event-enqueue.md",
+    "wiki/diagrams/scheduler/bootstrap.md",
+    "wiki/concepts/message-types.md",
+    "wiki/diagrams/scheduler",
+    "wiki/diagrams/scheduler-constraints.md",
+    "wiki/diagrams/scheduler-timer-lifecycle.md",
+    "wiki/diagrams/scheduler-event-dispatch.md",
+    "wiki/diagrams/scheduler-event-enqueue.md",
+    "wiki/diagrams/scheduler-bootstrap.md",
     "wiki/diagrams/simulator-runtime-tick.md",
     "wiki/diagrams/simulator-runtime-outer.md",
     "wiki/diagrams",
-    "wiki/concepts/message-types.md",
     "docs/chat-style.md",
     "wiki/concepts/evaluation-metrics.md",
     "wiki/sources/2026-04-21_danezis-narwhal-tusk-2022.md",
@@ -215,27 +234,8 @@
     "wiki/concepts/network-model-phases.md",
     "concepts/network-model.md",
     "wiki/algorithms/dag-based.md",
-    "wiki/concepts/synchrony-models.md",
-    "concepts/experiment-matrix.md",
-    "resources/04_DAG_Based_DeepDive.md",
-    "resources/03_Avalanche_DeepDive.md",
-    "resources/02_PoS_Finality_DeepDive.md",
-    "resources/01_PBFT_DeepDive.md",
-    "resources/00_BFT_Foundation.md",
     "wiki/log.md.tmp.37796.1777129600005",
     "wiki/concepts/problem-statement.md.tmp.37796.1777129594834",
-    "wiki/log.md.tmp.37796.1777129341526",
-    "TASKS.md.tmp.37796.1777129284883",
-    "wiki/index.md.tmp.37796.1777129237647",
-    "TASKS.md.tmp.37796.1777129215183",
-    "TASKS.md.tmp.37796.1777129209767",
-    "TASKS.md.tmp.37796.1777128848331",
-    "TASKS.md.tmp.37796.1777128844822",
-    "drafts/ch2_litreview.md",
-    "drafts/ch1_intro.md",
-    "wiki/concepts/problem-statement.md",
-    "wiki/concepts/consensus-overview.md",
-    "wiki/concepts/cap-theorem.md",
-    "wiki/concepts/consensus-properties.md"
+    "wiki/log.md.tmp.37796.1777129341526"
   ]
 }
