@@ -28,9 +28,7 @@ in replicas; Casper FFG in stake; Snowman in validators (full mapping
 in [[concepts/adversary-model-runtime]] §2). Attachment is owned by
 [[concepts/node-model#adversary-attachment]] (`self.adversary` slot +
 per-protocol FSM touchpoint matrix); this page owns binding semantics
-per cell. Effect columns reuse [[concepts/evaluation-metrics]]. The
-network is honest infrastructure per [[concepts/network-model]] §6;
-all adversarial behaviour originates at `Node`-level dispatch.
+per cell. Effect columns reuse [[concepts/evaluation-metrics]].
 
 ## 2. Generic capability × protocol matrix
 
