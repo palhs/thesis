@@ -20,23 +20,8 @@
               "icon": "lucide-file",
               "title": "metric-reconciliation"
             }
-          },
-          {
-            "id": "117730cc4ba635f9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "wiki/diagrams/index.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "index"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -110,7 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "wiki/diagrams/index.md",
+                "file": "wiki/concepts/metric-reconciliation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +105,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for index"
+              "title": "Backlinks for metric-reconciliation"
             }
           },
           {
@@ -129,12 +114,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "wiki/diagrams/index.md",
+                "file": "wiki/concepts/metric-reconciliation.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from index"
+              "title": "Outgoing links from metric-reconciliation"
             }
           },
           {
@@ -199,8 +184,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "117730cc4ba635f9",
+  "active": "99f1e9d0aa9f5886",
   "lastOpenFiles": [
+    "wiki/concepts/adversary-model-runtime.md",
+    "wiki/concepts/adversary-model.md",
+    "wiki/diagrams/index.md",
+    "docs/superpowers/plans/2026-05-13-t18-adversary-model-plan.md",
+    "docs/superpowers/plans",
+    "docs/superpowers/specs/2026-05-13-t18-adversary-model-design.md",
     "wiki/concepts/simulation-design-runtime.md",
     "wiki/concepts/simulation-design.md",
     "docs/superpowers/specs/2026-05-13-t17-scheduler-design.md",
@@ -210,7 +201,6 @@
     "wiki/diagrams/docs/superpowers",
     "wiki/diagrams/docs",
     "wiki/diagrams/scheduler/constraints.md",
-    "wiki/diagrams/index.md",
     "wiki/diagrams/scheduler/timer-lifecycle.md",
     "wiki/diagrams/scheduler/event-dispatch.md",
     "wiki/concepts/metric-reconciliation.md",
@@ -230,12 +220,7 @@
     "wiki/concepts/evaluation-metrics.md",
     "wiki/sources/2026-04-21_danezis-narwhal-tusk-2022.md",
     "wiki/concepts/node-model.md",
-    "wiki/concepts/network-model.md",
-    "wiki/concepts/network-model-phases.md",
-    "concepts/network-model.md",
-    "wiki/algorithms/dag-based.md",
     "wiki/log.md.tmp.37796.1777129600005",
-    "wiki/concepts/problem-statement.md.tmp.37796.1777129594834",
-    "wiki/log.md.tmp.37796.1777129341526"
+    "wiki/concepts/problem-statement.md.tmp.37796.1777129594834"
   ]
 }

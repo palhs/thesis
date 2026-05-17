@@ -13,7 +13,8 @@ thesis drafts. Agents operate one task at a time; humans review every merge.
   - `wiki/algorithms/`, `wiki/concepts/`, `wiki/sources/`, `wiki/experiments/`, `wiki/lint/`
 - `src/` — simulator code.
 - `results/` — CSVs, plots.
-- `drafts/` — thesis chapters in markdown. Converted to LaTeX at the end.
+- `drafts/` — thesis chapters in markdown. Ported into LaTeX in
+  `../thesis-tex/` (sibling Overleaf clone; outside this repo).
 - `TASKS.md` — the work queue. Source of truth for status.
 - `docs/` — operating rules (imported below).
 
