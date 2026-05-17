@@ -31,7 +31,12 @@ per-protocol FSM touchpoint matrix); this page owns binding semantics
 per cell. Effect columns reuse [[concepts/evaluation-metrics]]. Total
 surface: **18 valid `(adversary_id, protocol_id)` pairs** = (4
 capabilities × 4 protocols − 1 structural `N/A`) + 3 protocol-specific
-surfaces; T51–T53 sizes its experiment matrix against this count.
+surfaces. Of these, the Week-10 experiment tasks T51–T53 exercise the
+**12** generic-capability pairs under §§3–5 (`delay-emission`,
+`withhold-participation`, `equivocate-vote`); the 6 pairs under §6 and
+§7 are catalogued design space with no experiment task (human scope
+decision 2026-05-18 — see §8 Revisions and [[concepts/experiment-matrix]]
+§8).
 
 ## 2. Generic capability × protocol matrix
 
@@ -248,9 +253,18 @@ against.
 
 ## 8. Revisions
 
-Reserved per the W3 design-contract precedent
-([[concepts/node-model#revisions]] established the pattern). Initially
-empty.
+### 2026-05-18 — §1 experiment-coverage claim narrowed
+
+§1 previously read "T51–T53 sizes its experiment matrix against this
+count" (all 18 pairs). T19 ([[concepts/experiment-matrix]] §8) surfaced
+that the Week-10 experiment tasks T51–T53 exercise only the 12
+generic-capability pairs under §§3–5; §6 `disrupt-leader` (3 pairs) and
+the §7 protocol-specific surfaces (3 pairs) have no experiment task. A
+human scope decision (`TASKS.md` § Backlog) resolved the mismatch by
+narrowing the coverage claim rather than adding experiment tasks. The
+18-pair catalog is **unchanged** — the 6 uncovered pairs remain
+documented design space; only the claim that T51–T53 covers all of them
+is corrected, here and in §1.
 
 ## 9. Sources
 
