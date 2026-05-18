@@ -78,6 +78,31 @@ reading the wiki page.
   boundary, RNG ownership, metric-computation ownership, wallclock
   prohibition, four fail-fast validation gates.
 
+### Simulator runtime — T20 ([[concepts/system-design]])
+
+One macro-level diagram, one abstraction above the T17 contract set.
+
+- [[diagrams/runtime/macro]] — one experiment-matrix cell + seed to
+  one row of `results.csv`. Six phases: init, workload, run loop,
+  stop, flush, output. The run-loop phase zooms into the five
+  scheduler diagrams above; `build()` zooms into
+  [[diagrams/scheduler/bootstrap]].
+
+### Protocol main loops — T20 ([[concepts/system-design-protocols]])
+
+One sequence diagram per protocol, all at a matched abstraction
+level: one consensus decision instance from first message to
+`decided`.
+
+- [[diagrams/protocols/pbft]] — three-phase commit for one
+  `(view, seq)` instance; view-change branch.
+- [[diagrams/protocols/casper-ffg]] — justify→finalise for one
+  epoch; accountable-safety (slashing) branch.
+- [[diagrams/protocols/snowman]] — subsampled `K`-peer poll loop for
+  one block; accept at `counter ≥ β`.
+- [[diagrams/protocols/narwhal-tusk]] — one DAG round (header → vote
+  → certificate) plus the zero-message Tusk anchor commit.
+
 ## How to read them
 
 Read the five T17 diagrams in order: bootstrap → enqueue → dispatch →
@@ -87,31 +112,24 @@ pattern. The fifth pins what is *not* in the scheduler.
 
 ## What is *not* drawn (yet)
 
-- **Protocol-internal sequences.** PBFT three-phase commit, Casper FFG
-  justify→finalise, Snowman `K`-peer poll, Narwhal+Tusk DAG walk.
-  These belong to a future `protocols/` heading; one sequence diagram
-  per protocol at matched abstraction level.
 - **Adversary catalogue.** [[diagrams/scheduler/constraints]] pins
   *where* adversaries attach. The catalogue of *which* adversaries
   exist and how each one distorts the four Node outbound calls is T18
   ([[concepts/adversary-model]]).
 - **Experiment matrix.** The harness-level cell × seed iteration
   shape is T19 ([[concepts/experiment-matrix]]).
-- **Simulator-runtime macro view.** A higher-level "from YAML config
-  to one row of `results.csv`" sequence — six phases (init →
-  workload → run loop → stop → flush → output) — would sit one
-  abstraction level above the T17 contract set and zoom into the
-  Scheduler lifeline of the T17 diagrams. Earlier Mermaid drafts of
-  this view were removed during the T17 review cycle; if re-added it
-  would slot in as a new catalogue section at the macro abstraction
-  level.
-
 ## Status
 
 The five T17 contract diagrams (Swimlanes.io) were authored during
 T17 ([[concepts/simulation-design]], In Review as of 2026-05-13). When
 T17 merges, they become permanent reference material for
 [[concepts/simulation-design]] and the implementation work in T21.
+
+The five T20 diagrams (one `runtime/`, four `protocols/`) were
+authored during T20 ([[concepts/system-design]] /
+[[concepts/system-design-protocols]], In Review as of 2026-05-18).
+They close the "protocol-internal sequences" and "simulator-runtime
+macro view" gaps this section previously listed.
 
 Forward wikilinks to unwritten pages
 ([[concepts/adversary-model]], [[concepts/reproducibility]],
