@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 35 · In Review: 0 · In Progress: 1 · Not Started: 49 · Blocked: 0
+- Completed: 35 · In Review: 1 · In Progress: 0 · Not Started: 49 · Blocked: 0
 
 ## Legend
 
@@ -104,7 +104,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 ## Week 4 — Simulator skeleton
 
-- `[ ]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
+- `[?]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
   _Outcome:_ Working scheduler passing 3+ unit tests · _Design:_ `wiki/concepts/simulation-design.md`, `wiki/concepts/simulation-design-runtime.md` · _Spec:_ `docs/superpowers/specs/2026-05-13-t17-scheduler-design.md` · _Artifact:_ `src/scheduler/` + `wiki/experiments/<date>_scheduler-baseline.md`
 - `[ ]` **T22** `H` Engineer — Implement node objects with state management
   _Outcome:_ Node class with transitions, message handling, honest/adversarial hooks · _Artifact:_ `src/nodes/`
