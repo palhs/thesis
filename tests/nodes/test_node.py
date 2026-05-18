@@ -82,5 +82,23 @@ class TestOutboundUnbound(unittest.TestCase):
         self.assertEqual(n.emit("evt", {}, 0.0), ("bound", "evt"))
 
 
+class TestStart(unittest.TestCase):
+    def test_start_transitions_to_running(self):
+        n = FakeNode()
+        n.start(0.0)
+        self.assertIs(n.status, Lifecycle.RUNNING)
+
+    def test_start_delegates_to_on_start(self):
+        n = FakeNode()
+        n.start(0.0)
+        self.assertIn(("_on_start", 0.0), n.calls)
+
+    def test_second_start_raises(self):
+        n = FakeNode()
+        n.start(0.0)
+        with self.assertRaisesRegex(RuntimeError, "with status RUNNING"):
+            n.start(0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -85,3 +85,13 @@ class Node(ABC):
         """Emit a structured observability event. Bound by Scheduler.bind()."""
         raise RuntimeError(
             f"Node {self.id}.emit called before Scheduler.bind()")
+
+    # --- Inbound hooks: public; called by the Scheduler (spec §5.4). ---
+
+    def start(self, t: float) -> None:
+        """Bootstrap kickoff (scheduler phase 5). CREATED -> RUNNING."""
+        if self.status is not Lifecycle.CREATED:
+            raise RuntimeError(
+                f"start() on Node {self.id} with status {self.status.name}")
+        self.status = Lifecycle.RUNNING
+        self._on_start(t)
