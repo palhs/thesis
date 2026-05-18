@@ -357,11 +357,14 @@ class TestSchedule(unittest.TestCase):
 
     def test_heap_orders_by_time_then_node_then_seq(self):
         s = Scheduler()
-        s.schedule(TimerFire("b", None), t=20.0, node_id=0)
-        s.schedule(TimerFire("a", None), t=10.0, node_id=1)
-        s.schedule(TimerFire("c", None), t=10.0, node_id=0)
+        # seq is a per-node counter incremented in schedule() CALL order,
+        # not virtual-time order (simulation-design.md §3 D2). So node 0's
+        # t=20 event gets seq 1 and its t=10 event gets seq 2.
+        s.schedule(TimerFire("b", None), t=20.0, node_id=0)   # node 0, seq 1
+        s.schedule(TimerFire("a", None), t=10.0, node_id=1)   # node 1, seq 1
+        s.schedule(TimerFire("c", None), t=10.0, node_id=0)   # node 0, seq 2
         order = [heapq.heappop(s.heap)[:3] for _ in range(3)]
-        self.assertEqual(order, [(10.0, 0, 1), (10.0, 1, 1), (20.0, 0, 2)])
+        self.assertEqual(order, [(10.0, 0, 2), (10.0, 1, 1), (20.0, 0, 1)])
 
     def test_schedule_in_the_past_raises(self):
         s = Scheduler()
