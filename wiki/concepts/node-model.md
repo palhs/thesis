@@ -662,3 +662,15 @@ on the adversary-model page.
 
 No other §s are affected. Determinism rules (§8), inbound API (§6),
 outbound API (§7), and role taxonomy (§5) are unchanged.
+
+### 2026-05-19 — §8 per-Node RNG seeding uses a stable hash
+
+T22 (`src/nodes/`) implements per-Node RNG seeding with a `blake2b`-derived
+stable hash — `int.from_bytes(blake2b(f"{global_seed}:{node_id}").digest())`
+— rather than the literal `seed = hash((global_seed, node_id))` of §8.
+Python's built-in `hash()` is process-randomised for string and bytes inputs
+and is not guaranteed stable across processes or machines; `blake2b` is. This
+resolves the §11 open-to-revision item "Per-`Node` RNG seeding hash" and
+upholds the §8 byte-identical-replay contract under T27's cross-process
+reproducibility. No other §s are affected: the determinism *contract* is
+unchanged; only the seed-derivation primitive is pinned.
