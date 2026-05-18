@@ -101,6 +101,9 @@ and T25 determinism-regression use cases respectively.
 
 Five fields. All access is via the §6 API surface.
 
+> **Revised (§9 R1).** The T21 implementation holds two further fields —
+> `nodes` and `network` — as the dispatch targets `run()` routes events to.
+
 | Field | Type | Purpose |
 | :-- | :-- | :-- |
 | `heap` | `list[tuple[SimTime, NodeId, int, Event]]` | Min-heap over `(t, node_id, seq, event)`. Tie-break per D2. |
@@ -151,6 +154,10 @@ Validates `t >= self.now` (raises `ValueError`), increments
 Called by `Network.submit_*` (Deliveries), `Network.start`
 (PhaseAdvance), and `set_timer` (TimerFires). The only path into
 the heap.
+
+> **Revised (§9 R2).** The T21 implementation returns the assigned `seq`
+> (`-> int`) so `set_timer` can register the heap entry's exact `seq`
+> without a second increment.
 
 ```
 set_timer(node_id, timer_id, delay, payload, t) -> None
