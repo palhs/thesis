@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 38 · In Review: 0 · In Progress: 1 · Not Started: 49 · Blocked: 0
+- Completed: 38 · In Review: 1 · In Progress: 0 · Not Started: 49 · Blocked: 0
 
 ## Legend
 
@@ -63,7 +63,7 @@ specs); the `\include{biography}` line has been removed from the template.
   file exists; every name or personal detail is either author-supplied or
   marked `TODO(human)`; content ports cleanly into
   `../thesis-tex/MIT-thesis-template/acknowledgments.tex`
-- `[~]` **T68** `H` Writer — Build the biblatex `.bib` from the wiki bibliography
+- `[?]` **T68** `H` Writer — Build the biblatex `.bib` from the wiki bibliography
   _Outcome:_ Convert the consolidated annotated bibliography (`[1]`–`[18]`
   in `wiki/concepts/annotated-bibliography.md`) and the `wiki/sources/*.md`
   pages into a biblatex `.bib` file the MIT template compiles against.
