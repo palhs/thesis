@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 34 · In Review: 1 · In Progress: 0 · Not Started: 50 · Blocked: 0
+- Completed: 35 · In Review: 0 · In Progress: 0 · Not Started: 50 · Blocked: 0
 
 ## Legend
 
@@ -99,7 +99,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ Adversary catalog spanning the four-protocol scope (PBFT / Casper FFG / Snowman / Narwhal+Tusk), in two layers. **(1) Four generic categories** — delayer, equivocator, non-participant, leader-disruptor — each given an explicit per-protocol semantics row or marked `N/A` with justification (leader-disruptor is `N/A` for Snowman; Snowman equivocation reduces to a weaker "lying responder" form and must be flagged as such). **(2) Protocol-specific adversaries** — at minimum: Snowman colluding sub-sampler (coordinated query responses biasing `α_c` counts); Narwhal+Tusk data-availability withholding (worker certifies header but withholds batch contents); Casper FFG slashable equivocation refinements (surround vote, double vote with explicit slashing semantics). Each entry specifies: adversary action, victim protocol(s), measurable effect on safety vs liveness, configuration knobs (% of stake/nodes affected, intensity), and the invariant to be verified by simulator instrumentation. · _Artifact:_ `wiki/concepts/adversary-model.md` + update `wiki/index.md` · _Verify:_ every generic adversary has a per-protocol semantics row or an `N/A` justification; every protocol-specific adversary traces to its source paper (`[4]` / `[7]` / `[9]` / `[11]`); T51–T53 (Week 10 adversarial experiments) can be expressed as `(adversary_id, protocol_id, intensity)` triples drawn from this catalog — exercising the 12 generic-capability pairs under §§3–5; the 6 pairs under §6 (disrupt-leader) and §7 (protocol-specific surfaces) are catalogued design space deliberately out of experimental scope (human decision 2026-05-18, see § Backlog)
 - `[x]` **T19** `M` Engineer — Design experiment parameter space
   _Outcome:_ Matrix: validator counts, delay ranges, adversary fractions, timeouts, seeds · _Artifact:_ `wiki/concepts/experiment-matrix.md`
-- `[?]` **T20** `H` Engineer — Produce system design diagram + pseudocode
+- `[x]` **T20** `H` Engineer — Produce system design diagram + pseudocode
   _Outcome:_ Architecture diagram + pseudocode for each protocol main loop · _Artifact:_ `wiki/concepts/system-design.md`
 
 ## Week 4 — Simulator skeleton
