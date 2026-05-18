@@ -106,3 +106,23 @@ class Node(ABC):
         self._halt_reason = reason
         self.emit("halted",
                   {"node_id": self.id, "reason": reason.name, "t": t}, t)
+
+    def on_message(self, msg: Message, t: float) -> None:
+        """Scheduler-dispatched message delivery. Drops if halted, errors if
+        not yet started, otherwise delegates to _on_message."""
+        if self.status is Lifecycle.HALTED:
+            return                       # halted Node ceases handling (§3)
+        if self.status is Lifecycle.CREATED:
+            raise RuntimeError(
+                f"on_message before start() on Node {self.id}")
+        self._on_message(msg, t)
+
+    def on_timer(self, timer_id: Any, payload: Any, t: float) -> None:
+        """Scheduler-dispatched timer fire. Same lifecycle guard as
+        on_message, then delegates to _on_timer."""
+        if self.status is Lifecycle.HALTED:
+            return
+        if self.status is Lifecycle.CREATED:
+            raise RuntimeError(
+                f"on_timer before start() on Node {self.id}")
+        self._on_timer(timer_id, payload, t)

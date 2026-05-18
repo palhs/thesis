@@ -1,7 +1,7 @@
 """Unit tests for the shared-layer Node (node-model.md, T22)."""
 import unittest
 
-from nodes import HaltReason, Lifecycle, Node
+from nodes import HaltReason, Lifecycle, Message, Node
 from nodes.node import _stable_seed
 from _helpers import FakeNode
 
@@ -133,6 +133,48 @@ class TestHalt(unittest.TestCase):
         n.halt(HaltReason.RUN_END, 5.0)
         with self.assertRaisesRegex(RuntimeError, "with status HALTED"):
             n.start(0.0)
+
+
+class TestInboundGuards(unittest.TestCase):
+    def _msg(self):
+        return Message(src=1, dst=0, type="X", payload=None, t_sent=0.0)
+
+    def test_on_message_before_start_raises(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().on_message(self._msg(), 1.0)
+
+    def test_on_timer_before_start_raises(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().on_timer("tid", None, 1.0)
+
+    def test_on_message_while_running_delegates(self):
+        n = FakeNode()
+        n.start(0.0)
+        m = self._msg()
+        n.on_message(m, 2.0)
+        self.assertEqual(n.calls,
+                         [("_on_start", 0.0), ("_on_message", m, 2.0)])
+
+    def test_on_timer_while_running_delegates(self):
+        n = FakeNode()
+        n.start(0.0)
+        n.on_timer("tid", "pl", 2.0)
+        self.assertEqual(n.calls,
+                         [("_on_start", 0.0), ("_on_timer", "tid", "pl", 2.0)])
+
+    def test_on_message_after_halt_is_dropped(self):
+        n, _ = _running_node_with_recorder()
+        n.halt(HaltReason.RUN_END, 3.0)
+        before = list(n.calls)
+        n.on_message(self._msg(), 4.0)
+        self.assertEqual(n.calls, before)        # _on_message NOT invoked
+
+    def test_on_timer_after_halt_is_dropped(self):
+        n, _ = _running_node_with_recorder()
+        n.halt(HaltReason.RUN_END, 3.0)
+        before = list(n.calls)
+        n.on_timer("tid", None, 4.0)
+        self.assertEqual(n.calls, before)
 
 
 if __name__ == "__main__":
