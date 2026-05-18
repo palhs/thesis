@@ -95,3 +95,14 @@ class Node(ABC):
                 f"start() on Node {self.id} with status {self.status.name}")
         self.status = Lifecycle.RUNNING
         self._on_start(t)
+
+    def halt(self, reason: HaltReason, t: float) -> None:
+        """Transition to HALTED and emit the mandatory `halted` event.
+        Re-halting is a no-op: the first reason wins (the harness blanket-
+        halts every Node with RUN_END at run's end). See spec §5.3."""
+        if self.status is Lifecycle.HALTED:
+            return
+        self.status = Lifecycle.HALTED
+        self._halt_reason = reason
+        self.emit("halted",
+                  {"node_id": self.id, "reason": reason.name, "t": t}, t)

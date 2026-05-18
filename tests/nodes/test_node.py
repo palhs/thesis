@@ -1,7 +1,7 @@
 """Unit tests for the shared-layer Node (node-model.md, T22)."""
 import unittest
 
-from nodes import Lifecycle, Node
+from nodes import HaltReason, Lifecycle, Node
 from nodes.node import _stable_seed
 from _helpers import FakeNode
 
@@ -97,6 +97,41 @@ class TestStart(unittest.TestCase):
         n = FakeNode()
         n.start(0.0)
         with self.assertRaisesRegex(RuntimeError, "with status RUNNING"):
+            n.start(0.0)
+
+
+def _running_node_with_recorder():
+    n = FakeNode()
+    emitted = []
+    n.emit = lambda et, fs, t: emitted.append((et, fs, t))
+    n.start(0.0)
+    return n, emitted
+
+
+class TestHalt(unittest.TestCase):
+    def test_halt_transitions_to_halted(self):
+        n, _ = _running_node_with_recorder()
+        n.halt(HaltReason.RUN_END, 5.0)
+        self.assertIs(n.status, Lifecycle.HALTED)
+
+    def test_halt_emits_halted_event(self):
+        n, emitted = _running_node_with_recorder()
+        n.halt(HaltReason.CRASHED, 9.0)
+        self.assertEqual(
+            emitted,
+            [("halted", {"node_id": n.id, "reason": "CRASHED", "t": 9.0}, 9.0)])
+
+    def test_second_halt_is_noop_and_keeps_first_reason(self):
+        n, emitted = _running_node_with_recorder()
+        n.halt(HaltReason.CRASHED, 9.0)
+        n.halt(HaltReason.RUN_END, 12.0)        # blanket run-end halt
+        self.assertIs(n._halt_reason, HaltReason.CRASHED)
+        self.assertEqual(len(emitted), 1)        # no second event
+
+    def test_start_after_halt_raises(self):
+        n, _ = _running_node_with_recorder()
+        n.halt(HaltReason.RUN_END, 5.0)
+        with self.assertRaisesRegex(RuntimeError, "with status HALTED"):
             n.start(0.0)
 
 
