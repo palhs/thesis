@@ -5,8 +5,8 @@ work, push for review. Humans mark Completed on merge.
 
 ## Dashboard
 
-- Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 36 · In Review: 0 · In Progress: 0 · Not Started: 49 · Blocked: 0
+- Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
+- Completed: 36 · In Review: 0 · In Progress: 1 · Not Started: 51 · Blocked: 0
 
 ## Legend
 
@@ -40,6 +40,45 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ Index reflects S1–S7 pages; log has one retroactive entry per import · _Artifact:_ `wiki/index.md`, `wiki/log.md`
 - `[x]` **S9** `M` Linter — Sync completeness check
   _Outcome:_ Confirm every W1–W2 completed task (T1–T10) has a corresponding wiki artifact · _Artifact:_ `wiki/lint/<date>_sync-report.md`
+
+---
+
+## Thesis assembly — parallel track (front & back matter)
+
+Front- and back-matter tasks required by the MIT thesis layout but absent
+from the weekly Writer queue. **Not bound to the weekly sequence** — safe to
+pick up alongside any in-flight task: they touch only `drafts/`, `wiki/`,
+and the sibling `../thesis-tex/` repo, never `src/`, so they never conflict
+with an Engineer task in progress.
+
+Biography front matter is intentionally omitted (optional under MIT thesis
+specs); the `\include{biography}` line has been removed from the template.
+
+- `[ ]` **T67** `H` Writer — Draft acknowledgments front matter
+  _Outcome:_ Brief acknowledgments page (~half page) for the thesis front
+  matter. The agent supplies structure and neutral phrasing only; specific
+  names and personal thanks are left as `TODO(human)` for the author. Front
+  matter is not wiki knowledge — create no wiki page; append a `log.md`
+  entry only. · _Artifact:_ `drafts/front_acknowledgments.md` · _Verify:_
+  file exists; every name or personal detail is either author-supplied or
+  marked `TODO(human)`; content ports cleanly into
+  `../thesis-tex/MIT-thesis-template/acknowledgments.tex`
+- `[ ]` **T68** `H` Writer — Build the biblatex `.bib` from the wiki bibliography
+  _Outcome:_ Convert the consolidated annotated bibliography (`[1]`–`[18]`
+  in `wiki/concepts/annotated-bibliography.md`) and the `wiki/sources/*.md`
+  pages into a biblatex `.bib` file the MIT template compiles against.
+  Define a stable citation-key convention (e.g. `lamport1982bgp`) and record
+  the `[N]` ↔ bibkey ↔ source-page mapping so draft citations port
+  deterministically. Repoint the template's `\addbibresource` at the new
+  file. The `.bib` grows as later chapters cite more — this task lands the
+  initial build from the 18 known entries, not the final set. · _Artifact:_
+  `../thesis-tex/MIT-thesis-template/references.bib`; updated
+  `\addbibresource` in `../thesis-tex/MIT-thesis-template/MIT-Thesis.tex`;
+  new `wiki/concepts/citation-keys.md` holding the mapping; update
+  `wiki/index.md` · _Verify:_ every `[1]`–`[18]` entry has a matching
+  `.bib` record; each record is well-formed biblatex with the required
+  fields for its entry type; the mapping page resolves every
+  `wiki/sources/*.md` page to exactly one bibkey
 
 ---
 
@@ -106,7 +145,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 - `[x]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
   _Outcome:_ Working scheduler passing 3+ unit tests · _Design:_ `wiki/concepts/simulation-design.md`, `wiki/concepts/simulation-design-runtime.md` · _Spec:_ `docs/superpowers/specs/2026-05-13-t17-scheduler-design.md` · _Artifact:_ `src/scheduler/` + `wiki/experiments/<date>_scheduler-baseline.md`
-- `[ ]` **T22** `H` Engineer — Implement node objects with state management
+- `[~]` **T22** `H` Engineer — Implement node objects with state management
   _Outcome:_ Node class with transitions, message handling, honest/adversarial hooks · _Artifact:_ `src/nodes/`
 - `[ ]` **T23** `H` Engineer — Implement message passing with configurable delay
   _Outcome:_ Delivery system with delay injection and drop simulation · _Artifact:_ `src/network/`
@@ -226,6 +265,15 @@ one resource into the appropriate wiki page. Not counted in the 66.
   _Outcome:_ 2+ rehearsals; 15–20 min; answers to 10 expected questions · _Artifact:_ rehearsal notes in `wiki/log.md`
 - `[ ]` **T66** `H` Engineer — Final code package + README + reproducibility check
   _Outcome:_ Zip archive: code, configs, seeds, README, sample output verified · _Artifact:_ `results/release/` · _KPI checkpoint_
+- `[ ]` **T69** `H` Writer — Draft the abstract
+  _Outcome:_ ~500-word abstract for the MIT front matter, written from the
+  finished and revised chapters: problem, method (four-protocol simulation
+  study), headline results, contribution. No formulas or special characters
+  (MIT thesis spec). Front matter is not wiki knowledge — create no wiki
+  page; append a `log.md` entry only. · _Artifact:_ `drafts/front_abstract.md`
+  · _Verify:_ ≤500 words; states problem, method, key results, and
+  contribution; no math mode or special characters; ports cleanly into
+  `../thesis-tex/MIT-thesis-template/abstract.tex`
 - `[ ]` **L-W12** `M` Linter — Final wiki lint pass
   _Outcome:_ Final report; any remaining `TODO(cite)` or dead links resolved before submission · _Artifact:_ `wiki/lint/<date>_report.md`
 
