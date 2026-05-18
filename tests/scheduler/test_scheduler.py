@@ -2,7 +2,8 @@
 import heapq
 import unittest
 
-from scheduler import Scheduler
+from scheduler import Delivery, PhaseAdvance, Scheduler, TimerFire
+from _stubs import RecordingNetwork, RecordingNode, SimpleMessage
 
 
 class TestSchedulerSkeleton(unittest.TestCase):
@@ -25,9 +26,6 @@ class TestSchedulerSkeleton(unittest.TestCase):
         self.assertEqual(s._next_seq(0), 2)
         self.assertEqual(s._next_seq(1), 1)   # node 1 counter is independent
         self.assertEqual(s._next_seq(0), 3)
-
-
-from scheduler import PhaseAdvance, TimerFire
 
 
 class TestSchedule(unittest.TestCase):
@@ -107,9 +105,6 @@ class TestTimers(unittest.TestCase):
         self.assertEqual(len(s.heap), 2)  # old entry left as a tombstone
 
 
-from _stubs import RecordingNetwork, RecordingNode
-
-
 class TestBind(unittest.TestCase):
     def test_bind_registers_node_for_dispatch(self):
         s = Scheduler()
@@ -148,9 +143,11 @@ class TestBind(unittest.TestCase):
         s.bind_network(net)
         self.assertIs(s.network, net)
 
-
-from scheduler import Delivery, RunResult
-from _stubs import SimpleMessage
+    def test_emit_with_no_sink_is_silent(self):
+        s = Scheduler()  # event_sink left as None
+        node = RecordingNode(7)
+        s.bind(node)
+        node.emit("x", {}, 1.0)  # must complete without raising
 
 
 class TestRun(unittest.TestCase):
@@ -235,6 +232,20 @@ class TestRun(unittest.TestCase):
         result = s.run(stop_when=lambda: len(n1.calls) >= 3)
         self.assertEqual(result.stopped_by, "predicate")
         self.assertEqual(result.events_processed, 3)
+
+    def test_dispatch_to_unbound_node_raises_keyerror(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        # node_id=99 was never bind()-ed.
+        s.schedule(Delivery(SimpleMessage(0, 99, "m")), t=5.0, node_id=99)
+        with self.assertRaises(KeyError):
+            s.run()
+
+    def test_phaseadvance_with_no_network_raises(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        # bind_network() deliberately not called.
+        s.schedule(PhaseAdvance(3), t=7.0, node_id=Scheduler.PHASE_NODE_ID)
+        with self.assertRaises(RuntimeError):
+            s.run()
 
     def test_event_sink_called_before_dispatch_per_non_stale_event(self):
         s, n0, n1 = self._scheduler_with_two_nodes()

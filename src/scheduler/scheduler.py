@@ -33,8 +33,11 @@ class Scheduler:
     """Custom min-heap discrete-event scheduler (simulation-design.md §3 D1)."""
 
     PHASE_NODE_ID: NodeId = -1   # sentinel node_id for PhaseAdvance (§3 D2)
+    EMIT_SEQ: int = -1           # emit events carry no real seq; placeholder slot
 
     def __init__(self) -> None:
+        # per-node-monotonic seq makes (t, node_id, seq) unique by
+        # construction, so heapq never reaches the 4th tuple element (event).
         self.heap: list[tuple[SimTime, NodeId, int, Event]] = []
         self.registry: dict[tuple[NodeId, TimerId], int] = {}
         self.seq_per: dict[NodeId, int] = {}
@@ -69,7 +72,10 @@ class Scheduler:
 
     def set_timer(self, node_id: NodeId, timer_id: TimerId,
                   delay: SimTime, payload: Any, t: SimTime) -> None:
-        """Schedule a TimerFire for a Node. `delay == 0` is legal."""
+        """Schedule a TimerFire for a Node. `delay == 0` is legal.
+
+        `timer_id` must be hashable (it keys the `registry` dict).
+        """
         if delay < 0:
             raise ValueError(f"negative timer delay: {delay}")
         # Funnel through schedule() (single-funnel invariant, §5.1) and
@@ -93,7 +99,8 @@ class Scheduler:
             node.id, timer_id
         )
         node.emit = lambda event_type, fields, t: (
-            self.event_sink(t, node.id, -1, ("emit", event_type, fields))
+            self.event_sink(t, node.id, self.EMIT_SEQ,
+                            ("emit", event_type, fields))
             if self.event_sink is not None
             else None
         )
@@ -136,13 +143,26 @@ class Scheduler:
                 return RunResult("predicate", self._now,
                                  n_processed, n_tombstoned)
 
+    def _node(self, node_id: NodeId) -> Any:
+        try:
+            return self.nodes[node_id]
+        except KeyError:
+            raise KeyError(
+                f"dispatch: no Node bound for node_id={node_id}"
+            ) from None
+
     def _dispatch(self, event: Event, node_id: NodeId, t: SimTime) -> None:
         """Route a popped event to its handler, keyed on event class."""
         if isinstance(event, Delivery):
-            self.nodes[node_id].on_message(event.msg, t)
+            self._node(node_id).on_message(event.msg, t)
         elif isinstance(event, TimerFire):
-            self.nodes[node_id].on_timer(event.timer_id, event.payload, t)
+            self._node(node_id).on_timer(event.timer_id, event.payload, t)
         elif isinstance(event, PhaseAdvance):
+            if self.network is None:
+                raise RuntimeError(
+                    "dispatch: PhaseAdvance with no network bound; "
+                    "call bind_network() first"
+                )
             self.network.advance_phase(event.phase_id)
         else:  # fail-fast on an unknown event class (runtime §3).
             raise TypeError(f"unknown event class: {type(event).__name__}")
