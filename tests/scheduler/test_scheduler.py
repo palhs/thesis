@@ -107,5 +107,47 @@ class TestTimers(unittest.TestCase):
         self.assertEqual(len(s.heap), 2)  # old entry left as a tombstone
 
 
+from _stubs import RecordingNetwork, RecordingNode
+
+
+class TestBind(unittest.TestCase):
+    def test_bind_registers_node_for_dispatch(self):
+        s = Scheduler()
+        node = RecordingNode(7)
+        s.bind(node)
+        self.assertIs(s.nodes[7], node)
+
+    def test_bind_wires_set_timer_curried_on_node_id(self):
+        s = Scheduler()
+        node = RecordingNode(7)
+        s.bind(node)
+        node.set_timer("round", 5.0, None, 0.0)
+        self.assertEqual(s.registry[(7, "round")], s.heap[0][2])
+
+    def test_bind_wires_cancel_timer_curried_on_node_id(self):
+        s = Scheduler()
+        node = RecordingNode(7)
+        s.bind(node)
+        node.set_timer("round", 5.0, None, 0.0)
+        node.cancel_timer("round")
+        self.assertNotIn((7, "round"), s.registry)
+
+    def test_bind_wires_emit_through_event_sink(self):
+        s = Scheduler()
+        captured: list[tuple] = []
+        s.event_sink = lambda t, nid, seq, ev: captured.append((t, nid, seq, ev))
+        node = RecordingNode(7)
+        s.bind(node)
+        node.emit("committed", {"block": 1}, 12.0)
+        self.assertEqual(captured,
+                         [(12.0, 7, -1, ("emit", "committed", {"block": 1}))])
+
+    def test_bind_network_sets_network_handle(self):
+        s = Scheduler()
+        net = RecordingNetwork()
+        s.bind_network(net)
+        self.assertIs(s.network, net)
+
+
 if __name__ == "__main__":
     unittest.main()

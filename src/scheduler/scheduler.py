@@ -80,3 +80,26 @@ class Scheduler:
     def cancel_timer(self, node_id: NodeId, timer_id: TimerId) -> None:
         """Cancel a timer. O(1); the heap entry is left as a lazy tombstone."""
         self.registry.pop((node_id, timer_id), None)
+
+    def bind(self, node: Any) -> None:
+        """Wire a Node's scheduler-owned outbound API and register it for
+        dispatch. Does NOT wire send/broadcast — that is Network.bind's half.
+        """
+        self.nodes[node.id] = node   # DD3 / Revision R1: dispatch target.
+        node.set_timer = lambda timer_id, delay, payload, t: self.set_timer(
+            node.id, timer_id, delay, payload, t
+        )
+        node.cancel_timer = lambda timer_id: self.cancel_timer(
+            node.id, timer_id
+        )
+        node.emit = lambda event_type, fields, t: (
+            self.event_sink(t, node.id, -1, ("emit", event_type, fields))
+            if self.event_sink is not None
+            else None
+        )
+
+    def bind_network(self, network: Any) -> None:
+        """Register the Network as the dispatch target for PhaseAdvance
+        events (DD3 / Revision R1). Called once during bootstrap phase 3.
+        """
+        self.network = network
