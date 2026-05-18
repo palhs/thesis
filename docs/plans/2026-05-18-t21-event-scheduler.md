@@ -734,13 +734,19 @@ class TestRun(unittest.TestCase):
         self.assertEqual(result.now, 0.0)
 
     def test_deadline_stops_after_pop_past_t_max(self):
+        # Deadline semantics (simulation-design.md §3 D5): "Loop exits when
+        # now >= t_max after a pop." Events strictly inside t_max run; the
+        # first event that pushes `now` past t_max runs too (overshoot by
+        # one); anything later is left unprocessed on the heap.
         s, n0, n1 = self._scheduler_with_two_nodes()
         s.schedule(Delivery(SimpleMessage(0, 1, "a")), t=10.0, node_id=1)
         s.schedule(Delivery(SimpleMessage(0, 1, "b")), t=30.0, node_id=1)
+        s.schedule(Delivery(SimpleMessage(0, 1, "c")), t=50.0, node_id=1)
         result = s.run(t_max=20.0)
         self.assertEqual(result.stopped_by, "deadline")
-        self.assertEqual(result.events_processed, 1)  # only the t=10 event
-        self.assertEqual(result.now, 10.0)
+        self.assertEqual(result.events_processed, 2)   # t=10 and t=30
+        self.assertEqual(result.now, 30.0)
+        self.assertEqual(len(s.heap), 1)               # t=50 still queued
 
     def test_empty_run_with_past_deadline_returns_deadline(self):
         s, _, _ = self._scheduler_with_two_nodes()
