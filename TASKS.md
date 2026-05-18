@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 36 · In Review: 1 · In Progress: 0 · Not Started: 51 · Blocked: 0
+- Completed: 37 · In Review: 0 · In Progress: 0 · Not Started: 51 · Blocked: 0
 
 ## Legend
 
@@ -145,7 +145,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 - `[x]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
   _Outcome:_ Working scheduler passing 3+ unit tests · _Design:_ `wiki/concepts/simulation-design.md`, `wiki/concepts/simulation-design-runtime.md` · _Spec:_ `docs/superpowers/specs/2026-05-13-t17-scheduler-design.md` · _Artifact:_ `src/scheduler/` + `wiki/experiments/<date>_scheduler-baseline.md`
-- `[?]` **T22** `H` Engineer — Implement node objects with state management
+- `[x]` **T22** `H` Engineer — Implement node objects with state management
   _Outcome:_ Node class with transitions, message handling, honest/adversarial hooks · _Artifact:_ `src/nodes/`
 - `[ ]` **T23** `H` Engineer — Implement message passing with configurable delay
   _Outcome:_ Delivery system with delay injection and drop simulation · _Artifact:_ `src/network/`
