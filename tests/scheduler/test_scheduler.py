@@ -61,6 +61,16 @@ class TestSchedule(unittest.TestCase):
         seq = s.schedule(PhaseAdvance(0), t=5.0, node_id=0)
         self.assertEqual(seq, 1)
 
+    def test_schedule_with_non_finite_t_raises(self):
+        # A NaN/inf t must be rejected: `nan < now` is False, so without an
+        # explicit guard a non-finite t lands on the heap and corrupts the
+        # ordering for the rest of the run (NaN comparisons are all False).
+        s = Scheduler()
+        for bad_t in (float("nan"), float("inf"), float("-inf")):
+            with self.assertRaises(ValueError):
+                s.schedule(PhaseAdvance(0), t=bad_t, node_id=0)
+        self.assertEqual(s.heap, [])   # nothing slipped through
+
 
 class TestTimers(unittest.TestCase):
     def test_set_timer_registers_heap_entry_seq(self):
@@ -82,6 +92,16 @@ class TestTimers(unittest.TestCase):
         s = Scheduler()
         with self.assertRaises(ValueError):
             s.set_timer(node_id=0, timer_id="x", delay=-1.0, payload=None, t=0.0)
+
+    def test_non_finite_delay_raises(self):
+        # NaN/inf delay would push a non-finite TimerFire time onto the heap.
+        s = Scheduler()
+        for bad_delay in (float("nan"), float("inf")):
+            with self.assertRaises(ValueError):
+                s.set_timer(node_id=0, timer_id="x", delay=bad_delay,
+                            payload=None, t=0.0)
+        self.assertEqual(s.heap, [])
+        self.assertEqual(s.registry, {})
 
     def test_cancel_timer_removes_registry_entry(self):
         s = Scheduler()
