@@ -1,7 +1,7 @@
 """Unit tests for the shared-layer Node (node-model.md, T22)."""
 import unittest
 
-from nodes import HaltReason, Lifecycle, Message, Node
+from nodes import AdversaryProfile, HaltReason, Lifecycle, Message, Node
 from nodes.node import _stable_seed
 from _helpers import FakeNode
 
@@ -187,6 +187,18 @@ class TestEmitDecided(unittest.TestCase):
             emitted,
             [("decided",
               {"value": "digest", "instance_id": (1, 2), "t": 8.0}, 8.0)])
+
+
+class TestAdversarySlot(unittest.TestCase):
+    def test_adversary_profile_is_a_protocol(self):
+        # typing.Protocol sets _is_protocol on the class.
+        self.assertTrue(getattr(AdversaryProfile, "_is_protocol", False))
+
+    def test_adversary_slot_is_assignable(self):
+        n = FakeNode()
+        sentinel = object()
+        n.adversary = sentinel
+        self.assertIs(n.adversary, sentinel)
 
 
 if __name__ == "__main__":

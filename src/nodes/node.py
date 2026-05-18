@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 import random
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Optional, Protocol
 
 from .lifecycle import HaltReason, Lifecycle
 from .message import Message
@@ -24,6 +24,13 @@ def _stable_seed(global_seed: int, node_id: int) -> int:
     digest = hashlib.blake2b(f"{global_seed}:{node_id}".encode(),
                              digest_size=8).digest()
     return int.from_bytes(digest, "big")
+
+
+class AdversaryProfile(Protocol):
+    """Opaque adversary strategy slot. Owned by T18 (adversary-model.md);
+    this placeholder exists only so Node.adversary is typed. T22 holds the
+    slot and does not introspect it."""
+    ...
 
 
 class Node(ABC):
@@ -42,7 +49,7 @@ class Node(ABC):
             _stable_seed(global_seed=global_seed, node_id=node_id))
         self.status: Lifecycle = Lifecycle.CREATED
         self._halt_reason: Optional[HaltReason] = None
-        self.adversary: Optional[object] = None   # typed in Task 10
+        self.adversary: Optional[AdversaryProfile] = None
 
     # --- Inbound hooks: protected; protocol subclasses override these. ---
 

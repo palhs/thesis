@@ -4,6 +4,12 @@ See docs/superpowers/specs/2026-05-19-t22-node-objects-design.md.
 """
 from .lifecycle import HaltReason, Lifecycle
 from .message import Message
-from .node import Node
+from .node import AdversaryProfile, Node
 
-__all__ = ["HaltReason", "Lifecycle", "Message", "Node"]
+__all__ = [
+    "AdversaryProfile",
+    "HaltReason",
+    "Lifecycle",
+    "Message",
+    "Node",
+]
