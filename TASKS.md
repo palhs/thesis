@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 35 · In Review: 0 · In Progress: 0 · Not Started: 50 · Blocked: 0
+- Completed: 35 · In Review: 0 · In Progress: 1 · Not Started: 49 · Blocked: 0
 
 ## Legend
 
