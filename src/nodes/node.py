@@ -126,3 +126,12 @@ class Node(ABC):
             raise RuntimeError(
                 f"on_timer before start() on Node {self.id}")
         self._on_timer(timer_id, payload, t)
+
+    # --- Event emission helper (spec §5.6). ---
+
+    def _emit_decided(self, value: Any, instance_id: Any, t: float) -> None:
+        """Emit a `decided` event for an FSM instance reaching its terminal
+        state. Convenience for protocol subclasses (spec §5.6); the FSM layer
+        decides *when* to call it."""
+        self.emit("decided",
+                  {"value": value, "instance_id": instance_id, "t": t}, t)

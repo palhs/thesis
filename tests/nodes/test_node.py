@@ -177,5 +177,17 @@ class TestInboundGuards(unittest.TestCase):
         self.assertEqual(n.calls, before)
 
 
+class TestEmitDecided(unittest.TestCase):
+    def test_emit_decided_uses_uniform_schema(self):
+        n = FakeNode()
+        emitted = []
+        n.emit = lambda et, fs, t: emitted.append((et, fs, t))
+        n._emit_decided(value="digest", instance_id=(1, 2), t=8.0)
+        self.assertEqual(
+            emitted,
+            [("decided",
+              {"value": "digest", "instance_id": (1, 2), "t": 8.0}, 8.0)])
+
+
 if __name__ == "__main__":
     unittest.main()
