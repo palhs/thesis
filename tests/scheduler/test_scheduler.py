@@ -149,5 +149,102 @@ class TestBind(unittest.TestCase):
         self.assertIs(s.network, net)
 
 
+from scheduler import Delivery, RunResult
+from _stubs import SimpleMessage
+
+
+class TestRun(unittest.TestCase):
+    def _scheduler_with_two_nodes(self):
+        s = Scheduler()
+        n0, n1 = RecordingNode(0), RecordingNode(1)
+        s.bind(n0)
+        s.bind(n1)
+        return s, n0, n1
+
+    def test_dispatch_delivery_to_on_message(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        msg = SimpleMessage(0, 1, "hello")
+        s.schedule(Delivery(msg), t=10.0, node_id=1)
+        result = s.run()
+        self.assertEqual(n1.calls, [("on_message", msg, 10.0)])
+        self.assertEqual(result.stopped_by, "quiescence")
+        self.assertEqual(result.events_processed, 1)
+
+    def test_dispatch_timerfire_to_on_timer(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        n0.set_timer("round", 5.0, {"view": 2}, 0.0)
+        s.run()
+        self.assertEqual(n0.calls, [("on_timer", "round", {"view": 2}, 5.0)])
+
+    def test_dispatch_phaseadvance_to_network(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        net = RecordingNetwork()
+        s.bind_network(net)
+        s.schedule(PhaseAdvance(3), t=7.0, node_id=Scheduler.PHASE_NODE_ID)
+        s.run()
+        self.assertEqual(net.calls, [("advance_phase", 3)])
+
+    def test_cancelled_timer_is_tombstoned_not_dispatched(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        n0.set_timer("round", 5.0, None, 0.0)
+        n0.cancel_timer("round")
+        result = s.run()
+        self.assertEqual(n0.calls, [])
+        self.assertEqual(result.events_tombstoned, 1)
+        self.assertEqual(result.events_processed, 0)
+
+    def test_reregistered_timer_fires_once_old_entry_tombstoned(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        n0.set_timer("round", 5.0, "stale", 0.0)
+        n0.set_timer("round", 8.0, "fresh", 0.0)
+        result = s.run()
+        self.assertEqual(n0.calls, [("on_timer", "round", "fresh", 8.0)])
+        self.assertEqual(result.events_tombstoned, 1)
+
+    def test_quiescence_on_drained_heap(self):
+        s, _, _ = self._scheduler_with_two_nodes()
+        result = s.run()
+        self.assertEqual(result.stopped_by, "quiescence")
+        self.assertEqual(result.now, 0.0)
+
+    def test_deadline_stops_after_pop_past_t_max(self):
+        # Deadline semantics (simulation-design.md §3 D5): "Loop exits when
+        # now >= t_max after a pop." Events strictly inside t_max run; the
+        # first event that pushes `now` past t_max runs too (overshoot by
+        # one); anything later is left unprocessed on the heap.
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        s.schedule(Delivery(SimpleMessage(0, 1, "a")), t=10.0, node_id=1)
+        s.schedule(Delivery(SimpleMessage(0, 1, "b")), t=30.0, node_id=1)
+        s.schedule(Delivery(SimpleMessage(0, 1, "c")), t=50.0, node_id=1)
+        result = s.run(t_max=20.0)
+        self.assertEqual(result.stopped_by, "deadline")
+        self.assertEqual(result.events_processed, 2)   # t=10 and t=30
+        self.assertEqual(result.now, 30.0)
+        self.assertEqual(len(s.heap), 1)               # t=50 still queued
+
+    def test_empty_run_with_past_deadline_returns_deadline(self):
+        s, _, _ = self._scheduler_with_two_nodes()
+        result = s.run(t_max=0.0)
+        self.assertEqual(result.stopped_by, "deadline")
+
+    def test_predicate_stops_after_dispatch(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        for i in range(5):
+            s.schedule(Delivery(SimpleMessage(0, 1, i)), t=float(i + 1),
+                       node_id=1)
+        result = s.run(stop_when=lambda: len(n1.calls) >= 3)
+        self.assertEqual(result.stopped_by, "predicate")
+        self.assertEqual(result.events_processed, 3)
+
+    def test_event_sink_called_before_dispatch_per_non_stale_event(self):
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        seen: list[tuple] = []
+        s.event_sink = lambda t, nid, seq, ev: seen.append((t, nid, type(ev).__name__))
+        n0.set_timer("a", 5.0, None, 0.0)
+        s.schedule(Delivery(SimpleMessage(0, 1, "m")), t=8.0, node_id=1)
+        s.run()
+        self.assertEqual(seen, [(5.0, 0, "TimerFire"), (8.0, 1, "Delivery")])
+
+
 if __name__ == "__main__":
     unittest.main()

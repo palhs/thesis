@@ -103,3 +103,46 @@ class Scheduler:
         events (DD3 / Revision R1). Called once during bootstrap phase 3.
         """
         self.network = network
+
+    def run(self, t_max: SimTime | None = None,
+            stop_when: Callable[[], bool] | None = None) -> RunResult:
+        """Run the dispatch loop until a stop condition fires.
+
+        Stop conditions (OR-composed, §3 D5):
+          - deadline   : `now >= t_max` checked before each pop;
+          - quiescence : the heap drains;
+          - predicate  : `stop_when()` returns True after a dispatch.
+        """
+        n_processed = 0
+        n_tombstoned = 0
+        while True:
+            if t_max is not None and self._now >= t_max:
+                return RunResult("deadline", self._now,
+                                 n_processed, n_tombstoned)
+            if not self.heap:
+                return RunResult("quiescence", self._now,
+                                 n_processed, n_tombstoned)
+            t, node_id, seq, event = heapq.heappop(self.heap)
+            self._now = t
+            if isinstance(event, TimerFire) and \
+                    self.registry.get((node_id, event.timer_id)) != seq:
+                n_tombstoned += 1
+                continue
+            if self.event_sink is not None:
+                self.event_sink(t, node_id, seq, event)
+            self._dispatch(event, node_id, t)
+            n_processed += 1
+            if stop_when is not None and stop_when():
+                return RunResult("predicate", self._now,
+                                 n_processed, n_tombstoned)
+
+    def _dispatch(self, event: Event, node_id: NodeId, t: SimTime) -> None:
+        """Route a popped event to its handler, keyed on event class."""
+        if isinstance(event, Delivery):
+            self.nodes[node_id].on_message(event.msg, t)
+        elif isinstance(event, TimerFire):
+            self.nodes[node_id].on_timer(event.timer_id, event.payload, t)
+        elif isinstance(event, PhaseAdvance):
+            self.network.advance_phase(event.phase_id)
+        else:  # fail-fast on an unknown event class (runtime §3).
+            raise TypeError(f"unknown event class: {type(event).__name__}")
