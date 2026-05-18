@@ -66,3 +66,17 @@ class Scheduler:
         seq = self._next_seq(node_id)
         heapq.heappush(self.heap, (t, node_id, seq, event))
         return seq
+
+    def set_timer(self, node_id: NodeId, timer_id: TimerId,
+                  delay: SimTime, payload: Any, t: SimTime) -> None:
+        """Schedule a TimerFire for a Node. `delay == 0` is legal."""
+        if delay < 0:
+            raise ValueError(f"negative timer delay: {delay}")
+        # Funnel through schedule() (single-funnel invariant, §5.1) and
+        # register the seq it assigned (DD4 / Revision R2).
+        seq = self.schedule(TimerFire(timer_id, payload), t + delay, node_id)
+        self.registry[(node_id, timer_id)] = seq
+
+    def cancel_timer(self, node_id: NodeId, timer_id: TimerId) -> None:
+        """Cancel a timer. O(1); the heap entry is left as a lazy tombstone."""
+        self.registry.pop((node_id, timer_id), None)

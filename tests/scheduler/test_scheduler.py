@@ -64,5 +64,48 @@ class TestSchedule(unittest.TestCase):
         self.assertEqual(seq, 1)
 
 
+class TestTimers(unittest.TestCase):
+    def test_set_timer_registers_heap_entry_seq(self):
+        s = Scheduler()
+        s.set_timer(node_id=0, timer_id="round", delay=5.0, payload=None, t=0.0)
+        self.assertEqual(len(s.heap), 1)
+        t, node_id, seq, ev = s.heap[0]
+        self.assertEqual((t, node_id), (5.0, 0))
+        self.assertIsInstance(ev, TimerFire)
+        # Registry seq MUST equal the heap entry's seq (tombstone correctness).
+        self.assertEqual(s.registry[(0, "round")], seq)
+
+    def test_zero_delay_is_allowed(self):
+        s = Scheduler()
+        s.set_timer(node_id=0, timer_id="yield", delay=0.0, payload=None, t=3.0)
+        self.assertEqual(s.heap[0][0], 3.0)
+
+    def test_negative_delay_raises(self):
+        s = Scheduler()
+        with self.assertRaises(ValueError):
+            s.set_timer(node_id=0, timer_id="x", delay=-1.0, payload=None, t=0.0)
+
+    def test_cancel_timer_removes_registry_entry(self):
+        s = Scheduler()
+        s.set_timer(node_id=0, timer_id="round", delay=5.0, payload=None, t=0.0)
+        s.cancel_timer(node_id=0, timer_id="round")
+        self.assertNotIn((0, "round"), s.registry)
+        # Lazy tombstone: heap entry is left in place.
+        self.assertEqual(len(s.heap), 1)
+
+    def test_cancel_unknown_timer_is_noop(self):
+        s = Scheduler()
+        s.cancel_timer(node_id=0, timer_id="never-set")  # must not raise
+
+    def test_reregistration_overwrites_registry_seq(self):
+        s = Scheduler()
+        s.set_timer(node_id=0, timer_id="round", delay=5.0, payload=None, t=0.0)
+        first_seq = s.registry[(0, "round")]
+        s.set_timer(node_id=0, timer_id="round", delay=8.0, payload=None, t=0.0)
+        second_seq = s.registry[(0, "round")]
+        self.assertNotEqual(first_seq, second_seq)
+        self.assertEqual(len(s.heap), 2)  # old entry left as a tombstone
+
+
 if __name__ == "__main__":
     unittest.main()
