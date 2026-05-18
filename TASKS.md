@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 38 · In Review: 0 · In Progress: 0 · Not Started: 50 · Blocked: 0
+- Completed: 38 · In Review: 0 · In Progress: 1 · Not Started: 49 · Blocked: 0
 
 ## Legend
 
@@ -54,7 +54,7 @@ with an Engineer task in progress.
 Biography front matter is intentionally omitted (optional under MIT thesis
 specs); the `\include{biography}` line has been removed from the template.
 
-- `[ ]` **T67** `H` Writer — Draft acknowledgments front matter
+- `[~]` **T67** `H` Writer — Draft acknowledgments front matter
   _Outcome:_ Brief acknowledgments page (~half page) for the thesis front
   matter. The agent supplies structure and neutral phrasing only; specific
   names and personal thanks are left as `TODO(human)` for the author. Front
