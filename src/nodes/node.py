@@ -5,11 +5,25 @@ Protocol behaviour is supplied by subclasses (PBFTNode = T28, etc.).
 """
 from __future__ import annotations
 
+import hashlib
+import random
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 from .lifecycle import HaltReason, Lifecycle
 from .message import Message
+
+
+def _stable_seed(global_seed: int, node_id: int) -> int:
+    """Derive a process-stable 64-bit RNG seed from (global_seed, node_id).
+
+    Python's built-in hash() is process-randomised for some inputs; blake2b
+    is identical across processes and machines. See the node-model.md §8
+    Revision dated 2026-05-19.
+    """
+    digest = hashlib.blake2b(f"{global_seed}:{node_id}".encode(),
+                             digest_size=8).digest()
+    return int.from_bytes(digest, "big")
 
 
 class Node(ABC):
@@ -24,6 +38,8 @@ class Node(ABC):
         self.id: int = node_id
         self.weight: float = weight
         self.endpoint: object = endpoint
+        self.rng: random.Random = random.Random(
+            _stable_seed(global_seed=global_seed, node_id=node_id))
         self.status: Lifecycle = Lifecycle.CREATED
         self._halt_reason: Optional[HaltReason] = None
         self.adversary: Optional[object] = None   # typed in Task 10
