@@ -55,5 +55,32 @@ class TestRng(unittest.TestCase):
         self.assertNotEqual(a.rng.random(), b.rng.random())
 
 
+class TestOutboundUnbound(unittest.TestCase):
+    def test_send_raises_before_bind(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().send(1, "X", None, 0.0)
+
+    def test_broadcast_raises_before_bind(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().broadcast("X", None, 0.0)
+
+    def test_set_timer_raises_before_bind(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().set_timer("tid", 1.0, None, 0.0)
+
+    def test_cancel_timer_raises_before_bind(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().cancel_timer("tid")
+
+    def test_emit_raises_before_bind(self):
+        with self.assertRaises(RuntimeError):
+            FakeNode().emit("evt", {}, 0.0)
+
+    def test_bind_overwrites_placeholder(self):
+        n = FakeNode()
+        n.emit = lambda et, fs, t: ("bound", et)   # simulate Scheduler.bind
+        self.assertEqual(n.emit("evt", {}, 0.0), ("bound", "evt"))
+
+
 if __name__ == "__main__":
     unittest.main()

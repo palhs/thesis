@@ -57,3 +57,31 @@ class Node(ABC):
     @abstractmethod
     def _on_timer(self, timer_id: Any, payload: Any, t: float) -> None:
         """Handle a fired timer."""
+
+    # --- Outbound API: placeholders overwritten at bind time (spec §5.5). ---
+
+    def send(self, dst: int, type: str, payload: object, t: float) -> None:
+        """Unicast `payload` to one peer. Bound by Network.bind() (spec §5.5)."""
+        raise RuntimeError(
+            f"Node {self.id}.send called before Network.bind()")
+
+    def broadcast(self, type: str, payload: object, t: float) -> None:
+        """Send `payload` to the active validator set. Bound by Network.bind()."""
+        raise RuntimeError(
+            f"Node {self.id}.broadcast called before Network.bind()")
+
+    def set_timer(self, timer_id: Any, delay: float,
+                  payload: object, t: float) -> None:
+        """Register a timer firing on_timer after `delay`. Bound by Scheduler.bind()."""
+        raise RuntimeError(
+            f"Node {self.id}.set_timer called before Scheduler.bind()")
+
+    def cancel_timer(self, timer_id: Any) -> None:
+        """Cancel a previously-registered timer. Bound by Scheduler.bind()."""
+        raise RuntimeError(
+            f"Node {self.id}.cancel_timer called before Scheduler.bind()")
+
+    def emit(self, event_type: str, fields: dict, t: float) -> None:
+        """Emit a structured observability event. Bound by Scheduler.bind()."""
+        raise RuntimeError(
+            f"Node {self.id}.emit called before Scheduler.bind()")
