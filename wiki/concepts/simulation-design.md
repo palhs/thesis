@@ -301,4 +301,23 @@ harness); [[concepts/reproducibility]] (T27, exercises the runtime
 
 ## 9. Revisions
 
-None.
+### [2026-05-18] T21 implementation — R1: scheduler dispatch references
+
+§6.4 / §7 left unspecified *how* the scheduler holds the `Node` and
+`Network` references its `run()` dispatch calls. T21 resolves this:
+`bind(node)` additionally registers the node in `Scheduler.nodes:
+dict[NodeId, Node]`, and a new `bind_network(network)` method (bootstrap
+phase 3) sets `Scheduler.network`. §6.3's "no `Scheduler → Network`
+reference" forbids the *outbound-binding cycle* (`set_timer` / `send`
+cross-wiring); a dispatch-only handle for `PhaseAdvance` does not create
+that cycle.
+
+### [2026-05-18] T21 implementation — R2: `schedule()` returns `seq`
+
+§5.1-§5.2 / §6.2 described `set_timer` as computing its own `seq` *and*
+funnelling through `schedule()`, which also assigns a `seq` — a double
+increment that desynchronises the registry seq from the heap entry's seq
+and breaks the tombstone check. T21 resolves this: `schedule()` returns
+the `seq` it assigned (`-> int`, not `-> None`); `set_timer` funnels
+through `schedule()` once and registers the returned value. The
+single-funnel invariant (§5.1) is preserved.

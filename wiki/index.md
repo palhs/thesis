@@ -63,6 +63,8 @@
 
 ## Experiments
 
+- [[experiments/2026-05-18_scheduler-baseline]] — T21 build-verification baseline: the discrete-event scheduler drives a 2-node ping-pong through the full six-phase bootstrap to quiescence; determinism contract holds (byte-identical re-run).
+
 ## Lint reports
 
 - [[lint/2026-04-21_sync-report]] — S9 sync-completeness pass: T1 artifact `consensus-overview.md` missing on disk and from index; all other W0–W2 completed tasks check out.
