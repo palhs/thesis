@@ -225,6 +225,11 @@ while heap:
 return RunResult('quiescence', ...)
 ```
 
+> **Revised (§9 R3).** The T21 implementation checks the deadline before
+> the quiescence (empty-heap) condition — the reverse of the loop-guard
+> ordering above. The two differ only when the heap is empty *and*
+> `now >= t_max`, where T21 reports `'deadline'`, not `'quiescence'`.
+
 Determinism guarantees, fail-fast on contract violations, and the
 empty-run case are specified in
 [[concepts/simulation-design-runtime]] §1 and §3.
@@ -328,3 +333,26 @@ and breaks the tombstone check. T21 resolves this: `schedule()` returns
 the `seq` it assigned (`-> int`, not `-> None`); `set_timer` funnels
 through `schedule()` once and registers the returned value. The
 single-funnel invariant (§6.2) is preserved.
+
+### [2026-05-19] T21 review — R3: stop-condition check order
+
+The §6.5 pseudocode is structured `while heap: ... if now >= t_max:
+return 'deadline' ...`, so the empty-heap (quiescence) check is the loop
+guard and is reached *before* the deadline check. The T21 implementation
+inverts this: each iteration checks `now >= t_max` (deadline) *first*,
+then `not heap` (quiescence). The two orders disagree on exactly one
+input — an **empty heap reached with `now >= t_max`** (e.g. a run whose
+last event drains the heap at precisely `t_max`, or `run(t_max=t)` on an
+already-empty heap with `now >= t`): the pseudocode reports
+`stopped_by='quiescence'`, the implementation reports `'deadline'`.
+
+This is a deliberate deviation, kept because for a time-bounded run that
+both drained *and* hit its deadline, `'deadline'` is the more honest
+label — the run was time-bounded and the bound was reached; reporting
+`'quiescence'` would imply the protocol settled on its own when the
+deadline may have masked further activity. It also matches the
+"run-past-`t_max`-then-clip" convention for time-bounded experiments
+(`TASKS.md` § Backlog, 2026-05-18). The T21 test
+`test_empty_run_with_past_deadline_returns_deadline` pins this behaviour.
+§6.5's pseudocode is illustrative, not normative on this tie; the
+implementation is authoritative.
