@@ -6,6 +6,7 @@ Spec: docs/superpowers/specs/2026-05-13-t17-scheduler-design.md
 from __future__ import annotations
 
 import heapq
+import math
 from dataclasses import dataclass
 from typing import Any, Callable, Literal
 
@@ -62,8 +63,14 @@ class Scheduler:
 
         Returns the per-Node seq assigned (DD4 / Revision R2), so set_timer
         can register the heap entry's exact seq without a second increment.
-        Raises ValueError if `t` is in the past (fail-fast, runtime §3).
+        Raises ValueError if `t` is in the past or non-finite (fail-fast,
+        runtime §3).
         """
+        # NaN/inf must be rejected before the past-time guard: `nan < now`
+        # is False, so a non-finite t would slip through and corrupt heap
+        # ordering (all NaN comparisons are False) — fatal for determinism.
+        if not math.isfinite(t):
+            raise ValueError(f"schedule with non-finite t={t}")
         if t < self._now:
             raise ValueError(f"schedule in the past: t={t} < now={self._now}")
         seq = self._next_seq(node_id)
@@ -76,6 +83,10 @@ class Scheduler:
 
         `timer_id` must be hashable (it keys the `registry` dict).
         """
+        # Mirror schedule()'s non-finite guard so the error names `delay`
+        # rather than the derived `t + delay`.
+        if not math.isfinite(delay):
+            raise ValueError(f"non-finite timer delay: {delay}")
         if delay < 0:
             raise ValueError(f"negative timer delay: {delay}")
         # Funnel through schedule() (single-funnel invariant, §5.1) and
