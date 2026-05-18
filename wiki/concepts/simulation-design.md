@@ -101,6 +101,9 @@ and T25 determinism-regression use cases respectively.
 
 Five fields. All access is via the §6 API surface.
 
+> **Revised (§9 R1).** The T21 implementation holds two further fields —
+> `nodes` and `network` — as the dispatch targets `run()` routes events to.
+
 | Field | Type | Purpose |
 | :-- | :-- | :-- |
 | `heap` | `list[tuple[SimTime, NodeId, int, Event]]` | Min-heap over `(t, node_id, seq, event)`. Tie-break per D2. |
@@ -151,6 +154,10 @@ Validates `t >= self.now` (raises `ValueError`), increments
 Called by `Network.submit_*` (Deliveries), `Network.start`
 (PhaseAdvance), and `set_timer` (TimerFires). The only path into
 the heap.
+
+> **Revised (§9 R2).** The T21 implementation returns the assigned `seq`
+> (`-> int`) so `set_timer` can register the heap entry's exact `seq`
+> without a second increment.
 
 ```
 set_timer(node_id, timer_id, delay, payload, t) -> None
@@ -301,4 +308,23 @@ harness); [[concepts/reproducibility]] (T27, exercises the runtime
 
 ## 9. Revisions
 
-None.
+### [2026-05-18] T21 implementation — R1: scheduler dispatch references
+
+§6.4 / §7 left unspecified *how* the scheduler holds the `Node` and
+`Network` references its `run()` dispatch calls. T21 resolves this:
+`bind(node)` additionally registers the node in `Scheduler.nodes:
+dict[NodeId, Node]`, and a new `bind_network(network)` method (bootstrap
+phase 3) sets `Scheduler.network`. §6.3's "no `Scheduler → Network`
+reference" forbids the *outbound-binding cycle* (`set_timer` / `send`
+cross-wiring); a dispatch-only handle for `PhaseAdvance` does not create
+that cycle.
+
+### [2026-05-18] T21 implementation — R2: `schedule()` returns `seq`
+
+§6.2 described `set_timer` as computing its own `seq` *and*
+funnelling through `schedule()`, which also assigns a `seq` — a double
+increment that desynchronises the registry seq from the heap entry's seq
+and breaks the tombstone check. T21 resolves this: `schedule()` returns
+the `seq` it assigned (`-> int`, not `-> None`); `set_timer` funnels
+through `schedule()` once and registers the returned value. The
+single-funnel invariant (§6.2) is preserved.

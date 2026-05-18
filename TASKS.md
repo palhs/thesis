@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 68 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 35 · In Review: 0 · In Progress: 0 · Not Started: 50 · Blocked: 0
+- Completed: 35 · In Review: 1 · In Progress: 0 · Not Started: 49 · Blocked: 0
 
 ## Legend
 
@@ -104,7 +104,7 @@ one resource into the appropriate wiki page. Not counted in the 66.
 
 ## Week 4 — Simulator skeleton
 
-- `[ ]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
+- `[?]` **T21** `H` Engineer — Implement event scheduler (SimPy or custom)
   _Outcome:_ Working scheduler passing 3+ unit tests · _Design:_ `wiki/concepts/simulation-design.md`, `wiki/concepts/simulation-design-runtime.md` · _Spec:_ `docs/superpowers/specs/2026-05-13-t17-scheduler-design.md` · _Artifact:_ `src/scheduler/` + `wiki/experiments/<date>_scheduler-baseline.md`
 - `[ ]` **T22** `H` Engineer — Implement node objects with state management
   _Outcome:_ Node class with transitions, message handling, honest/adversarial hooks · _Artifact:_ `src/nodes/`
@@ -237,4 +237,5 @@ Agents append here when they notice out-of-scope issues during a task.
 
 - **Dashboard arithmetic.** `TASKS.md` dashboard line previously read "Not Started: 66" when the actual sum was 65 after S0–S5 and T1–T10 completions (total 81 slots across T-tasks + S-tasks + L-tasks, minus 16 completed = 65). Fixed incidentally as part of the S6 flip (now 65 Not Started, 1 In Progress). Watch for re-drift during future flips.
 - **Ava Labs documentation as a non-bibliography citation** (introduced by S9 reconciliation). [[algorithms/avalanche]] uses a `[ava-docs]` marker for production-variant details (Snowman, C-Chain / P-Chain / X-Chain, production parameters `K=20, α_c≈0.8K, β≈15`, "sub-second" finality). Per the citation policy, any quantitative claim should ultimately cite a primary paper; the Ava Labs URL is currently the only available source for some production details. Priority: L — watch for Writer tasks quoting `[ava-docs]`-backed performance numbers and flag them; ideally replace with primary-paper corroboration from [9] or [10] when possible.
+- **Time-bounded experiments: run-past-`t_max`-then-clip.** The scheduler's `run(t_max)` deadline is overshoot-by-one — it exits when `now >= t_max` *after* a pop (`wiki/concepts/simulation-design.md` §3 D5 / §9), stopping on the first event that reaches `t_max`, so a sibling event scheduled at exactly `t_max` but later in `(t, node_id, seq)` tie-break order can be left unprocessed. **Decision 2026-05-18 (human, reviewing T21):** any time-bounded run (T46/T47 delay experiments, and every `run()` call with a `t_max`) deliberately uses a buffer — `run(t_max = window + buffer)` — so the real measurement boundary is interior to the run and no in-window event is ever truncated; the analysis/output step then *clips* events with `t > window` so reported metrics cover exactly `[0, window]`. Two parameters to pin when the harness (T27/T41) and delay experiments (T46/T47) are designed: (1) buffer size — must exceed the maximum settling time of any in-window action (≥ max network delay; one round/timeout duration is safer); (2) boundary metric semantics — whether an outcome started in-window but completed in the buffer (e.g. a block proposed at `t<window`, committed at `t>window`) counts toward the window's metrics, since clipping alone would drop it. Record in `wiki/concepts/experiment-matrix.md` when T46/T47 are planned.
 - **§6 disrupt-leader and §7 protocol-specific adversaries have no experiment task** (noticed reviewing `wiki/concepts/adversary-model.md` against the Week 10 experiment matrix; sibling scope fixes for T53/T54 already folded into those task entries). T51–T53 cover delay / offline / equivocate (catalog §§3–5 only). The catalog defines 21 adversary surfaces; T51–T53 reach roughly half. Uncovered: §6 disrupt-leader (all protocols), §7.1 Snowman colluding sub-sampler, §7.2 Narwhal+Tusk data-availability withholding. Note T18's verify clause asserts "T51–T53 can be expressed as triples drawn from this catalog without gaps" — that claim appears already unmet. **Resolved 2026-05-18 (during T19):** human chose path (b) — narrow the coverage claim, add no new experiment tasks. The catalog stays at 18 valid pairs (superseding the "21 surfaces" figure above — `wiki/concepts/adversary-model.md` §1 is authoritative; the covered subset is 12, not "roughly half"); the 6 §6/§7 pairs are catalogued design space out of experimental scope. T18's verify clause, `adversary-model.md` §1 + §8, `wiki/index.md`, and `wiki/concepts/experiment-matrix.md` §8 all amended to state T51–T53 exercise 12 of 18 pairs.
