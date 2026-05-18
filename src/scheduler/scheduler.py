@@ -53,3 +53,16 @@ class Scheduler:
         seq = self.seq_per.get(node_id, 0) + 1
         self.seq_per[node_id] = seq
         return seq
+
+    def schedule(self, event: Event, t: SimTime, node_id: NodeId) -> int:
+        """Enqueue an event. The single funnel into the heap.
+
+        Returns the per-Node seq assigned (DD4 / Revision R2), so set_timer
+        can register the heap entry's exact seq without a second increment.
+        Raises ValueError if `t` is in the past (fail-fast, runtime §3).
+        """
+        if t < self._now:
+            raise ValueError(f"schedule in the past: t={t} < now={self._now}")
+        seq = self._next_seq(node_id)
+        heapq.heappush(self.heap, (t, node_id, seq, event))
+        return seq
