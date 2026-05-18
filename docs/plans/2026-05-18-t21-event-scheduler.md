@@ -1043,13 +1043,13 @@ that cycle.
 
 ### [2026-05-18] T21 implementation — R2: `schedule()` returns `seq`
 
-§5.1-§5.2 / §6.2 described `set_timer` as computing its own `seq` *and*
+§6.2 described `set_timer` as computing its own `seq` *and*
 funnelling through `schedule()`, which also assigns a `seq` — a double
 increment that desynchronises the registry seq from the heap entry's seq
 and breaks the tombstone check. T21 resolves this: `schedule()` returns
 the `seq` it assigned (`-> int`, not `-> None`); `set_timer` funnels
 through `schedule()` once and registers the returned value. The
-single-funnel invariant (§5.1) is preserved.
+single-funnel invariant (§6.2) is preserved.
 ```
 
 **Step 2: Create the experiment page**
