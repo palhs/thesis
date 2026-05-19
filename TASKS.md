@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 38 · In Review: 2 · In Progress: 0 · Not Started: 48 · Blocked: 0
+- Completed: 40 · In Review: 0 · In Progress: 0 · Not Started: 48 · Blocked: 0
 
 ## Legend
 
@@ -54,7 +54,7 @@ with an Engineer task in progress.
 Biography front matter is intentionally omitted (optional under MIT thesis
 specs); the `\include{biography}` line has been removed from the template.
 
-- `[?]` **T67** `H` Writer — Draft acknowledgments front matter
+- `[x]` **T67** `H` Writer — Draft acknowledgments front matter
   _Outcome:_ Brief acknowledgments page (~half page) for the thesis front
   matter. The agent supplies structure and neutral phrasing only; specific
   names and personal thanks are left as `TODO(human)` for the author. Front
@@ -63,7 +63,7 @@ specs); the `\include{biography}` line has been removed from the template.
   file exists; every name or personal detail is either author-supplied or
   marked `TODO(human)`; content ports cleanly into
   `../thesis-tex/MIT-thesis-template/acknowledgments.tex`
-- `[?]` **T68** `H` Writer — Build the biblatex `.bib` from the wiki bibliography
+- `[x]` **T68** `H` Writer — Build the biblatex `.bib` from the wiki bibliography
   _Outcome:_ Convert the consolidated annotated bibliography (`[1]`–`[18]`
   in `wiki/concepts/annotated-bibliography.md`) and the `wiki/sources/*.md`
   pages into a biblatex `.bib` file the MIT template compiles against.
