@@ -75,3 +75,21 @@ class EventLogger:
         else:
             raise TypeError(
                 f"EventLogger.sink: unrecognised payload {payload!r}")
+
+    def to_csv(self, path) -> None:
+        """Write the buffered records to `path` as CSV. Creates parent
+        directories. The `fields` cell is the sorted-key repr of the dict —
+        deterministic (insertion-order-independent) and round-trips simple
+        types, including the tuple instance_id of PBFT/Narwhal decided
+        events, via ast.literal_eval. An empty buffer writes header only.
+        """
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", newline="") as fh:
+            writer = csv.writer(fh)
+            writer.writerow(_CSV_HEADER)
+            for r in self.records:
+                writer.writerow((
+                    r.t, r.node_id, r.event_type, r.seq,
+                    repr(dict(sorted(r.fields.items()))),
+                ))

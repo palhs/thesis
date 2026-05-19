@@ -96,5 +96,50 @@ class TestSinkFailFast(unittest.TestCase):
             logger.sink(1.0, 0, 1, ("notemit", "x", {}))
 
 
+class TestToCsv(unittest.TestCase):
+    def test_header_and_rows(self):
+        logger = EventLogger()
+        logger.sink(12.0, 5, -1, ("emit", "decided", {"value": "0xab"}))
+        logger.sink(8.5, 3, 4,
+                    Delivery(Message(1, 3, "PREPARE", None, 4.0)))
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "events.csv"
+            logger.to_csv(out)
+            rows = out.read_text().splitlines()
+        self.assertEqual(rows[0], "t,node_id,event_type,seq,fields")
+        self.assertEqual(len(rows), 3)            # header + 2 records
+        self.assertTrue(rows[1].startswith("12.0,5,decided,-1,"))
+
+    def test_fields_cell_has_sorted_keys(self):
+        logger = EventLogger()
+        # insertion order b, a — serialisation must sort to a, b.
+        logger.sink(1.0, 0, -1, ("emit", "x", {"b": 2, "a": 1}))
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "e.csv"
+            logger.to_csv(out)
+            data_row = out.read_text().splitlines()[1]
+        # last CSV cell is the fields repr; parse it back.
+        import csv as _csv
+        fields_cell = next(_csv.reader([data_row]))[-1]
+        self.assertEqual(fields_cell, "{'a': 1, 'b': 2}")
+        self.assertEqual(ast.literal_eval(fields_cell), {"a": 1, "b": 2})
+
+    def test_empty_buffer_writes_header_only(self):
+        logger = EventLogger()
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "empty.csv"
+            logger.to_csv(out)
+            rows = out.read_text().splitlines()
+        self.assertEqual(rows, ["t,node_id,event_type,seq,fields"])
+
+    def test_creates_missing_parent_dirs(self):
+        logger = EventLogger()
+        logger.sink(1.0, 0, -1, ("emit", "halted", {}))
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "nested" / "deeper" / "events.csv"
+            logger.to_csv(out)
+            self.assertTrue(out.exists())
+
+
 if __name__ == "__main__":
     unittest.main()
