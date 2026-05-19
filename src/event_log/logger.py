@@ -59,6 +59,19 @@ class EventLogger:
             _, event_type, fields = payload
             self.records.append(
                 EventRecord(t, node_id, event_type, seq, dict(fields)))
+        elif isinstance(payload, Delivery):
+            msg = payload.msg
+            self.records.append(EventRecord(
+                t, node_id, DELIVERY, seq,
+                {"msg_type": msg.type, "src": msg.src, "dst": msg.dst}))
+        elif isinstance(payload, TimerFire):
+            self.records.append(EventRecord(
+                t, node_id, TIMER_FIRE, seq,
+                {"timer_id": payload.timer_id}))
+        elif isinstance(payload, PhaseAdvance):
+            self.records.append(EventRecord(
+                t, node_id, PHASE_ADVANCE, seq,
+                {"phase_id": payload.phase_id}))
         else:
             raise TypeError(
                 f"EventLogger.sink: unrecognised payload {payload!r}")
