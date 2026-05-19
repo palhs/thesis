@@ -69,7 +69,8 @@ Follow this three-phase loop. Do not invoke `superpowers:brainstorming` or
 Do not introduce claims that aren't in the wiki — if the wiki is missing
 something you need, stop and flag it as a Researcher task in Backlog
 instead of inventing. Mark any missing external citation `TODO(cite)`.
-Register: academic, neutral, concrete. No hype.
+Draft prose follows `docs/draft-style.md` — audience, register, voice, and
+word choice are fixed there.
 
 ## Linter
 
