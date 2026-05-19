@@ -185,3 +185,9 @@
 - role: Writer
 - touched: `wiki/concepts/citation-keys.md` (new), `wiki/index.md`, `wiki/log.md`, `TASKS.md`; sibling repo `../thesis-tex/MIT-thesis-template/references.bib` (new) and `MIT-Thesis.tex` (committed separately in that repo)
 - notes: Converted the 18-entry consolidated annotated bibliography (`[1]`–`[18]`) into a biblatex `references.bib` for the MIT template. Defined the stable citation-key convention `<firstauthor><year><shortname>` and recorded the full `[N]` ↔ bibkey ↔ source-page ↔ entry-type mapping in the new `citation-keys.md`. Entry types: 5 `@article`, 6 `@inproceedings`, 7 `@online` (arXiv preprints with `eprint`+`eprinttype={arxiv}`+derived url). DOIs intentionally deferred for this initial build (no invented identifiers). Repointed the template's `\addbibresource` from `mitthesis-sample.bib` to `references.bib`. The `.bib` and `.tex` changes land in the sibling `../thesis-tex` repo, committed there separately; this repo's branch carries only the wiki + TASKS changes. The file grows as later chapters cite more sources.
+
+## [2026-05-19] code | task 24 — event-logging subsystem
+
+- role: Engineer
+- touched: src/event_log/{__init__,event_types,logger}.py, src/nodes/node.py, tests/event_log/{test_event_types,test_logger,test_e2e}.py, wiki/concepts/event-log-schema.md, wiki/concepts/node-model.md, wiki/index.md, wiki/experiments/2026-05-19_logging-baseline.md
+- notes: Added the structured event-logging subsystem — a passive Scheduler.event_sink consumer normalising emit + transport events into CSV-exportable EventRecords. Pinned the two-shape event_sink seam in a new concept page; adopted shared event-type constants in node.py. Subsystem named `event_log` (not `logging`) to avoid shadowing the stdlib module.
