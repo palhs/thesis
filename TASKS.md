@@ -150,7 +150,7 @@ specs); the `\include{biography}` line has been removed from the template.
 - `[x]` **T23** `H` Engineer — Implement message passing with configurable delay
   _Outcome:_ Delivery system with delay injection and drop simulation · _Artifact:_ `src/network/`
 - `[?]` **T24** `M` Engineer — Add logging for consensus events
-  _Outcome:_ Structured logs (timestamp, node_id, event_type, round, msg_id) exportable to CSV · _Artifact:_ `src/event_log/` (renamed from `src/logging/` — Decision E: a `logging` package on `PYTHONPATH=src` shadows the stdlib module)
+  _Outcome:_ Structured event log — core columns `t, node_id, event_type, seq` plus an open `fields` dict — exportable to CSV (Decision A: `round` / `msg_id` have no source in the current event stream; they are `fields` keys populated by protocol code in T28+, not columns) · _Artifact:_ `src/event_log/` (renamed from `src/logging/` — Decision E: a `logging` package on `PYTHONPATH=src` shadows the stdlib module)
 - `[ ]` **T25** `H` Engineer — Test basic message exchange among nodes
   _Outcome:_ Integration test with 4 nodes; delay distribution matches config · _Artifact:_ `src/tests/` + experiment page
 - `[ ]` **T26** `H` Engineer — Set up repo scaffolding: /src, /tests, /configs, /results
