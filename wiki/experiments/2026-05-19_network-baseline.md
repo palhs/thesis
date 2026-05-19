@@ -20,8 +20,8 @@ layer bootstraps, injects delay, and runs deterministically.
   real `Network`.
 - Seeds: `global_seed=42` — the harness seed; the `Network` derives its own
   RNG stream from it (network-model-phases §6 determinism contract).
-- Commit: TODO(human): commit hash (the `src/network/` delivery layer +
-  network-suite tests; the state at which this baseline is reproducible).
+- Commit: 552e579 (the `src/network/` delivery layer + network-suite tests;
+  the state at which this baseline is reproducible).
 
 ## Re-run
 
