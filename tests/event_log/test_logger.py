@@ -141,5 +141,14 @@ class TestToCsv(unittest.TestCase):
             self.assertTrue(out.exists())
 
 
+class TestPackageExports(unittest.TestCase):
+    def test_public_names_importable_from_package_root(self):
+        import event_log
+        for name in ("EventLogger", "EventRecord", "HALTED", "DECIDED",
+                     "DELIVERY", "TIMER_FIRE", "PHASE_ADVANCE",
+                     "TRANSPORT_EVENT_TYPES"):
+            self.assertIn(name, dir(event_log), name)
+
+
 if __name__ == "__main__":
     unittest.main()
