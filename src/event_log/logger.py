@@ -29,3 +29,36 @@ class EventRecord:
     event_type: str
     seq: int
     fields: dict
+
+
+class EventLogger:
+    """Passive event_sink consumer. Buffers EventRecords; exports to CSV.
+
+    Wired at bootstrap phase 4: `scheduler.event_sink = logger.sink`
+    (simulation-design.md §7.2). Holds no file handle and no scheduler
+    reference — a pure passive recorder.
+    """
+
+    def __init__(self) -> None:
+        self.records: list[EventRecord] = []
+
+    def __len__(self) -> int:
+        return len(self.records)
+
+    def sink(self, t: float, node_id: int, seq: int,
+             payload: Any) -> None:
+        """The Scheduler.event_sink callback. Normalises one event into an
+        EventRecord and appends it. Raises TypeError on an unknown shape.
+
+        Two payload shapes (event-log-schema.md §seam):
+          - ("emit", event_type, fields)  — from Node.emit() via bind()
+          - a typed Delivery / TimerFire / PhaseAdvance — from run()
+        """
+        if (isinstance(payload, tuple) and len(payload) == 3
+                and payload[0] == "emit"):
+            _, event_type, fields = payload
+            self.records.append(
+                EventRecord(t, node_id, event_type, seq, dict(fields)))
+        else:
+            raise TypeError(
+                f"EventLogger.sink: unrecognised payload {payload!r}")

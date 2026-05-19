@@ -8,7 +8,7 @@ from pathlib import Path
 from nodes import Message
 from scheduler import Delivery, PhaseAdvance, TimerFire
 
-from event_log.logger import EventRecord
+from event_log.logger import EventLogger, EventRecord
 
 
 class TestEventRecord(unittest.TestCase):
@@ -26,6 +26,34 @@ class TestEventRecord(unittest.TestCase):
                         seq=-1, fields={})
         with self.assertRaises(FrozenInstanceError):
             r.t = 9.0
+
+
+class TestSinkEmit(unittest.TestCase):
+    def test_emit_tuple_becomes_record(self):
+        logger = EventLogger()
+        logger.sink(12.0, 5, -1,
+                    ("emit", "decided",
+                     {"value": "0xab", "instance_id": (2, 7)}))
+        self.assertEqual(len(logger), 1)
+        r = logger.records[0]
+        self.assertEqual((r.t, r.node_id, r.event_type, r.seq),
+                         (12.0, 5, "decided", -1))
+        self.assertEqual(r.fields,
+                         {"value": "0xab", "instance_id": (2, 7)})
+
+    def test_emit_fields_dict_is_copied_not_aliased(self):
+        logger = EventLogger()
+        original = {"reason": "RUN_END"}
+        logger.sink(3.0, 1, -1, ("emit", "halted", original))
+        original["reason"] = "MUTATED"
+        self.assertEqual(logger.records[0].fields, {"reason": "RUN_END"})
+
+    def test_len_reflects_record_count(self):
+        logger = EventLogger()
+        self.assertEqual(len(logger), 0)
+        logger.sink(1.0, 0, -1, ("emit", "halted", {}))
+        logger.sink(2.0, 0, -1, ("emit", "decided", {}))
+        self.assertEqual(len(logger), 2)
 
 
 if __name__ == "__main__":
