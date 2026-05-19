@@ -150,5 +150,30 @@ class TestPackageExports(unittest.TestCase):
             self.assertIn(name, dir(event_log), name)
 
 
+class TestDeterminism(unittest.TestCase):
+    def test_identical_event_sequences_yield_identical_csv(self):
+        # Same event sequence -> byte-identical CSV. fields dicts are
+        # supplied in DIFFERENT insertion orders to prove sorted-key
+        # serialisation makes the output order-independent.
+        seq_a = [
+            (1.0, 0, -1, ("emit", "decided", {"value": "v", "n": 1})),
+            (2.0, 1, 4, Delivery(Message(0, 1, "PING", None, 1.0))),
+        ]
+        seq_b = [
+            (1.0, 0, -1, ("emit", "decided", {"n": 1, "value": "v"})),
+            (2.0, 1, 4, Delivery(Message(0, 1, "PING", None, 1.0))),
+        ]
+        with tempfile.TemporaryDirectory() as d:
+            a, b = Path(d) / "a.csv", Path(d) / "b.csv"
+            la, lb = EventLogger(), EventLogger()
+            for ev in seq_a:
+                la.sink(*ev)
+            for ev in seq_b:
+                lb.sink(*ev)
+            la.to_csv(a)
+            lb.to_csv(b)
+            self.assertEqual(a.read_bytes(), b.read_bytes())
+
+
 if __name__ == "__main__":
     unittest.main()
