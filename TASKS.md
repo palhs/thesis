@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 40 · In Review: 0 · In Progress: 0 · Not Started: 48 · Blocked: 0
+- Completed: 40 · In Review: 0 · In Progress: 1 · Not Started: 47 · Blocked: 0
 
 ## Legend
 
@@ -149,7 +149,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Node class with transitions, message handling, honest/adversarial hooks · _Artifact:_ `src/nodes/`
 - `[x]` **T23** `H` Engineer — Implement message passing with configurable delay
   _Outcome:_ Delivery system with delay injection and drop simulation · _Artifact:_ `src/network/`
-- `[ ]` **T24** `M` Engineer — Add logging for consensus events
+- `[~]` **T24** `M` Engineer — Add logging for consensus events
   _Outcome:_ Structured logs (timestamp, node_id, event_type, round, msg_id) exportable to CSV · _Artifact:_ `src/logging/`
 - `[ ]` **T25** `H` Engineer — Test basic message exchange among nodes
   _Outcome:_ Integration test with 4 nodes; delay distribution matches config · _Artifact:_ `src/tests/` + experiment page
