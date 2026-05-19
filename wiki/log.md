@@ -169,3 +169,9 @@
 - role: Engineer
 - touched: src/nodes/, tests/nodes/, docs/superpowers/specs/2026-05-19-t22-node-objects-design.md, docs/plans/2026-05-19-t22-node-objects.md, wiki/concepts/node-model.md, wiki/experiments/2026-05-19_node-baseline.md, wiki/index.md
 - notes: Implemented the shared lifecycle layer of the validator abstraction (abstract `Node`: lifecycle FSM, per-Node RNG, template-method inbound hooks, outbound-API placeholders, opaque adversary slot, `Message` envelope). Per-protocol FSMs deferred to T28/T32/T38. Recorded a node-model.md §8 Revision for stable blake2b RNG seeding.
+
+## [2026-05-19] code | task 23 — Message passing with configurable delay
+
+- role: Engineer
+- touched: src/network/{__init__,phases,network}.py, tests/network/{_helpers,test_delay_dist,test_partition,test_phases,test_network,test_e2e}.py, docs/superpowers/specs/2026-05-19-t23-network-{design,plan}.md, wiki/experiments/2026-05-19_network-baseline.md, wiki/concepts/network-model-phases.md, wiki/index.md, TASKS.md
+- notes: Built the honest delivery layer ([[concepts/network-model]] / [[concepts/network-model-phases]]): the `Network` class with a scriptable phase timeline, five delay distributions (constant/uniform/normal/exponential/heavy_tail), per-phase Bernoulli drop, a deterministic partition predicate, and a `blake2b`-seeded network-scoped RNG. Three suites green (network 57 incl. 5 e2e, scheduler 40, nodes 41); the `2026-05-19_network-baseline` page records the 2-node ping-pong build verification. Recorded a network-model-phases.md §6.1 Revision: the network RNG seed switched from the spec's `hash()`-based seed (process-randomised, breaks cross-process replay) to a `blake2b` digest, mirroring the node-model.md §8 fix. Adversary semantics, message contents, and YAML phase loading remain out of scope (T18/T16/T19/T27).

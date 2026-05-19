@@ -15,13 +15,20 @@ Status in `TASKS.md`:
 ## Per-task workflow
 
 1. Read the task entry in `TASKS.md`.
-2. Read `wiki/index.md` to orient on what already exists.
-3. Flip status to In Progress. Commit alone: `task <N>: start`.
-4. Do the work. Stay inside the task's scope.
-5. Create/update wiki pages. Update `wiki/index.md` if new pages were added.
-6. Append entry to `wiki/log.md` (format in `docs/wiki-spec.md`).
-7. Flip status to In Review. Commit: `task <N>: <short description>`.
-8. Push branch. Summarize for the human: files touched, wiki pages
+2. Check the `## Backlog` in `TASKS.md` for the current task's ID (match the
+   full ID, e.g. `T25`, not `T2`). An entry that names this task in a
+   *follow-up* clause — `Watch for T25`, `When T25`, or similar — is in-scope
+   context: address it as part of the task, or, if it is genuinely
+   separable, leave it and say so in the handoff summary (step 9). A bare
+   mention (e.g. "noticed in the T25 review") records only where an issue
+   was found and needs no action.
+3. Read `wiki/index.md` to orient on what already exists.
+4. Flip status to In Progress. Commit alone: `task <N>: start`.
+5. Do the work. Stay inside the task's scope.
+6. Create/update wiki pages. Update `wiki/index.md` if new pages were added.
+7. Append entry to `wiki/log.md` (format in `docs/wiki-spec.md`).
+8. Flip status to In Review. Commit: `task <N>: <short description>`.
+9. Push branch. Summarize for the human: files touched, wiki pages
    added/updated, decisions made, open questions.
 
 ## Branch convention
