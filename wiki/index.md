@@ -65,6 +65,7 @@
 
 - [[experiments/2026-05-18_scheduler-baseline]] — T21 build-verification baseline: the discrete-event scheduler drives a 2-node ping-pong through the full six-phase bootstrap to quiescence; determinism contract holds (byte-identical re-run).
 - [[experiments/2026-05-19_node-baseline]] — T22 build-verification baseline: the shared-layer `Node` drives a 2-node ping-pong through the six-phase bootstrap to quiescence; lifecycle, event emission, and the determinism contract hold.
+- [[experiments/2026-05-19_network-baseline]] — T23 build-verification baseline: the real `Network` drives a 2-node ping-pong through the six-phase bootstrap to quiescence; delay injection, drop, partition, and the network-level determinism contract hold.
 
 ## Lint reports
 

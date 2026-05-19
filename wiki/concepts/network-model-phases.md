@@ -287,3 +287,19 @@ maintained on [[concepts/network-model]] §8.
   timeline as part of the experiment YAML schema.
 - [[concepts/reproducibility]] (T27) — harness-level `global_seed`
   injection consumed by §6.1.
+
+## Revisions
+
+### 2026-05-19 — §6.1 network RNG seed switched to `blake2b`
+
+T23 implementation. §6.1 specifies the network RNG as
+`Random(seed=hash(("network", global_seed)))`. Python's built-in
+`hash()` of a tuple containing a `str` is process-randomised
+(`PYTHONHASHSEED`), so that seed differs between processes — which
+breaks the byte-identical cross-process replay this very page (§6)
+promises. T23 diverges: the seed is derived by a `blake2b` digest of
+`b"network:" + str(global_seed)` (`_network_seed()` / design spec
+Decision D), a stable 64-bit value identical across processes and
+machines. This mirrors the [[concepts/node-model]] §8 fix applied to
+the per-`Node` RNG (2026-05-19). The §6.2 sampling order and §6.3
+forbidden surfaces are unchanged.
