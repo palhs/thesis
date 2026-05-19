@@ -13,6 +13,8 @@ from typing import Any, Optional, Protocol
 from .lifecycle import HaltReason, Lifecycle
 from .message import Message
 
+from event_log.event_types import DECIDED, HALTED
+
 
 def _stable_seed(global_seed: int, node_id: int) -> int:
     """Derive a process-stable 64-bit RNG seed from (global_seed, node_id).
@@ -111,7 +113,7 @@ class Node(ABC):
             return
         self.status = Lifecycle.HALTED
         self._halt_reason = reason
-        self.emit("halted",
+        self.emit(HALTED,
                   {"node_id": self.id, "reason": reason.name, "t": t}, t)
 
     def on_message(self, msg: Message, t: float) -> None:
@@ -140,5 +142,5 @@ class Node(ABC):
         """Emit a `decided` event for an FSM instance reaching its terminal
         state. Convenience for protocol subclasses (spec §5.6); the FSM layer
         decides *when* to call it."""
-        self.emit("decided",
+        self.emit(DECIDED,
                   {"value": value, "instance_id": instance_id, "t": t}, t)

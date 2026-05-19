@@ -674,3 +674,14 @@ resolves the §11 open-to-revision item "Per-`Node` RNG seeding hash" and
 upholds the §8 byte-identical-replay contract under T27's cross-process
 reproducibility. No other §s are affected: the determinism *contract* is
 unchanged; only the seed-derivation primitive is pinned.
+
+### 2026-05-19 — §7 event-emission names sourced from the shared `event_types` module
+
+T24 (`src/event_log/`) introduces `event_log/event_types.py` as the single
+source of truth for `event_type` strings. `src/nodes/node.py` now imports
+`HALTED` / `DECIDED` from it instead of the bare string literals `"halted"` /
+`"decided"` in `Node.halt` and `Node._emit_decided`. A typo in an event-type
+name now fails fast (`NameError`) rather than silently producing an
+unrecognised event. The §7 mandatory-event table is unchanged in content —
+the emitted strings are byte-identical; only their definition site moved.
+No other §s affected.
