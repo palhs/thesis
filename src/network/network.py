@@ -43,6 +43,9 @@ class Network:
 
     def register(self, node: Node) -> None:
         """Bootstrap phase 2: make `node` resolvable as a delivery target."""
+        if node.id in self.registry:
+            raise ValueError(
+                f"Network.register: NodeId {node.id} already registered")
         self.registry[node.id] = node
 
     def bind(self, node: Node) -> None:

@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 43 · In Review: 0 · In Progress: 0 · Not Started: 45 · Blocked: 0
+- Completed: 44 · In Review: 0 · In Progress: 0 · Not Started: 44 · Blocked: 0
 
 ## Legend
 
@@ -155,7 +155,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Integration test with 4 nodes; delay distribution matches config · _Artifact:_ `src/tests/` + experiment page
 - `[x]` **T26** `H` Engineer — Set up repo scaffolding: /src, /tests, /configs, /results
   _Outcome:_ Clean structure, README, .gitignore, initial commit · _Artifact:_ repo root
-- `[ ]` **T27** `M` Engineer — Set up reproducibility: seed control, YAML configs
+- `[x]` **T27** `M` Engineer — Set up reproducibility: seed control, YAML configs
   _Outcome:_ YAML loader, seed injection; same seed → same output · _Artifact:_ `src/config/` + `wiki/concepts/reproducibility.md`
 - `[ ]` **L-W4** `M` Linter — Wiki lint pass (end of Week 4)
   _Outcome:_ Report on wiki health before implementation phase · _Artifact:_ `wiki/lint/<date>_report.md`

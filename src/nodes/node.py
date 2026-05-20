@@ -6,6 +6,7 @@ Protocol behaviour is supplied by subclasses (PBFTNode = T28, etc.).
 from __future__ import annotations
 
 import hashlib
+import math
 import random
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Protocol
@@ -42,6 +43,12 @@ class Node(ABC):
 
     def __init__(self, node_id: int, weight: float,
                  endpoint: object, global_seed: int) -> None:
+        if node_id < 0:
+            raise ValueError(
+                f"node_id must be non-negative, got {node_id} "
+                f"(values < 0 collide with the PhaseAdvance sentinel)")
+        if not math.isfinite(weight):
+            raise ValueError(f"weight must be finite, got {weight}")
         if weight < 0:
             raise ValueError(f"weight must be non-negative, got {weight}")
         self.id: int = node_id

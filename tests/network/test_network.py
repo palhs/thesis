@@ -302,5 +302,19 @@ class TestDelivery(unittest.TestCase):
         self.assertEqual(len(set(forward.values())), 3)  # 3 distinct delays
 
 
+class TestRegisterCollision(unittest.TestCase):
+    def test_duplicate_register_rejected(self):
+        # A duplicate register silently clobbers today; the gate makes it loud.
+        net = Network(Scheduler(), _single_phase(), SEED)
+        a = StubNode(node_id=5)
+        b = StubNode(node_id=5)
+        net.register(a)
+        with self.assertRaises(ValueError) as cm:
+            net.register(b)
+        self.assertIn("5", str(cm.exception))
+        # First registration still resolvable.
+        self.assertIs(net.registry[5], a)
+
+
 if __name__ == "__main__":
     unittest.main()
