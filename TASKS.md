@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 73 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 45 · In Review: 0 · In Progress: 1 · Not Started: 44 · Blocked: 0
+- Completed: 45 · In Review: 1 · In Progress: 0 · Not Started: 44 · Blocked: 0
 
 ## Legend
 
@@ -159,7 +159,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ YAML loader, seed injection; same seed → same output · _Artifact:_ `src/config/` + `wiki/concepts/reproducibility.md`
 - `[x]` **L-W4** `M` Linter — Wiki lint pass (end of Week 4)
   _Outcome:_ Report on wiki health before implementation phase · _Artifact:_ `wiki/lint/<date>_report.md`
-- `[~]` **L-W4.1** `M` Researcher — Catalog the Diagrams subtree and admit it as an index category (M3a + M3b from L-W4)
+- `[?]` **L-W4.1** `M` Researcher — Catalog the Diagrams subtree and admit it as an index category (M3a + M3b from L-W4)
   _Outcome:_ Two related edits, landed together because they are the same kind of index-curation work. (i) Amend `docs/wiki-spec.md § Index structure` to add `Diagrams` to the closed category list ("Algorithms, Concepts, Sources, Experiments, Drafts" → "Algorithms, Concepts, Sources, Experiments, Drafts, Diagrams"); the subtree was introduced in W3 (T17/T18/T20) after S8 wrote the original list. (ii) Add a `## Diagrams` section to `wiki/index.md` listing all 11 on-disk pages — `diagrams/index`, `diagrams/runtime/macro`, `diagrams/protocols/{pbft,casper-ffg,snowman,narwhal-tusk}`, `diagrams/scheduler/{bootstrap,event-enqueue,event-dispatch,timer-lifecycle,constraints}` — each with a one-line summary in the same `- [[path]] — summary` style as the other categories. (iii) Add the missing `[[drafts/front_acknowledgments]]` entry under `## Drafts` (T67 artifact present on disk but uncatalogued). · _Artifact:_ updated `docs/wiki-spec.md`, `wiki/index.md` · _Verify:_ M3a and M3b in `wiki/lint/2026-05-21_report.md` resolved — every `wiki/diagrams/*.md` file on disk has exactly one index entry under `## Diagrams`; `drafts/front_acknowledgments` appears under `## Drafts`; `docs/wiki-spec.md § Index structure` category list reads six categories
 - `[ ]` **L-W4.2** `L` Researcher — Repoint three dead protocol-page wikilinks in `concepts/reproducibility.md` (M2 from L-W4)
   _Outcome:_ `wiki/concepts/reproducibility.md` links to three non-existent pages — `[[algorithms/casper-ffg]]`, `[[algorithms/snowman]]`, `[[algorithms/narwhal-tusk]]` — authored against a protocol-page layout the wiki does not use. The wiki organizes consensus by family page: Casper FFG lives in `wiki/algorithms/pos.md`, Snowman in `wiki/algorithms/avalanche.md`, Narwhal+Tusk in `wiki/algorithms/dag-based.md`. Repoint each link to its family page (with `#section` anchors where an exact section exists; otherwise plain page link is fine). Do not split the family pages — option (b) was explicitly rejected during L-W4 triage. · _Artifact:_ updated `wiki/concepts/reproducibility.md` · _Verify:_ M2 in `wiki/lint/2026-05-21_report.md` resolved — zero dead `[[algorithms/...]]` wikilinks remain in `reproducibility.md`; the three replacement targets each resolve to a real `wiki/algorithms/*.md` file on disk
