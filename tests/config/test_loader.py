@@ -173,5 +173,53 @@ class TestLeafConstructionErrors(_LoaderTestBase):
                          {"strategy": "delay-emission", "fraction": 0.1})
 
 
+class TestCrossField(_LoaderTestBase):
+    def test_zero_n_rejected(self):
+        body = MINIMAL_YAML.replace("n: 4", "n: 0")
+        path = write_yaml(self.tmp_path, body)
+        with self.assertRaises(ConfigError) as cm:
+            load_config(path)
+        self.assertIn("n", str(cm.exception))
+
+    def test_huge_n_rejected(self):
+        # The sanity ceiling is 10_000 (spec § 4.5).
+        body = MINIMAL_YAML.replace("n: 4", "n: 100000")
+        path = write_yaml(self.tmp_path, body)
+        with self.assertRaises(ConfigError):
+            load_config(path)
+
+    def test_zero_t_max_rejected(self):
+        body = MINIMAL_YAML.replace("t_max: 1000.0", "t_max: 0")
+        path = write_yaml(self.tmp_path, body)
+        with self.assertRaises(ConfigError) as cm:
+            load_config(path)
+        self.assertIn("t_max", str(cm.exception))
+
+    def test_nan_t_max_rejected(self):
+        body = MINIMAL_YAML.replace("t_max: 1000.0", "t_max: .nan")
+        path = write_yaml(self.tmp_path, body)
+        with self.assertRaises(ConfigError) as cm:
+            load_config(path)
+        self.assertIn("t_max", str(cm.exception))
+
+    def test_zero_n_runs_rejected(self):
+        body = MINIMAL_YAML.replace("n_runs: 1", "n_runs: 0")
+        path = write_yaml(self.tmp_path, body)
+        with self.assertRaises(ConfigError) as cm:
+            load_config(path)
+        self.assertIn("n_runs", str(cm.exception))
+
+    def test_partition_nodeid_out_of_range_rejected(self):
+        # n = 4, so valid NodeIds are 0..3. NodeId 99 must be rejected.
+        body = MINIMAL_YAML.replace(
+            "partitions: []",
+            "partitions:\n        - groups: [[0, 1], [99]]\n",
+        )
+        path = write_yaml(self.tmp_path, body)
+        with self.assertRaises(ConfigError) as cm:
+            load_config(path)
+        self.assertIn("99", str(cm.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

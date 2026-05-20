@@ -10,6 +10,7 @@ from leaf __post_init__ validators are caught and re-raised.
 """
 from __future__ import annotations
 
+import math
 import pathlib
 from typing import Any
 
@@ -220,5 +221,35 @@ def load_config(path: str | pathlib.Path) -> Config:
         workload=dict(raw["workload"]),
     )
 
-    # Task 9 adds the cross-field validation pass before this return.
+    # --- 4.5 Cross-field validation -------------------------------------
+    _validate_config(config, path)
     return config
+
+
+def _validate_config(config: Config, path: pathlib.Path) -> None:
+    """Step 4.5: cross-field checks.
+
+    Raises ConfigError naming the first violation found.
+    """
+    if not (1 <= config.n <= 10_000):
+        raise ConfigError(
+            path, "n",
+            f"must be in [1, 10000], got {config.n}")
+    if not math.isfinite(config.t_max) or config.t_max <= 0:
+        raise ConfigError(
+            path, "t_max",
+            f"must be a positive finite float, got {config.t_max}")
+    if config.seeds.n_runs < 1:
+        raise ConfigError(
+            path, "seeds.n_runs",
+            f"must be >= 1, got {config.seeds.n_runs}")
+
+    valid_ids = set(range(config.n))
+    for i, ph in enumerate(config.network):
+        for j, part in enumerate(ph.partitions):
+            for nid in (nid for g in part.groups for nid in g):
+                if nid not in valid_ids:
+                    raise ConfigError(
+                        path,
+                        f"network.phases[{i}].partitions[{j}]",
+                        f"NodeId {nid} not in range(n)={config.n}")
