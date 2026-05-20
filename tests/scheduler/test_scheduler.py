@@ -277,7 +277,7 @@ class TestRun(unittest.TestCase):
         self.assertEqual(seen, [(5.0, 0, "TimerFire"), (8.0, 1, "Delivery")])
 
     def test_event_sink_skips_tombstoned_events(self):
-        # Closes T25-coverage-gaps.md S-2: the sink contract is "called
+        # Closes T25-review gap S-2: the sink contract is "called
         # once per non-stale event, before dispatch" — the prior test proves
         # the non-stale half, this proves the stale half. The dispatch loop
         # `continue`s on a tombstoned TimerFire BEFORE invoking the sink, so

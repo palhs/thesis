@@ -1,8 +1,9 @@
 """Stress tests for the Scheduler — extreme-scale / high-churn scenarios
 the small-scale correctness suite does not exercise.
 
-Added during the 2026-05-20 T25 review per the T25-coverage-gaps.md
-walkthrough. Closes / regression-sentinels the following gap items:
+Added during the 2026-05-20 T25 review walkthrough. Closes / regression-
+sentinels the following gap items (IDs scoped to that walkthrough's
+audit, recorded in the wiki/log.md T25 entry):
 
   ST-2  Tombstone density under high churn
         — regression sentinel for the TASKS.md Backlog item
