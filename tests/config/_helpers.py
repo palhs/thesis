@@ -31,3 +31,30 @@ def write_yaml(tmp_path, body: str = MINIMAL_YAML):
     p = tmp_path / "cfg.yaml"
     p.write_text(body)
     return p
+
+
+from nodes import HaltReason, Message, Node
+
+
+class MinimalNode(Node):
+    """Concrete Node used by T27 factory + e2e tests. Tiny by design — its
+    sole job is to produce observable events so the determinism contract
+    can be exercised without binding to T28+ protocol semantics.
+
+    Behaviour: on _on_start, broadcast a single "PING" carrying a random
+    draw from self.rng. On _on_message, halt(RUN_END). _on_timer is
+    defensive — never fired by this scenario.
+    """
+
+    def __init__(self, node_id, global_seed):
+        super().__init__(node_id, weight=1.0, endpoint=None,
+                         global_seed=global_seed)
+
+    def _on_start(self, t):
+        self.broadcast("PING", {"r": self.rng.random()}, t)
+
+    def _on_message(self, msg, t):
+        self.halt(HaltReason.RUN_END, t)
+
+    def _on_timer(self, timer_id, payload, t):
+        raise AssertionError("MinimalNode never sets a timer")
