@@ -69,6 +69,7 @@
 - [[experiments/2026-05-19_node-baseline]] — T22 build-verification baseline: the shared-layer `Node` drives a 2-node ping-pong through the six-phase bootstrap to quiescence; lifecycle, event emission, and the determinism contract hold.
 - [[experiments/2026-05-19_network-baseline]] — T23 build-verification baseline: the real `Network` drives a 2-node ping-pong through the six-phase bootstrap to quiescence; delay injection, drop, partition, and the network-level determinism contract hold.
 - [[experiments/2026-05-19_logging-baseline]] — T24 build-verification baseline: the EventLogger records a real 2-node ping-pong; both `event_sink` shapes captured, CSV well-formed, determinism contract holds.
+- [[experiments/2026-05-19_message-exchange-integration]] — T25 cross-component integration test: scheduler + Node + Network driven by 4/7/10-node scenarios; message exchange complete, observed delay distribution matches the configured `uniform`, scheduler dispatches in canonical `(t, node_id, seq)` order under scrambled submission.
 
 ## Lint reports
 

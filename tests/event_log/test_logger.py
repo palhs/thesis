@@ -27,6 +27,22 @@ class TestEventRecord(unittest.TestCase):
         with self.assertRaises(FrozenInstanceError):
             r.t = 9.0
 
+    def test_fields_dict_is_mutable_in_place_known_contract_limitation(self):
+        # Closes T25 review gap L-1. EventRecord is frozen at the dataclass
+        # level — `r.t = X` raises FrozenInstanceError — but `r.fields` is a
+        # plain dict, which is not frozen. Mutating via `r.fields[k] = v`
+        # succeeds and modifies the buffered record. The emit-side defensive
+        # copy in sink() protects the inbound direction (against caller
+        # mutation of the source dict); this is the symmetric outbound
+        # concern. If the footgun becomes a real problem, wrap fields in
+        # types.MappingProxyType — for now we pin current behaviour.
+        logger = EventLogger()
+        logger.sink(1.0, 0, -1, ("emit", "decided", {"v": 1}))
+        r = logger.records[0]
+        r.fields["mutated"] = True
+        self.assertEqual(logger.records[0].fields,
+                         {"v": 1, "mutated": True})
+
 
 class TestSinkEmit(unittest.TestCase):
     def test_emit_tuple_becomes_record(self):
@@ -95,6 +111,21 @@ class TestSinkFailFast(unittest.TestCase):
         with self.assertRaises(TypeError):
             logger.sink(1.0, 0, 1, ("notemit", "x", {}))
 
+    def test_two_tuple_emit_raises_type_error(self):
+        # Closes T25 review gap L-6 (arity edge). Emit-tuple detection
+        # requires len(payload) == 3 — a too-short tuple falls through to
+        # the fail-fast raise just like the wrong-tag case.
+        logger = EventLogger()
+        with self.assertRaises(TypeError):
+            logger.sink(1.0, 0, 1, ("emit", "x"))
+
+    def test_four_tuple_emit_raises_type_error(self):
+        # Closes T25 review gap L-6 (arity edge). Symmetric to the
+        # 2-tuple case: a too-long tuple is also rejected.
+        logger = EventLogger()
+        with self.assertRaises(TypeError):
+            logger.sink(1.0, 0, 1, ("emit", "x", {}, "extra"))
+
 
 class TestToCsv(unittest.TestCase):
     def test_header_and_rows(self):
@@ -139,6 +170,59 @@ class TestToCsv(unittest.TestCase):
             out = Path(d) / "nested" / "deeper" / "events.csv"
             logger.to_csv(out)
             self.assertTrue(out.exists())
+
+    def test_csv_cell_round_trips_tuple_via_ast_literal_eval(self):
+        # Closes T25 review gap L-2. The design contract claims the CSV
+        # cell round-trips the tuple instance_id of PBFT / Narwhal decided
+        # events (event-log-schema.md "CSV format"); the existing
+        # sorted-keys test only pinned that for plain {int, str} values.
+        # A regression switching repr -> json.dumps would silently break
+        # the tuple round-trip (JSON has no tuple type) without failing
+        # any existing test.
+        logger = EventLogger()
+        logger.sink(1.0, 0, -1, ("emit", "decided",
+                                  {"value": "0xab", "instance_id": (2, 7)}))
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "e.csv"
+            logger.to_csv(out)
+            data_row = out.read_text().splitlines()[1]
+        import csv as _csv
+        fields_cell = next(_csv.reader([data_row]))[-1]
+        parsed = ast.literal_eval(fields_cell)
+        self.assertEqual(parsed,
+                         {"instance_id": (2, 7), "value": "0xab"})
+        # Type discipline: the round-trip preserves tuple, not list.
+        self.assertIsInstance(parsed["instance_id"], tuple)
+
+    def test_second_to_csv_to_same_path_overwrites(self):
+        # Closes T25 review gap L-5 (overwrite half). Stdlib open(path, "w")
+        # semantics — second export to the same path replaces, not appends.
+        logger = EventLogger()
+        logger.sink(1.0, 0, -1, ("emit", "halted", {}))
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "e.csv"
+            logger.to_csv(out)
+            first = out.read_bytes()
+            logger.sink(2.0, 0, -1, ("emit", "decided", {}))
+            logger.to_csv(out)
+            second = out.read_bytes()
+        self.assertNotEqual(first, second)
+        # Replaced, not appended — the second file is the new buffer in
+        # full (header + 2 rows), not the old file with extra rows tacked on.
+        self.assertEqual(second.count(b"\n"), 3)   # header + 2 records
+
+    def test_sink_after_to_csv_extends_buffer(self):
+        # Closes T25 review gap L-5 (resumability half). The logger holds
+        # no file handle; to_csv is a pure read of the buffer. Further
+        # sink() calls extend the buffer just like before.
+        logger = EventLogger()
+        logger.sink(1.0, 0, -1, ("emit", "halted", {}))
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "e.csv"
+            logger.to_csv(out)
+        logger.sink(2.0, 0, -1, ("emit", "decided", {}))
+        self.assertEqual(len(logger), 2)
+        self.assertEqual(logger.records[-1].event_type, "decided")
 
 
 class TestPackageExports(unittest.TestCase):

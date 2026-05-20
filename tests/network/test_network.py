@@ -34,6 +34,26 @@ class TestNetworkWiring(unittest.TestCase):
         n.send(1, "X", None, 0.0)
         self.assertEqual(len(sched.heap), 1)
 
+    def test_bind_broadcast_lambda_invoked_through_node(self):
+        # T25-walkthrough W-1: the bind() lambda for broadcast was never
+        # actually invoked by the network suite (only submit_broadcast was
+        # called directly). Pins the lambda body that routes
+        # `node.broadcast(...)` -> `submit_broadcast(node.id, ...)`.
+        sched = Scheduler()
+        net = Network(sched, _single_phase(), SEED)
+        sender = StubNode(0)
+        net.register(sender)
+        net.register(StubNode(1))
+        net.register(StubNode(2))
+        net.bind(sender)
+        net.start()
+        sender.broadcast("ANN", {"k": 1}, 0.0)
+        self.assertEqual(len(sched.heap), 2)               # sender excluded
+        dsts = sorted(ev.msg.dst for (_t, _n, _s, ev) in sched.heap)
+        self.assertEqual(dsts, [1, 2])
+        for (_t, _n, _s, ev) in sched.heap:
+            self.assertEqual(ev.msg.src, 0)                # set by the lambda
+
     def test_network_rng_is_process_stable(self):
         # blake2b-seeded: identical across constructions, not hash()-randomised
         a = Network(Scheduler(), _single_phase(), SEED)
@@ -200,6 +220,86 @@ class TestDelivery(unittest.TestCase):
         delays = sorted(t - ev.msg.t_sent for (t, _n, _s, ev) in sched.heap
                         if isinstance(ev, Delivery))
         self.assertEqual(delays, [1.0, 10.0])
+
+    def test_phase_parameters_baked_at_submit_time(self):
+        # T25-walkthrough NW-5: a Delivery scheduled in phase[i] keeps its
+        # phase[i] fire time even after advance_phase(i+1). The §1 pipeline
+        # reads self.phases[self._phase_idx] AT SUBMIT TIME and commits the
+        # delay; the heap entry is immutable thereafter.
+        #
+        # test_active_phase_governs_delay (above) pins that a NEW submit
+        # after advance_phase uses the new phase's delay. This pins the
+        # converse: a PRIOR submit's already-scheduled Delivery is NOT
+        # retroactively re-sampled.
+        slow = DelayDist("constant", {"delay": 100.0})
+        fast = DelayDist("constant", {"delay": 1.0})
+        phases = (Phase(0.0, 50.0, slow), Phase(50.0, math.inf, fast))
+        sched, net = self._net(phases=phases, ids=(0, 1))
+
+        net.submit_unicast(0, 1, "X", None, 49.0)
+        deliveries_before = [(t, ev.msg.t_sent)
+                             for (t, _n, _s, ev) in sched.heap
+                             if isinstance(ev, Delivery)]
+        self.assertEqual(deliveries_before, [(149.0, 49.0)])  # 49 + 100
+
+        net.advance_phase(1)
+        deliveries_after = [(t, ev.msg.t_sent)
+                            for (t, _n, _s, ev) in sched.heap
+                            if isinstance(ev, Delivery)]
+        # Same fire time — phase 1's delay 1.0 was never applied.
+        self.assertEqual(deliveries_after, [(149.0, 49.0)])
+
+    def test_drop_and_partition_compose_per_sampling_order(self):
+        # T25-walkthrough NW-6: §6.2 sampling order under composition.
+        # With BOTH p_drop > 0 AND a partition active, the order is
+        # drop coin (consumes 1 RNG draw) -> partition check (no RNG) ->
+        # delay sample (never reached, partition blocks). Regardless of
+        # how the drop coin lands, a partition-bound message consumes
+        # exactly one RNG draw and zero delay samples.
+        #
+        # The existing test_partition_drop_consumes_no_delay_sample pins
+        # this for p_drop = 0; this is the composed case.
+        part = Partition(groups=((0,), (1,)))
+        phases = (Phase(0.0, math.inf, _D, p_drop=0.5,
+                        partitions=(part,)),)
+        sched, net = self._net(phases=phases, ids=(0, 1))
+        net.submit_unicast(0, 1, "X", None, 0.0)        # partition-bound
+        ref = _random.Random(_network_seed(SEED))
+        ref.random()                                     # exactly one coin
+        self.assertEqual(net.net_rng.getstate(), ref.getstate())
+        self.assertEqual(len(sched.heap), 0)             # nothing scheduled
+
+    def test_broadcast_rng_consumption_independent_of_registration_order(self):
+        # T25-walkthrough NW-8: §6.3 forbidden surface — broadcast iterates
+        # `sorted(NodeId)` so the kth delay sample is consumed by the kth
+        # sorted recipient, regardless of registration order. A regression
+        # that dropped sorted() (e.g. `for dst in self.registry`) would
+        # still deliver to the same SET of recipients (so the existing
+        # test_broadcast_reaches_registry_minus_sender still passes) but
+        # would shuffle the dst -> delay-sample mapping across registration
+        # orders, breaking byte-identical replay. Stochastic delay is
+        # required — a constant delay never reads net_rng and could not
+        # show this.
+        stochastic = DelayDist("uniform", {"low": 1.0, "high": 100.0})
+        phases = (Phase(0.0, math.inf, stochastic),)
+
+        def run(register_order):
+            sched = Scheduler()
+            net = Network(sched, phases, SEED)
+            for nid in register_order:
+                net.register(StubNode(nid))
+            net.start()
+            net.submit_broadcast(0, "X", None, 0.0)
+            return {ev.msg.dst: t for (t, _n, _s, ev) in sched.heap
+                    if isinstance(ev, Delivery)}
+
+        forward = run([0, 1, 2, 3])
+        reverse = run([3, 2, 1, 0])
+        self.assertEqual(forward, reverse)
+        # And the mapping is non-trivial (different recipients get different
+        # delays drawn from net_rng) — a sanity check that the test would
+        # actually fail if iteration order shuffled the RNG consumption.
+        self.assertEqual(len(set(forward.values())), 3)  # 3 distinct delays
 
 
 if __name__ == "__main__":

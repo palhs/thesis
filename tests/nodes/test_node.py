@@ -134,6 +134,29 @@ class TestHalt(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "with status HALTED"):
             n.start(0.0)
 
+    def test_halt_from_created_skips_running_and_drops_inbound(self):
+        # N-1: the harness blanket-halts every Node at run's end (spec §5.3);
+        # for a Node that was never start()-ed, that transition is CREATED ->
+        # HALTED, skipping RUNNING but still monotonic. The mandatory `halted`
+        # event must fire, and any subsequently-dispatched message or timer
+        # must be dropped (the HALTED guard in on_message/on_timer takes
+        # precedence over the CREATED-raises guard).
+        n = FakeNode()
+        emitted = []
+        n.emit = lambda et, fs, t: emitted.append((et, fs, t))
+        self.assertIs(n.status, Lifecycle.CREATED)
+        n.halt(HaltReason.RUN_END, 7.0)
+        self.assertIs(n.status, Lifecycle.HALTED)
+        self.assertIs(n._halt_reason, HaltReason.RUN_END)
+        self.assertEqual(
+            emitted,
+            [("halted", {"node_id": n.id, "reason": "RUN_END", "t": 7.0}, 7.0)])
+        # HALTED short-circuits both inbound guards: drop, do not raise.
+        n.on_message(Message(src=1, dst=n.id, type="X", payload=None,
+                             t_sent=0.0), 8.0)
+        n.on_timer("tid", None, 8.0)
+        self.assertEqual(n.calls, [])  # no _on_* delegation
+
 
 class TestInboundGuards(unittest.TestCase):
     def _msg(self):

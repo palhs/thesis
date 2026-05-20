@@ -276,6 +276,25 @@ class TestRun(unittest.TestCase):
         s.run()
         self.assertEqual(seen, [(5.0, 0, "TimerFire"), (8.0, 1, "Delivery")])
 
+    def test_event_sink_skips_tombstoned_events(self):
+        # Closes T25-coverage-gaps.md S-2: the sink contract is "called
+        # once per non-stale event, before dispatch" — the prior test proves
+        # the non-stale half, this proves the stale half. The dispatch loop
+        # `continue`s on a tombstoned TimerFire BEFORE invoking the sink, so
+        # a cancelled timer leaves no record in the event stream. The T24
+        # event_log subsystem depends on this — a leak would silently
+        # pollute the run's CSV.
+        s, n0, n1 = self._scheduler_with_two_nodes()
+        seen: list[tuple] = []
+        s.event_sink = lambda t, nid, seq, ev: seen.append((t, nid, type(ev).__name__))
+        n0.set_timer("dead", 5.0, None, 0.0)     # will be tombstoned
+        n0.cancel_timer("dead")
+        n0.set_timer("live", 10.0, None, 0.0)    # will fire
+        result = s.run()
+        self.assertEqual(seen, [(10.0, 0, "TimerFire")])
+        self.assertEqual(result.events_tombstoned, 1)
+        self.assertEqual(result.events_processed, 1)
+
 
 if __name__ == "__main__":
     unittest.main()
