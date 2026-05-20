@@ -3,7 +3,7 @@
 ## 2.1 Chapter roadmap
 
 Chapter 1 introduced the four Layer-1 consensus families this thesis
-evaluates and motivated, at an executive level, the absence of a unified
+evaluates and motivated, at a high level, the absence of a unified
 comparative evaluation from the existing literature. The present chapter
 develops that motivation at literature-review depth, supporting three
 claims on which the remainder of the thesis depends:
@@ -38,7 +38,7 @@ Figure 2.1. §2.4 surveys each region in turn on a uniform skeleton, with
 Table 2.1 as the cross-family scorecard. §2.5 turns to the existing
 evaluations of those families and demonstrates, with Table 2.2, that the
 reporting vocabulary itself blocks comparative judgment. §2.6 states the
-resulting unified-harness gap and forwards the reader into Chapter 3.
+resulting unified-harness gap and passes the reader into Chapter 3.
 
 ## 2.2 Blockchains and the consensus problem
 
@@ -75,7 +75,7 @@ Byzantine, with stake-weighting where applicable
 [[wiki/concepts/fault-model]]), or both. Across the concession space, the
 `3f+1` quorum-intersection arithmetic recurs wherever a family preserves
 deterministic safety [[wiki/concepts/quorum-arithmetic]]. The CAP theorem
-[18], projected onto blockchains, renders the operational consequence
+[18], projected onto blockchains, makes the operational consequence
 concrete: under partition, a chain must choose Consistency (PBFT-style and
 PoS-finality halt safely) or Availability (Avalanche-style continues with
 weakened guarantees); partition-tolerance is non-negotiable
@@ -90,9 +90,9 @@ section maps how the four families chose.
 
 ## 2.3 The design space the impossibilities create
 
-A `3f+1` quorum under partial synchrony is one habitable point in the
+A `3f+1` quorum under partial synchrony is one viable point in the
 concession space, and the most direct one. PBFT [4] and its descendants
-HotStuff [5] and Tendermint [6] occupy it. Three other habitable points
+HotStuff [5] and Tendermint [6] occupy it. Three other viable points
 exist, and the four families evaluated in this thesis sit at the four
 points respectively. Figure 2.1 redraws the propagation tree from
 [[wiki/concepts/consensus-families#propagation-of-the-bft-problem]].
@@ -120,7 +120,7 @@ The three non-PBFT branches are best read as answers to the question of
 what to relax when partial synchrony's assumption is too strong.
 PoS-finality retains `3f+1` and partial synchrony but adds an *economic*
 layer — accountable safety via slashing — converting the Byzantine fault
-model from an exogenous assumption into a behaviorally disincentivized one
+model from an external assumption into a behaviorally disincentivized one
 [7], [8]. Avalanche-style abandons quorums altogether and replaces them
 with repeated random subsampling, accepting a non-zero safety-violation
 probability `ε` in exchange for asynchrony tolerance and per-validator
@@ -173,11 +173,11 @@ Stabilization Time via view change.
 
 *Documented adversarial weakness.* The most-studied weakness within the
 §1.4 taxonomy is **leader-targeted delayed voting**: a Byzantine leader,
-or a delaying coalition that includes the leader, induces successive view
+or a delaying coalition that includes the leader, triggers successive view
 changes whose `O(n³)` cost in the original formulation [4] degrades
 latency well before any safety threshold is approached.
 
-*Simulator role.* The PBFT-family module exists primarily to stress RQ1
+*Simulator role.* The PBFT-family module exists primarily to test RQ1
 (commit latency under delay) and RQ3 (the `O(n²)` scaling exponent), and
 to supply the deterministic-finality reference point against which
 Avalanche-style probabilistic finality is measured.
@@ -197,18 +197,18 @@ constitutes the deployed Ethereum PoS specification.
 distinguishing addition is *accountable safety*: a pair of contradictory
 votes by the same validator yields cryptographic evidence sufficient to
 slash that validator's stake, converting the Byzantine fault model into an
-economically disincentivized one rather than leaving it exogenous.
+economically disincentivized one rather than leaving it external.
 
 *Documented adversarial weakness.* Of the §1.4 adversaries,
 **equivocation** has received the most attention, both because slashing
 exists to deter it and because the FFG safety proof depends on the
 slashing condition being credibly enforced [7], [8]. The inactivity-leak behavior under
 prolonged silent non-participation is a secondary concern: after a
-finality drought, the protocol gradually leaks the stake of
+long stretch without finality, the protocol gradually leaks the stake of
 non-participating validators to restore a `2f+1` quorum, at the cost of a
 widened time-to-finality window.
 
-*Simulator role.* The PoS-finality module stresses RQ4 (safety against
+*Simulator role.* The PoS-finality module tests RQ4 (safety against
 liveness under equivocation and silent non-participation) and contributes
 the *epoch-granularity* time-to-finality measurement to the unified
 schema.
@@ -240,7 +240,7 @@ Cachin and Schneider [10] tightens the informal liveness claims of [9] and
 identifies configurations under which sampling rounds fail to converge as
 quickly as [9] predicts.
 
-*Simulator role.* The Avalanche-family module stresses RQ3 (the
+*Simulator role.* The Avalanche-family module tests RQ3 (the
 `n`-independent message cost) and RQ4 (probabilistic safety under
 adversarial sampling), and supplies the only non-deterministic finality
 metric in the unified schema.
@@ -262,14 +262,14 @@ view changes [11], [12]. Per-block message complexity is `O(n)`, with
 per-validator storage and bandwidth as the cost concession (the DAG must
 be retained until ordering passes through it).
 
-*Documented adversarial weakness.* The §1.4 adversary most pertinent to
+*Documented adversarial weakness.* The §1.4 adversary most relevant to
 this family is **selective dropping by a Byzantine sender attempting to
 withhold a block from a subset of receivers**, the case the
 reliable-broadcast layer is explicitly designed to defeat [11], [13]. The
 worst-case condition for the family combines sustained packet loss with
 adversarial mempool inputs that force longer DAG retention windows.
 
-*Simulator role.* The DAG-based module stresses RQ3 (the `O(n)` scaling
+*Simulator role.* The DAG-based module tests RQ3 (the `O(n)` scaling
 exponent) and RQ4 (reliable broadcast under packet loss), and contributes
 the WAN-scale throughput baseline against which the PBFT-style and
 PoS-finality modules are compared.
@@ -286,7 +286,7 @@ subproblems explain the absence.
 
 Each family's primary papers report what that family's design concedes —
 and little else. The PBFT and HotStuff papers report operations per second
-on a low-latency LAN harness with view-change cost as the principal
+on a low-latency LAN harness with view-change cost as the main
 disturbance metric [4], [5]. Casper FFG reports time-to-finality in
 *epochs* — a unit that becomes physical only after multiplication by the
 underlying chain's slot duration [7], [8]. Avalanche reports two figures
@@ -322,7 +322,7 @@ answer.
 
 ### 2.5.2 Surveys, critiques, and the methodological precedent
 
-Three taxonomic surveys position the families qualitatively without
+Three taxonomic surveys place the families in qualitative terms without
 contributing measurements of their own. Bano *et al.* [14] supply the
 canonical Systematization of Knowledge and the taxonomic backbone reused
 by [[wiki/concepts/consensus-families]]. Xiao *et al.* [15] aggregate
