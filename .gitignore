@@ -2,7 +2,21 @@ __pycache__/
 *.pyc
 .venv/
 .env
+
+# Test + coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.egg-info/
+
+# Experiment outputs (kept out of git; .gitkeep preserves the dir)
 results/**/*.csv
 results/**/*.png
 !results/**/.gitkeep
+
+# OS
 .DS_Store
+Thumbs.db
+

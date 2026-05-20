@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 71 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 2
-- Completed: 42 · In Review: 0 · In Progress: 0 · Not Started: 46 · Blocked: 0
+- Completed: 42 · In Review: 1 · In Progress: 0 · Not Started: 45 · Blocked: 0
 
 ## Legend
 
@@ -153,7 +153,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Structured event log — core columns `t, node_id, event_type, seq` plus an open `fields` dict — exportable to CSV (Decision A: `round` / `msg_id` have no source in the current event stream; they are `fields` keys populated by protocol code in T28+, not columns) · _Artifact:_ `src/event_log/` (renamed from `src/logging/` — Decision E: a `logging` package on `PYTHONPATH=src` shadows the stdlib module)
 - `[x]` **T25** `H` Engineer — Test basic message exchange among nodes
   _Outcome:_ Integration test with 4 nodes; delay distribution matches config · _Artifact:_ `src/tests/` + experiment page
-- `[ ]` **T26** `H` Engineer — Set up repo scaffolding: /src, /tests, /configs, /results
+- `[?]` **T26** `H` Engineer — Set up repo scaffolding: /src, /tests, /configs, /results
   _Outcome:_ Clean structure, README, .gitignore, initial commit · _Artifact:_ repo root
 - `[ ]` **T27** `M` Engineer — Set up reproducibility: seed control, YAML configs
   _Outcome:_ YAML loader, seed injection; same seed → same output · _Artifact:_ `src/config/` + `wiki/concepts/reproducibility.md`

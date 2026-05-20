@@ -1,0 +1,6 @@
+# Development dependencies.
+#
+# Install with: pip install -r requirements-dev.txt
+# (Runtime requirements.txt is currently empty; the simulator is stdlib-only.)
+
+coverage>=7.0
