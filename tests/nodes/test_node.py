@@ -28,6 +28,32 @@ class TestConstruction(unittest.TestCase):
         with self.assertRaises(TypeError):
             Node(0, 1.0, None, 0)  # type: ignore[abstract]
 
+    def test_negative_node_id_rejected(self):
+        # node_id = -1 is the PhaseAdvance sentinel; -2 etc. would still
+        # silently sort before every real NodeId at the same t.
+        with self.assertRaises(ValueError):
+            FakeNode(node_id=-1)
+        with self.assertRaises(ValueError):
+            FakeNode(node_id=-7)
+
+    def test_nan_weight_rejected(self):
+        import math
+        with self.assertRaises(ValueError):
+            FakeNode(weight=math.nan)
+
+    def test_pos_inf_weight_rejected(self):
+        import math
+        with self.assertRaises(ValueError):
+            FakeNode(weight=math.inf)
+
+    def test_neg_inf_weight_rejected(self):
+        import math
+        # `weight < 0` already rejects -inf, but the explicit guard names
+        # `weight must be finite` in the error rather than `must be non-negative`.
+        with self.assertRaises(ValueError) as cm:
+            FakeNode(weight=-math.inf)
+        self.assertIn("finite", str(cm.exception))
+
 
 class TestRng(unittest.TestCase):
     def test_stable_seed_is_fixed_for_fixed_input(self):

@@ -1,5 +1,7 @@
 # Runtime dependencies for the thesis simulator.
 #
-# The simulator (src/) currently uses the Python standard library only.
-# T27 introduces YAML configuration; the loader will pin its dependency
-# here when it lands.
+# PyYAML is the simulator's first non-stdlib runtime dependency, pinned by
+# T27 (src/config/) for the YAML loader. Use `safe_load` only — never
+# `yaml.load` with an unsafe loader (reproducibility.md § Forbidden surfaces).
+
+PyYAML>=6.0
