@@ -2,166 +2,181 @@
 
 ## 1.1 Background
 
-A **Layer-1 (L1) blockchain** is a replicated, append-only log of
-transactions maintained across a set of mutually distrusting validators
-[[wiki/concepts/consensus-overview#what-a-blockchain-is]]. At each height,
-one new block must be produced, and every honest validator must agree on
-which block it is. The step that makes that agreement happen — **consensus**
-— is where the four protocol families evaluated in this thesis differ, and
-it is what this thesis evaluates.
+A Layer-1 (L1) blockchain maintains a replicated, append-only log of
+transactions across a set of mutually distrusting validators
+[[wiki/concepts/consensus-overview#what-a-blockchain-is]]. At each height
+the validator set must agree on a single block; the protocol that produces
+that agreement — the consensus protocol — is the locus at which the four
+families evaluated in this thesis differ.
 
-Consensus is hard for three connected reasons that every deployed protocol
-has to answer. Some validators may be **Byzantine** — that is, arbitrary:
-they may crash, lie, collude, or send conflicting messages to different
-peers [1]. The network is not synchronous either: messages are delayed,
-reordered, and dropped, and a validator cannot distinguish a slow peer from
-an offline peer from a lying peer [3]. Under pure asynchrony, the FLP
-impossibility result then proves that no deterministic protocol can
-guarantee both **safety** (all honest validators agree on the same history)
-and **liveness** (the protocol keeps making progress) with even one
-crash-faulty process [2].
+Three foundational results circumscribe what any such protocol can achieve.
+The Byzantine Generals Problem [1] establishes that deterministic agreement
+among `n` processes tolerating `f` arbitrarily-faulty participants requires
+`n ≥ 3f+1` [[wiki/concepts/byzantine-generals]]. The Fischer–Lynch–Paterson
+impossibility [2] establishes that, under pure asynchrony, no deterministic
+protocol guarantees both safety and liveness in the presence of even one
+crash fault [[wiki/concepts/flp-impossibility]]. Dwork, Lynch and Stockmeyer
+[3] supply the most influential relaxation: under partial synchrony,
+consensus is solvable for `f < n/3` [[wiki/concepts/synchrony-models]].
+Together these results constitute the design space within which every
+deployed L1 protocol situates itself.
 
-Every deployed L1 protocol relaxes one of these constraints. The four
-families evaluated in this thesis — PBFT-style, PoS-finality,
-Avalanche-style, and DAG-based — correspond to four different relaxations
-[[wiki/concepts/consensus-families]].
+The four families evaluated in this thesis — PBFT-style
+[[wiki/algorithms/pbft]], PoS-finality [[wiki/algorithms/pos]],
+Avalanche-style [[wiki/algorithms/avalanche]], and DAG-based
+[[wiki/algorithms/dag-based]] — correspond to four distinct relaxations of
+that design space [[wiki/concepts/consensus-families]]. Each family selects
+a different combination of synchrony assumption, fault threshold, and
+finality regime; each pays a different primary cost.
 
 ## 1.2 Motivation
 
-Layer-1 blockchains now hold real assets and settle real transactions. The
-consensus protocol underneath them is what decides whether a transaction is
-final, whether the chain keeps moving, and whether two honest validators
-can ever end up holding conflicting histories. When that protocol works,
-nobody notices. When it doesn't, the cost is borne by everyone using the
-chain. Ethereum runs a PoS-finality protocol [8]; Sui runs a DAG-based
-protocol [13]; Cosmos runs a PBFT-style protocol [6]; Avalanche mainnet
-runs the Avalanche-style protocol it gave its name to [9]. The choice of
-consensus family governs, in each case, availability and finality for the
-users of the chain.
+Layer-1 blockchains underwrite the settlement guarantees on which their
+users depend: the consensus protocol determines whether a transaction is
+final, whether the chain continues to advance, and whether two honest
+validators can ever commit incompatible histories at the same height
+[[wiki/concepts/consensus-overview#why-consensus-is-needed]]. The choice of
+family is consequential in production. Ethereum is secured by a PoS-finality
+protocol [8]; Sui is secured by a DAG-based protocol [13]; Cosmos chains
+are secured by a PBFT-style protocol [6]; the Avalanche mainnet is secured
+by the Avalanche-style protocol from which the family takes its name [9].
 
-Most consensus protocols are analysed under ideal assumptions — honest
-participants, stable networks, one variable stressed at a time. Real
-Layer-1 networks offer none of that. Validators span continents, messages
-arrive late or are lost, and some of the participants are slow, offline, or
-hostile. The conditions that test a protocol hardest are exactly the ones
-its original benchmarks never combine. Surveys [14] and methodological
-critiques [16] identify this absence of comparable stress-condition
-evaluation as the principal obstacle to honest cross-family comparison.
+The primary literature evaluates each protocol predominantly under benign
+conditions: honest participation, stable networks, single-variable
+perturbations. Production deployments admit none of those simplifications.
+Validators are geographically distributed; messages are delayed, reordered,
+and dropped; a non-trivial fraction of the active set is, at any given
+moment, slow, offline, or adversarial. The conditions under which a
+consensus protocol is tested most severely are precisely the conditions its
+publication benchmarks do not combine. Both the canonical taxonomic survey
+[14] and the methodological critique of Cachin and Vukolić [16] identify
+the absence of comparable stress-condition evaluation as the principal
+obstacle to honest cross-family comparison.
 
-That gap would be only an academic concern if performance and security
-stayed separate. They do not. Under delay and adversarial pressure, the two
-become coupled: a protocol that merely *slows* under load may also miss
-finality, fork, or let honest validators commit different blocks.
-Benign-condition benchmarks never expose this coupling. This thesis is
-motivated by that coupling — and by the limited availability, in the
-current literature, of comparable cross-family evaluation under unified
-stress conditions.
+The omission would be of academic interest only if performance and security
+remained decoupled. They do not. Under combined network delay and
+adversarial pressure the two become entangled: a protocol that merely
+*slows* under load may also miss finality, fork, or admit conflicting
+commits across honest validators. The performance–security coupling is
+invisible to benign-condition benchmarks. This thesis is motivated by that
+coupling, and by the absence of a unified harness in which it can be
+measured across the four families on matched assumptions
+[[wiki/concepts/problem-statement#the-gap]].
 
 ## 1.3 Problem statement
 
-The working title of this thesis is *Performance–Security Evaluation of
-Layer-1 Consensus Algorithms under Network Delay and Adversarial Conditions:
-A Simulation-Based Comparative Study*
+The working title is *Performance–Security Evaluation of Layer-1 Consensus
+Algorithms under Network Delay and Adversarial Conditions: A
+Simulation-Based Comparative Study*
 [[wiki/concepts/problem-statement#thesis-title]].[^1]
 
-This thesis investigates the comparative performance–security behaviour of
-four Layer-1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
+This thesis investigates the comparative performance–security behavior of
+the four Layer-1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
 PoS-finality [[wiki/algorithms/pos]], Avalanche-style
 [[wiki/algorithms/avalanche]], and DAG-based [[wiki/algorithms/dag-based]]
-— under controlled network delay and adversarial conditions using a unified
-simulation harness. Rather than benchmarking production systems directly,
-it provides a reproducible cross-family evaluation framework in which
-latency, throughput, communication cost, safety, and liveness can be
-measured under matched assumptions.
+— under controlled network delay and adversarial conditions, using a
+unified discrete-event simulator. The contribution is not a benchmark of
+production systems; it is a reproducible cross-family evaluation framework
+in which latency, throughput, communication cost, and the safety and
+liveness response to adversarial pressure are measured under matched
+assumptions [[wiki/concepts/problem-statement#thesis-contribution]].
 
-In this thesis, **performance** refers to the observable cost of running
-the protocol — commit latency, sustained throughput, and communication
-overhead — and **security** refers to the preservation of the protocol's
-two core correctness guarantees under adversarial pressure: *safety*,
-measured as the absence of conflicting commits across honest validators
-(fork rate and empirical safety-violation probability ε), and *liveness*,
-measured as the fraction of rounds that reach commit and the frequency of
-view-change or reorg events
-[[wiki/concepts/evaluation-metrics#reliability-metrics]].
+Two operational definitions follow the metric schema of
+[[wiki/concepts/evaluation-metrics]]. *Performance* denotes the observable
+cost of executing the protocol: commit latency, sustained throughput, and
+communication overhead in messages and bytes per agreed unit. *Security*
+denotes the preservation of the protocol's two correctness properties under
+adversarial pressure: *safety*, instrumented as the absence of conflicting
+commits across honest validators (fork rate and empirical safety-violation
+probability `ε`), and *liveness*, instrumented as the fraction of rounds
+reaching commit together with the frequency of view-change or reorg events
+[[wiki/concepts/evaluation-metrics#reliability-metrics]]. The reconciliation
+of these definitions across the linear-chain, epoch-based,
+probabilistic-finality, and DAG-anchored output structures of the four
+families is established in [[wiki/concepts/metric-reconciliation]].
 
-The contribution sits between two bodies of existing work. On one side, the
-primary papers [4]–[13] report performance for individual protocols on
-harness-specific conditions; their numbers are not directly comparable
-across families, a limitation explicitly noted in the principal surveys
-[14], [15]. On the other side, taxonomic surveys [14]–[16] position the
-families qualitatively but do not measure them. This thesis contributes to
-that middle layer by extending the simulation-based methodology of Gervais
-*et al.* [17] — originally applied to Proof-of-Work — to BFT-style,
-PoS-finality, Avalanche-style, and DAG-based protocols.
+The contribution is situated between two existing bodies of work. On one
+side, the primary papers [4]–[13] report performance for individual
+protocols under harness-specific conditions; the principal surveys [14],
+[15] explicitly note that those numbers do not cross family boundaries. On
+the other side, the taxonomic surveys [14]–[16] position the families
+qualitatively but do not measure them. This thesis occupies the middle
+layer by extending the simulation-based, metrics-instrumented methodology
+of Gervais *et al.* [17] — originally applied to Proof-of-Work — to
+PBFT-style, PoS-finality, Avalanche-style, and DAG-based protocols
+[[wiki/concepts/problem-statement#intended-contributions]].
 
 [^1]: The title is working, pending supervisor sign-off as part of the
-Week 2 milestone.
+Week 2 milestone (see [[wiki/concepts/problem-statement#status]]).
 
 ## 1.4 Scope and assumptions
 
-The thesis evaluates four Layer-1 consensus families at the message-passing
-level inside a discrete-event simulator
-[[wiki/concepts/problem-statement#scope]]. Within scope: configurable
-network delay (constant, uniform, exponential, heavy-tailed), configurable
-packet loss, four Byzantine validator behaviours (silent non-participation,
-delayed voting, equivocation, selective dropping), and validator sets up to
-a few hundred nodes. Out of scope: Proof-of-Work as a subject of comparison
-(covered only as a methodological baseline [17]), Layer-2 protocols,
-testnet or mainnet deployment, economic and incentive design, and
-cryptographic primitive performance.
+Evaluation is conducted at the message-passing level inside a
+discrete-event simulator [[wiki/concepts/problem-statement#scope]]. Within
+scope: configurable network delay (constant, uniform, exponential,
+heavy-tailed); configurable packet loss; the four Byzantine validator
+behaviors documented in the primary literature — silent non-participation,
+delayed voting, equivocation, and selective dropping
+[[wiki/concepts/adversary-model]] — and validator sets up to several
+hundred nodes. Out of scope: Proof-of-Work as a subject of comparison
+(it appears only as a methodological precedent through [17]); Layer-2
+protocols; deployment on testnet or mainnet; economic and incentive design;
+and the performance of cryptographic primitives.
 
 Four assumptions frame the results
 [[wiki/concepts/problem-statement#assumptions-and-limitations]]. First,
-the per-family implementations are deliberately simplified. Each protocol
-is treated as a *family representative* for controlled comparative
-experimentation, not as a complete proxy for every production variant in
-that family; the aim is fair comparison across families, not matching any
-specific production codebase's throughput. Second, the network model is
-idealised — delay and loss are configurable, but TCP congestion control,
-kernel scheduling, and physical-layer jitter are not modelled. Third, the
-adversarial strategies evaluated are those documented in the primary
-literature; attacks requiring specialised cryptographic or economic
-modelling are left to future work. Fourth, literature-reported numbers are
-treated as order-of-magnitude sanity checks, not as validation targets —
-the simulator's contribution is internal consistency across families, not
-matching production throughput.
+each family is represented by a deliberately simplified implementation; the
+simplification is intentional, since the aim is fair like-for-like
+comparison across families rather than the reproduction of any particular
+production codebase's throughput. Second, the network is idealized: delay
+and loss are configurable parameters, but TCP congestion control, kernel
+scheduling, and physical-layer jitter are not modeled — the abstraction
+level matches that of prior simulation studies [17]. Third, the adversarial
+strategies evaluated are those most frequently discussed in the primary
+literature; attacks requiring specialized cryptographic or economic
+modeling are deferred to future work. Fourth, literature-reported figures
+are treated as order-of-magnitude sanity checks rather than as validation
+targets; the simulator's contribution is internal consistency across
+families under matched assumptions, not the reproduction of production
+throughput.
 
-Simulation, rather than testnet or live-network measurement, is the chosen
-method for three reasons: reproducibility, controlled conditions, and a
-matched harness across all four families. This is the same rationale that
-motivated the PoW simulation framework of [17].
+Simulation is preferred to testnet or live-network measurement for three
+reasons: reproducibility of seeded runs, the controlled isolation of one
+independent variable at a time, and a matched harness across all four
+families. This is the same rationale that motivated the unified
+Proof-of-Work simulator of Gervais *et al.* [17].
 
 ## 1.5 Research questions
 
 Five research questions structure the empirical evaluation
 [[wiki/concepts/research-questions]]. RQ1–RQ4 generate the data; RQ5
-synthesises it.
+synthesizes it.
 
 - **RQ1.** How does end-to-end commit latency scale, for each of the four
-  families, as network delay variance increases from nominal to
-  heavy-tailed? *This tests the synchrony assumption each family makes.*
-- **RQ2.** How does sustained throughput of each family degrade under
-  increasing Byzantine fraction, below and approaching the theoretical
-  threshold? *This tests how gracefully each family approaches its fault
-  bound.*
+  families, as the variance of the network-delay distribution increases
+  from nominal to heavy-tailed? *The question stresses the synchrony
+  assumption each family makes.*
+- **RQ2.** How does sustained throughput degrade, for each family, as the
+  Byzantine fraction increases below and toward the theoretical fault
+  threshold? *The question characterizes the manner in which each family
+  approaches its fault bound, not merely whether it reaches it.*
 - **RQ3.** What is the relative communication overhead of each family,
-  measured in messages and bytes per block, under a fixed workload and
-  identical network assumptions? *This exposes the different scaling
-  exponents — `O(n²)` for PBFT, `O(n)` for DAG-based, per-validator `O(K·β)`
-  independent of `n` for Avalanche — in a single measurement.*
+  measured in messages and bytes per agreed unit, under a fixed workload
+  and identical network assumptions? *The question exposes the differing
+  scaling exponents — `O(n²)` for PBFT, `O(n)` for DAG-based, per-validator
+  `O(K·β)` independent of `n` for Avalanche — in a single measurement.*
 - **RQ4.** Under which adversarial strategies (silent non-participation,
   delayed voting, equivocation, selective dropping) does each family
-  experience liveness degradation, safety violations, or neither? *This
-  maps adversarial behaviour to the properties each family claims to
-  preserve.*
-- **RQ5.** Is there a consistent Pareto frontier of the performance–security
-  tradeoff across the four families, and does any family dominate across all
-  operating regimes? *This is the comparative synthesis question and the
-  headline contribution of the thesis.*
+  exhibit liveness degradation, safety violation, or neither? *The question
+  maps each adversary onto the property each family claims to preserve.*
+- **RQ5.** Does a consistent Pareto frontier of the performance–security
+  tradeoff exist across the four families, and does any family dominate
+  across all operating regimes? *The question is the comparative synthesis
+  and the headline contribution.*
 
-Each question pairs with a defined subset of the unified metric schema in
-[[wiki/concepts/evaluation-metrics]] and with a defined independent
-variable in the experimental matrix.
+Each question is paired with a defined subset of the unified metric schema
+in [[wiki/concepts/evaluation-metrics]] and with a defined independent
+variable in the experiment matrix [[wiki/concepts/experiment-matrix]].
 
 ## 1.6 Contributions and thesis roadmap
 
@@ -172,23 +187,24 @@ The thesis makes four contributions
    configurable network delay and adversarial conditions, with a shared
    metric schema and a pluggable protocol interface.
 2. Simplified reference implementations of one protocol from each of the
-   four families within a single harness, enabling reproducible like-for-like
-   comparison.
+   four families within a single harness, enabling reproducible
+   like-for-like comparison.
 3. An experimental dataset and comparative analysis quantifying the
    performance–security tradeoff across the four families under matched
    conditions, answering RQ1–RQ5.
 4. A methodological extension of the simulation-based,
    metrics-instrumented evaluation approach of Gervais *et al.* [17] —
-   originally applied to Proof-of-Work — to BFT-style, PoS-finality,
+   originally applied to Proof-of-Work — to PBFT-style, PoS-finality,
    Avalanche-style, and DAG-based protocols.
 
-The remainder of the thesis is organised as follows. **Chapter 2** reviews
-the literature on blockchain consensus families and prior comparative
+The remainder of the thesis is organized as follows. **Chapter 2** reviews
+the literature on Layer-1 consensus families and prior comparative
 evaluations. **Chapter 3** describes the methodology: the system model, the
 four protocol implementations, the metric schema, and the experimental
 design. **Chapter 4** presents the empirical results — baseline,
 network-delay, and adversarial experiments — answering RQ1–RQ4.
-**Chapter 5** presents the cross-family Pareto synthesis that answers RQ5,
-and illustrates the simulator's design utility with one targeted
-enhancement experiment (an adaptive timeout) compared against the baseline. **Chapter 6** concludes with the findings, their limitations, and
+**Chapter 5** presents the cross-family Pareto synthesis that answers RQ5
+and illustrates the simulator's design utility with a targeted enhancement
+experiment (an adaptive timeout) compared against the baseline.
+**Chapter 6** concludes with the findings, their limitations, and
 directions for further work.
