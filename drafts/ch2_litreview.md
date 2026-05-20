@@ -61,9 +61,8 @@ supermajority recurring throughout the BFT literature
 [[wiki/concepts/byzantine-generals]]. Fischer, Lynch and Paterson [2]
 showed that, in a purely asynchronous network, no deterministic protocol
 can guarantee both safety and liveness in the presence of even a single
-crash-faulty process. The FLP impossibility is not specific to malice; it
-is what forces every Layer-1 protocol to relax some assumption
-[[wiki/concepts/flp-impossibility]]. Dwork, Lynch and Stockmeyer [3]
+crash-faulty process. The FLP impossibility is not specific to malice: it forces every Layer-1
+protocol to relax some assumption [[wiki/concepts/flp-impossibility]]. Dwork, Lynch and Stockmeyer [3]
 supply the most influential of those relaxations: under *partial
 synchrony* — message delays are bounded but the bound is not known a
 priori — consensus is solvable for `f < n/3`
@@ -126,8 +125,8 @@ model from an exogenous assumption into a behaviorally disincentivized one
 with repeated random subsampling, accepting a non-zero safety-violation
 probability `ε` in exchange for asynchrony tolerance and per-validator
 cost independent of `n` [9], [10]. DAG-based protocols retain `3f+1` but
-separate the two responsibilities classical consensus bundles — data
-availability and ordering — routing the first to a DAG mempool and the
+separate the two responsibilities classical consensus bundles (data
+availability and ordering), routing the first to a DAG mempool and the
 second to a thin commit rule that derives total order from the DAG with
 zero additional messages in the common case [11]–[13].
 
@@ -200,10 +199,10 @@ votes by the same validator yields cryptographic evidence sufficient to
 slash that validator's stake, converting the Byzantine fault model into an
 economically disincentivized one rather than leaving it exogenous.
 
-*Documented adversarial weakness.* The most-studied weakness within the
-§1.4 taxonomy is **equivocation**, both because slashing exists to deter
-it and because the FFG safety proof depends on the slashing condition
-being credibly enforced [7], [8]. The inactivity-leak behavior under
+*Documented adversarial weakness.* Of the §1.4 adversaries,
+**equivocation** has received the most attention, both because slashing
+exists to deter it and because the FFG safety proof depends on the
+slashing condition being credibly enforced [7], [8]. The inactivity-leak behavior under
 prolonged silent non-participation is a secondary concern: after a
 finality drought, the protocol gradually leaks the stake of
 non-participating validators to restore a `2f+1` quorum, at the cost of a
@@ -248,10 +247,9 @@ metric in the unified schema.
 
 ### 2.4.4 DAG-based
 
-*Mechanism.* Narwhal [11] separates the two duties classical consensus
-bundles — data availability and ordering — by running a reliable-broadcast
-DAG mempool that records the causal dependencies of every transaction
-batch. Tusk [11] derives a total order from the DAG with zero additional
+*Mechanism.* Narwhal [11] separates the two classical consensus duties of
+data availability and ordering by running a reliable-broadcast DAG
+mempool that records the causal dependencies of every transaction batch. Tusk [11] derives a total order from the DAG with zero additional
 messages in the common case; Bullshark [12] simplifies Tusk and adds a
 two-round partial-synchrony fast path; Mysticeti [13] removes block
 certification and reaches the three-round BFT latency lower bound
@@ -264,8 +262,8 @@ view changes [11], [12]. Per-block message complexity is `O(n)`, with
 per-validator storage and bandwidth as the cost concession (the DAG must
 be retained until ordering passes through it).
 
-*Documented adversarial weakness.* The most-studied weakness within the
-§1.4 taxonomy is **selective dropping by a Byzantine sender attempting to
+*Documented adversarial weakness.* The §1.4 adversary most pertinent to
+this family is **selective dropping by a Byzantine sender attempting to
 withhold a block from a subset of receivers**, the case the
 reliable-broadcast layer is explicitly designed to defeat [11], [13]. The
 worst-case condition for the family combines sustained packet loss with

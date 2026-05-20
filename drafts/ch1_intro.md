@@ -6,10 +6,10 @@ A Layer-1 (L1) blockchain maintains a replicated, append-only log of
 transactions across a set of mutually distrusting validators
 [[wiki/concepts/consensus-overview#what-a-blockchain-is]]. At each height
 the validator set must agree on a single block; the protocol that produces
-that agreement — the consensus protocol — is the locus at which the four
-families evaluated in this thesis differ.
+that agreement is the consensus protocol, and the four families evaluated
+in this thesis differ in how they produce it.
 
-Three foundational results circumscribe what any such protocol can achieve.
+Three foundational results bound what any such protocol can achieve.
 The Byzantine Generals Problem [1] establishes that deterministic agreement
 among `n` processes tolerating `f` arbitrarily-faulty participants requires
 `n ≥ 3f+1` [[wiki/concepts/byzantine-generals]]. The Fischer–Lynch–Paterson
@@ -18,14 +18,14 @@ protocol guarantees both safety and liveness in the presence of even one
 crash fault [[wiki/concepts/flp-impossibility]]. Dwork, Lynch and Stockmeyer
 [3] supply the most influential relaxation: under partial synchrony,
 consensus is solvable for `f < n/3` [[wiki/concepts/synchrony-models]].
-Together these results constitute the design space within which every
-deployed L1 protocol situates itself.
+Together these results define the design space in which every deployed L1
+protocol must sit.
 
-The four families evaluated in this thesis — PBFT-style
-[[wiki/algorithms/pbft]], PoS-finality [[wiki/algorithms/pos]],
-Avalanche-style [[wiki/algorithms/avalanche]], and DAG-based
-[[wiki/algorithms/dag-based]] — correspond to four distinct relaxations of
-that design space [[wiki/concepts/consensus-families]]. Each family selects
+The four families evaluated in this thesis correspond to four distinct
+relaxations of that design space [[wiki/concepts/consensus-families]]:
+PBFT-style [[wiki/algorithms/pbft]], PoS-finality
+[[wiki/algorithms/pos]], Avalanche-style [[wiki/algorithms/avalanche]],
+and DAG-based [[wiki/algorithms/dag-based]]. Each family selects
 a different combination of synchrony assumption, fault threshold, and
 finality regime; each pays a different primary cost.
 
@@ -102,7 +102,7 @@ protocols under harness-specific conditions; the principal surveys [14],
 the other side, the taxonomic surveys [14]–[16] position the families
 qualitatively but do not measure them. This thesis occupies the middle
 layer by extending the simulation-based, metrics-instrumented methodology
-of Gervais *et al.* [17] — originally applied to Proof-of-Work — to
+of Gervais *et al.* [17], originally applied to Proof-of-Work, to
 PBFT-style, PoS-finality, Avalanche-style, and DAG-based protocols
 [[wiki/concepts/problem-statement#intended-contributions]].
 
@@ -115,9 +115,9 @@ Evaluation is conducted at the message-passing level inside a
 discrete-event simulator [[wiki/concepts/problem-statement#scope]]. Within
 scope: configurable network delay (constant, uniform, exponential,
 heavy-tailed); configurable packet loss; the four Byzantine validator
-behaviors documented in the primary literature — silent non-participation,
-delayed voting, equivocation, and selective dropping
-[[wiki/concepts/adversary-model]] — and validator sets up to several
+behaviors documented in the primary literature, namely silent
+non-participation, delayed voting, equivocation, and selective dropping
+[[wiki/concepts/adversary-model]]; and validator sets up to several
 hundred nodes. Out of scope: Proof-of-Work as a subject of comparison
 (it appears only as a methodological precedent through [17]); Layer-2
 protocols; deployment on testnet or mainnet; economic and incentive design;
@@ -130,7 +130,7 @@ simplification is intentional, since the aim is fair like-for-like
 comparison across families rather than the reproduction of any particular
 production codebase's throughput. Second, the network is idealized: delay
 and loss are configurable parameters, but TCP congestion control, kernel
-scheduling, and physical-layer jitter are not modeled — the abstraction
+scheduling, and physical-layer jitter are not modeled. The abstraction
 level matches that of prior simulation studies [17]. Third, the adversarial
 strategies evaluated are those most frequently discussed in the primary
 literature; attacks requiring specialized cryptographic or economic
@@ -163,8 +163,8 @@ synthesizes it.
 - **RQ3.** What is the relative communication overhead of each family,
   measured in messages and bytes per agreed unit, under a fixed workload
   and identical network assumptions? *The question exposes the differing
-  scaling exponents — `O(n²)` for PBFT, `O(n)` for DAG-based, per-validator
-  `O(K·β)` independent of `n` for Avalanche — in a single measurement.*
+  scaling exponents (`O(n²)` for PBFT, `O(n)` for DAG-based, per-validator
+  `O(K·β)` independent of `n` for Avalanche) in a single measurement.*
 - **RQ4.** Under which adversarial strategies (silent non-participation,
   delayed voting, equivocation, selective dropping) does each family
   exhibit liveness degradation, safety violation, or neither? *The question
@@ -193,9 +193,9 @@ The thesis makes four contributions
    performance–security tradeoff across the four families under matched
    conditions, answering RQ1–RQ5.
 4. A methodological extension of the simulation-based,
-   metrics-instrumented evaluation approach of Gervais *et al.* [17] —
-   originally applied to Proof-of-Work — to PBFT-style, PoS-finality,
-   Avalanche-style, and DAG-based protocols.
+   metrics-instrumented evaluation approach of Gervais *et al.* [17],
+   which they originally applied to Proof-of-Work, to PBFT-style,
+   PoS-finality, Avalanche-style, and DAG-based protocols.
 
 The remainder of the thesis is organized as follows. **Chapter 2** reviews
 the literature on Layer-1 consensus families and prior comparative
