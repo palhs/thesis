@@ -80,5 +80,20 @@
 
 ## Drafts
 
+- [[drafts/front_acknowledgments]] — Acknowledgments front matter: neutral scaffold prose with `TODO(human)` markers for advisor, committee, department, funding, peers, and family; ports into `../thesis-tex/MIT-thesis-template/acknowledgments.tex`.
 - [[drafts/ch1_intro]] — Chapter 1 Introduction: background, motivation, problem statement, operational performance/security definitions, scope and assumptions, RQ1–RQ5, contributions, and chapter roadmap.
 - [[drafts/ch2_litreview]] — Chapter 2 Literature Review: blockchain & the consensus problem, the four-family design space (Figure 2.1), per-family survey on a uniform mechanism / guarantees / adversarial-weakness / RQ-role skeleton (Table 2.1), and the metric-vocabulary fragmentation that obstructs cross-family comparison (Table 2.2). Establishes the unified-harness gap as a literature-level claim and hands off to Chapter 3.
+
+## Diagrams
+
+- [[diagrams/index]] — Diagrams navigation entry point: Swimlanes.io syntax legend, lifeline glossary, catalogue of the T17 / T20 diagram sets, reading order, and the deliberately-deferred adversary and experiment-matrix gaps.
+- [[diagrams/runtime/macro]] — T20 macro runtime view: one experiment-matrix cell + seed → one `results.csv` row through six phases (init, workload, run loop, stop, flush, output); the run-loop phase zooms into the five scheduler diagrams.
+- [[diagrams/protocols/pbft]] — T20 protocol main loop: PBFT three-phase commit (pre-prepare → prepare → commit) for one `(view, seq)` instance plus the view-change branch.
+- [[diagrams/protocols/casper-ffg]] — T20 protocol main loop: Casper FFG justify→finalise for one epoch with the accountable-safety (slashing) branch on detected double / surround votes.
+- [[diagrams/protocols/snowman]] — T20 protocol main loop: Snowman subsampled `K`-peer poll loop for one block, accepting at `counter ≥ β`.
+- [[diagrams/protocols/narwhal-tusk]] — T20 protocol main loop: one Narwhal DAG round (header → vote → certificate) plus the zero-message Tusk anchor commit over the DAG.
+- [[diagrams/scheduler/bootstrap]] — T17 scheduler contract: the cast and how the harness wires them across six phases from construction to run; pins the split-bind invariant (Scheduler owns `set_timer` / `cancel_timer` / `emit`; Network owns `send` / `broadcast`).
+- [[diagrams/scheduler/event-enqueue]] — T17 scheduler contract: how events get onto the heap; three sources (Node `set_timer`, Network delivery, Network phase advance) funnel through `Scheduler.schedule()`; pins seq assignment and validation gates.
+- [[diagrams/scheduler/event-dispatch]] — T17 scheduler contract: one iteration of `run()` (pop, advance virtual time, deadline check, tombstone check, event-sink emit, dispatch, predicate check) with the three exit paths drawn explicitly.
+- [[diagrams/scheduler/timer-lifecycle]] — T17 scheduler contract: one timer's full life cycle through set / cancel / overwrite / fire; shows the lazy-tombstone pattern (registry is the source of truth, heap is append-only from the cancel side).
+- [[diagrams/scheduler/constraints]] — T17 scheduler contract: the negative space — adversary boundary, RNG ownership, metric-computation ownership, wallclock prohibition, and the four fail-fast validation gates.

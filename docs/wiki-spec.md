@@ -27,7 +27,7 @@ retrieval graph — see `docs/retrieval.md`.
 
 `wiki/index.md` is the retrieval entry point. Rules:
 
-- Organized by category: Algorithms, Concepts, Sources, Experiments, Drafts.
+- Organized by category: Algorithms, Concepts, Sources, Experiments, Drafts, Diagrams.
 - One line per page: `- [[path/to/page]] — one-line summary`.
 - Updated on every task that creates a page.
 - Keep under ~500 lines total. If it grows past that, revisit — split by

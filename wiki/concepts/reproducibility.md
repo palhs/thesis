@@ -16,8 +16,9 @@ Three claims:
 - (c) Captured `event_sink` stream end-to-end is byte-identical under (a) ∧ (b).
 
 The thesis' central artifact is comparative measurement across four
-consensus protocols ([[algorithms/pbft]], [[algorithms/casper-ffg]],
-[[algorithms/snowman]], [[algorithms/narwhal-tusk]]). Every reported metric
+consensus protocols ([[algorithms/pbft]], [[algorithms/pos]],
+[[algorithms/avalanche#snowman--linearised-production]],
+[[algorithms/dag-based]]). Every reported metric
 — latency, throughput, message complexity, behaviour under fault injection
 — is a function of (configuration, randomness). If a run is not
 byte-identical for the same input, every reported metric inherits hidden
