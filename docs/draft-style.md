@@ -14,6 +14,14 @@ equivocation, DAG) is used without a first-use gloss. Do not pad chapters with
 tutorial explanation of standard concepts. Define a term only when it is
 genuinely non-standard or is used in a narrow sense specific to this thesis.
 
+Technical terminology is exempt, but general (non-technical) vocabulary is
+constrained to the IELTS 7.0 band. Prefer common, widely understood words
+over rarer or more ornate near-synonyms: "show" or "demonstrate" rather than
+"evince"; "use" rather than "utilise"; "because" rather than "inasmuch as";
+"large" rather than "voluminous". Formality is achieved through sentence
+structure and precision (see Register), not through reaching for a more
+obscure word.
+
 This is the opposite of `docs/chat-style.md`, which defines terms for a
 beginner reader. The two audiences differ — do not apply chat-style glossing
 to drafts.
