@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 73 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 48 · In Review: 0 · In Progress: 1 · Not Started: 41 · Blocked: 0
+- Completed: 48 · In Review: 1 · In Progress: 0 · Not Started: 41 · Blocked: 0
 
 ## Legend
 
@@ -168,7 +168,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 - `[x]` **T28** `H` Engineer — Implement simplified PBFT proposal logic
   _Outcome:_ Leader proposes, broadcasts pre-prepare, nodes validate · _Artifact:_ `src/pbft/`
-- `[~]` **T29** `H` Engineer — Implement PBFT voting and commit/finalization
+- `[?]` **T29** `H` Engineer — Implement PBFT voting and commit/finalization
   _Outcome:_ Full round: pre-prepare → prepare (2f+1) → commit (2f+1) → finalize; full view-change recovery (`VIEW-CHANGE` → `NEW-VIEW` → reissue) — human decision 2026-05-21 supersedes the original "view change stub" scope, reconciling with `wiki/concepts/system-design-protocols.md` §6 ("T29 implements the full recovery path") · _Artifact:_ `src/pbft/`
 - `[ ]` **T30** `H` Engineer — Test PBFT correctness under honest nodes
   _Outcome:_ Finalizes with 4/7/10 nodes; no forks; latency logged · _Artifact:_ `wiki/experiments/<date>_pbft-baseline.md`

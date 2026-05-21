@@ -244,4 +244,27 @@ implement the §§2–5 loops; [[concepts/output-format]] (T40) fixes the
 
 ## Revisions
 
-None.
+- **2026-05-21 (T29).** The §2 PBFT sketch diverges from the T29
+  implementation (`src/pbft/node.py`) in three ways a reader reproducing
+  the protocol from the sketch alone would get wrong:
+  - *Self-recorded votes.* The sketch counts `i.add_prepare(msg)` /
+    `i.add_commit(msg)` over delivered messages only. `Network.broadcast`
+    excludes the sender, so a node never receives its own vote — counting
+    deliveries alone tops out at `2f`, never `2f+1`. The implementation
+    has every replica (the primary included) **explicitly self-record**
+    its own `PREPARE` / `COMMIT` — and its own `PRE-PREPARE` — into the
+    instance's quorum dict (T29 design spec Decision B).
+  - *Per-view timer backoff.* The sketch arms the view-change timer with
+    a flat `VC_DELAY`. The implementation uses `vc_delay·2^view` (Decision
+    F): a flat delay cannot make view-change recovery terminate
+    deterministically — a delay regime that view-changes once view-changes
+    forever.
+  - *Lazy instance creation.* The sketch does `i = self.inst[(view, seq)]`
+    directly. A `PREPARE` or `COMMIT` can arrive before the local
+    `PRE-PREPARE` (the network gives no ordering guarantee), so the
+    implementation creates the instance with `setdefault` and files the
+    vote regardless of state, counting it once the digest is known
+    (Decision C).
+  The §6 register already flagged the sketch as non-binding; this entry
+  records the specific divergences. The control spine — three-phase
+  commit, `2f+1` transitions, `decided` on `COMMITTED` — is unchanged.

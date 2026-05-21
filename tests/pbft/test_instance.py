@@ -47,5 +47,27 @@ class TestInstance(unittest.TestCase):
         self.assertEqual(i.digest, b"\x11" * 32)
 
 
+class TestT29MatchingHelpers(unittest.TestCase):
+    """T29 spec § 5: request_payload field + digest-matching vote counts."""
+
+    def test_request_payload_defaults_none(self):
+        from pbft.instance import Instance
+        self.assertIsNone(Instance(view=0, seq=0).request_payload)
+
+    def test_matching_prepares_counts_only_digest_matches(self):
+        from pbft.instance import Instance
+        inst = Instance(view=0, seq=0)
+        inst.digest = b"A" * 32
+        inst.prepares = {0: b"A" * 32, 1: b"A" * 32, 2: b"B" * 32}
+        self.assertEqual(inst.matching_prepares(), 2)
+
+    def test_matching_is_zero_while_digest_none(self):
+        from pbft.instance import Instance
+        inst = Instance(view=0, seq=0)
+        inst.prepares = {0: b"A" * 32}
+        self.assertEqual(inst.matching_prepares(), 0)
+        self.assertEqual(inst.matching_commits(), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

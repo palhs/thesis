@@ -183,21 +183,29 @@ class TestRule5DigestMismatch(unittest.TestCase):
         self.assertEqual(rejections[0][1]["reason"], "digest_mismatch")
 
 
-# --- Unknown-type rejection + known-but-unwired silent no-op ------------
+# --- Unknown-type rejection + malformed voting-payload rejection --------
 
 class TestOnMessageDispatch(unittest.TestCase):
-    def test_known_but_unwired_types_silently_no_op(self):
-        # T29's PREPARE/COMMIT/VIEW-CHANGE/NEW-VIEW are vocabulary T28
-        # acknowledges but does not handle. No pbft_rejected event.
+    def test_voting_types_reject_malformed_payload(self):
+        # T29 wired PREPARE/COMMIT/VIEW-CHANGE/NEW-VIEW. A payload=None
+        # envelope of any of those types is now rejected with
+        # reason="malformed_payload" (the payload-shape guard, spec § 6.2),
+        # not silently dropped as in the T28 skeleton — T18 will inject
+        # malformed envelopes of exactly these types.
         node = _node(node_id=1, n=4)
         emitted, *_ = _install_capturers(node)
         _kickoff(node)
 
-        for typ in ("PREPARE", "COMMIT", "VIEW-CHANGE", "NEW-VIEW"):
+        types = ("PREPARE", "COMMIT", "VIEW-CHANGE", "NEW-VIEW")
+        for typ in types:
             msg = Message(src=0, dst=1, type=typ, payload=None, t_sent=0.0)
             node.on_message(msg, t=5.0)
 
-        self.assertEqual(emitted, [])
+        self.assertEqual(len(emitted), 4)
+        for (event, fields, _), typ in zip(emitted, types):
+            self.assertEqual(event, PBFT_REJECTED)
+            self.assertEqual(fields["reason"], "malformed_payload")
+            self.assertEqual(fields["msg_type"], typ)
 
     def test_unknown_type_rejects(self):
         node = _node(node_id=1, n=4)
