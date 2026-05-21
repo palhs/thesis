@@ -61,10 +61,11 @@ class PBFTNode(Node):
         self.next_seq: int = 0
         self.inst: dict[tuple[int, int], Instance] = {}
 
-    # --- Node ABC hooks: stubs in this task; Tasks 5 + 6 fill them in. ---
+    # --- Lifecycle hooks (spec § 7.2 / § 7.3). ---
 
     def _on_start(self, t: float) -> None:
-        raise NotImplementedError("Task 6")
+        if self._is_primary(self.view):
+            self.set_timer("propose", self.propose_delay, None, t)
 
     def _on_message(self, msg: Message, t: float) -> None:
         if msg.type == "PRE-PREPARE":
@@ -77,7 +78,24 @@ class PBFTNode(Node):
                        "src": msg.src}, t)
 
     def _on_timer(self, timer_id: Any, payload: Any, t: float) -> None:
-        raise NotImplementedError("Task 6")
+        if timer_id == "propose":
+            self._propose(t)
+        # else: silent no-op. T29 owns ("view_change", instance_key).
+
+    def _propose(self, t: float) -> None:
+        if not self.workload:
+            return                              # drain complete; no re-arm
+        if not self._is_primary(self.view):
+            return                              # demoted mid-flight (T29)
+        request = self.workload.pop(0)
+        seq = self.next_seq
+        self.next_seq += 1
+        d = digest(request)
+        pp = PrePreparePayload(view=self.view, seq=seq,
+                               request_digest=d, request_payload=request)
+        self.broadcast("PRE-PREPARE", pp, t)
+        self._accept_pre_prepare(self.view, seq, d, src=self.id, t=t)
+        self.set_timer("propose", self.propose_delay, None, t)
 
     # --- Recipient PRE-PREPARE pipeline (spec § 7.4 / § 7.5). ---
 
