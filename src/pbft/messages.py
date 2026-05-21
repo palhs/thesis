@@ -48,7 +48,8 @@ class CommitPayload:
 class ViewChangePayload:
     new_view: int
     last_stable_seq: int
-    prepared: list[tuple[int, int, bytes]] = field(default_factory=list)
+    prepared: list[tuple[int, int, bytes, bytes]] = field(default_factory=list)
+    # each tuple: (view, seq, request_digest, request_payload)
 
 
 @dataclass(frozen=True)

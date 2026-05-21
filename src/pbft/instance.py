@@ -29,6 +29,22 @@ class Instance:
     seq: int
     state: InstanceState = InstanceState.IDLE
     digest: Optional[bytes] = None
+    # T29: request payload, retained for self-contained view-change evidence
+    # (Decision E). Set by _accept_pre_prepare alongside `digest`.
+    request_payload: Optional[bytes] = None
     # T29: quorum collection. src -> digest, one entry per matching message.
     prepares: dict[int, bytes] = field(default_factory=dict)
     commits: dict[int, bytes] = field(default_factory=dict)
+
+    def matching_prepares(self) -> int:
+        """Count PREPAREs whose asserted digest matches this instance's
+        pre-prepared digest. Zero while digest is None (Decision C)."""
+        if self.digest is None:
+            return 0
+        return sum(1 for d in self.prepares.values() if d == self.digest)
+
+    def matching_commits(self) -> int:
+        """COMMIT analogue of `matching_prepares`."""
+        if self.digest is None:
+            return 0
+        return sum(1 for d in self.commits.values() if d == self.digest)

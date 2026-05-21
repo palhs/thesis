@@ -72,6 +72,7 @@
 - [[experiments/2026-05-19_logging-baseline]] — T24 build-verification baseline: the EventLogger records a real 2-node ping-pong; both `event_sink` shapes captured, CSV well-formed, determinism contract holds.
 - [[experiments/2026-05-19_message-exchange-integration]] — T25 cross-component integration test: scheduler + Node + Network driven by 4/7/10-node scenarios; message exchange complete, observed delay distribution matches the configured `uniform`, scheduler dispatches in canonical `(t, node_id, seq)` order under scrambled submission.
 - [[experiments/2026-05-21_pbft-proposal-baseline]] — T28 build-verification baseline: the PBFT pre-prepare phase across the W3 stack; n=4 and n=7 scenarios reach a self-consistent PRE_PREPARED state with zero voting messages emitted and byte-identical determinism re-runs.
+- [[experiments/2026-05-21_pbft-consensus-baseline]] — T29 build-verification baseline: the full PBFT three-phase commit across the W3 stack; honest n=4/n=7 runs reach `decided`, and a delay-regime n=4 run exercises the full VIEW-CHANGE → NEW-VIEW recovery path without a safety break; determinism byte-identical.
 
 ## Lint reports
 

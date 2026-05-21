@@ -91,13 +91,6 @@ class TestScenarioA_n4(unittest.TestCase):
         logger, _ = _run(n=4, workload_for=self._workload_for)
         self.assertEqual(_count_event(logger.records, PBFT_REJECTED), 0)
 
-    def test_no_voting_messages_emitted(self):
-        # PREPARE / COMMIT / VIEW-CHANGE / NEW-VIEW must be zero in T28.
-        logger, _ = _run(n=4, workload_for=self._workload_for)
-        for typ in ("PREPARE", "COMMIT", "VIEW-CHANGE", "NEW-VIEW"):
-            self.assertEqual(_count_msg_type(logger.records, typ), 0,
-                             f"unexpected {typ} delivery in T28")
-
     def test_pre_prepare_deliveries_count(self):
         # 3 broadcasts x 3 non-primary recipients = 9 PRE-PREPARE deliveries.
         # The primary's self-loop is in-process and does NOT generate a

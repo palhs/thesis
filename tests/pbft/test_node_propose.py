@@ -127,8 +127,9 @@ class TestProposePath(unittest.TestCase):
         # _on_start armed the timer; fire it manually.
         primary.on_timer("propose", None, t=1.0)
 
-        # One PRE-PREPARE broadcast with the right shape.
-        self.assertEqual(len(broadcasts), 1)
+        # The PRE-PREPARE broadcast leads, with the right shape. T29's
+        # uniform-quorum model (Decision B) means the primary's self-loop
+        # accept also broadcasts a PREPARE, so two broadcasts are expected.
         typ, pp, t = broadcasts[0]
         self.assertEqual(typ, "PRE-PREPARE")
         self.assertIsInstance(pp, PrePreparePayload)
@@ -136,6 +137,7 @@ class TestProposePath(unittest.TestCase):
         self.assertEqual(pp.seq, 0)
         self.assertEqual(pp.request_payload, b"A")
         self.assertEqual(pp.request_digest, digest(b"A"))
+        self.assertIn("PREPARE", [b[0] for b in broadcasts])
 
         # Self-loop: primary's own (0, 0) is PRE_PREPARED with one
         # pbft_pre_prepared event whose src == self.id.
@@ -150,10 +152,10 @@ class TestProposePath(unittest.TestCase):
         # next_seq advanced.
         self.assertEqual(primary.next_seq, 1)
 
-        # Re-arm: the propose timer was re-set after broadcast (the
-        # original from _on_start plus one from _propose).
-        self.assertEqual(len(timers), 2)
-        self.assertEqual(timers[1][0], "propose")
+        # T29: the self-loop accept arms a per-instance view-change timer,
+        # and _propose re-arms the propose timer.
+        self.assertIn(("view_change", 0, 0), [tid for tid, *_ in timers])
+        self.assertEqual(timers[-1][0], "propose")
 
     def test_drain_stops_when_workload_empty(self):
         primary = _node(0, n=4, workload=[b"A"], propose_delay=1.0)
@@ -163,9 +165,11 @@ class TestProposePath(unittest.TestCase):
         primary.on_timer("propose", None, t=2.0)    # workload empty: no-op
 
         # Exactly one PRE-PREPARE; the second fire was a drain no-op.
-        self.assertEqual(len(broadcasts), 1)
-        # No additional timer past the re-arm from the first _propose.
-        self.assertEqual(len(timers), 2)
+        pre_prepares = [b for b in broadcasts if b[0] == "PRE-PREPARE"]
+        self.assertEqual(len(pre_prepares), 1)
+        # Two propose timers (_on_start + the one _propose re-arm); the
+        # second fire drained nothing and armed nothing.
+        self.assertEqual([t for t in timers if t[0] == "propose"].__len__(), 2)
 
     def test_next_seq_monotone_across_drain(self):
         primary = _node(0, n=4, workload=[b"A", b"B", b"C"],
@@ -174,7 +178,7 @@ class TestProposePath(unittest.TestCase):
         primary.start(t=0.0)
         for k in range(3):
             primary.on_timer("propose", None, t=float(k + 1))
-        seqs = [b[1].seq for b in broadcasts]
+        seqs = [b[1].seq for b in broadcasts if b[0] == "PRE-PREPARE"]
         self.assertEqual(seqs, [0, 1, 2])
 
     def test_unknown_timer_silently_no_op(self):

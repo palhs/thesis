@@ -54,6 +54,17 @@ class TestPlaceholderPayloads(unittest.TestCase):
         self.assertEqual(vc.last_stable_seq, 0)
         self.assertEqual(vc.prepared, [])
 
+    def test_view_change_payload_prepared_holds_four_tuples(self):
+        # T29 Decision E: prepared evidence carries the request payload as a
+        # fourth element so the new primary can reissue without having
+        # prepared the instance itself.
+        from pbft.messages import ViewChangePayload
+        vc = ViewChangePayload(
+            new_view=1, last_stable_seq=-1,
+            prepared=[(0, 0, b"d" * 32, b"REQ")])
+        self.assertEqual(vc.prepared[0], (0, 0, b"d" * 32, b"REQ"))
+        self.assertEqual(vc.new_view, 1)
+
     def test_new_view_payload_fields(self):
         nv = NewViewPayload(new_view=1, vc_proofs=[], reissued=[])
         self.assertEqual(nv.new_view, 1)
