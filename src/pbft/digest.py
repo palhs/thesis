@@ -4,7 +4,8 @@
 Matches the process-stable hash discipline established for the per-Node
 RNG seed (src/nodes/node.py:_stable_seed) and the network RNG seed
 (src/network/network.py:_network_seed). blake2b, not hash() — Python's
-hash() of bytes is process-stable but the discipline is uniform.
+hash() of bytes is process-randomised (PYTHONHASHSEED), which would break
+byte-identical replay; blake2b is identical across processes.
 """
 from __future__ import annotations
 
