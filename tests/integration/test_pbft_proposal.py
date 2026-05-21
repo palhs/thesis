@@ -7,7 +7,7 @@ six-phase bootstrap is real and the determinism contract holds end-to-end:
   Scenario A — n=4, workload=[b"A", b"B", b"C"]
   Scenario B — n=7, workload=[b"X"]
 
-Both run under a single phase, zero delay, zero drop. The propose-timer
+Both run under a single phase, minimal (1e-9) delay, zero drop. The propose-timer
 chain ends on workload drain; the run reaches quiescence without a t_max.
 """
 import math
