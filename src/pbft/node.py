@@ -67,10 +67,67 @@ class PBFTNode(Node):
         raise NotImplementedError("Task 6")
 
     def _on_message(self, msg: Message, t: float) -> None:
-        raise NotImplementedError("Task 5")
+        if msg.type == "PRE-PREPARE":
+            self._handle_pre_prepare(msg, t)
+        elif msg.type in ("PREPARE", "COMMIT", "VIEW-CHANGE", "NEW-VIEW"):
+            return                              # T29 wires these
+        else:
+            self.emit(PBFT_REJECTED,
+                      {"reason": "unknown_type", "msg_type": msg.type,
+                       "src": msg.src}, t)
 
     def _on_timer(self, timer_id: Any, payload: Any, t: float) -> None:
         raise NotImplementedError("Task 6")
+
+    # --- Recipient PRE-PREPARE pipeline (spec § 7.4 / § 7.5). ---
+
+    def _handle_pre_prepare(self, msg: Message, t: float) -> None:
+        pp: PrePreparePayload = msg.payload
+        # Rule 1: sender is the asserted view's primary.
+        if msg.src != (pp.view % self.n):
+            self._reject(t, "non_primary_sender",
+                         view=pp.view, seq=pp.seq, src=msg.src)
+            return
+        # Rule 2: view matches recipient's current view.
+        if pp.view != self.view:
+            self._reject(t, "view_mismatch",
+                         view=pp.view, seq=pp.seq, src=msg.src)
+            return
+        # Rule 3: not in the middle of a view change.
+        if self.view_changing:
+            self._reject(t, "view_changing",
+                         view=pp.view, seq=pp.seq, src=msg.src)
+            return
+        # Rule 4: (view, seq) instance not already past IDLE.
+        existing = self.inst.get((pp.view, pp.seq))
+        if existing is not None and existing.state is not InstanceState.IDLE:
+            self._reject(t, "duplicate_pre_prepare",
+                         view=pp.view, seq=pp.seq, src=msg.src)
+            return
+        # Rule 5: digest integrity.
+        if digest(pp.request_payload) != pp.request_digest:
+            self._reject(t, "digest_mismatch",
+                         view=pp.view, seq=pp.seq, src=msg.src)
+            return
+
+        self._accept_pre_prepare(pp.view, pp.seq, pp.request_digest,
+                                 src=msg.src, t=t)
+
+    def _accept_pre_prepare(self, view: int, seq: int, d: bytes,
+                            src: int, t: float) -> None:
+        """Shared IDLE -> PRE_PREPARED transition. Caller (recipient
+        validator or primary self-loop) guarantees validation has
+        passed; this method is unconditional."""
+        inst = self.inst.setdefault((view, seq),
+                                    Instance(view=view, seq=seq))
+        inst.state = InstanceState.PRE_PREPARED
+        inst.digest = d
+        self.emit(PBFT_PRE_PREPARED,
+                  {"view": view, "seq": seq, "digest": d.hex(),
+                   "src": src}, t)
+
+    def _reject(self, t: float, reason: str, **fields) -> None:
+        self.emit(PBFT_REJECTED, {"reason": reason, **fields}, t)
 
     # --- Primary detection (Decision D). ---
 
