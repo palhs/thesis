@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 73 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 47 · In Review: 1 · In Progress: 0 · Not Started: 42 · Blocked: 0
+- Completed: 48 · In Review: 0 · In Progress: 0 · Not Started: 42 · Blocked: 0
 
 ## Legend
 
@@ -166,7 +166,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 5 — PBFT implementation
 
-- `[?]` **T28** `H` Engineer — Implement simplified PBFT proposal logic
+- `[x]` **T28** `H` Engineer — Implement simplified PBFT proposal logic
   _Outcome:_ Leader proposes, broadcasts pre-prepare, nodes validate · _Artifact:_ `src/pbft/`
 - `[ ]` **T29** `H` Engineer — Implement PBFT voting and commit/finalization
   _Outcome:_ Full round: pre-prepare → prepare (2f+1) → commit (2f+1) → finalize; view change stub · _Artifact:_ `src/pbft/`
