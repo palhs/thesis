@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 73 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 50 · In Review: 1 · In Progress: 0 · Not Started: 39 · Blocked: 0
+- Completed: 50 · In Review: 1 · In Progress: 1 · Not Started: 38 · Blocked: 0
 
 ## Legend
 
@@ -177,7 +177,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 6 — PoS implementation + start Ch. 3
 
-- `[ ]` **T32** `H` Engineer — Implement simplified PoS-inspired consensus
+- `[~]` **T32** `H` Engineer — Implement simplified PoS-inspired consensus
   _Outcome:_ Validator-based voting; proposer by stake/turn; threshold finality · _Artifact:_ `src/pos/`
 - `[ ]` **T33** `H` Engineer — Define validator selection / turn-based proposal
   _Outcome:_ Round-robin or weighted random; fairness verified over 100 rounds · _Artifact:_ `src/pos/selection.py` + wiki update
