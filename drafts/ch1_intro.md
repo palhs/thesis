@@ -41,9 +41,10 @@ protocol [8]; Sui is secured by a DAG-based protocol [13]; Cosmos chains
 are secured by a PBFT-style protocol [6]; the Avalanche mainnet is secured
 by the Avalanche-style protocol from which the family takes its name [9].
 
-The primary literature evaluates each protocol predominantly under benign
-conditions: honest participation, stable networks, single-variable
-disturbances. Production deployments allow none of those simplifications.
+The primary literature evaluates each protocol under scattered,
+harness-specific conditions: each study fixes its own network model, fault
+assumptions, and workload, and varies one disturbance at a time. Live operation
+combines those disturbances rather than isolating them.
 Validators are geographically distributed; messages are delayed, reordered,
 and dropped; a sizable fraction of the active set is, at any given
 moment, slow, offline, or adversarial. The conditions under which a

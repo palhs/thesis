@@ -387,3 +387,20 @@ bibliography.
   view-change cap parameterisation feeding the size column.
 - [[concepts/output-format]] (T40) — CSV schema consuming the
   per-row metric tag.
+
+## Revisions
+
+- **2026-05-21 (T29).** `VIEW-CHANGE` evidence is a **4-tuple**, not the
+  3-tuple declared in §3 and the §8 sketch. The T29 implementation
+  (`src/pbft/messages.py`) carries `prepared` as
+  `list[(view, seq, request_digest, request_payload)]` — the request
+  payload is included so the new primary can reissue a valid `PRE-PREPARE`
+  (which must satisfy the digest-integrity rule) for an instance it never
+  personally prepared (T29 design spec Decision E). The §3 size column
+  `8 + 8 + k·48` therefore understates the payload by `k·|req|`.
+- **2026-05-21 (T29).** §9's "VIEW-CHANGE evidence size cap" item
+  anticipated "T29 may need a stricter cap". T29 applies **no cap**: it
+  drops the checkpoint protocol entirely (T29 design spec Decision D), so
+  `last_stable_seq` is vestigial — fixed at `-1` — and the evidence is
+  *every* instance the replica holds at state ≥ `PREPARED`. A bounded cap
+  is deferred to a future task that models checkpointing.
