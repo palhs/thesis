@@ -404,3 +404,20 @@ bibliography.
   `last_stable_seq` is vestigial — fixed at `-1` — and the evidence is
   *every* instance the replica holds at state ≥ `PREPARED`. A bounded cap
   is deferred to a future task that models checkpointing.
+- **2026-05-23 (T32).** The §4 Casper FFG payloads in the catalog carry
+  fields the T32 implementation (`src/pos/messages.py`) omits:
+  - `ATTESTATION` drops `head_vote_hash` — LMD-GHOST fork choice is out
+    of scope (T32 design spec Decision B), and the head vote has no
+    consumer.
+  - `ATTESTATION` and `BLOCK-PROPOSAL` drop the per-validator `signature`
+    and `proposer_sig` fields — the simulator passes Python objects, not
+    signed bytes, and performs no signature verification (the catalog's
+    own §1 notes encoding is out of scope).
+  The §4 byte-size columns therefore **overstate** the actual wire
+  payloads by the omitted fields: a real `ATTESTATION` is closer to
+  `8 + 8 + 8 + 32 + 8 + 32` bytes (no `head_vote_hash`, no signature) and
+  a real `BLOCK-PROPOSAL` correspondingly shorter. The simulator is a
+  correct upper-bound for these protocols' message counts and accurate
+  for the FFG arithmetic; the byte budget needs the deductions applied
+  when comparing against a real wire format. A signed-message model is
+  deferred to whatever task adds cryptographic accounting.

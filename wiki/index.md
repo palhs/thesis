@@ -74,6 +74,7 @@
 - [[experiments/2026-05-21_pbft-proposal-baseline]] — T28 build-verification baseline: the PBFT pre-prepare phase across the W3 stack; n=4 and n=7 scenarios reach a self-consistent PRE_PREPARED state with zero voting messages emitted and byte-identical determinism re-runs.
 - [[experiments/2026-05-21_pbft-consensus-baseline]] — T29 build-verification baseline: the full PBFT three-phase commit across the W3 stack; honest n=4/n=7 runs reach `decided`, and a delay-regime n=4 run exercises the full VIEW-CHANGE → NEW-VIEW recovery path without a safety break; determinism byte-identical.
 - [[experiments/2026-05-21_pbft-baseline]] — T30 honest-node correctness experiment: full PBFT three-phase commit under an all-honest validator set at n=4/7/10 — every node finalizes, zero forks (one `decided` value per seq), finalization latency logged; determinism byte-identical.
+- [[experiments/2026-05-23_casper-baseline]] — T32 build-verification baseline: the simplified Casper FFG honest-path core across the W3 stack; n=4/7 (uniform and non-uniform stake) runs justify and finalise epochs through two-round FFG aggregation, decided fires in epoch order, determinism byte-identical.
 
 ## Lint reports
 

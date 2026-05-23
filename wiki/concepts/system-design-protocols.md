@@ -268,3 +268,25 @@ implement the §§2–5 loops; [[concepts/output-format]] (T40) fixes the
   The §6 register already flagged the sketch as non-binding; this entry
   records the specific divergences. The control spine — three-phase
   commit, `2f+1` transitions, `decided` on `COMMITTED` — is unchanged.
+- **2026-05-23 (T32).** The §3 Casper sketch diverges from the T32
+  implementation (`src/pos/node.py`) in two ways a reader reproducing the
+  protocol from the sketch alone would get wrong:
+  - *Attestation cadence.* The sketch attests **every slot**, building the
+    FFG checkpoint vote and a per-slot head vote together. The
+    implementation attests **once per epoch** at `attest_offset` slots in
+    (the constructor default is the mid-epoch slot — design spec Decision
+    J). The per-slot head vote belongs to LMD-GHOST fork choice, which is
+    out of scope (next item); without LMD-GHOST the per-slot cadence
+    contributes no extra information to the FFG gadget and inflates the
+    message count by a factor of `slots_per_epoch`.
+  - *Fork-choice object.* The sketch references a `self.lmd_ghost`
+    object to choose the head vote and resolve `chain.head` under
+    competing forks. The implementation has **no fork-choice object**:
+    `Chain.head` is just the block at the greatest known slot (honest-path
+    linear chain — Decision B). Delay-induced reorgs are out of scope
+    until T46–T50.
+  The §6 register already flagged the sketch as non-binding; this entry
+  records the specific divergences. The control spine — slot loop with
+  proposer rotation, per-epoch FFG aggregation, two-round justify→finalise
+  on a `≥ 2/3` stake supermajority, `decided` on finalisation — is
+  unchanged.
