@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 73 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 53 · In Review: 2 · In Progress: 0 · Not Started: 35 · Blocked: 0
+- Completed: 54 · In Review: 1 · In Progress: 0 · Not Started: 35 · Blocked: 0
 
 ## Legend
 
@@ -183,7 +183,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Round-robin or weighted random; fairness verified over 100 rounds · _Artifact:_ `src/pos/selection.py` + wiki update
 - `[x]` **T34** `H` Engineer — Define voting/finality rule (threshold participation)
   _Outcome:_ Finality when ≥2/3 attest; edge cases tested · _Artifact:_ `src/pos/finality.py`
-- `[?]` **T35** `H` Engineer — Test PoS correctness and comparison-ready output
+- `[x]` **T35** `H` Engineer — Test PoS correctness and comparison-ready output
   _Outcome:_ Same CSV format as PBFT · _Artifact:_ `wiki/experiments/<date>_pos-baseline.md`
 - `[ ]` **T36** `M` Writer — Begin drafting Chapter 3 (Methodology)
   _Outcome:_ 2–3 pages: system model, algorithm descriptions, simulation setup, metrics · _Artifact:_ `drafts/ch3_methodology.md`
