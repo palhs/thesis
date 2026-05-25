@@ -35,6 +35,14 @@ class TestConstructor(unittest.TestCase):
         with self.assertRaises(ValueError):
             make_node(0, 4, stake_table={0: 3.0, 1: 3.0})   # missing 2,3
 
+    def test_rejects_zero_total_stake(self):
+        # All-zero per-validator stake passes the >= 0 check but yields
+        # total_stake = 0, which would let the 2/3 threshold be met
+        # vacuously by an empty quorum. T34 precondition for the
+        # finality rule.
+        with self.assertRaises(ValueError):
+            make_node(0, 4, stake_table={i: 0.0 for i in range(4)})
+
     def test_event_constants_exist(self):
         for name in ("CASPER_BLOCK_ACCEPTED", "CASPER_ATTESTED",
                      "CASPER_JUSTIFIED", "CASPER_FINALISED",

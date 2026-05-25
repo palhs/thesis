@@ -21,7 +21,8 @@ from typing import Any
 from nodes import Message, Node
 
 from .chain import Block, Chain, GENESIS_HASH, block_hash
-from .epoch import EpochFSM, EpochState, meets_supermajority
+from .epoch import EpochFSM, EpochState
+from .finality import evaluate as evaluate_ffg
 from .messages import AttestationPayload, BlockProposalPayload, FFGVote
 from .selection import stake_weighted_proposer
 
@@ -85,6 +86,11 @@ class CasperNode(Node):
             if s < 0 or s != s or s == float("inf") or s == float("-inf"):
                 raise ValueError(
                     f"stake_table[{vid}]={s} must be finite and non-negative")
+        if sum(stake_table.values()) <= 0:
+            raise ValueError(
+                "stake_table total must be positive — an all-zero "
+                "validator set would let the 2/3 threshold be met "
+                "vacuously by an empty quorum")
         if stake_table[node_id] != weight:
             raise ValueError(
                 f"stake_table[{node_id}]={stake_table[node_id]} "
@@ -199,32 +205,30 @@ class CasperNode(Node):
             return                              # dedupe (Decision I)
         self._run_ffg_transitions(ffg.source_epoch, ffg.target_epoch, t)
 
-    def _is_justified(self, epoch: int) -> bool:
-        return epoch == 0 or self._epoch_state(epoch).state in (
-            EpochFSM.JUSTIFIED, EpochFSM.FINALISED)
-
     def _run_ffg_transitions(self, source_epoch: int,
                              target_epoch: int, t: float) -> None:
-        """Casper FFG two-round gadget (design spec §5.3): justify target
-        on a supermajority link from a justified source; finalise source
-        when target is its direct child."""
+        """Casper FFG two-round gadget (design spec §5.3): delegate the
+        rule to `finality.evaluate` and apply the resulting transitions."""
         tgt = self._epoch_state(target_epoch)
-        if (tgt.state is EpochFSM.UNJUSTIFIED
-                and self._is_justified(source_epoch)
-                and meets_supermajority(tgt.link_stake(source_epoch),
-                                        self.total_stake)):
-            tgt.state = EpochFSM.JUSTIFIED
-            self.highest_justified = max(self.highest_justified, target_epoch)
-            self.emit(CASPER_JUSTIFIED,
-                      {"epoch": target_epoch,
-                       "checkpoint_hash": _hexor(tgt.checkpoint_hash)}, t)
-            src = self._epoch_state(source_epoch)
-            if (target_epoch == source_epoch + 1
-                    and src.state is EpochFSM.JUSTIFIED):
-                src.state = EpochFSM.FINALISED
-                self.highest_finalised = max(self.highest_finalised,
-                                             source_epoch)
-                self._finalise(source_epoch, src.checkpoint_hash, t)
+        src = self._epoch_state(source_epoch)
+        transitions = evaluate_ffg(
+            source_epoch=source_epoch, target_epoch=target_epoch,
+            link_stake=tgt.link_stake(source_epoch),
+            total_stake=self.total_stake,
+            source_state=src.state, target_state=tgt.state,
+        )
+        if not transitions.justified:
+            return
+        tgt.state = EpochFSM.JUSTIFIED
+        self.highest_justified = max(self.highest_justified, target_epoch)
+        self.emit(CASPER_JUSTIFIED,
+                  {"epoch": target_epoch,
+                   "checkpoint_hash": _hexor(tgt.checkpoint_hash)}, t)
+        if transitions.finalised_source:
+            src.state = EpochFSM.FINALISED
+            self.highest_finalised = max(self.highest_finalised,
+                                         source_epoch)
+            self._finalise(source_epoch, src.checkpoint_hash, t)
 
     def _finalise(self, epoch: int, checkpoint_hash: bytes | None,
                   t: float) -> None:

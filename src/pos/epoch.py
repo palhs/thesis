@@ -1,13 +1,13 @@
-"""Per-epoch FFG state and supermajority arithmetic (design spec §5).
+"""Per-epoch FFG state aggregator (design spec §5).
 
 One `EpochState` instance per target epoch — the [[concepts/node-model]] §4
 FSM instance for Casper FFG. `record_vote` is dedup'd by attester
 (Decision I): a duplicated delivery, or an honest validator's second vote
 for the same target, leaves the link stake unchanged.
 
-The supermajority test is division-free (`3·stake >= 2·total`) so whole-
-number stakes compare exactly without floating-point rounding (Decision
-in spec §5.2).
+The supermajority test and the justify/finalise transition rule live in
+[[algorithms/pos]] §5 and the `finality` module (T34); this file owns
+aggregation only.
 """
 from __future__ import annotations
 
@@ -18,11 +18,6 @@ class EpochFSM(Enum):
     UNJUSTIFIED = 0
     JUSTIFIED = 1
     FINALISED = 2
-
-
-def meets_supermajority(stake: float, total_stake: float) -> bool:
-    """True iff `stake` is at least 2/3 of `total_stake`."""
-    return 3.0 * stake >= 2.0 * total_stake
 
 
 class EpochState:

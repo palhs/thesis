@@ -1,16 +1,6 @@
 import unittest
 
-from pos.epoch import EpochFSM, EpochState, meets_supermajority
-
-
-class TestSupermajority(unittest.TestCase):
-    def test_two_thirds_boundary(self):
-        # >= 2/3 of total. total=9 -> need >= 6.
-        self.assertFalse(meets_supermajority(5.0, 9.0))
-        self.assertTrue(meets_supermajority(6.0, 9.0))
-
-    def test_exact_two_thirds_passes(self):
-        self.assertTrue(meets_supermajority(6.0, 9.0))
+from pos.epoch import EpochFSM, EpochState
 
 
 class TestEpochState(unittest.TestCase):
