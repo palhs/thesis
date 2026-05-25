@@ -23,6 +23,7 @@ from nodes import Message, Node
 from .chain import Block, Chain, GENESIS_HASH, block_hash
 from .epoch import EpochFSM, EpochState, meets_supermajority
 from .messages import AttestationPayload, BlockProposalPayload, FFGVote
+from .selection import stake_weighted_proposer
 
 
 CASPER_BLOCK_ACCEPTED = "casper_block_accepted"
@@ -65,6 +66,7 @@ class CasperNode(Node):
                  attest_offset: int | None = None,
                  workload: list[bytes] | None = None) -> None:
         super().__init__(node_id, weight, endpoint, global_seed)
+        self.global_seed: int = global_seed
         if n <= 0:
             raise ValueError(f"n must be positive, got {n}")
         if not 0 <= node_id < n:
@@ -140,12 +142,11 @@ class CasperNode(Node):
         # Re-arm the slot timer unconditionally (proposer rotation).
         self.set_timer("slot", self.slot_duration, slot + 1, t)
 
-    # --- Proposer selection (Decision E; T33 seam). ---
+    # --- Proposer selection (T33: stake-weighted random). ---
 
     def _proposer_of(self, slot: int) -> int:
-        """Round-robin: `slot mod n`. T33 replaces this with stake-weighted
-        selection in `src/pos/selection.py`."""
-        return slot % self.n
+        return stake_weighted_proposer(slot, self.stake_table,
+                                       self.global_seed)
 
     # --- Propose (design spec §6.4 step 2). ---
 

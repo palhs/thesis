@@ -75,6 +75,7 @@
 - [[experiments/2026-05-21_pbft-consensus-baseline]] — T29 build-verification baseline: the full PBFT three-phase commit across the W3 stack; honest n=4/n=7 runs reach `decided`, and a delay-regime n=4 run exercises the full VIEW-CHANGE → NEW-VIEW recovery path without a safety break; determinism byte-identical.
 - [[experiments/2026-05-21_pbft-baseline]] — T30 honest-node correctness experiment: full PBFT three-phase commit under an all-honest validator set at n=4/7/10 — every node finalizes, zero forks (one `decided` value per seq), finalization latency logged; determinism byte-identical.
 - [[experiments/2026-05-23_casper-baseline]] — T32 build-verification baseline: the simplified Casper FFG honest-path core across the W3 stack; n=4/7 (uniform and non-uniform stake) runs justify and finalise epochs through two-round FFG aggregation, decided fires in epoch order, determinism byte-identical.
+- [[experiments/2026-05-23_pos-selection-fairness]] — T33 build-verification: 100-round empirical fairness check on the stake-weighted random proposer (`src/pos/selection.py`); four stake distributions (uniform n=4/7, skewed 10/20/30/40, heavy-majority 60/13/13/14) all land inside the `|Δ| ≤ 0.10` per-validator tolerance under fixed `global_seed=42`.
 
 ## Lint reports
 

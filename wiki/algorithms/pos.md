@@ -184,6 +184,20 @@ Knobs exposed to experiments:
   dynamic and lets the adversarial-delay adversary be parameterised.
 - **Slashing penalty magnitude** — drives the safety-cost-budget metric.
 
+**Proposer selection (T33).** The slot proposer is drawn by
+stake-weighted random sampling: `src/pos/selection.py`'s
+`stake_weighted_proposer(slot, stake_table, global_seed)` is a pure
+function seeded from `(global_seed, slot)` via blake2b, so every
+validator computes the same proposer for any given slot (`CasperNode`
+rejects any `BLOCK-PROPOSAL` whose `msg.src` disagrees). The
+probability of selecting validator `v` equals its share of total stake;
+zero-stake validators are never selected. The 100-round empirical
+fairness check is `tests/pos/test_selection.py`; the broader sweep over
+seeds and stake distributions is the T33 experiment page
+[[experiments/2026-05-23_pos-selection-fairness]]. The earlier T32 rule
+(`slot mod n`, round-robin) is retained as `round_robin_proposer` for
+reference and direct testing.
+
 These feed T32–T35 (PoS implementation and correctness tests) and the
 baseline/delay/adversarial experiment batteries in Weeks 8–10.
 

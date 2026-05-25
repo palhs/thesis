@@ -25,7 +25,7 @@ def _populate_chain(node, upto_epoch):
     parent = GENESIS_HASH
     hashes = {0: GENESIS_HASH}
     for s in range(1, last_slot + 1):
-        proposer = s % node.n
+        proposer = node._proposer_of(s)
         bh = block_hash(slot=s, parent_hash=parent, proposer_idx=proposer,
                         transactions=())
         pp = BlockProposalPayload(slot=s, epoch=s // spe,

@@ -154,3 +154,19 @@ work.
 - [[concepts/simulation-design]] — the discrete-event scheduler and the
   six-phase bootstrap; the `t_max` deadline-stop branch the Casper run
   exercises.
+
+## Revisions
+
+**2026-05-23 (T33).** The proposer-selection rule changed from inline
+round-robin (`slot mod n`) to stake-weighted random sampling
+(`src/pos/selection.py`'s `stake_weighted_proposer`, seeded from
+`(global_seed, slot)` via blake2b). The event *counts* in the table
+above remain valid as honest-path build verification — every epoch is
+still proposed, attested, and finalised end-to-end, the supermajority
+arithmetic is unchanged, and zero rejections still hold — but the
+per-slot proposer identities, and therefore the specific block hashes
+recorded by the byte-identical determinism re-run, no longer match
+those produced under the T32 rule. The canonical PoS baseline that
+re-records event-record content under the new rule is T35
+(`wiki/experiments/<date>_pos-baseline.md`); this page remains the
+T32 build-verification record.
