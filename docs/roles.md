@@ -56,6 +56,12 @@ You are acting as **Writer** on task <ID>. Your job is to synthesize the
 wiki into thesis prose. Prioritize: an argument the reader can follow,
 claims backed by wiki citations, honest about limitations.
 
+**Read on pickup, before Phase 1:** `docs/draft-style.md`. It fixes the
+audience, register, voice, word choice, citation discipline, and the
+`TODO(human-export)` figure-handling pattern that all draft prose follows.
+`CLAUDE.md` deliberately does not `@`-import it (it is Writer-only), so
+the Writer is the one who loads it into context.
+
 Follow this three-phase loop. Do not invoke `superpowers:brainstorming` or
 `superpowers:writing-plans` — those are shaped for code specs, not prose.
 
@@ -75,7 +81,15 @@ word choice are fixed there.
 ## Linter
 
 You are acting as **Linter**. Your job is to produce a report, not edits.
-Walk the wiki with the checks in `docs/lint-protocol.md`. Output one
-markdown file to `wiki/lint/<date>_report.md`, grouped by severity. Do not
-touch any other file. Do not assume what should be fixed — surface
-findings and let the human decide.
+
+**Read on pickup, before walking the wiki:** `docs/lint-protocol.md`. It
+enumerates the checks to run (orphans, missing pages, contradictions,
+stale status, index drift, citation gaps, dead links, figure-export
+gaps), the run cadence, and the report format. `CLAUDE.md` deliberately
+does not `@`-import it (it is Linter-only), so the Linter is the one who
+loads it into context.
+
+Walk the wiki with those checks. Output one markdown file to
+`wiki/lint/<date>_report.md`, grouped by severity. Do not touch any other
+file. Do not assume what should be fixed — surface findings and let the
+human decide.
