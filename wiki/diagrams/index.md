@@ -103,6 +103,30 @@ level: one consensus decision instance from first message to
 - [[diagrams/protocols/narwhal-tusk]] — one DAG round (header → vote
   → certificate) plus the zero-message Tusk anchor commit.
 
+## Export for thesis figures
+
+Each diagram is also a thesis figure. Rendered PDFs are co-located with
+their source: `wiki/diagrams/<group>/<slug>.pdf` sits beside the matching
+`.md`. The PDF is committed to git and is the authoritative render — a
+diagram and its PDF travel together.
+
+Workflow:
+
+1. The Writer cites the figure in `drafts/ch*.md` via the diagram's
+   wikilink (`Figure N.x ([[diagrams/<group>/<slug>]])`) and drops a
+   `TODO(human-export)` marker per `docs/draft-style.md § Figures and
+   diagrams`.
+2. The human opens the diagram's `.md` on swimlanes.io, exports the PDF
+   (not PNG — vector keeps it crisp and text-selectable), and saves it as
+   the sibling `<slug>.pdf`.
+3. T62 (W12 figure polish) copies `wiki/diagrams/**/*.pdf` into
+   `../thesis-tex/MIT-thesis-template/figures/` and finalises captions,
+   labels, and the list-of-figures.
+
+Agents never invoke a renderer, never check in a PDF, and never invent a
+PDF path that does not match the diagram's wiki slug. L-W12 verifies every
+figure reference in `drafts/` has a PDF on disk (lint check 8).
+
 ## How to read them
 
 Read the five T17 diagrams in order: bootstrap → enqueue → dispatch →

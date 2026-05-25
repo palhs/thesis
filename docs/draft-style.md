@@ -69,6 +69,36 @@ Unchanged from `docs/wiki-spec.md`: every claim cites a wiki page inline as
 `[[wiki/...]]`; missing external citations are marked `TODO(cite)`; do not
 invent citations. Drafts introduce no claim not traceable to a wiki page.
 
+## Figures and diagrams
+
+Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as Swimlanes.io
+DSL blocks. Drafts do not embed the DSL; they reference the rendered figure.
+
+Rendered PDFs are co-located with their source: `wiki/diagrams/<group>/<slug>.pdf`
+sits beside `wiki/diagrams/<group>/<slug>.md`. PDFs are tracked in git. The
+export itself is human-only — agents never invoke a renderer, never check in
+a binary PDF, and never invent a PDF path that does not match the diagram's
+wiki slug. (Vector PDF, not PNG: Swimlanes output is line art and text;
+vector stays crisp at any zoom and keeps figure text selectable.)
+
+Hand-off marker. The Writer cites each figure in prose at the point it is
+needed, then drops a `TODO(human-export)` line directly under the paragraph
+with two fields: the source wiki page (`wiki/diagrams/<group>/<slug>.md`)
+and the intended caption. The target PDF path is implied by the wiki slug
+and does not need to be repeated. The human exports the PDF from
+swimlanes.io to the co-located path.
+
+Citation pattern in prose: `Figure 3.1 ([[diagrams/protocols/pbft]])`. The
+wikilink is the back-reference to source-of-truth; the figure number is the
+front-stage handle. Final cross-reference numbering, captions, and the
+list-of-figures are T62 (W12 figure polish); the LaTeX-side
+`\includegraphics` lines and the copy of `wiki/diagrams/**/*.pdf` into
+`../thesis-tex/MIT-thesis-template/figures/` are downstream of T62 as well.
+
+`TODO(human-export)` markers are tracked like `TODO(cite)`. L-W12 verifies
+no marker remains and that every figure reference has a PDF on disk before
+submission (see `docs/lint-protocol.md` check 8).
+
 ## What this does NOT change
 
 - Wiki pages keep their technical/synthesis register.

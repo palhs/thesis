@@ -17,6 +17,9 @@ the report.
    missing from disk.
 6. **Citation gaps** — `TODO(cite)` markers in `drafts/`.
 7. **Dead links** — wikilinks pointing to non-existent pages.
+8. **Figure-export gaps** — `TODO(human-export)` markers in `drafts/`, and
+   `drafts/` figure references whose `wiki/diagrams/<group>/<slug>.pdf`
+   sibling is missing on disk.
 
 ## Output
 
