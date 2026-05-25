@@ -76,6 +76,7 @@
 - [[experiments/2026-05-21_pbft-baseline]] — T30 honest-node correctness experiment: full PBFT three-phase commit under an all-honest validator set at n=4/7/10 — every node finalizes, zero forks (one `decided` value per seq), finalization latency logged; determinism byte-identical.
 - [[experiments/2026-05-23_casper-baseline]] — T32 build-verification baseline: the simplified Casper FFG honest-path core across the W3 stack; n=4/7 (uniform and non-uniform stake) runs justify and finalise epochs through two-round FFG aggregation, decided fires in epoch order, determinism byte-identical.
 - [[experiments/2026-05-23_pos-selection-fairness]] — T33 build-verification: 100-round empirical fairness check on the stake-weighted random proposer (`src/pos/selection.py`); four stake distributions (uniform n=4/7, skewed 10/20/30/40, heavy-majority 60/13/13/14) all land inside the `|Δ| ≤ 0.10` per-validator tolerance under fixed `global_seed=42`.
+- [[experiments/2026-05-25_pos-baseline]] — T35 honest-validator correctness experiment for the simplified Casper FFG; four scenarios (n=4/7/10 uniform stake plus n=4 non-uniform stake) all finalise every reachable epoch with zero forks, finalisation latency logged at `≈ 5.000000001 s` for epoch 1, and byte-identical determinism. Also re-records the canonical event-stream snapshot under the T33 stake-weighted proposer rule, superseding the T32 baseline. Regenerates a sample `results/pos/baseline.csv` (gitignored runtime artifact; T35-local schema; T40 will unify against [[concepts/output-format]]).
 
 ## Lint reports
 
