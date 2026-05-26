@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 75 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 54 · In Review: 1 · In Progress: 0 · Not Started: 35 · Blocked: 2
+- Completed: 54 · In Review: 2 · In Progress: 0 · Not Started: 34 · Blocked: 2
 
 ## Legend
 
@@ -185,7 +185,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Finality when ≥2/3 attest; edge cases tested · _Artifact:_ `src/pos/finality.py`
 - `[x]` **T35** `H` Engineer — Test PoS correctness and comparison-ready output
   _Outcome:_ Same CSV format as PBFT · _Artifact:_ `wiki/experiments/<date>_pos-baseline.md`
-- `[ ]` **T36** `M` Writer — Begin drafting Chapter 3 (Methodology)
+- `[?]` **T36** `M` Writer — Begin drafting Chapter 3 (Methodology)
   _Outcome:_ 2–3 pages: system model, algorithm descriptions, simulation setup, metrics. First pass covers the two protocols implemented by end of W6 (PBFT, Casper FFG); the remaining two protocols land via T36.1 and T36.2 so Ch. 3 stays consistent with `src/` as it grows. · _Artifact:_ `drafts/ch3_methodology.md`
 - `[!]` **T36.1** `M` Writer — Extend Ch. 3 methodology to cover Snowman (blocked: no Snowman implementation task scheduled)
   _Outcome:_ Pick up once Snowman is implemented in `src/` (currently unscheduled; W7 T38 may absorb it). Add a Snowman subsection to the algorithm-descriptions section of `drafts/ch3_methodology.md`: mechanism (Snowflake → Snowball → Snowman lineage), safety/liveness posture, and how Snowman's parameter rescaling at thesis-scale `n` (`K`, `α_c`, `β`) is handled per [[concepts/metric-reconciliation]]. Update the simulation-setup and metrics sections to reflect Snowman's per-block finality semantics and the empirical safety-violation invariant `(1−α_c/K)^β`. Front matter is not wiki knowledge — append a `log.md` entry only; create no new wiki page. · _Artifact:_ updated `drafts/ch3_methodology.md` · _Verify:_ Ch. 3 covers three protocols (PBFT, Casper FFG, Snowman); the Snowman subsection cites [[algorithms/avalanche]] and the metric-reconciliation page; no `TODO(cite)` left dangling for content that exists in the wiki

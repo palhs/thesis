@@ -71,39 +71,35 @@ invent citations. Drafts introduce no claim not traceable to a wiki page.
 
 ## Figures and diagrams
 
-Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as DSL blocks.
-Two DSLs are in use:
+Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as Mermaid
+fenced blocks. Mermaid is the single DSL the thesis uses; the curated
+Mermaid syntax reference for this project is in
+[`docs/mermaid-syntax.md`](mermaid-syntax.md). Authors of a new diagram
+read that file first.
 
-- **Swimlanes.io** for sequence and interaction diagrams (scheduler
-  contracts, protocol main loops). No clean CLI exists, so export is
-  human-only.
-- **Mermaid** for taxonomy and component diagrams (Chapter 2 family
-  tree, future architecture/component figures). Renders via the
-  Mermaid CLI (`mmdc`), so the agent that authors the diagram also
-  produces the PDF in the same pass.
+Two Mermaid diagram types are in scope:
+
+- **`sequenceDiagram`** — every sequence and interaction diagram
+  (scheduler contracts, protocol main loops, the macro runtime view).
+- **`flowchart`** — taxonomy and component diagrams (Chapter 2 family
+  tree, future architecture/component figures).
 
 Drafts do not embed the DSL; they reference the rendered figure.
 
 Rendered PDFs are co-located with their source: `wiki/diagrams/<group>/<slug>.pdf`
 sits beside `wiki/diagrams/<group>/<slug>.md`. PDFs are tracked in git.
 Agents never invent a PDF path that does not match the diagram's wiki
-slug. (Vector PDF, not PNG: both Swimlanes and Mermaid output are line
-art and text; vector stays crisp at any zoom and keeps figure text
-selectable.)
+slug. (Vector PDF, not PNG: Mermaid output is line art and text; vector
+stays crisp at any zoom and keeps figure text selectable.)
 
-Hand-off pattern differs by DSL:
+Hand-off pattern (single route, no human bottleneck):
 
-- **Swimlanes (human-export).** The Writer cites the figure in prose
-  at the point it is needed, then drops a `TODO(human-export)` line
-  directly under the paragraph with two fields: the source wiki page
-  (`wiki/diagrams/<group>/<slug>.md`) and the intended caption. The
-  target PDF path is implied by the wiki slug. The human exports the
-  PDF from swimlanes.io to the co-located path.
-- **Mermaid (agent-export).** The agent renders to PDF via `mmdc` as
-  part of the same task that authors the diagram source (invocation
-  pinned in [[diagrams/index]] § Export for thesis figures), commits
-  the PDF alongside the `.md`, and cites the rendered figure in the
-  draft without any `TODO(human-export)` marker.
+- **Agent export via `mmdc`.** The agent that authors the diagram also
+  renders the PDF in the same pass, using the invocation pinned in
+  [`docs/mermaid-syntax.md`](mermaid-syntax.md) (and mirrored in
+  [[diagrams/index]] § Export for thesis figures). The PDF is committed
+  alongside the `.md`; the draft cites the rendered figure with no
+  pending-export marker.
 
 Citation pattern in prose: `Figure 3.1 ([[diagrams/protocols/pbft]])`. The
 wikilink is the back-reference to source-of-truth; the figure number is the
@@ -112,9 +108,12 @@ list-of-figures are T62 (W12 figure polish); the LaTeX-side
 `\includegraphics` lines and the copy of `wiki/diagrams/**/*.pdf` into
 `../thesis-tex/MIT-thesis-template/figures/` are downstream of T62 as well.
 
-`TODO(human-export)` markers are tracked like `TODO(cite)`. L-W12 verifies
-no marker remains and that every figure reference has a PDF on disk before
-submission (see `docs/lint-protocol.md` check 8).
+L-W12 verifies that every figure reference has a PDF on disk before
+submission (`docs/lint-protocol.md` check 8). Historical drafts may
+carry `TODO(human-export)` markers from the prior Swimlanes pipeline;
+those are tracked like `TODO(cite)` and must be cleared before
+submission — the migration plan that retired Swimlanes is
+[`docs/plans/2026-05-26-swimlanes-to-mermaid.md`](plans/2026-05-26-swimlanes-to-mermaid.md).
 
 ## What this does NOT change
 
