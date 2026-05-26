@@ -119,6 +119,26 @@
       padding: 10px 14px; font-family: var(--sans); font-size: 10pt;
       margin: 0 0 1.5em;
     }
+    .figure {
+      margin: 0.6em 0 1.4em;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    .figure img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .figure .src {
+      display: block;
+      font-family: var(--sans);
+      font-size: 9.5pt;
+      color: var(--muted);
+      margin-top: 0.3em;
+    }
+    .figure .src a { color: var(--accent); text-decoration: none; }
+    .figure .src a:hover { text-decoration: underline; }
     @media print {
       html, body, .page { background: white; box-shadow: none; padding: 0; margin: 0; width: auto; }
       .banner { display: none; }
@@ -184,20 +204,10 @@
 <h2>2.3 The design space the impossibilities create</h2>
 <p>A <code>3f+1</code> quorum under partial synchrony is one viable point in the concession space, and the most direct one. PBFT <sup class="cite">[4]</sup> and its descendants HotStuff <sup class="cite">[5]</sup> and Tendermint <sup class="cite">[6]</sup> occupy it. Three other viable points exist, and the four families evaluated in this thesis sit at the four points respectively. Figure 2.1 redraws the propagation tree from.</p>
 <p class="figcap"><strong>Figure 2.1 — From the Byzantine Generals Problem to the four families.</strong></p>
-<pre class="code"><code>                   Byzantine Generals Problem
-                   n &gt;= 3f+1, safety + liveness
-                              |
-        +---------------+-----+----------+--------------------+
-        |               |                |                    |
-   Deterministic   Deterministic     Probabilistic      Decouple data-
-   quorum-based    stake-weighted    random              availability
-   partial sync    + economic        subsampling         from ordering
-        |               |                |                    |
-   PBFT family     PoS-finality      Avalanche family    DAG-based family
-   (PBFT,          (Casper FFG,      (Slush -&gt; Snowflake (Narwhal+Tusk,
-   HotStuff,       Gasper)           -&gt; Snowball -&gt;      Bullshark,
-   Tendermint)                        Avalanche)         Mysticeti)
-       [4]–[6]         [7], [8]          [9], [10]         [11]–[13]</code></pre>
+<div class="figure">
+  <img src="../wiki/diagrams/concepts/bft-families-tree.svg" alt="From the Byzantine Generals Problem to the four families">
+  <span class="src">Source: <a href="../wiki/diagrams/concepts/bft-families-tree.md"><code>wiki/diagrams/concepts/bft-families-tree.md</code></a> · Mermaid <code>flowchart TD</code> · <a href="../wiki/diagrams/concepts/bft-families-tree.pdf">PDF</a></span>
+</div>
 <p>The three non-PBFT branches are best read as answers to the question of what to relax when partial synchrony&#x27;s assumption is too strong. PoS-finality retains <code>3f+1</code> and partial synchrony but adds an <em>economic</em> layer — accountable safety via slashing — converting the Byzantine fault model from an external assumption into a behaviorally disincentivized one <sup class="cite">[7]</sup>, <sup class="cite">[8]</sup>. Avalanche-style abandons quorums altogether and replaces them with repeated random subsampling, accepting a non-zero safety-violation probability <code>ε</code> in exchange for asynchrony tolerance and per-validator cost independent of <code>n</code> <sup class="cite">[9]</sup>, <sup class="cite">[10]</sup>. DAG-based protocols retain <code>3f+1</code> but separate the two responsibilities classical consensus bundles (data availability and ordering), routing the first to a DAG mempool and the second to a thin commit rule that derives total order from the DAG with zero additional messages in the common case <sup class="cite">[11]</sup>–<sup class="cite">[13]</sup>.</p>
 <p>The choice each branch makes determines the metric vocabulary in which it later reports its performance. §2.4 examines each branch in turn, on the uniform skeleton previewed in Table 2.1.</p>
 <h2>2.4 The four families</h2>
@@ -242,8 +252,11 @@
 <p>This first pass establishes the framework end-to-end on the two protocols implemented through Week 6: PBFT and Casper FFG. The remaining two protocols, Snowman (§3.3.3) and Narwhal+Tusk (§3.3.4), are present as deferred subsections; their detailed treatment lands with tasks T36.1 and T36.2 once the corresponding implementations exist in <code>src/</code>. The system model (§3.2), the simulation setup (§3.4), and the family-agnostic half of the metric schema (§3.5) are written so that they require no revision when the deferred subsections are filled.</p>
 <h2>3.2 System model</h2>
 <p>The simulator is a single-process discrete-event system in which five component types are layered into one run. The harness builds the wired system from a configuration cell and drives the run; the scheduler owns the single run loop and the virtual clock; the network delivers messages with configurable delay and loss; the validators execute protocol logic; the event logger captures the event stream that the metric reduction consumes. Control flow is one-directional: the harness wires the system once and calls <code>Scheduler.run()</code>; from that point onward, validators act only through their outbound API, never by calling another component directly.</p>
-<p class="figcap"><strong>Figure 3.1 ().</strong> Macro runtime view of one seeded run.</p>
-<p><code><span class="todo">TODO(human-export)</span>: wiki/diagrams/runtime/macro.md — Macro runtime view: one (config, seed) to one CSV row through six phases.</code></p>
+<p class="figcap"><strong>Figure 3.1 — Macro runtime view of one seeded run.</strong></p>
+<div class="figure">
+  <img src="../wiki/diagrams/runtime/macro.svg" alt="Macro runtime view of one seeded run">
+  <span class="src">Source: <a href="../wiki/diagrams/runtime/macro.md"><code>wiki/diagrams/runtime/macro.md</code></a> · Mermaid <code>sequenceDiagram</code> · <a href="../wiki/diagrams/runtime/macro.pdf">PDF</a></span>
+</div>
 <h3>3.2.1 Discrete-event execution</h3>
 <p>The scheduler is custom rather than SimPy-based, built on a binary min-heap over the tuple <code>(t, node_id, seq, event)</code>. Three event classes pin the contract — <code>Delivery</code>, <code>TimerFire</code>, and <code>PhaseAdvance</code> — and the dispatch routes each class to a fixed handler. The <code>(t, node_id, seq)</code> tie-break is uniquely valued by construction, which together with the centralization of randomness in scheduler- and node-owned RNG streams forces byte-identical replay of any run from the same global seed. The simulator never reads wall-clock time; virtual time is advanced only by events popped from the heap.</p>
 <h3>3.2.2 Node model</h3>
@@ -261,15 +274,21 @@
 <p><em>Simulator mapping.</em> Only the classical variant is implemented: single primary, no HotStuff threshold-signature linearization, no Tendermint round-robin rotation. Two knobs are exposed to experiments: the view-change timeout, which defaults to <code>3·E[round_latency]</code> and uses an exponential per-view backoff <code>vc_delay·2^view</code>, and the Byzantine fraction. The exponential backoff is required for view-change recovery to terminate deterministically: a flat timeout that has fired once will fire again in the same delay regime.</p>
 <p><em>Simplifications.</em> The simulator carries no cryptographic signatures; message digests serve integrity and deterministic replay only. The <code>VIEW-CHANGE</code> evidence a replica attaches is therefore an assertion rather than a cryptographic prepared certificate, and the adversary catalog deliberately carries no evidence-forgery capability. The boundary affects no honest-path result and no equivocating-primary result; within-threshold safety against forged view-change evidence is assumed by construction.</p>
 <p><em>Event-handler shape.</em> Three inbound entry points dispatch the three-phase commit and the view-change recovery; the <code>decided</code> event fires on commit-quorum collection. Figure 3.2 gives the handler-dispatch shape.</p>
-<p class="figcap"><strong>Figure 3.2 ().</strong> PBFT three-phase commit for one <code>(view, seq)</code> instance with the view-change branch.</p>
-<p><code><span class="todo">TODO(human-export)</span>: wiki/diagrams/protocols/pbft.md — PBFT three-phase commit and view-change branch.</code></p>
+<p class="figcap"><strong>Figure 3.2 — PBFT three-phase commit for one <code>(view, seq)</code> instance with the view-change branch.</strong></p>
+<div class="figure">
+  <img src="../wiki/diagrams/protocols/pbft.svg" alt="PBFT three-phase commit and view-change branch">
+  <span class="src">Source: <a href="../wiki/diagrams/protocols/pbft.md"><code>wiki/diagrams/protocols/pbft.md</code></a> · Mermaid <code>sequenceDiagram</code> · <a href="../wiki/diagrams/protocols/pbft.pdf">PDF</a></span>
+</div>
 <h3>3.3.2 Casper FFG</h3>
 <p><em>Mechanism.</em> Casper FFG <sup class="cite">[7]</sup> is a two-round BFT finality gadget over a chain of blocks. Time is partitioned into fixed-length epochs of <code>slots_per_epoch</code> slots, and the first block of each epoch is designated a checkpoint. Validators attest to <code>&lt;source, target&gt;</code> checkpoint pairs; a checkpoint <code>T</code> is justified once attestations representing at least two-thirds of total stake support a link from a justified ancestor; <code>T</code> is finalized once it is justified and its direct child is also justified. Safety is accountable: a validator that signs two FFG votes with the same target or surrounds one of its own votes can be cryptographically convicted and its stake slashed.</p>
 <p><em>Simulator mapping.</em> The implementation is a simplified Casper FFG gadget with stake-weighted proposer selection. Proposer assignment is a pure function of <code>(global_seed, slot)</code> through blake2b, and the 100-round fairness check at four stake distributions is recorded in. Two calibration defaults diverge from Ethereum&#x27;s deployed values: <code>slots_per_epoch = 4</code> (against Ethereum&#x27;s 32) and <code>slot_duration = 100 ms</code> (against Ethereum&#x27;s 12 s), both pinned in. The first preserves FFG&#x27;s epoch character at the smallest value that still admits a meaningful multi-slot epoch; the second keeps FFG finality at the same order of magnitude as the other three protocols&#x27; commit latency, so that cross-protocol plots remain readable on a single axis. The <code>{16, 32}</code> and <code>{500 ms}</code> sensitivity-sweep points defend the comparative ordering at production scale.</p>
 <p><em>Simplifications.</em> LMD-GHOST fork choice is not implemented; <code>Chain.head</code> is the block at the greatest known slot under an honest-path linear chain. Delay-induced reorgs are out of scope until the delay sweep of Week 9. Attestation cadence is once per epoch at a configurable offset rather than once per slot; the per-slot head vote belongs to LMD-GHOST and contributes no extra information to the FFG gadget once fork choice is honest-path-linear.</p>
 <p><em>Event-handler shape.</em> The slot loop drives proposer selection and attestation emission; FFG vote aggregation transitions epoch state through unjustified → justified → finalized; the <code>decided</code> event fires on finalization.</p>
-<p class="figcap"><strong>Figure 3.3 ().</strong> Casper FFG justify→finalize for one epoch with the slashing branch on detected double or surround votes.</p>
-<p><code><span class="todo">TODO(human-export)</span>: wiki/diagrams/protocols/casper-ffg.md — Casper FFG justify→finalize and slashing branch.</code></p>
+<p class="figcap"><strong>Figure 3.3 — Casper FFG justify→finalize for one epoch with the slashing branch on detected double or surround votes.</strong></p>
+<div class="figure">
+  <img src="../wiki/diagrams/protocols/casper-ffg.svg" alt="Casper FFG justify-finalize and slashing branch">
+  <span class="src">Source: <a href="../wiki/diagrams/protocols/casper-ffg.md"><code>wiki/diagrams/protocols/casper-ffg.md</code></a> · Mermaid <code>sequenceDiagram</code> · <a href="../wiki/diagrams/protocols/casper-ffg.pdf">PDF</a></span>
+</div>
 <h3>3.3.3 Snowman</h3>
 <p><code><span class="todo">TODO(T36.1)</span>.</code> Snowman is the deterministically-ordered linearization of the Avalanche family deployed on Avalanche&#x27;s C-Chain and Subnet stack <sup class="cite">[9]</sup>. The simulator&#x27;s Snowman implementation does not yet exist; T36.1 picks up this subsection once it does. The parameter-rescaling rule that holds Snowman comparable to the other three protocols at thesis-scale <code>n</code> is pinned in, and the empirical safety-violation invariant <code>ε ≤ (1 − α_c/K)^β</code> carries through to §3.5.</p>
 <h3>3.3.4 Narwhal+Tusk</h3>
