@@ -260,17 +260,18 @@ Commit sequence on the migration branch:
 
 After verification (§7) passes on the migration branch tip:
 
-8. Push the migration branch to origin so it remains a reviewable
-   standalone unit (the human may later open a PR from it to `main`
-   independent of whatever else lands on the starting branch).
-9. Switch back to the starting branch and merge with `git merge --no-ff
+8. Switch back to the starting branch and merge with `git merge --no-ff
    task/diagrams-mermaid-migration` so the merge is a visible commit
    on the starting branch's history (no silent fast-forward). Conflicts
    are surfaced to the human, not auto-resolved.
-10. Leave the starting-branch merge commit **local** (not pushed) so
-    the human can inspect before publishing. Re-run §7 verification on
-    the merged starting-branch HEAD to confirm the merge did not
-    reintroduce a stale `TODO(human-export)` line or a missing PDF.
+9. Both branches remain **local** — nothing is pushed. The migration
+   commits ride along with the starting branch to `main` whenever that
+   branch is eventually pushed and merged. The
+   `task/diagrams-mermaid-migration` ref is preserved locally so the
+   human can push it later for an independent PR if they change their
+   mind. Re-run §7 verification on the merged starting-branch HEAD to
+   confirm the merge did not reintroduce a stale `TODO(human-export)`
+   line or a missing PDF.
 
 The kickoff prompt for a fresh session is in
 [`2026-05-26-swimlanes-to-mermaid.kickoff.md`](2026-05-26-swimlanes-to-mermaid.kickoff.md).

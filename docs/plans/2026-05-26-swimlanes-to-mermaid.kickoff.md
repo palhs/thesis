@@ -65,11 +65,6 @@ improvise** — every decision is already pinned in the persisted docs.
 **Then merge back into the starting branch so the user can continue
 their in-flight work:**
 
-- Push the migration branch first: `git push -u origin
-  task/diagrams-mermaid-migration`. This preserves it as a reviewable
-  standalone unit — the human may still want to open a PR from it to
-  `main` later, independent of whatever else lands on the starting
-  branch.
 - Switch back: `git checkout <starting-branch>`.
 - Merge: `git merge --no-ff task/diagrams-mermaid-migration -m
   "Merge branch 'task/diagrams-mermaid-migration' into
@@ -83,9 +78,12 @@ their in-flight work:**
   the migration strips three `TODO(human-export)` lines), **stop and
   surface the conflict**. Do not auto-resolve. The user is the
   authority on which side wins for in-flight prose edits.
-- **Do not push the starting branch.** Leave the merge commit local
-  so the user can inspect it and push when they are ready. The
-  migration branch is already on origin; that is enough for review.
+- **Do not push anything.** Both branches stay local. The migration
+  rides along with the starting branch to `main` whenever that branch
+  is eventually pushed and merged. The local
+  `task/diagrams-mermaid-migration` ref is preserved so the human can
+  still push it for an independent PR later if they change their
+  mind.
 - Re-run the §7 verification checks on the merged starting-branch
   HEAD as well, to confirm the merge did not reintroduce a stale
   `TODO(human-export)` line or a missing PDF.
@@ -100,16 +98,17 @@ their in-flight work:**
 - Rewrite historical entries in `wiki/log.md` or
   `docs/plans/2026-05-18-…md`. History is not silently overwritten
   (`docs/wiki-spec.md` § Revisions rule).
-- Self-complete or self-merge. Per `CLAUDE.md` hard rules, the agent
-  pushes the branch and the human reviews + merges.
+- Flip any `TASKS.md` entry to Completed, per `CLAUDE.md` hard rules.
+  This migration is meta-maintenance and touches no T-task status. The
+  starting-branch merge commit is the only "merge" you perform; the
+  eventual `<starting-branch> → main` merge is the human's call.
 
-**Handoff format when done:** the migration branch is pushed and
-merged locally into the starting branch. Summarise for the human in
-this shape:
+**Handoff format when done:** both branches are local; the migration
+is merged into the starting branch via a `--no-ff` merge commit, with
+no push. Summarise for the human in this shape:
 
-- Migration branch name + commit count + the pushed remote URL.
-- Starting branch name + the SHA of the merge commit (local only,
-  not pushed).
+- Migration branch name + commit count + tip SHA.
+- Starting branch name + the SHA of the merge commit.
 - Files touched (grouped by the seven migration commits, plus the
   merge commit on the starting branch).
 - Whether the merge was clean or required conflict resolution; if
@@ -141,11 +140,12 @@ reason to pause, not to improvise.
 - The agent should ask before running `npx --yes @mermaid-js/mermaid-cli@latest`
   the first time (it pulls a network dependency); approve it once and
   it will reuse the cached install for the remaining nine diagrams.
-- The merge-back to the starting branch is done locally and **not
-  pushed**, so you can inspect the merge commit before publishing. If
-  you would rather the agent push the starting branch too, say so when
-  pasting — otherwise the default is "migration branch pushed,
-  starting-branch merge commit local."
+- Both branches stay local by default. The migration will reach
+  `main` whenever the starting branch is eventually pushed and merged
+  — no separate push needed. If you want the migration branch pushed
+  for an independent review track to `main`, say so when pasting;
+  otherwise the agent leaves it local and the `task/diagrams-mermaid-migration`
+  ref is preserved so you can push it yourself any time later.
 - If you have done parallel work on the starting branch in another
   session while the migration was running, the merge may need conflict
   resolution. The agent is instructed to stop and ask in that case
