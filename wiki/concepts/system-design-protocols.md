@@ -26,7 +26,7 @@ the W3 design-contract style ([[concepts/node-model]] §10,
 land as `## Revisions` entries per `docs/wiki-spec.md` § Revisions rule.
 Secondary paths are elided with comments to keep the control spine
 readable. `f` is the fault threshold; `2f+1` the quorum. Each section
-pairs with a Swimlanes.io diagram under `diagrams/protocols/`.
+pairs with a Mermaid `sequenceDiagram` under `diagrams/protocols/`.
 
 ## 2. PBFT
 

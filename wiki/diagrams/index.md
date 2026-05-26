@@ -120,9 +120,9 @@ One macro-level diagram, one abstraction above the T17 contract set.
 
 ### Concept diagrams — Chapter 2 ([[concepts/consensus-families]])
 
-Taxonomy/component figures consumed by Chapter 2. Rendered in Mermaid
-(see § Mermaid syntax above) because Swimlanes.io has no idiomatic
-representation for a containment tree.
+Taxonomy/component figures consumed by Chapter 2. Authored as Mermaid
+`flowchart` (see § Mermaid `flowchart` above) — no time axis, no message
+exchange, just parent/child relationships.
 
 - [[diagrams/concepts/bft-families-tree]] — propagation of the
   Byzantine Generals Problem [1] into the four families this thesis

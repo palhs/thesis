@@ -30,9 +30,9 @@ companion answer the cross-cutting questions none of them owns alone:
 - **What does each protocol *do*?** [[concepts/system-design-protocols]]
   — the four main loops as pseudocode.
 
-Every diagram across both pages uses Swimlanes.io syntax per the legend
-in [[diagrams/index]]; the diagrams themselves live as standalone files
-([[diagrams/runtime/macro]] and the four under `diagrams/protocols/`)
+Every diagram across both pages is a Mermaid `sequenceDiagram` per the
+legend in [[diagrams/index]]; the diagrams themselves live as standalone
+files ([[diagrams/runtime/macro]] and the four under `diagrams/protocols/`)
 per the T17 precedent.
 
 ## 2. Architecture
@@ -100,7 +100,7 @@ loop**, and a `Node` is a set of handlers — `start`, `on_message`,
 There is no textbook "main loop" per protocol; each protocol's
 handler-dispatch logic is given as event-handler pseudocode in the
 companion page, [[concepts/system-design-protocols]], one section per
-protocol, each paired with its Swimlanes.io diagram:
+protocol, each paired with its Mermaid `sequenceDiagram`:
 
 - PBFT — [[concepts/system-design-protocols]] §2,
   [[diagrams/protocols/pbft]].
