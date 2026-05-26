@@ -66,11 +66,6 @@ measured across the four families on matched assumptions
 
 ## 1.3 Problem statement
 
-The working title is *Performance–Security Evaluation of Layer-1 Consensus
-Algorithms under Network Delay and Adversarial Conditions: A
-Simulation-Based Comparative Study*
-[[wiki/concepts/problem-statement#thesis-title]].[^1]
-
 This thesis investigates the comparative performance–security behavior of
 the four Layer-1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
 PoS-finality [[wiki/algorithms/pos]], Avalanche-style

@@ -7,13 +7,13 @@ Every TODO(human) marker MUST be resolved by the author before submission;
 the surrounding phrasing is a neutral scaffold only.
 -->
 
-I am grateful to my thesis advisor, TODO(human: advisor name and title),
+I am grateful to my thesis advisor, Dr. Giang Anh Tuan,
 for guidance and supervision throughout this work, and for the feedback
 that shaped its direction and methodology. I also thank
 TODO(human: committee members or thesis readers, with titles) for their
 time and comments on the work, and the faculty and staff of
 TODO(human: department or program name) for the instruction and support
-that made it possible.
+that made it possible..
 
 I thank TODO(human: fellow students, collaborators, or colleagues) for the
 discussions and feedback that improved this thesis. This work was supported
