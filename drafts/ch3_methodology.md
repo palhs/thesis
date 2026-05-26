@@ -42,9 +42,6 @@ their outbound API, never by calling another component directly
 **Figure 3.1 ([[diagrams/runtime/macro]]).** Macro runtime view of one
 seeded run.
 
-`TODO(human-export): wiki/diagrams/runtime/macro.md — Macro runtime
-view: one (config, seed) to one CSV row through six phases.`
-
 ### 3.2.1 Discrete-event execution
 
 The scheduler is custom rather than SimPy-based, built on a binary
@@ -160,9 +157,6 @@ handler-dispatch shape.
 **Figure 3.2 ([[diagrams/protocols/pbft]]).** PBFT three-phase commit
 for one `(view, seq)` instance with the view-change branch.
 
-`TODO(human-export): wiki/diagrams/protocols/pbft.md — PBFT three-phase
-commit and view-change branch.`
-
 ### 3.3.2 Casper FFG
 
 *Mechanism.* Casper FFG [7] is a two-round BFT finality gadget over a
@@ -210,9 +204,6 @@ on finalization.
 **Figure 3.3 ([[diagrams/protocols/casper-ffg]]).** Casper FFG
 justify→finalize for one epoch with the slashing branch on detected
 double or surround votes.
-
-`TODO(human-export): wiki/diagrams/protocols/casper-ffg.md — Casper FFG
-justify→finalize and slashing branch.`
 
 ### 3.3.3 Snowman
 
