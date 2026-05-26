@@ -17,9 +17,15 @@ the report.
    missing from disk.
 6. **Citation gaps** — `TODO(cite)` markers in `drafts/`.
 7. **Dead links** — wikilinks pointing to non-existent pages.
-8. **Figure-export gaps** — `TODO(human-export)` markers in `drafts/`, and
-   `drafts/` figure references whose `wiki/diagrams/<group>/<slug>.pdf`
-   sibling is missing on disk.
+8. **Figure-export gaps** — three checks:
+   - `TODO(human-export)` markers anywhere in `drafts/` or `wiki/`
+     (legacy from the retired Swimlanes pipeline; the 2026-05-26
+     Mermaid migration cleared them and no new ones should appear).
+   - `drafts/` figure references whose
+     `wiki/diagrams/<group>/<slug>.pdf` sibling is missing on disk.
+   - For every `wiki/diagrams/**/*.md` carrying a ```` ```mermaid ````
+     block, a sibling `.pdf` exists with mtime ≥ the `.md`'s mtime
+     (PDF is stale if older than its source).
 
 ## Output
 

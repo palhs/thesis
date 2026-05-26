@@ -109,11 +109,12 @@ list-of-figures are T62 (W12 figure polish); the LaTeX-side
 `../thesis-tex/MIT-thesis-template/figures/` are downstream of T62 as well.
 
 L-W12 verifies that every figure reference has a PDF on disk before
-submission (`docs/lint-protocol.md` check 8). Historical drafts may
-carry `TODO(human-export)` markers from the prior Swimlanes pipeline;
-those are tracked like `TODO(cite)` and must be cleared before
-submission — the migration plan that retired Swimlanes is
+submission (`docs/lint-protocol.md` check 8). The 2026-05-26 Swimlanes
+→ Mermaid migration retired the prior `TODO(human-export)` marker
+pattern; the migration plan is
 [`docs/plans/2026-05-26-swimlanes-to-mermaid.md`](plans/2026-05-26-swimlanes-to-mermaid.md).
+No new `TODO(human-export)` markers should appear — the lint check
+treats them as a regression.
 
 ## What this does NOT change
 
