@@ -1,53 +1,63 @@
 # Diagrams
 
 > Standalone folder for thesis diagrams. Each diagram lives in its own
-> Markdown file containing a source block (Swimlanes.io for
-> sequence/interaction diagrams, Mermaid for taxonomy/component
-> diagrams) plus per-step elaboration. Swimlanes.io blocks render via
-> [swimlanes.io](https://swimlanes.io) paste-and-render; Mermaid blocks
-> render via [`mmdc`](https://github.com/mermaid-js/mermaid-cli).
+> Markdown file containing a Mermaid source block plus per-step
+> elaboration. Mermaid blocks render via
+> [`mmdc`](https://github.com/mermaid-js/mermaid-cli).
 >
 > This page is the navigation entry point. Wiki pages that need a
 > diagram link here via `[[diagrams/<group>/<slug>]]`. New diagram
 > groups append a new catalogue section below.
+>
+> Authoritative Mermaid syntax reference for this project:
+> [`docs/mermaid-syntax.md`](../../docs/mermaid-syntax.md). The legend
+> below is a tour-sized summary; the syntax doc has the upstream-pinned
+> details and the project conventions.
 
 ## Legend
 
-Notation conventions used across the diagram set.
+Notation conventions used across the diagram set. Two Mermaid diagram
+types are in use — `sequenceDiagram` for every protocol main loop,
+scheduler-contract, and runtime view; `flowchart` for taxonomy and
+component diagrams where there is no time axis.
 
-### Swimlanes.io syntax
+### Mermaid `sequenceDiagram`
 
 | Symbol | Meaning |
 | :-- | :-- |
-| `A -> B: msg` | Solid arrow — synchronous call from `A` to `B`. |
-| `A => B: msg` | **Bold** arrow — emphasised invocation (handler dispatch, `RunResult` return, key API calls). |
-| `A --> B: msg` | Dashed arrow — return value, data flowing back rather than a new action. |
-| `note A, B: text` | Multi-actor note spanning from `A` to `B`; carries semantic content. |
-| `if: cond` / `else` / `end` | Conditional branch (up to one level of nesting per the Swimlanes spec). |
-| `group: label` / `end` | Non-conditional grouping. |
-| `=: text` | Bold divider — major section break inside the diagram. |
-| `-: text` | Regular divider — minor section break. |
-| `...: text` | Delay marker — "time passes, other events run." |
-| `autonumber` | Auto-numbers every message line. |
-| `order: A, B, C` | Locks lifeline order left-to-right. |
+| `sequenceDiagram` | First line — declares the chart type. |
+| `participant A` | Declares a lifeline. Declaration order locks left-to-right order on the page. |
+| `autonumber` | Auto-numbers every arrow line. |
+| `A->>B: msg` | Solid arrow with arrowhead — synchronous call or network send. |
+| `A-->>B: msg` | Dotted arrow with arrowhead — return value or response to a prior call. |
+| `Note over A: text` | Annotation tied to one lifeline. |
+| `Note over A,B: text` | Multi-actor note spanning from `A` to `B`. The workhorse for cross-lifeline annotations. |
+| `alt cond` / `else cond'` / `end` | `n`-way branch (at least one `alt`, zero or more `else`, one `end`). |
+| `opt cond` / `end` | Single-arm optional branch (no `else`). |
+| `loop label` / `end` | Repeated section — used for protocol main-loop iterations. |
+| `rect rgb(r,g,b)` / `end` | Visually shaded background block. Project convention: `rect rgb(240,240,240)` (light gray) wraps a heavy section, with `Note over <leftmost>,<rightmost>: <phase>` as the first line inside. |
+| `%% text` | Line-level comment — stripped before render. Used to pin the source spec a diagram traces to. |
 
-### Mermaid syntax
+**Authoring notes.** Mermaid parses `;` as a statement separator —
+avoid it inside note/message text (use `,` or `—`). The literal
+characters `<` and `>` are arrow markers — keep them out of note text
+(use words or parentheses); they are safe inside `alt`/`opt` labels.
+The CLI does not render `<b>...</b>` in sequence-diagram labels; bold
+emphasis is decorative-only and dropped from the source.
 
-Used for taxonomy and component diagrams where a sequence-flow
-notation is the wrong fit (no time axis, no message exchange — just
-parent/child or containment relationships). Primitives used in this
-diagram set:
+### Mermaid `flowchart`
+
+Used for taxonomy and component diagrams where there is no time axis —
+just parent/child or containment relationships. Currently one diagram:
+[[diagrams/concepts/bft-families-tree]].
 
 | Symbol | Meaning |
 | :-- | :-- |
 | `flowchart TD` | Top-down flowchart layout. Used for taxonomy trees. |
-| `A["label"]` | Node `A` with a display label. `<br/>` inside the label is a line break; `<b>...</b>` is bold. |
+| `A["label"]` | Node `A` with a display label. `<br/>` is a line break, `<b>...</b>` is bold (HTML works in flowchart labels). |
 | `A --> B` | Directed edge from `A` to `B` (parent → child in a tree). |
 | `classDef name fill:#...,stroke:#...` | Define a visual class. |
 | `class A,B name` | Apply a class to one or more nodes. |
-
-Render with `mmdc -i <slug>.mmd -o <slug>.pdf -b transparent -t neutral`
-(see § Export for thesis figures below).
 
 ### Lifeline glossary
 
@@ -141,31 +151,30 @@ their source: `wiki/diagrams/<group>/<slug>.pdf` sits beside the matching
 `.md`. The PDF is committed to git and is the authoritative render — a
 diagram and its PDF travel together.
 
-The export route depends on the DSL:
+**One route — Mermaid CLI (`mmdc`) agent export.** Every diagram is
+Mermaid; the agent that authors the diagram also produces the PDF in
+the same pass. No `TODO(human-export)` marker is needed — the draft
+cites the rendered figure straight away. Invocation:
 
-- **Swimlanes.io (sequence diagrams) — human export.** No clean CLI;
-  the human opens the diagram's `.md` on swimlanes.io, exports the PDF
-  (not PNG — vector keeps it crisp and text-selectable), and saves it
-  as the sibling `<slug>.pdf`. The Writer drops a `TODO(human-export)`
-  marker in the draft per `docs/draft-style.md § Figures and diagrams`
-  until the PDF lands.
-- **Mermaid (taxonomy/component diagrams) — agent export.** The
-  Mermaid CLI (`mmdc`) renders directly from the command line, so the
-  agent that authors the diagram also produces the PDF in the same
-  pass. No `TODO(human-export)` marker; the draft cites the rendered
-  figure straight away. Invocation:
-  ```
-  PUPPETEER_SKIP_DOWNLOAD=true \
-    npx --yes @mermaid-js/mermaid-cli@latest \
-    -p <puppeteer-config.json> \
-    -i <slug>.mmd -o <group>/<slug>.pdf \
-    -b transparent -t neutral
-  ```
-  where `puppeteer-config.json` points `executablePath` at the system
-  Chrome to skip the bundled Chromium download.
+```
+PUPPETEER_SKIP_DOWNLOAD=true \
+  npx --yes @mermaid-js/mermaid-cli@latest \
+  -p puppeteer-config.json \
+  -c mermaid-config.json \
+  -i wiki/diagrams/<group>/<slug>.md \
+  -o wiki/diagrams/<group>/<slug>.pdf \
+  -b transparent -t neutral
+mv wiki/diagrams/<group>/<slug>-1.pdf wiki/diagrams/<group>/<slug>.pdf
+```
 
-In both routes, the PDF filename must match the diagram's wiki slug
-exactly; agents never invent a PDF path that does not.
+`puppeteer-config.json` (repo root) points `executablePath` at the
+system Chrome to skip the bundled Chromium download.
+`mermaid-config.json` (repo root) sets `securityLevel: loose` for
+HTML rendering in flowchart labels. The `mv` step renames mmdc's
+`<slug>-1.pdf` Markdown-input output to the canonical `<slug>.pdf`.
+
+The PDF filename must match the diagram's wiki slug exactly; agents
+never invent a PDF path that does not.
 
 T62 (W12 figure polish) copies `wiki/diagrams/**/*.pdf` into
 `../thesis-tex/MIT-thesis-template/figures/` and finalises captions,
@@ -189,19 +198,24 @@ pattern. The fifth pins what is *not* in the scheduler.
   shape is T19 ([[concepts/experiment-matrix]]).
 ## Status
 
-The five T17 contract diagrams (Swimlanes.io) were authored during
-T17 ([[concepts/simulation-design]], In Review as of 2026-05-13). When
-T17 merges, they become permanent reference material for
-[[concepts/simulation-design]] and the implementation work in T21.
-
-The five T20 diagrams (one `runtime/`, four `protocols/`) were
-authored during T20 ([[concepts/system-design]] /
-[[concepts/system-design-protocols]], In Review as of 2026-05-18).
-They close the "protocol-internal sequences" and "simulator-runtime
-macro view" gaps this section previously listed.
+The five T17 contract diagrams and the five T20 diagrams (one
+`runtime/`, four `protocols/`) were originally authored in
+Swimlanes.io and migrated to Mermaid `sequenceDiagram` on 2026-05-26
+(see § Revisions). The concept diagram
+[[diagrams/concepts/bft-families-tree]] was authored directly in
+Mermaid `flowchart`.
 
 Forward wikilinks to unwritten pages
 ([[concepts/adversary-model]], [[concepts/reproducibility]],
 [[concepts/output-format]], [[concepts/experiment-matrix]]) are
 deliberately left dead and will resolve when T18, T27, T40, and T19
 land — same pattern S5 and S7 used during the Week 2 imports.
+
+## Revisions
+
+- **2026-05-26 — Swimlanes.io → Mermaid migration.** All 10 outstanding
+  Swimlanes.io diagrams converted to Mermaid `sequenceDiagram`. The
+  figure pipeline collapsed to one DSL and one agent-driven render
+  route (`mmdc`); the `TODO(human-export)` marker mechanism is retired
+  in this same pass. Plan:
+  [`docs/plans/2026-05-26-swimlanes-to-mermaid.md`](../../docs/plans/2026-05-26-swimlanes-to-mermaid.md).
