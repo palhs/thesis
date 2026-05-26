@@ -12,44 +12,53 @@
 
 ## Diagram
 
-```swimlanes
-title: Simulator runtime — one config cell to one results.csv row
+```mermaid
+%% Simulator runtime — one config cell to one results.csv row
+sequenceDiagram
+    autonumber
+    participant Harness
+    participant Config
+    participant Builder
+    participant Simulator
+    participant Logger
+    participant Results
 
-order: Harness, Config, Builder, Simulator, Logger, Results
-autonumber
+    Note over Harness,Results: phase 1 — init — resolve one experiment-matrix cell + seed
 
-note Harness, Results: **phase 1 — init**: resolve one experiment-matrix cell + seed
+    Harness->>Config: load(experiment.yaml)
+    Config-->>Harness: {protocol, n, network_phases, adversary, workload, seed}
+    Harness->>Builder: build(config)
+    Note over Builder: constructs Scheduler + Network + n Nodes, then runs the six-phase bootstrap (construct, register, bind, observability, kickoff, run)
+    Builder-->>Harness: Simulator (Scheduler + Network + Nodes, wired)
 
-Harness -> Config: load(experiment.yaml)
-Config --> Harness: `{protocol, n, network_phases, adversary, workload, seed}`
-Harness => Builder: build(config)
-note Builder: constructs Scheduler + Network + n Nodes, then runs the six-phase bootstrap (construct, register, bind, observability, kickoff, run)
-Builder --> Harness: Simulator (Scheduler + Network + Nodes, wired)
+    Note over Harness,Simulator: phase 2 — workload — seed proposer mempools
 
-note Harness, Simulator: **phase 2 — workload**: seed proposer mempools
+    Harness->>Simulator: load_workload(transactions)
 
-Harness -> Simulator: load_workload(transactions)
+    rect rgb(240,240,240)
+        Note over Harness,Results: phase 3 — run loop
+    end
 
-=: phase 3 — run loop
+    Harness->>Simulator: run(t_max, stop_when)
+    Note over Simulator: scheduler pops events — Nodes run protocol FSMs (pop, advance virtual time, dispatch, repeat)
+    Note over Harness,Results: … virtual time advances event-to-event
+    Simulator->>Logger: emit(decided / halted / message events)
 
-Harness => Simulator: run(t_max, stop_when)
-note Simulator: scheduler pops events; Nodes run protocol FSMs (pop, advance virtual time, dispatch, repeat)
-...: {fas-spinner} virtual time advances event-to-event
-Simulator -> Logger: emit(decided / halted / message events)
+    Note over Harness,Simulator: phase 4 — stop — one of three exit paths fires
 
-note Harness, Simulator: **phase 4 — stop**: one of three exit paths fires
+    Simulator->>Harness: RunResult(stopped_by, now, events_processed)
 
-Simulator => Harness: RunResult(stopped_by, now, events_processed)
+    Note over Harness,Results: phase 5 — flush + reduce
 
-note Harness, Results: **phase 5 — flush + reduce**
+    Harness->>Logger: flush()
+    Logger-->>Harness: per-event records
+    Harness->>Harness: reduce events to metrics (latency, throughput, msg_count, success)
 
-Harness -> Logger: flush()
-Logger --> Harness: per-event records
-Harness -> Harness: reduce events to metrics (latency, throughput, msg_count, success)
+    rect rgb(240,240,240)
+        Note over Harness,Results: phase 6 — output
+    end
 
-=: phase 6 — output
-
-Harness => Results: append one row `{run_id, protocol, n, adversary, metrics...}`
+    Harness->>Results: append one row {run_id, protocol, n, adversary, metrics...}
 ```
 
 ## What this pins

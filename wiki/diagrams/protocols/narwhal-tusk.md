@@ -13,35 +13,40 @@
 
 ## Diagram
 
-```swimlanes
-title: Narwhal+Tusk — one DAG round + anchor commit (n=4, f=1, quorum 2f+1=3)
+```mermaid
+%% Narwhal+Tusk — one DAG round + anchor commit (n=4, f=1, quorum 2f+1=3)
+sequenceDiagram
+    autonumber
+    participant ValidatorA
+    participant ValidatorB
+    participant ValidatorC
+    participant ValidatorD
 
-order: ValidatorA, ValidatorB, ValidatorC, ValidatorD
-autonumber
+    Note over ValidatorA,ValidatorD: every validator proposes one HEADER per round — certificate FSM keyed by (round, validator). Round r shown for ValidatorA.
 
-note ValidatorA, ValidatorD: every validator proposes one HEADER per round; certificate FSM keyed by (round, validator). Round r shown for ValidatorA.
+    rect rgb(240,240,240)
+        Note over ValidatorA,ValidatorD: round r — Narwhal DAG mempool
 
-=: round r — Narwhal DAG mempool
+        ValidatorA->>ValidatorA: on_timer(round) — batch mempool, attach 2f+1 parent certs from round r-1
+        ValidatorA->>ValidatorB: HEADER(r, validator=A, parent_certs, txs)
+        ValidatorA->>ValidatorC: HEADER(r, validator=A, parent_certs, txs)
+        ValidatorA->>ValidatorD: HEADER(r, validator=A, parent_certs, txs)
+        Note over ValidatorB,ValidatorD: B, C, D each broadcast their own round-r HEADER likewise (omitted)
+        ValidatorB-->>ValidatorA: HEADER-VOTE(r, header_hash)
+        ValidatorC-->>ValidatorA: HEADER-VOTE(r, header_hash)
+        ValidatorD-->>ValidatorA: HEADER-VOTE(r, header_hash)
+        Note over ValidatorA: on 2f+1 HEADER-VOTEs — (r, A) proposing → certified
+        ValidatorA->>ValidatorB: CERTIFICATE(r, validator=A, header_hash, signatures)
+        ValidatorA->>ValidatorC: CERTIFICATE(r, validator=A, header_hash, signatures)
+        ValidatorA->>ValidatorD: CERTIFICATE(r, validator=A, header_hash, signatures)
+        Note over ValidatorB,ValidatorD: CERTIFICATE is an eligible parent reference for round r+1
+    end
 
-ValidatorA -> ValidatorA: on_timer(round) — batch mempool, attach 2f+1 parent certs from round r-1
-ValidatorA => ValidatorB: HEADER(r, validator=A, parent_certs, txs)
-ValidatorA => ValidatorC: HEADER(r, validator=A, parent_certs, txs)
-ValidatorA => ValidatorD: HEADER(r, validator=A, parent_certs, txs)
-note ValidatorB, ValidatorD: B, C, D each broadcast their own round-r HEADER likewise (omitted)
-ValidatorB --> ValidatorA: HEADER-VOTE(r, header_hash)
-ValidatorC --> ValidatorA: HEADER-VOTE(r, header_hash)
-ValidatorD --> ValidatorA: HEADER-VOTE(r, header_hash)
-note ValidatorA: on **2f+1** HEADER-VOTEs: (r, A) **proposing → certified**
-ValidatorA => ValidatorB: CERTIFICATE(r, validator=A, header_hash, signatures)
-ValidatorA => ValidatorC: CERTIFICATE(r, validator=A, header_hash, signatures)
-ValidatorA => ValidatorD: CERTIFICATE(r, validator=A, header_hash, signatures)
-note ValidatorB, ValidatorD: CERTIFICATE is an eligible parent reference for round r+1
+    Note over ValidatorA,ValidatorD: Tusk anchor commit — local predicate, zero messages
 
--: Tusk anchor commit — local predicate, zero messages
-
-if: round r is an anchor round AND ≥ 2f+1 round-(r+1) certs reference round r's anchor
-  note ValidatorA, ValidatorD: anchor `nominated → committed`; deterministically order the anchor's causal history; `emit decided(anchor_cert_id, (anchor_round, anchor_id))`
-end
+    opt round r is an anchor round AND >= 2f+1 round-(r+1) certs reference round r's anchor
+        Note over ValidatorA,ValidatorD: anchor nominated → committed — deterministically order the anchor's causal history, emit decided(anchor_cert_id, (anchor_round, anchor_id))
+    end
 ```
 
 ## What this pins

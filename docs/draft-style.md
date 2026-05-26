@@ -69,6 +69,53 @@ Unchanged from `docs/wiki-spec.md`: every claim cites a wiki page inline as
 `[[wiki/...]]`; missing external citations are marked `TODO(cite)`; do not
 invent citations. Drafts introduce no claim not traceable to a wiki page.
 
+## Figures and diagrams
+
+Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as Mermaid
+fenced blocks. Mermaid is the single DSL the thesis uses; the curated
+Mermaid syntax reference for this project is in
+[`docs/mermaid-syntax.md`](mermaid-syntax.md). Authors of a new diagram
+read that file first.
+
+Two Mermaid diagram types are in scope:
+
+- **`sequenceDiagram`** — every sequence and interaction diagram
+  (scheduler contracts, protocol main loops, the macro runtime view).
+- **`flowchart`** — taxonomy and component diagrams (Chapter 2 family
+  tree, future architecture/component figures).
+
+Drafts do not embed the DSL; they reference the rendered figure.
+
+Rendered PDFs are co-located with their source: `wiki/diagrams/<group>/<slug>.pdf`
+sits beside `wiki/diagrams/<group>/<slug>.md`. PDFs are tracked in git.
+Agents never invent a PDF path that does not match the diagram's wiki
+slug. (Vector PDF, not PNG: Mermaid output is line art and text; vector
+stays crisp at any zoom and keeps figure text selectable.)
+
+Hand-off pattern (single route, no human bottleneck):
+
+- **Agent export via `mmdc`.** The agent that authors the diagram also
+  renders the PDF in the same pass, using the invocation pinned in
+  [`docs/mermaid-syntax.md`](mermaid-syntax.md) (and mirrored in
+  [[diagrams/index]] § Export for thesis figures). The PDF is committed
+  alongside the `.md`; the draft cites the rendered figure with no
+  pending-export marker.
+
+Citation pattern in prose: `Figure 3.1 ([[diagrams/protocols/pbft]])`. The
+wikilink is the back-reference to source-of-truth; the figure number is the
+front-stage handle. Final cross-reference numbering, captions, and the
+list-of-figures are T62 (W12 figure polish); the LaTeX-side
+`\includegraphics` lines and the copy of `wiki/diagrams/**/*.pdf` into
+`../thesis-tex/MIT-thesis-template/figures/` are downstream of T62 as well.
+
+L-W12 verifies that every figure reference has a PDF on disk before
+submission (`docs/lint-protocol.md` check 8). The 2026-05-26 Swimlanes
+→ Mermaid migration retired the prior `TODO(human-export)` marker
+pattern; the migration plan is
+[`docs/plans/2026-05-26-swimlanes-to-mermaid.md`](plans/2026-05-26-swimlanes-to-mermaid.md).
+No new `TODO(human-export)` markers should appear — the lint check
+treats them as a regression.
+
 ## What this does NOT change
 
 - Wiki pages keep their technical/synthesis register.

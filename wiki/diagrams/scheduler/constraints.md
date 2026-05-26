@@ -12,65 +12,70 @@
 
 ## Diagram
 
-```swimlanes
-title: Scheduler — constraints, boundary, fail-fast
+```mermaid
+%% Scheduler — constraints, boundary, fail-fast
+sequenceDiagram
+    autonumber
+    participant Harness
+    participant Node
+    participant Adversary
+    participant Network
+    participant Scheduler
+    participant EventSink
+    participant T40Consumer
 
-order: Harness, Node, Adversary, Network, Scheduler, EventSink, T40Consumer
-autonumber
+    rect rgb(240,240,240)
+        Note over Harness,T40Consumer: adversary boundary — gating happens at Node, not Scheduler
+        alt Node.adversary is None (honest)
+            Node->>Network: send(dst, msg, t)
+        else Node.adversary is set (Byzantine)
+            Node->>Adversary: gate(send, dst, msg, t)
+            Adversary->>Adversary: modify | drop | fork
+            Adversary->>Network: send(dst, msg', t) (or skip entirely)
+        end
+        Network->>Scheduler: schedule(Delivery msg', t')
+        Note over Adversary,Scheduler: Scheduler sees only post-adversary calls. It has no adversary slot, no interception hook, no SchedulerAdversaryProfile type.
+    end
 
-=: **adversary boundary** — gating happens at Node, not Scheduler
+    rect rgb(240,240,240)
+        Note over Harness,T40Consumer: RNG ownership — scheduler holds no RNG
+        Note over Network: net_rng — owned by Network, drives delay and drop sampling
+        Note over Node: self.rng — owned by Node, drives FSM-internal randomness (Snowman sampling, timer jitter)
+        Note over Scheduler: pure dispatch — no random.* calls anywhere in its body
+    end
 
-if: Node.adversary is None (honest)
-  Node -> Network: send(dst, msg, t)
-else: Node.adversary is set (Byzantine)
-  Node -> Adversary: gate(send, dst, msg, t)
-  Adversary -> Adversary: modify | drop | fork
-  Adversary -> Network: send(dst, msg', t) (or skip entirely)
-end
+    rect rgb(240,240,240)
+        Note over Harness,T40Consumer: metric computation — done downstream, not in scheduler
+        Scheduler->>EventSink: every popped event flows through event_sink
+        EventSink->>T40Consumer: structured event stream
+        T40Consumer->>T40Consumer: derive latency, throughput, msg counts, finality, fork rate
+        Note over Scheduler: scheduler never computes throughput, latency, success rate — it produces a deterministic event stream and stops there
+    end
 
-Network -> Scheduler: schedule(Delivery msg', t')
+    rect rgb(240,240,240)
+        Note over Harness,T40Consumer: wallclock — forbidden in every component
+        Note over Node: receives t as parameter on every handler — never reads wallclock
+        Note over Network: samples delay against virtual time — never reads wallclock
+        Note over Scheduler: advances self._now only on pop — never reads wallclock
+    end
 
-note Adversary, Scheduler: **Scheduler sees only post-adversary calls.** It has no adversary slot, no interception hook, no `SchedulerAdversaryProfile` type.
+    rect rgb(240,240,240)
+        Note over Harness,T40Consumer: fail-fast validation gates
+        opt schedule(event, t) with t < self.now
+            Scheduler->>Harness: raise ValueError — no time travel
+        end
+        opt set_timer(..., delay) with delay < 0
+            Scheduler->>Harness: raise ValueError — no negative delay
+        end
+        opt handler (on_message / on_timer / advance_phase) raises
+            Scheduler->>Harness: exception propagates out of run() — not caught
+        end
+        opt event_sink callback raises
+            Scheduler->>Harness: exception propagates out of run() — T24 wraps its own try/except if it wants graceful logging
+        end
+    end
 
-=: **RNG ownership** — scheduler holds no RNG
-
-note Network: `net_rng` — owned by Network; drives delay and drop sampling
-note Node: `self.rng` — owned by Node; drives FSM-internal randomness (Snowman sampling, timer jitter)
-note Scheduler: pure dispatch; **no `random.*` calls anywhere in its body**
-
-=: **metric computation** — done downstream, not in scheduler
-
-Scheduler -> EventSink: every popped event flows through `event_sink`
-EventSink -> T40Consumer: structured event stream
-T40Consumer -> T40Consumer: derive latency, throughput, msg counts, finality, fork rate
-
-note Scheduler: scheduler never computes throughput, latency, success rate; it produces a deterministic event stream and stops there
-
-=: **wallclock** — forbidden in every component
-
-note Node: receives `t` as parameter on every handler; never reads wallclock
-note Network: samples delay against virtual time; never reads wallclock
-note Scheduler: advances `self._now` only on pop; never reads wallclock
-
-=: **fail-fast validation gates**
-
-if: `schedule(event, t)` with `t < self.now`
-  Scheduler => Harness: raise ValueError — no time travel
-end
-
-if: `set_timer(..., delay)` with `delay < 0`
-  Scheduler => Harness: raise ValueError — no negative delay
-end
-
-if: handler (on_message / on_timer / advance_phase) raises
-  Scheduler => Harness: exception propagates out of run() — not caught
-end
-
-if: event_sink callback raises
-  Scheduler => Harness: exception propagates out of run() — T24 wraps its own try/except if it wants graceful logging
-end
-
-note Harness, Scheduler: **`delay == 0` is allowed** — fires on the next iteration via the tie-break `seq` ordering
+    Note over Harness,Scheduler: delay == 0 is allowed — fires on the next iteration via the tie-break seq ordering
 ```
 
 ## What this pins

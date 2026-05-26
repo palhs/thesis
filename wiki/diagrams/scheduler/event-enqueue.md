@@ -11,38 +11,45 @@
 
 ## Diagram
 
-```swimlanes
-title: Scheduler — enqueue path (three sources, one funnel)
+```mermaid
+%% Scheduler — enqueue path (three sources, one funnel)
+sequenceDiagram
+    autonumber
+    participant NodeA
+    participant Network
+    participant Scheduler
+    participant SeqPer
+    participant Registry
+    participant Heap
 
-order: NodeA, Network, Scheduler, SeqPer, Registry, Heap
-autonumber
+    Note over NodeA,Heap: three callers — one entry point at Scheduler.schedule()
 
-note NodeA, Heap: **three callers — one entry point at Scheduler.schedule()**
+    opt source is Node — set_timer
+        NodeA->>Scheduler: set_timer(timer_id, delay, payload, t)
+        Scheduler->>Scheduler: validate delay >= 0 else raise ValueError
+        Scheduler->>SeqPer: seq = seq_per[NodeA] + 1, seq_per[NodeA] = seq
+        Scheduler->>Registry: registry[(NodeA, timer_id)] = seq (overwrites if present)
+        Scheduler->>Scheduler: schedule(TimerFire(timer_id, payload), t + delay, NodeA)
+    end
 
-if: source is Node — set_timer
-  NodeA -> Scheduler: set_timer(timer_id, delay, payload, t)
-  Scheduler -> Scheduler: validate `delay >= 0` else raise ValueError
-  Scheduler -> SeqPer: `seq = seq_per[NodeA] + 1; seq_per[NodeA] = seq`
-  Scheduler -> Registry: `registry[(NodeA, timer_id)] = seq` (overwrites if present)
-  Scheduler -> Scheduler: schedule(TimerFire(timer_id, payload), `t + delay`, NodeA)
-end
+    opt source is Network — message delivery
+        Network->>Network: drop coin, partition, delay sample (per concepts/network-model-phases §6.2)
+        Network->>Scheduler: schedule(Delivery(msg), t_sent + delay, msg.dst)
+    end
 
-if: source is Network — message delivery
-  Network -> Network: drop coin, partition, delay sample (per [[concepts/network-model-phases]] §6.2)
-  Network -> Scheduler: schedule(Delivery(msg), `t_sent + delay`, msg.dst)
-end
+    opt source is Network — phase boundary
+        Network->>Scheduler: schedule(PhaseAdvance(phase_id), phase.t_end, SENTINEL)
+    end
 
-if: source is Network — phase boundary
-  Network -> Scheduler: schedule(PhaseAdvance(phase_id), `phase.t_end`, SENTINEL)
-end
+    Note over Scheduler,Heap: schedule() — single validation + push site
 
-note Scheduler, Heap: **schedule() — single validation + push site**
+    Scheduler->>Scheduler: validate t >= self.now else raise ValueError
+    Scheduler->>SeqPer: seq = seq_per[node_id] + 1, seq_per[node_id] = seq
+    Scheduler->>Heap: heappush (t, node_id, seq, event)
 
-Scheduler -> Scheduler: validate `t >= self.now` else raise ValueError
-Scheduler -> SeqPer: `seq = seq_per[node_id] + 1; seq_per[node_id] = seq`
-Scheduler -> Heap: heappush `(t, node_id, seq, event)`
-
-=: queued — fires later when run() pops at time t
+    rect rgb(240,240,240)
+        Note over NodeA,Heap: queued — fires later when run() pops at time t
+    end
 ```
 
 ## What this pins

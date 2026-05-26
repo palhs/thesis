@@ -98,23 +98,7 @@ points respectively. Figure 2.1 redraws the propagation tree from
 [[wiki/concepts/consensus-families#propagation-of-the-bft-problem]].
 
 **Figure 2.1 — From the Byzantine Generals Problem to the four families.**
-
-```
-                   Byzantine Generals Problem
-                   n >= 3f+1, safety + liveness
-                              |
-        +---------------+-----+----------+--------------------+
-        |               |                |                    |
-   Deterministic   Deterministic     Probabilistic      Decouple data-
-   quorum-based    stake-weighted    random              availability
-   partial sync    + economic        subsampling         from ordering
-        |               |                |                    |
-   PBFT family     PoS-finality      Avalanche family    DAG-based family
-   (PBFT,          (Casper FFG,      (Slush -> Snowflake (Narwhal+Tusk,
-   HotStuff,       Gasper)           -> Snowball ->      Bullshark,
-   Tendermint)                        Avalanche)         Mysticeti)
-       [4]–[6]         [7], [8]          [9], [10]         [11]–[13]
-```
+([[diagrams/concepts/bft-families-tree]])
 
 The three non-PBFT branches are best read as answers to the question of
 what to relax when partial synchrony's assumption is too strong.

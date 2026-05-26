@@ -11,61 +11,68 @@
 
 ## Diagram
 
-```swimlanes
-title: Scheduler — bootstrap and binding
+```mermaid
+%% Scheduler — bootstrap and binding
+sequenceDiagram
+    autonumber
+    participant Harness
+    participant Scheduler
+    participant Network
+    participant NodeA
+    participant NodeB
+    participant Heap
 
-order: Harness, Scheduler, Network, NodeA, NodeB, Heap
-autonumber
+    Note over Harness,Heap: phase 1 — construct system-level components
 
-note Harness, Heap: **phase 1 — construct system-level components**
+    Harness->>Scheduler: __init__()
+    Harness->>Network: __init__(scheduler, phases, net_rng)
+    Harness->>NodeA: __init__(id=0, weight=1.0, rng=Random(hash((seed, 0))))
+    Harness->>NodeB: __init__(id=1, weight=1.0, rng=Random(hash((seed, 1))))
 
-Harness -> Scheduler: __init__()
-Harness -> Network: __init__(scheduler, phases, net_rng)
-Harness -> NodeA: __init__(id=0, weight=1.0, rng=Random(hash((seed, 0))))
-Harness -> NodeB: __init__(id=1, weight=1.0, rng=Random(hash((seed, 1))))
+    Note over Harness,Network: phase 2 — register every Node in the endpoint table
 
-note Harness, Network: **phase 2 — register every Node in the endpoint table**
+    Harness->>Network: register(NodeA)
+    Harness->>Network: register(NodeB)
 
-Harness -> Network: register(NodeA)
-Harness -> Network: register(NodeB)
+    Note over Harness,NodeB: phase 3 — bind outbound APIs (split ownership)
 
-note Harness, NodeB: **phase 3 — bind outbound APIs (split ownership)**
+    Harness->>Scheduler: bind(NodeA)
+    Scheduler->>NodeA: node.set_timer / node.cancel_timer / node.emit
+    Harness->>Network: bind(NodeA)
+    Network->>NodeA: node.send / node.broadcast
+    Harness->>Scheduler: bind(NodeB)
+    Harness->>Network: bind(NodeB)
 
-Harness -> Scheduler: bind(NodeA)
-Scheduler -> NodeA: node.set_timer / node.cancel_timer / node.emit
-Harness -> Network: bind(NodeA)
-Network -> NodeA: node.send / node.broadcast
-Harness -> Scheduler: bind(NodeB)
-Harness -> Network: bind(NodeB)
+    Note over Harness,Scheduler: phase 4 — wire observability
 
-note Harness, Scheduler: **phase 4 — wire observability**
+    Harness->>Scheduler: event_sink = logger.sink
 
-Harness -> Scheduler: event_sink = logger.sink
+    Note over Harness,Heap: phase 5 — kickoff — populate the heap
 
-note Harness, Heap: **phase 5 — kickoff: populate the heap**
+    Harness->>Network: start()
+    Network->>Scheduler: schedule(PhaseAdvance, t = phase[0].t_end)
+    Scheduler->>Heap: heappush
 
-Harness -> Network: start()
-Network -> Scheduler: schedule(PhaseAdvance, t = phase[0].t_end)
-Scheduler -> Heap: heappush
+    Harness->>NodeA: start(t=0)
+    NodeA->>Scheduler: set_timer(view_change, delay=5000, t=0)
+    Scheduler->>Heap: heappush (5000, 0, 0, TimerFire)
+    NodeA->>Network: broadcast(announce, t=0)
+    Network->>Scheduler: schedule(Delivery, t = delay_sample)
+    Scheduler->>Heap: heappush
 
-Harness -> NodeA: start(t=0)
-NodeA -> Scheduler: set_timer(view_change, delay=5000, t=0)
-Scheduler -> Heap: heappush `(5000, 0, 0, TimerFire)`
-NodeA -> Network: broadcast(announce, t=0)
-Network -> Scheduler: schedule(Delivery, t = delay_sample)
-Scheduler -> Heap: heappush
+    Harness->>NodeB: start(t=0)
 
-Harness -> NodeB: start(t=0)
+    rect rgb(240,240,240)
+        Note over Harness,Heap: heap is now non-empty — ready to run
+    end
 
-=: heap is now non-empty — ready to run
+    Note over Harness,Scheduler: phase 6 — run
 
-note Harness, Scheduler: **phase 6 — run**
+    Harness->>Scheduler: run(t_max, stop_when)
 
-Harness => Scheduler: run(t_max, stop_when)
+    Note over Harness,Heap: … scheduler pops events, eventually a stop condition fires
 
-...: scheduler pops events; eventually a stop condition fires
-
-Scheduler => Harness: RunResult(stopped_by, now, events_processed)
+    Scheduler->>Harness: RunResult(stopped_by, now, events_processed)
 ```
 
 ## What this pins

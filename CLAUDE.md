@@ -24,9 +24,13 @@ thesis drafts. Agents operate one task at a time; humans review every merge.
 @docs/wiki-spec.md
 @docs/retrieval.md
 @docs/roles.md
-@docs/lint-protocol.md
 @docs/chat-style.md
-@docs/draft-style.md
+
+Role-specific docs are not loaded here. The matching role section in
+`docs/roles.md` names the style/protocol doc to read on pickup:
+
+- Writer → `docs/draft-style.md`
+- Linter → `docs/lint-protocol.md`
 
 ## Orientation
 

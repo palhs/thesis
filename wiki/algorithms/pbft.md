@@ -190,12 +190,30 @@ implementation exposes two knobs:
 These feed T28–T31 (PBFT implementation and correctness tests) and the
 baseline/delay/adversarial experiment batteries in Weeks 8–10.
 
+**Trusted view-change evidence — modeling boundary.** The simulator
+carries no signatures (digests serve message integrity and deterministic
+replay only); the authenticated-channels assumption of §Model and
+assumptions is extended here to cover *evidence content*. A `VIEW-CHANGE`
+message's prepared evidence is a plain assertion, not a cryptographic
+prepared certificate (`PRE-PREPARE` plus `2f` signed `PREPARE`s), so a
+Byzantine replica can fabricate it and the new primary's reissue
+computation will trust it. Within-threshold *safety against forged
+view-change evidence* is therefore assumed by construction, not
+demonstrated, and the adversary catalog ([[concepts/adversary-model]])
+deliberately carries no evidence-forgery capability. The boundary does
+**not** affect the results that are genuinely exercised: honest-node
+correctness, liveness behaviour, and the equivocating-*primary* attack
+(conflicting `PRE-PREPARE`, detected at the prepare quorum) are all
+unaffected.
+
 ## Expected findings
 
 Hypotheses to evaluate in the results chapter:
 
 - Safety is maintained across the full `f < n/3` range; equivocation
-  appears only once the Byzantine fraction crosses the threshold.
+  appears only once the Byzantine fraction crosses the threshold. Within
+  the trusted view-change-evidence boundary in §Simulator mapping, the
+  equivocating-primary case is demonstrated; evidence-forgery is not.
 - Throughput degrades sharply as delay variance increases, not mean delay.
 - View-change frequency dominates throughput loss under adversarial delay.
 

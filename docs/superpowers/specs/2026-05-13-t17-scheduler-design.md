@@ -421,9 +421,9 @@ outcome — far worse than crashing with a clear traceback that says "delay
 
 ## 8. Visual contract
 
-The five Swimlanes.io diagrams below are the binding visual specification
-for this spec. A reader who reads only these diagrams should be able to
-reconstruct §4–§7 above.
+The five Mermaid `sequenceDiagram` diagrams below are the binding visual
+specification for this spec. A reader who reads only these diagrams
+should be able to reconstruct §4–§7 above.
 
 - [[diagrams/scheduler/bootstrap]] — six-phase bootstrap sequence.
 - [[diagrams/scheduler/event-enqueue]] — three sources funnelling through
@@ -436,7 +436,7 @@ reconstruct §4–§7 above.
   rules, fail-fast gates.
 
 Navigation entry point: [[diagrams/index]] (also contains the legend for
-the Swimlanes.io syntax used).
+the Mermaid syntax used).
 
 ---
 

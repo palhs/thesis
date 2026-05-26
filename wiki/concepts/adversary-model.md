@@ -253,6 +253,15 @@ against.
 
 ## 8. Revisions
 
+### 2026-05-23 — PBFT view-change-evidence forgery is a deliberate non-capability
+
+The catalog carries no capability that forges a Byzantine replica's
+`VIEW-CHANGE` prepared evidence, and no `§7.4` PBFT view-change adversary
+is planned. This is a deliberate modeling boundary — the simulator trusts
+view-change evidence content (it carries no signatures), so PBFT
+within-threshold safety against evidence-forgery is assumed, not
+demonstrated. Authoritative statement: [[algorithms/pbft#simulator-mapping]].
+
 ### 2026-05-18 — §1 experiment-coverage claim narrowed
 
 §1 previously read "T51–T53 sizes its experiment matrix against this

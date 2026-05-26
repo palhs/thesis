@@ -11,47 +11,53 @@
 
 ## Diagram
 
-```swimlanes
-title: PBFT — three-phase commit for one (view, seq) instance (n=4, f=1, quorum 2f+1=3)
+```mermaid
+%% PBFT — three-phase commit for one (view, seq) instance (n=4, f=1, quorum 2f+1=3)
+sequenceDiagram
+    autonumber
+    participant Primary
+    participant ReplicaB
+    participant ReplicaC
+    participant ReplicaD
 
-order: Primary, ReplicaB, ReplicaC, ReplicaD
-autonumber
+    Note over Primary,ReplicaD: FSM instance keyed by (view, seq) — every replica starts the instance in state idle.
 
-note Primary, ReplicaD: FSM instance keyed by (view, seq); every replica starts the instance in state **idle**.
+    rect rgb(240,240,240)
+        Note over Primary,ReplicaD: pre-prepare phase
+        Primary->>Primary: on_timer(propose) — batch local mempool, assign (view, seq), digest
+        Primary->>ReplicaB: PRE-PREPARE(view, seq, digest, request)
+        Primary->>ReplicaC: PRE-PREPARE(view, seq, digest, request)
+        Primary->>ReplicaD: PRE-PREPARE(view, seq, digest, request)
+        Note over ReplicaB,ReplicaD: on_message — validate, arm view-change timer, idle → pre_prepared
+    end
 
-=: pre-prepare phase
+    rect rgb(240,240,240)
+        Note over Primary,ReplicaD: prepare phase
+        ReplicaB->>Primary: PREPARE(view, seq, digest)
+        ReplicaB->>ReplicaC: PREPARE(view, seq, digest)
+        ReplicaB->>ReplicaD: PREPARE(view, seq, digest)
+        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast PREPARE likewise (arrows omitted)
+        Note over Primary,ReplicaD: on 2f+1 matching PREPARE collected — pre_prepared → prepared
+    end
 
-Primary -> Primary: on_timer(propose) — batch local mempool, assign (view, seq), digest
-Primary => ReplicaB: PRE-PREPARE(view, seq, digest, request)
-Primary => ReplicaC: PRE-PREPARE(view, seq, digest, request)
-Primary => ReplicaD: PRE-PREPARE(view, seq, digest, request)
-note ReplicaB, ReplicaD: on_message: validate, arm view-change timer, **idle → pre_prepared**
+    rect rgb(240,240,240)
+        Note over Primary,ReplicaD: commit phase
+        ReplicaB->>Primary: COMMIT(view, seq, digest)
+        ReplicaB->>ReplicaC: COMMIT(view, seq, digest)
+        ReplicaB->>ReplicaD: COMMIT(view, seq, digest)
+        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast COMMIT likewise (arrows omitted)
+        Note over Primary,ReplicaD: on 2f+1 matching COMMIT — prepared → committed, cancel timer, emit decided(digest, (view, seq))
+    end
 
-=: prepare phase
+    Note over Primary,ReplicaD: liveness recovery — taken only if the instance stalls
 
-ReplicaB => Primary: PREPARE(view, seq, digest)
-ReplicaB => ReplicaC: PREPARE(view, seq, digest)
-ReplicaB => ReplicaD: PREPARE(view, seq, digest)
-note Primary, ReplicaD: ReplicaC and ReplicaD broadcast PREPARE likewise (arrows omitted)
-note Primary, ReplicaD: on **2f+1** matching PREPARE collected: **pre_prepared → prepared**
-
-=: commit phase
-
-ReplicaB => Primary: COMMIT(view, seq, digest)
-ReplicaB => ReplicaC: COMMIT(view, seq, digest)
-ReplicaB => ReplicaD: COMMIT(view, seq, digest)
-note Primary, ReplicaD: ReplicaC and ReplicaD broadcast COMMIT likewise (arrows omitted)
-note Primary, ReplicaD: on **2f+1** matching COMMIT: **prepared → committed**, cancel timer, `emit decided(digest, (view, seq))`
-
--: liveness recovery — taken only if the instance stalls
-
-if: view-change timer fires before committed
-  ReplicaB => ReplicaC: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
-  note ReplicaB, ReplicaD: cross-instance: `view_changing` set; all (view, *) instances frozen
-  note Primary, ReplicaD: new primary = `new_view mod n` collects 2f+1 VIEW-CHANGE
-  ReplicaC => Primary: NEW-VIEW(new_view, vc_proofs, reissued_pre_prepares)
-  note Primary, ReplicaD: advance current view; replay prepared-not-committed instances
-end
+    opt view-change timer fires before committed
+        ReplicaB->>ReplicaC: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
+        Note over ReplicaB,ReplicaD: cross-instance — view_changing set, all (view, *) instances frozen
+        Note over Primary,ReplicaD: new primary = new_view mod n collects 2f+1 VIEW-CHANGE
+        ReplicaC->>Primary: NEW-VIEW(new_view, vc_proofs, reissued_pre_prepares)
+        Note over Primary,ReplicaD: advance current view — replay prepared-not-committed instances
+    end
 ```
 
 ## What this pins

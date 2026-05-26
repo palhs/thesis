@@ -7,12 +7,12 @@
 # directory on PYTHONPATH alongside src/.
 #
 #   make test                 # every suite
-#   make test-integration     # one suite (also: scheduler nodes network event_log)
+#   make test-pbft            # one suite (also: scheduler nodes network event_log config pos integration)
 #   make coverage             # branch coverage across all suites (report-only)
 #   make clean                # remove __pycache__ and coverage artifacts
 
 PY            = python3
-SUITES        = scheduler nodes network event_log config integration
+SUITES        = scheduler nodes network event_log config pbft pos integration
 SUITE_TARGETS = $(addprefix test-,$(SUITES))
 
 .PHONY: test coverage clean $(SUITE_TARGETS)
