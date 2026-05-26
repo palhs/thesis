@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 75 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 54 · In Review: 2 · In Progress: 0 · Not Started: 34 · Blocked: 2
+- Completed: 54 · In Review: 2 · In Progress: 1 · Not Started: 33 · Blocked: 2
 
 ## Legend
 
@@ -194,7 +194,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 7 — Buffer / third algorithm
 
-- `[ ]` **T37** `H` Engineer — Assess status: ready for Algorithm 3 or need buffer?
+- `[~]` **T37** `H` Engineer — Assess status: ready for Algorithm 3 or need buffer?
   _Outcome:_ Written assessment; decision gate · _Artifact:_ `wiki/concepts/week7-decision.md`
 - `[ ]` **T38** `M` Engineer — If ready: implement DAG-based or Avalanche-style consensus
   _Outcome:_ Third algorithm producing same output format · _Artifact:_ `src/<alg3>/`
