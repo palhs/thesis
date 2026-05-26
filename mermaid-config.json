@@ -1,0 +1,7 @@
+{
+  "securityLevel": "loose",
+  "theme": "neutral",
+  "sequence": {
+    "htmlLabels": true
+  }
+}

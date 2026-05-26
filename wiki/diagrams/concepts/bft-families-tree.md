@@ -85,10 +85,9 @@ family-comparison row in [[concepts/consensus-families]].
 
 Authored ad-hoc on 2026-05-26 alongside the T36 Chapter 3 work, in
 response to a request to redraw Figure 2.1 in a standard diagram
-format. First diagram in the thesis to use Mermaid rather than
-Swimlanes.io; the choice is motivated in [[diagrams/index]] §
-Mermaid syntax — Swimlanes is sequence-flow oriented and cannot
-express a taxonomy tree idiomatically.
+format. The first diagram in the thesis to land in Mermaid; the
+subsequent 2026-05-26 Swimlanes.io → Mermaid migration brought the
+remaining 10 sequence diagrams onto the same toolchain.
 
 ## Revisions
 

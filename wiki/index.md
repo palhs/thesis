@@ -41,7 +41,7 @@
 - [[concepts/experiment-matrix]] — Experiment parameter space (T19): the six axes (validator-set size `n`, network timeline, adversary, protocol knobs, workload, seeds), three run families (A Scaling / B Delay / C Adversarial) each sweeping one axis, the per-RQ design map, the FFG `slot_duration`↔`E[delay]` coherence rule (FFG slot rescales with the delay regime — the analogue of Snowman `K`-rescaling), committed `workload_*` defaults, the peak-throughput ramp grid, and the seed/replication policy (common random numbers across protocols). Design half; enumerated catalog in the companion.
 - [[concepts/experiment-matrix-runs]] — Run-catalog companion to `experiment-matrix`: the network-timeline parameter tables with the per-timeline FFG `slot_duration` pairing, the 12 covered adversary (capability × protocol) triples with intensity grids (T51/T52/T53), the 6 uncovered catalog surfaces, and the ~2,700-run combinatorial budget. Split per `docs/wiki-spec.md` § Page size.
 - [[concepts/system-design]] — System synthesis (T20): how the W3 design contracts (node / network / message / scheduler / adversary models) compose into one running system. Component-layering table + the macro runtime view — one experiment-matrix cell to one `results.csv` row, six phases (init → workload → run loop → stop → flush → output). Diagram: [[diagrams/runtime/macro]]. Companion: `system-design-protocols`.
-- [[concepts/system-design-protocols]] — Companion to `system-design`: the four protocols' main loops as event-handler pseudocode (PBFT three-phase commit, Casper FFG justify→finalise, Snowman `K`-peer poll loop, Narwhal+Tusk DAG round + zero-message anchor commit), each non-binding and paired with a Swimlanes.io diagram under `diagrams/protocols/`; carries the open-to-revision register spanning both pages.
+- [[concepts/system-design-protocols]] — Companion to `system-design`: the four protocols' main loops as event-handler pseudocode (PBFT three-phase commit, Casper FFG justify→finalise, Snowman `K`-peer poll loop, Narwhal+Tusk DAG round + zero-message anchor commit), each non-binding and paired with a Mermaid `sequenceDiagram` under `diagrams/protocols/`; carries the open-to-revision register spanning both pages.
 
 ## Sources
 
@@ -93,7 +93,7 @@
 
 ## Diagrams
 
-- [[diagrams/index]] — Diagrams navigation entry point: Swimlanes.io + Mermaid syntax legends, lifeline glossary, catalogue of the T17 / T20 / Chapter 2 diagram sets, reading order, and the deliberately-deferred adversary and experiment-matrix gaps.
+- [[diagrams/index]] — Diagrams navigation entry point: Mermaid `sequenceDiagram` + `flowchart` syntax legends, lifeline glossary, catalogue of the T17 / T20 / Chapter 2 diagram sets, reading order, and the deliberately-deferred adversary and experiment-matrix gaps.
 - [[diagrams/concepts/bft-families-tree]] — Chapter 2 Figure 2.1: propagation of the Byzantine Generals Problem into the four families this thesis evaluates; Mermaid `flowchart TD`, three layers (origin → concession axis → family), four sibling branches.
 - [[diagrams/runtime/macro]] — T20 macro runtime view: one experiment-matrix cell + seed → one `results.csv` row through six phases (init, workload, run loop, stop, flush, output); the run-loop phase zooms into the five scheduler diagrams.
 - [[diagrams/protocols/pbft]] — T20 protocol main loop: PBFT three-phase commit (pre-prepare → prepare → commit) for one `(view, seq)` instance plus the view-change branch.
