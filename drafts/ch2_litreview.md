@@ -128,7 +128,7 @@ the lens applied to that family in §2.4.1–§2.4.4.
 | :---- | :---- | :---- | :---- | :---- |
 | **PBFT-style** | Partial | Deterministic, single-slot | `f < n/3` | `O(n²)` per-block messages; view-change cost on leader failure |
 | **PoS-finality** | Partial | Deterministic, checkpoint-based | `f < n/3` by stake | Time-to-finality spans multiple epochs; slashing-logic complexity |
-| **Avalanche-style** | Asynchronous / probabilistic | Probabilistic `(1 − ε)` | `f < n/5` (parameter-dependent) | No deterministic finality; parameter tuning required |
+| **Avalanche-style** | Asynchronous / probabilistic | Probabilistic `(1 − ε)` | No fixed fraction; parameter-tuned (see §2.4.3) | No deterministic finality; parameter tuning required |
 | **DAG-based** | Asynchronous | Deterministic, induced by DAG order | `f < n/3` | Higher per-node storage and bandwidth; deeper pipeline before order is fixed |
 
 Each subsection follows the same four-paragraph structure: mechanism,
@@ -208,21 +208,36 @@ four-stage cascade Slush → Snowflake → Snowball → Avalanche layers
 metastability resistance, persistence, and DAG operation onto the basic
 sampling primitive.
 
-*Guarantees and assumption.* Safety is *probabilistic*: the
-safety-violation probability is bounded by `ε < (1 − α_c/K)^β` and decays
-exponentially in the confidence parameter `β` [9]. Liveness holds
-asynchronously under the assumption of a non-adaptive Byzantine fraction
-below the parameter-dependent threshold (typically `f < n/5` for the
-parameter sets reported in [9]). Per-validator message cost is `O(K · β)`
-and independent of `n` — a structural asymmetry with respect to the three
-quorum-based families.
+*Guarantees and assumption.* Safety is *probabilistic* rather than
+absolute: two correct validators may, with some small probability `ε`,
+commit conflicting values. The defining property of the family is that
+`ε` is tunable, not fixed — raising the confidence parameter `β`, the
+number of consecutive agreeing sample rounds a validator requires before
+it commits, drives `ε` down exponentially, so a designer can make a
+safety violation as unlikely as the application demands [9].
+Avalanche-style therefore has no fixed fault threshold of the `f < n/3`
+form. The tolerated Byzantine fraction is set by the parameter choice:
+[9] reports that tuning can carry it above `n/3` at a cost in latency,
+with time-to-finality growing without bound only as the Byzantine
+fraction approaches `n/2`. Liveness holds asynchronously, on the
+assumption that the Byzantine set is fixed in advance rather than
+adaptive. Per-validator message cost is `O(K · β)` — proportional to
+the sample size `K` and the confidence parameter `β`, and independent of
+the validator-set size `n` — a structural asymmetry with respect to the
+three quorum-based families.
 
-*Documented adversarial weakness.* The most-studied weakness within the
-§1.4 taxonomy is **selective message dropping in combination with delayed
-voting**, the regime in which the formal re-analysis of Amores-Sesar,
-Cachin and Schneider [10] tightens the informal liveness claims of [9] and
-identifies configurations under which sampling rounds fail to converge as
-quickly as [9] predicts.
+*Documented adversarial weakness.* The weakness most relevant to this
+thesis's adversary taxonomy is **equivocation**: an adversary that
+presents conflicting votes to validators that have not yet decided can
+stall the `β`-round confidence counter that gates commitment. The formal
+re-analysis of Amores-Sesar, Cachin and Schneider [10] shows this attack
+is severe — an adversary influencing as few as two undecided validators
+can prevent the Snowflake and Snowball protocols from committing within
+any number of rounds polynomial in `β`, a far worse latency cost than
+the original analysis [9] suggests. The same work confirms that the
+underlying sampling routine converges quickly when no such adversary is
+present, and proposes a modified protocol that restores a usable
+latency–security balance.
 
 *Simulator role.* The Avalanche-family module tests RQ3 (the
 `n`-independent message cost) and RQ4 (probabilistic safety under
@@ -290,7 +305,7 @@ the obstacle.
 | PBFT (LAN) | Thousands of ops/s | Sub-10 ms | `< n/3` | [4] |
 | HotStuff | Linear in `n` after optimizations | 3-round commit | `< n/3` | [5] |
 | PoS-finality (Casper FFG / Gasper) | Block-proposal rate of underlying chain | Two-epoch finality (≤12.8 min on Ethereum) | `< 1/3` of stake | [7], [8] |
-| Avalanche | ~3.4 ktps (testnet) | ~1.35 s | Parameter-dependent, ~`< n/5` | [9], [10] |
+| Avalanche | ~3.4 ktps (testnet) | ~1.35 s | Parameter-dependent (no fixed fraction) | [9], [10] |
 | Narwhal + Tusk | ~140 ktps (WAN) | ~2–3 s | `< n/3` | [11] |
 | Bullshark | ~125 ktps | 2-round fast path under synchrony | `< n/3` | [12] |
 | Mysticeti | >200 ktps | ~0.5 s commit (WAN) | `< n/3` | [13] |
