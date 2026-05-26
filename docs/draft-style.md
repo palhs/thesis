@@ -71,22 +71,39 @@ invent citations. Drafts introduce no claim not traceable to a wiki page.
 
 ## Figures and diagrams
 
-Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as Swimlanes.io
-DSL blocks. Drafts do not embed the DSL; they reference the rendered figure.
+Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as DSL blocks.
+Two DSLs are in use:
+
+- **Swimlanes.io** for sequence and interaction diagrams (scheduler
+  contracts, protocol main loops). No clean CLI exists, so export is
+  human-only.
+- **Mermaid** for taxonomy and component diagrams (Chapter 2 family
+  tree, future architecture/component figures). Renders via the
+  Mermaid CLI (`mmdc`), so the agent that authors the diagram also
+  produces the PDF in the same pass.
+
+Drafts do not embed the DSL; they reference the rendered figure.
 
 Rendered PDFs are co-located with their source: `wiki/diagrams/<group>/<slug>.pdf`
-sits beside `wiki/diagrams/<group>/<slug>.md`. PDFs are tracked in git. The
-export itself is human-only — agents never invoke a renderer, never check in
-a binary PDF, and never invent a PDF path that does not match the diagram's
-wiki slug. (Vector PDF, not PNG: Swimlanes output is line art and text;
-vector stays crisp at any zoom and keeps figure text selectable.)
+sits beside `wiki/diagrams/<group>/<slug>.md`. PDFs are tracked in git.
+Agents never invent a PDF path that does not match the diagram's wiki
+slug. (Vector PDF, not PNG: both Swimlanes and Mermaid output are line
+art and text; vector stays crisp at any zoom and keeps figure text
+selectable.)
 
-Hand-off marker. The Writer cites each figure in prose at the point it is
-needed, then drops a `TODO(human-export)` line directly under the paragraph
-with two fields: the source wiki page (`wiki/diagrams/<group>/<slug>.md`)
-and the intended caption. The target PDF path is implied by the wiki slug
-and does not need to be repeated. The human exports the PDF from
-swimlanes.io to the co-located path.
+Hand-off pattern differs by DSL:
+
+- **Swimlanes (human-export).** The Writer cites the figure in prose
+  at the point it is needed, then drops a `TODO(human-export)` line
+  directly under the paragraph with two fields: the source wiki page
+  (`wiki/diagrams/<group>/<slug>.md`) and the intended caption. The
+  target PDF path is implied by the wiki slug. The human exports the
+  PDF from swimlanes.io to the co-located path.
+- **Mermaid (agent-export).** The agent renders to PDF via `mmdc` as
+  part of the same task that authors the diagram source (invocation
+  pinned in [[diagrams/index]] § Export for thesis figures), commits
+  the PDF alongside the `.md`, and cites the rendered figure in the
+  draft without any `TODO(human-export)` marker.
 
 Citation pattern in prose: `Figure 3.1 ([[diagrams/protocols/pbft]])`. The
 wikilink is the back-reference to source-of-truth; the figure number is the
