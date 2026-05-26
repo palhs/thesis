@@ -1,9 +1,11 @@
 # Diagrams
 
 > Standalone folder for thesis diagrams. Each diagram lives in its own
-> Markdown file containing a Swimlanes.io source block plus per-step
-> elaboration. Swimlanes.io blocks render via
-> [swimlanes.io](https://swimlanes.io) paste-and-render or the CLI.
+> Markdown file containing a source block (Swimlanes.io for
+> sequence/interaction diagrams, Mermaid for taxonomy/component
+> diagrams) plus per-step elaboration. Swimlanes.io blocks render via
+> [swimlanes.io](https://swimlanes.io) paste-and-render; Mermaid blocks
+> render via [`mmdc`](https://github.com/mermaid-js/mermaid-cli).
 >
 > This page is the navigation entry point. Wiki pages that need a
 > diagram link here via `[[diagrams/<group>/<slug>]]`. New diagram
@@ -28,6 +30,24 @@ Notation conventions used across the diagram set.
 | `...: text` | Delay marker — "time passes, other events run." |
 | `autonumber` | Auto-numbers every message line. |
 | `order: A, B, C` | Locks lifeline order left-to-right. |
+
+### Mermaid syntax
+
+Used for taxonomy and component diagrams where a sequence-flow
+notation is the wrong fit (no time axis, no message exchange — just
+parent/child or containment relationships). Primitives used in this
+diagram set:
+
+| Symbol | Meaning |
+| :-- | :-- |
+| `flowchart TD` | Top-down flowchart layout. Used for taxonomy trees. |
+| `A["label"]` | Node `A` with a display label. `<br/>` inside the label is a line break; `<b>...</b>` is bold. |
+| `A --> B` | Directed edge from `A` to `B` (parent → child in a tree). |
+| `classDef name fill:#...,stroke:#...` | Define a visual class. |
+| `class A,B name` | Apply a class to one or more nodes. |
+
+Render with `mmdc -i <slug>.mmd -o <slug>.pdf -b transparent -t neutral`
+(see § Export for thesis figures below).
 
 ### Lifeline glossary
 
@@ -88,6 +108,17 @@ One macro-level diagram, one abstraction above the T17 contract set.
   scheduler diagrams above; `build()` zooms into
   [[diagrams/scheduler/bootstrap]].
 
+### Concept diagrams — Chapter 2 ([[concepts/consensus-families]])
+
+Taxonomy/component figures consumed by Chapter 2. Rendered in Mermaid
+(see § Mermaid syntax above) because Swimlanes.io has no idiomatic
+representation for a containment tree.
+
+- [[diagrams/concepts/bft-families-tree]] — propagation of the
+  Byzantine Generals Problem [1] into the four families this thesis
+  evaluates. Three layers, four sibling branches. Consumed by
+  `drafts/ch2_litreview.md` §2.3 (Figure 2.1).
+
 ### Protocol main loops — T20 ([[concepts/system-design-protocols]])
 
 One sequence diagram per protocol, all at a matched abstraction
@@ -110,22 +141,36 @@ their source: `wiki/diagrams/<group>/<slug>.pdf` sits beside the matching
 `.md`. The PDF is committed to git and is the authoritative render — a
 diagram and its PDF travel together.
 
-Workflow:
+The export route depends on the DSL:
 
-1. The Writer cites the figure in `drafts/ch*.md` via the diagram's
-   wikilink (`Figure N.x ([[diagrams/<group>/<slug>]])`) and drops a
-   `TODO(human-export)` marker per `docs/draft-style.md § Figures and
-   diagrams`.
-2. The human opens the diagram's `.md` on swimlanes.io, exports the PDF
-   (not PNG — vector keeps it crisp and text-selectable), and saves it as
-   the sibling `<slug>.pdf`.
-3. T62 (W12 figure polish) copies `wiki/diagrams/**/*.pdf` into
-   `../thesis-tex/MIT-thesis-template/figures/` and finalises captions,
-   labels, and the list-of-figures.
+- **Swimlanes.io (sequence diagrams) — human export.** No clean CLI;
+  the human opens the diagram's `.md` on swimlanes.io, exports the PDF
+  (not PNG — vector keeps it crisp and text-selectable), and saves it
+  as the sibling `<slug>.pdf`. The Writer drops a `TODO(human-export)`
+  marker in the draft per `docs/draft-style.md § Figures and diagrams`
+  until the PDF lands.
+- **Mermaid (taxonomy/component diagrams) — agent export.** The
+  Mermaid CLI (`mmdc`) renders directly from the command line, so the
+  agent that authors the diagram also produces the PDF in the same
+  pass. No `TODO(human-export)` marker; the draft cites the rendered
+  figure straight away. Invocation:
+  ```
+  PUPPETEER_SKIP_DOWNLOAD=true \
+    npx --yes @mermaid-js/mermaid-cli@latest \
+    -p <puppeteer-config.json> \
+    -i <slug>.mmd -o <group>/<slug>.pdf \
+    -b transparent -t neutral
+  ```
+  where `puppeteer-config.json` points `executablePath` at the system
+  Chrome to skip the bundled Chromium download.
 
-Agents never invoke a renderer, never check in a PDF, and never invent a
-PDF path that does not match the diagram's wiki slug. L-W12 verifies every
-figure reference in `drafts/` has a PDF on disk (lint check 8).
+In both routes, the PDF filename must match the diagram's wiki slug
+exactly; agents never invent a PDF path that does not.
+
+T62 (W12 figure polish) copies `wiki/diagrams/**/*.pdf` into
+`../thesis-tex/MIT-thesis-template/figures/` and finalises captions,
+labels, and the list-of-figures. L-W12 verifies every figure
+reference in `drafts/` has a PDF on disk (lint check 8).
 
 ## How to read them
 

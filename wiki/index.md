@@ -92,7 +92,8 @@
 
 ## Diagrams
 
-- [[diagrams/index]] — Diagrams navigation entry point: Swimlanes.io syntax legend, lifeline glossary, catalogue of the T17 / T20 diagram sets, reading order, and the deliberately-deferred adversary and experiment-matrix gaps.
+- [[diagrams/index]] — Diagrams navigation entry point: Swimlanes.io + Mermaid syntax legends, lifeline glossary, catalogue of the T17 / T20 / Chapter 2 diagram sets, reading order, and the deliberately-deferred adversary and experiment-matrix gaps.
+- [[diagrams/concepts/bft-families-tree]] — Chapter 2 Figure 2.1: propagation of the Byzantine Generals Problem into the four families this thesis evaluates; Mermaid `flowchart TD`, three layers (origin → concession axis → family), four sibling branches.
 - [[diagrams/runtime/macro]] — T20 macro runtime view: one experiment-matrix cell + seed → one `results.csv` row through six phases (init, workload, run loop, stop, flush, output); the run-loop phase zooms into the five scheduler diagrams.
 - [[diagrams/protocols/pbft]] — T20 protocol main loop: PBFT three-phase commit (pre-prepare → prepare → commit) for one `(view, seq)` instance plus the view-change branch.
 - [[diagrams/protocols/casper-ffg]] — T20 protocol main loop: Casper FFG justify→finalise for one epoch with the accountable-safety (slashing) branch on detected double / surround votes.
