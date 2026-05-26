@@ -11,36 +11,41 @@
 
 ## Diagram
 
-```swimlanes
-title: Scheduler — one iteration of run()
+```mermaid
+%% Scheduler — one iteration of run()
+sequenceDiagram
+    autonumber
+    participant Caller
+    participant Scheduler
+    participant Heap
+    participant Registry
+    participant EventSink
+    participant Node
 
-order: Caller, Scheduler, Heap, Registry, EventSink, Node
-autonumber
+    opt heap is empty
+        Scheduler->>Caller: return RunResult(stopped_by='quiescence', now, events_processed)
+    end
 
-if: heap is empty
-  Scheduler => Caller: return RunResult(stopped_by='quiescence', now, events_processed)
-end
+    Scheduler->>Heap: heappop
+    Heap-->>Scheduler: (t, node_id, seq, event)
+    Scheduler->>Scheduler: self._now = t
 
-Scheduler -> Heap: heappop
-Heap --> Scheduler: `(t, node_id, seq, event)`
-Scheduler -> Scheduler: self._now = t
+    opt t_max set AND now >= t_max
+        Scheduler->>Caller: return RunResult(stopped_by='deadline', now, events_processed)
+    end
 
-if: t_max set AND now >= t_max
-  Scheduler => Caller: return RunResult(stopped_by='deadline', now, events_processed)
-end
+    alt event is TimerFire AND registry[(node_id, event.timer_id)] != event.seq
+        Note over Scheduler,Registry: stale TimerFire — silently skip, control jumps to next iteration
+    else
+        Scheduler->>EventSink: (if event_sink set) event_sink(t, node_id, seq, event)
+        Scheduler->>Node: dispatch by event class — Delivery → on_message, TimerFire → on_timer, PhaseAdvance → network.advance_phase
+    end
 
-if: event is TimerFire AND `registry[(node_id, event.timer_id)] != event.seq`
-  note Scheduler, Registry: **stale TimerFire** — silently skip; control jumps to next iteration
-else
-  Scheduler -> EventSink: (if event_sink set) `event_sink(t, node_id, seq, event)`
-  Scheduler -> Node: dispatch by event class — **Delivery** → `on_message`, **TimerFire** → `on_timer`, **PhaseAdvance** → `network.advance_phase`
-end
+    opt stop_when set AND stop_when() == true
+        Scheduler->>Caller: return RunResult(stopped_by='predicate', now, events_processed)
+    end
 
-if: stop_when set AND `stop_when() == true`
-  Scheduler => Caller: return RunResult(stopped_by='predicate', now, events_processed)
-end
-
--: control returns to top of loop
+    Note over Caller,Node: control returns to top of loop
 ```
 
 ## What this pins

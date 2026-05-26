@@ -11,46 +11,56 @@
 
 ## Diagram
 
-```swimlanes
-title: Scheduler — timer lifecycle (lazy tombstone)
+```mermaid
+%% Scheduler — timer lifecycle (lazy tombstone)
+sequenceDiagram
+    autonumber
+    participant Node
+    participant Scheduler
+    participant SeqPer
+    participant Registry
+    participant Heap
 
-order: Node, Scheduler, SeqPer, Registry, Heap
-autonumber
+    Note over Node,Heap: scenario — Node sets timer_id=1, one of {cancel, overwrite, fire} happens later
 
-note Node, Heap: **scenario** — Node sets timer_id=1; one of {cancel, overwrite, fire} happens later
+    Node->>Scheduler: set_timer(timer_id=1, delay=20, payload, t=10)
+    Scheduler->>SeqPer: seq_per[Node] -> 1
+    Scheduler->>Registry: registry[(Node, 1)] = 1
+    Scheduler->>Heap: heappush (30, Node, 1, TimerFire id=1)
 
-Node -> Scheduler: set_timer(timer_id=1, delay=20, payload, t=10)
-Scheduler -> SeqPer: seq_per[Node] -> 1
-Scheduler -> Registry: registry[(Node, 1)] = 1
-Scheduler -> Heap: heappush `(30, Node, 1, TimerFire id=1)`
+    rect rgb(240,240,240)
+        Note over Node,Heap: time passes — scheduler pops other events
+    end
 
-=: time passes; scheduler pops other events
+    opt case A — cancel before fire
+        Node->>Scheduler: cancel_timer(timer_id=1)
+        Scheduler->>Registry: del registry[(Node, 1)]
+        Note over Scheduler,Heap: heap still holds (30, Node, 1, TimerFire) — it is a tomb
+    end
 
-if: **case A** — cancel before fire
-  Node -> Scheduler: cancel_timer(timer_id=1)
-  Scheduler -> Registry: del registry[(Node, 1)]
-  note Scheduler, Heap: heap still holds `(30, Node, 1, TimerFire)` — it is a tomb
-end
+    opt case B — re-register (overwrite) before fire
+        Node->>Scheduler: set_timer(timer_id=1, delay=15, payload', t=12)
+        Scheduler->>SeqPer: seq_per[Node] -> 2
+        Scheduler->>Registry: registry[(Node, 1)] = 2 (overwrites the 1)
+        Scheduler->>Heap: heappush (27, Node, 2, TimerFire id=1)
+        Note over Scheduler,Heap: heap now holds both the new entry and the old tomb
+    end
 
-if: **case B** — re-register (overwrite) before fire
-  Node -> Scheduler: set_timer(timer_id=1, delay=15, payload', t=12)
-  Scheduler -> SeqPer: seq_per[Node] -> 2
-  Scheduler -> Registry: registry[(Node, 1)] = 2 (overwrites the `1`)
-  Scheduler -> Heap: heappush `(27, Node, 2, TimerFire id=1)`
-  note Scheduler, Heap: heap now holds **both** the new entry and the old tomb
-end
+    rect rgb(240,240,240)
+        Note over Node,Heap: case B — at t=27 the newer entry pops first
+    end
 
-=: case B — at t=27 the newer entry pops first
+    Scheduler->>Heap: heappop -> (27, Node, 2, TimerFire id=1)
+    Scheduler->>Registry: registry[(Node, 1)] == 2 ? yes — alive
+    Scheduler->>Node: on_timer(1, payload', 27)
 
-Scheduler -> Heap: heappop -> `(27, Node, 2, TimerFire id=1)`
-Scheduler -> Registry: `registry[(Node, 1)] == 2`? yes — alive
-Scheduler => Node: on_timer(1, payload', 27)
+    rect rgb(240,240,240)
+        Note over Node,Heap: later at t=30 the older entry pops
+    end
 
-=: later at t=30 the older entry pops
-
-Scheduler -> Heap: heappop -> `(30, Node, 1, TimerFire id=1)`
-Scheduler -> Registry: `registry[(Node, 1)] == 1`? no (current is 2 or absent) — **stale**
-note Scheduler: silently skip; Node.on_timer is **not** invoked
+    Scheduler->>Heap: heappop -> (30, Node, 1, TimerFire id=1)
+    Scheduler->>Registry: registry[(Node, 1)] == 1 ? no (current is 2 or absent) — stale
+    Note over Scheduler: silently skip — Node.on_timer is not invoked
 ```
 
 ## What this pins
