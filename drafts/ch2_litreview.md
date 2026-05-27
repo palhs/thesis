@@ -24,8 +24,7 @@ claims on which the remainder of the thesis depends:
 
 Two scope notes pin the chapter. First, Proof-of-Work appears as a
 methodological precedent through [17] only; it is not a subject of
-comparison, consistent with the scope contract in
-[[wiki/concepts/problem-statement#scope]]. Second, the chapter surveys the
+comparison, consistent with the scope contract in Chapter 1. Second, the chapter surveys the
 *literature* on each family at the level of mechanism, guarantees, and
 documented adversarial weakness; the simulator-level mechanics of each
 protocol are the concern of Chapter 3.
@@ -79,10 +78,13 @@ deterministic safety [[wiki/concepts/quorum-arithmetic]]. The CAP theorem
 concrete: under partition, a chain must choose Consistency (PBFT-style and
 PoS-finality halt safely) or Availability (Avalanche-style continues with
 weakened guarantees); partition-tolerance is non-negotiable
-[[wiki/concepts/cap-theorem]]. The four properties expected of a consensus
-protocol — Agreement, Validity, Termination, and Integrity
-[[wiki/concepts/consensus-properties]] — sit on top of the concession space
-and trade off against one another whenever the assumed model is violated.
+[[wiki/concepts/cap-theorem]]. The three properties expected of a consensus
+protocol — Agreement (no two honest validators commit different values at
+the same height), Validity (any committed value was proposed by some
+validator), and Termination (every honest validator eventually commits)
+[[wiki/concepts/consensus-properties]] — sit on top of the concession
+space and trade off against one another whenever the assumed model is
+violated.
 
 No fifth foundational result permits a free lunch; every Layer-1 protocol
 begins by choosing which of the existing constraints to relax. The next
@@ -94,14 +96,15 @@ A `3f+1` quorum under partial synchrony is one viable point in the
 concession space, and the most direct one. PBFT [4] and its descendants
 HotStuff [5] and Tendermint [6] occupy it. Three other viable points
 exist, and the four families evaluated in this thesis sit at the four
-points respectively. Figure 2.1 redraws the propagation tree from
-[[wiki/concepts/consensus-families#propagation-of-the-bft-problem]].
+points respectively. Figure 2.1 maps the propagation from the Byzantine
+Generals Problem to the four families.
 
 **Figure 2.1 — From the Byzantine Generals Problem to the four families.**
 ([[diagrams/concepts/bft-families-tree]])
 
 The three non-PBFT branches are best read as answers to the question of
-what to relax when partial synchrony's assumption is too strong.
+which assumption to loosen further once PBFT's partial-synchrony,
+`3f+1`-quorum point has been fixed.
 PoS-finality retains `3f+1` and partial synchrony but adds an *economic*
 layer — accountable safety via slashing — converting the Byzantine fault
 model from an external assumption into a behaviorally disincentivized one
@@ -120,9 +123,9 @@ uniform skeleton previewed in Table 2.1.
 
 ## 2.4 The four families
 
-**Table 2.1 — Four-family design space.** Adapted from
-[[wiki/concepts/consensus-families#comparison-table]]. Each row is read as
-the lens applied to that family in §2.4.1–§2.4.4.
+**Table 2.1 — Four-family design space.** Each row is read as the lens
+applied to that family in §2.4.1–§2.4.4; the per-family citations
+supporting each row are given in the prose of those subsections.
 
 | Family | Synchrony | Finality | Fault threshold | Primary cost concession |
 | :---- | :---- | :---- | :---- | :---- |
@@ -295,8 +298,8 @@ parameterization [9], [10]. The DAG-based papers report
 kilo-transactions-per-second at WAN scale together with a three-round
 commit latency [11]–[13]. Table 2.2 collects the headline numbers.
 
-**Table 2.2 — Reported metric vocabulary across families.** Adapted from
-[[wiki/concepts/evaluation-metrics#reported-ranges-in-the-literature]].
+**Table 2.2 — Reported metric vocabulary across families.** Headline
+numbers compiled from the primary sources listed in the Source column.
 The columns are not directly comparable; this incomparability is precisely
 the obstacle.
 
@@ -323,8 +326,8 @@ answer.
 
 Three taxonomic surveys place the families in qualitative terms without
 contributing measurements of their own. Bano *et al.* [14] supply the
-canonical Systematization of Knowledge and the taxonomic backbone reused
-by [[wiki/concepts/consensus-families]]. Xiao *et al.* [15] aggregate
+canonical Systematization of Knowledge and the taxonomic backbone this
+chapter reuses. Xiao *et al.* [15] aggregate
 reported throughput, latency, and fault-tolerance ranges across families
 while explicitly flagging the cross-harness incomparability problem.
 Cachin and Vukolić [16] supply a methodological critique of
@@ -366,6 +369,9 @@ latency, throughput, overhead, and reliability
 sweeps the network-delay axis (RQ1), the Byzantine-fraction axis (RQ2),
 the validator-set-size axis (RQ3), and the adversarial-strategy axis (RQ4)
 under common assumptions [[wiki/concepts/research-questions]],
-[[wiki/concepts/experiment-matrix]]. Chapter 4 reports the resulting data
+[[wiki/concepts/experiment-matrix]]. The specific network-delay
+distributions used to instantiate the synchrony axis empirically
+(constant, uniform, exponential, heavy-tailed) are defined as part of
+the system model in Chapter 3. Chapter 4 reports the resulting data
 and answers RQ1–RQ4. Chapter 5 supplies the cross-family Pareto synthesis
 demanded by RQ5. Chapter 6 concludes.
