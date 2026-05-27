@@ -29,7 +29,7 @@ from types import MappingProxyType
 
 from config.factory import build_run
 from config.schema import Config, SeedsConfig
-from event_log import EventLogger
+from common import run_to_completion
 from network import DelayDist, Phase
 
 from .node import CasperNode
@@ -72,10 +72,8 @@ def _run_scenario(n: int, stake_table: dict[int, float]):
             slot_duration=_SLOT_DURATION, slots_per_epoch=_SLOTS_PER_EPOCH,
         )
 
-    logger = EventLogger()
     handle = build_run(config, _GLOBAL_SEED, factory)
-    handle.scheduler.event_sink = logger.sink
-    handle.scheduler.run(t_max=_T_MAX)
+    _, logger = run_to_completion(handle, t_max=_T_MAX)
     return logger
 
 
