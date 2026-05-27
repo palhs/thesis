@@ -290,3 +290,42 @@ implement the §§2–5 loops; [[concepts/output-format]] (T40) fixes the
   proposer rotation, per-epoch FFG aggregation, two-round justify→finalise
   on a `≥ 2/3` stake supermajority, `decided` on finalisation — is
   unchanged.
+- **2026-05-27 (T38).** The §4 Snowman sketch diverges from the T38
+  implementation (`src/snowman/`) in five ways a reader reproducing the
+  protocol from the sketch alone would get wrong:
+  - *`α_p` / `α_c` split.* The sketch uses a single `ALPHA_C`. The
+    implementation splits the production thresholds per `[ava-docs]` and
+    [[concepts/metric-reconciliation]] §Snowman parameter rescaling:
+    `α_p = ⌊K/2⌋+1` controls *preference-flip*; `α_c = ⌈0.8·K⌉` controls
+    *counter-increment*. The §6 register already flagged this; the entry
+    pins the specific rule.
+  - *`ConflictSet` keyed by `parent_id`.* The sketch's `self.block[block_id]
+    = (preference, counter, state)` tuple is too compact for the flip path:
+    detecting `α_p` requires per-block `agree` and per-block `confidence`,
+    which only make sense once blocks are grouped into a conflict set. The
+    implementation introduces `ConflictSet` keyed by `parent_id` with
+    `members: dict[block_id, Block]`, `confidence: dict[block_id, int]`,
+    plus per-set `preference`, `counter`, `state`.
+  - *α-based early termination.* The sketch closes the round on
+    `responses == K`. The implementation closes on
+    `agree[current_pref] ≥ α_c` (success-path) OR `responses == K`
+    (quorum-path); the failure-path early-close is deliberately not
+    implemented. The success-path early-close is safe under the rescaling
+    rule because `α_p + α_c > K` for all `K ∈ [3, 20]`, asserted in
+    `tests/snowman/test_parameters.py`. Drop-resilience (a poll-deadline
+    timer) defers to T47 via a subsequent `## Revisions` entry.
+  - *Self-announcement self-recording.* The sketch handles
+    `BLOCK-ANNOUNCEMENT` only via `on_message`. `Network.broadcast` excludes
+    the sender, so the proposer never receives its own announcement. The
+    implementation has `_propose` explicitly call `_record_announce` on its
+    own block before broadcasting — same precedent as T29 Decision B
+    (PBFT primary self-records `PRE-PREPARE`).
+  - *Slot-driven proposer rotation.* The sketch's `start(t)` is `pass`
+    ("idle until a block arrives"); the implementation arms a `"slot"`
+    timer at `t = 0` with cadence `slot_duration` and round-robin proposer
+    rule `slot % n == self.id` — the cross-protocol-comparable choice
+    matching `CasperNode`'s slot loop (T32 Decision J).
+  The §6 register already flagged the sketch as non-binding; this entry
+  records the specific divergences. The control spine — per-block
+  subsampled `K`-peer poll, Snowball counter accumulator, `β`-acceptance,
+  `decided` event on acceptance — is unchanged.
