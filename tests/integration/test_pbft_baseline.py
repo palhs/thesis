@@ -22,7 +22,7 @@ from types import MappingProxyType
 
 from config.factory import build_run
 from config.schema import Config, SeedsConfig
-from event_log import EventLogger
+from common import run_to_completion
 from network import DelayDist, Phase
 from pbft import PBFTNode, digest
 
@@ -70,11 +70,9 @@ def _factory(n: int):
 
 
 def _run(n: int, global_seed: int = 42):
-    """Build, attach an EventLogger, run to quiescence -> (logger, result)."""
-    logger = EventLogger()
+    """Build, run to quiescence, return (logger, result)."""
     handle = build_run(_config(n), global_seed, _factory(n))
-    handle.scheduler.event_sink = logger.sink
-    result = handle.scheduler.run()
+    result, logger = run_to_completion(handle)
     return logger, result
 
 
