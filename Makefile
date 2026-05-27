@@ -12,7 +12,7 @@
 #   make clean                # remove __pycache__ and coverage artifacts
 
 PY            = python3
-SUITES        = scheduler nodes network event_log config pbft pos snowman integration
+SUITES        = scheduler nodes network event_log config common pbft pos snowman integration
 SUITE_TARGETS = $(addprefix test-,$(SUITES))
 
 .PHONY: test coverage clean $(SUITE_TARGETS)
