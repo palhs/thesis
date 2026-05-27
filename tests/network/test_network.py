@@ -83,6 +83,15 @@ class TestPhaseAdvance(unittest.TestCase):
         with self.assertRaises(ValueError):
             net.start()
 
+    def test_start_rejects_double_call(self):
+        # Second start would re-schedule every interior PhaseAdvance,
+        # double-firing rollovers and corrupting the heap.
+        net = Network(Scheduler(), _single_phase(), SEED)
+        net.start()
+        with self.assertRaises(RuntimeError) as cm:
+            net.start()
+        self.assertIn("twice", str(cm.exception))
+
     def test_advance_phase_moves_pointer(self):
         net = Network(Scheduler(), self._two_phase(), SEED)
         net.start()

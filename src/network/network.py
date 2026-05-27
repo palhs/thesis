@@ -68,6 +68,8 @@ class Network:
         it, and Scheduler.schedule rejects non-finite t. validate_timeline's
         finite-interior-boundary check guarantees every scheduled t is finite.
         """
+        if self._started:
+            raise RuntimeError("Network.start() called twice")
         validate_timeline(self.phases, set(self.registry))
         for i in range(len(self.phases) - 1):
             self.scheduler.schedule(
