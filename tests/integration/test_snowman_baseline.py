@@ -14,7 +14,7 @@ from types import MappingProxyType
 
 from config.factory import build_run
 from config.schema import Config, SeedsConfig
-from event_log import EventLogger
+from common import run_to_completion
 from network import DelayDist, Phase
 from snowman import SnowmanNode
 
@@ -57,10 +57,8 @@ def _factory(n: int):
 
 
 def _run(n: int, global_seed: int = 42):
-    logger = EventLogger()
     handle = build_run(_config(n), global_seed, _factory(n))
-    handle.scheduler.event_sink = logger.sink
-    result = handle.scheduler.run(t_max=_T_MAX)
+    result, logger = run_to_completion(handle, t_max=_T_MAX)
     return logger, result, dict(handle.nodes)
 
 
