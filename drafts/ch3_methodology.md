@@ -312,7 +312,19 @@ reaches commit or finality; throughput measures how many transactions
 the protocol commits per unit time; overhead measures the messages,
 bytes, and per-validator state the protocol consumes; reliability
 measures whether the protocol preserves safety and liveness under
-delay and adversary. Every latency metric is anchored at "tx submit,"
+delay and adversary. Safety and liveness here are the operational
+counterparts of the foundational properties defined in §2.2: a *safety
+violation* is an observed breach of Agreement — two honest validators
+commit different values at the same height within one simulator run —
+and is counted directly by `fork_rate` and, where applicable, by the
+`view_change_or_reorg_count` instrumentation; a *liveness failure* is
+an observed breach of Termination — at least one honest validator
+fails to commit within the run's measurement window — and is counted
+by the complement of `success_rate`. Validity is preserved by
+construction in the simulator (the workload generator emits only
+well-formed transactions and no protocol module commits a value it did
+not receive) and is therefore not instrumented as a separate column.
+Every latency metric is anchored at "tx submit,"
 the wall-clock moment the workload generator emits the transaction
 before it reaches any validator, so end-to-end latency is comparable
 across protocols whether or not they carry a separate mempool.
