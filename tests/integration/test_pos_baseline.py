@@ -26,7 +26,7 @@ from types import MappingProxyType
 
 from config.factory import build_run
 from config.schema import Config, SeedsConfig
-from event_log import EventLogger
+from common import run_to_completion
 from network import DelayDist, Phase
 from pos import CasperNode
 
@@ -95,17 +95,14 @@ def _factory(n: int, stake_table: dict[int, float]):
 
 
 def _run(n: int, stake_table: dict[int, float], global_seed: int = 42):
-    """Build, attach an EventLogger, run to t_max -> (logger, result).
+    """Build, run to t_max, return (logger, result).
 
-    Casper has no quiescence — the slot timer re-arms indefinitely — so
-    every run is bounded by t_max only. config.factory.build_run does not
-    pipe Config.t_max into scheduler.run(), so pass it through here (same
-    pattern as test_casper_baseline.py).
-    """
-    logger = EventLogger()
+    Casper has no quiescence — the slot timer re-arms indefinitely —
+    so every run is bounded by t_max only. config.factory.build_run
+    does not pipe Config.t_max into scheduler.run(), so pass it
+    through here (same pattern as test_casper_baseline.py)."""
     handle = build_run(_config(n), global_seed, _factory(n, stake_table))
-    handle.scheduler.event_sink = logger.sink
-    result = handle.scheduler.run(t_max=_T_MAX)
+    result, logger = run_to_completion(handle, t_max=_T_MAX)
     return logger, result
 
 
