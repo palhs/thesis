@@ -421,3 +421,17 @@ bibliography.
   for the FFG arithmetic; the byte budget needs the deductions applied
   when comparing against a real wire format. A signed-message model is
   deferred to whatever task adds cryptographic accounting.
+- **2026-05-27 (T38).** The §5 Snowman wire schema is implemented as
+  written, with one behavioural clarification a reader reproducing the
+  protocol from §5 alone might miss: when a responder receives
+  `QUERY(request_id, block_id)` for a `block_id` whose conflict set it
+  has not yet learned (no `BLOCK-ANNOUNCEMENT` received), it returns
+  `QUERY-RESPONSE(request_id, preferred_block_id = block_id)` — the
+  *queried* `block_id` itself, as a permissive default that does not bias
+  against the proposer. Honest-path baseline never exercises this branch
+  (`delay = 1e-9 ≪ slot_duration = 1.0`), but the code path exists and
+  is exercised by `tests/snowman/test_node_query.py`. As with the T32
+  entry above, signature fields are omitted from the simulator: the
+  three Snowman payloads (`BLOCK-ANNOUNCEMENT`, `QUERY`, `QUERY-RESPONSE`)
+  carry no `signature` field — the simulator passes Python objects, not
+  signed bytes.

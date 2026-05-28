@@ -102,6 +102,9 @@ class Scheduler:
         """Wire a Node's scheduler-owned outbound API and register it for
         dispatch. Does NOT wire send/broadcast — that is Network.bind's half.
         """
+        if node.id in self.nodes:
+            raise ValueError(
+                f"Scheduler.bind: duplicate NodeId {node.id} already bound")
         self.nodes[node.id] = node   # DD3 / Revision R1: dispatch target.
         node.set_timer = lambda timer_id, delay, payload, t: self.set_timer(
             node.id, timer_id, delay, payload, t

@@ -168,4 +168,15 @@ Consequence: two `global_seed`-identical runs produce byte-identical
 - [[concepts/evaluation-metrics]] — the metric definitions the derived
   dataset reports.
 - [[concepts/output-format]] — T40, the unified metrics CSV *derived* from
-  this raw event log (forward reference; not yet authored).
+  this raw event log.
+
+## Revisions
+
+- **2026-05-28 by T40.** The unified comparative CSV produced by
+  `src/output/csv.py` (see [[concepts/output-format]]) is a sibling
+  consumer of the same `EventLogger.records` substrate this page
+  describes. The two CSVs are *both* derived from the raw event log,
+  with different column sets and different row granularities: the
+  event-log CSV (this page) is one row per `EventRecord`, dispatch-
+  ordered; the comparative CSV (output-format) is one row per
+  `(protocol, scenario, seed)` simulation run.

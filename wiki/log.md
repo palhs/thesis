@@ -3,6 +3,70 @@
 > Append-only chronological record. Format:
 > ## [YYYY-MM-DD] <type> | task <N> — <title>
 
+## [2026-05-28] code | task 40 — fix orchestrator commit-hash determinism
+
+- role: Engineer
+- touched: `src/output/csv.py`, `src/output/baseline.py`,
+  `src/snowman/summarise.py`
+- notes: Surfaced during §M-verify (`shasum -c` on two consecutive
+  `python3 -m output.baseline` runs failed on `baseline.csv`).
+  `_resolve_commit_hash` was being called per-row inside
+  `write_unified_csv` BEFORE `path.open("w")`; from a clean tree, all
+  9 main-CSV rows captured the clean hash, then `path.open("w")`
+  truncated the file (dirtying the tree), so `sanity_row`'s subsequent
+  `_resolve_commit_hash` call returned `-dirty` — inconsistent
+  provenance within one orchestrator pass. Cross-run: each run dirtied
+  the tree for the next. Fix threads an optional `commit_hash` kwarg
+  through `write_unified_csv → _generic_cols` and `sanity_row →
+  _generic_cols`; `output.baseline.main` snapshots once at the top of
+  the pass and passes the same value to both writers. e2e test stays
+  green (it monkeypatches `_resolve_commit_hash` so it never observed
+  the bug). Determinism contract on `[[concepts/output-format]]` §10
+  now holds at the orchestrator level for any starting tree state.
+  The committed canonical CSVs are unaffected — they were generated
+  from an already-dirty Commit-5 tree so all rows had been internally
+  consistent at `c6082f3b-dirty`.
+
+## [2026-05-28] code | task 40 — wire output orchestrator + canonical artifacts
+
+- role: Engineer
+- touched: `src/output/csv.py` (real `_REDUCERS` populated),
+  `src/output/baseline.py` (new), `tests/output/test_baseline_e2e.py`
+  (new), `src/{pbft,pos,snowman}/{baseline,summarise}.py` (new + harmonised),
+  `tests/{pbft,pos,snowman}/test_summarise.py` (new),
+  `tests/integration/test_{pbft,pos,snowman}_baseline.py` (harmonised),
+  `results/baseline.csv` (new canonical artifact),
+  `results/snowman_n4_sanity.csv` (new sibling), `.gitignore`
+  (canonical CSVs exempted from blanket ignore),
+  `wiki/experiments/2026-05-28_unified-output.md` (new),
+  `wiki/concepts/output-format.md` (§5.3 `block_hash` → `instance_id`
+  correction to match real Snowman emit shape), `wiki/index.md`,
+  `wiki/log.md`
+- notes: T40 implementation complete. Three protocols' honest baselines
+  driven through one writer. Byte-identical determinism verified
+  (`shasum -c` after two consecutive `python3 -m output.baseline` runs;
+  also asserted by `tests/output/test_baseline_e2e.py`). T35-local CSV
+  writer retired. PBFT `tps` exposed as conservative under the
+  quiescence-tail denominator (`vc_delay=1000.0` advances `result.now`
+  even on the honest path); peak-throughput column deferred to T58 per
+  [[concepts/output-format]] §11. Snowman O(K·β) message cost vs PBFT
+  O(n²) surfaced honestly in `consensus_msgs_per_acu`. Wiki §5.3
+  `block_hash` typo fixed in the same commit (real Snowman emits
+  `instance_id`; surfaced by Commit-5 reviewer).
+
+## [2026-05-28] code | task 40 — wiki contract for output-format
+
+- role: Engineer
+- touched: `wiki/concepts/output-format.md` (new),
+  `wiki/concepts/event-log-schema.md` (Revisions block),
+  `wiki/concepts/runner.md` (Revisions block), `wiki/index.md`
+- notes: Landed the canonical comparative-CSV contract page pinned by
+  [[concepts/metric-reconciliation]] §T40. Wiki contract first, code
+  scaffolding lands next per spec §7. Two upstream Revisions blocks
+  acknowledge the new downstream consumer of the event-log substrate
+  and close T39's documented CSV-output gap. Closes L-W4 M1's 15
+  forward-references.
+
 ## [2026-04-20] sync | task S0 — Import BFT Foundation concepts
 - role: Researcher
 - touched: `wiki/concepts/byzantine-generals.md`, `wiki/concepts/flp-impossibility.md`, `wiki/concepts/cap-theorem.md`, `wiki/concepts/consensus-properties.md`, `wiki/concepts/synchrony-models.md`, `wiki/concepts/fault-model.md`, `wiki/concepts/quorum-arithmetic.md`, `wiki/concepts/consensus-families.md`, `wiki/index.md`, `TASKS.md`
@@ -299,3 +363,41 @@
 - role: Engineer (meta-maintenance)
 - touched: `wiki/diagrams/scheduler/{bootstrap,event-enqueue,event-dispatch,timer-lifecycle,constraints}.{md,pdf}`, `wiki/diagrams/runtime/macro.{md,pdf}`, `wiki/diagrams/protocols/{pbft,casper-ffg,snowman,narwhal-tusk}.{md,pdf}`, `wiki/diagrams/index.md`, `wiki/diagrams/concepts/bft-families-tree.md`, `wiki/index.md`, `wiki/concepts/system-design.md`, `wiki/concepts/system-design-protocols.md`, `docs/draft-style.md`, `docs/lint-protocol.md`, `docs/superpowers/specs/2026-05-13-t17-scheduler-design.md`, `drafts/ch3_methodology.md`, `puppeteer-config.json` (new), `mermaid-config.json` (new), `wiki/log.md`
 - notes: Out-of-task meta-maintenance on `task/diagrams-mermaid-migration`, merged into the in-flight `task/T36-ch3-methodology` via a `--no-ff` merge so the migration commits ride along with the starting branch to `main`. Converted all 10 outstanding Swimlanes.io diagrams (5 T17 scheduler contracts, 1 T20 runtime view, 4 T20 protocol main loops) to Mermaid `sequenceDiagram` per the cheat-sheet in `docs/plans/2026-05-26-swimlanes-to-mermaid.md` §3, and rendered each via `mmdc` to a co-located vector PDF. Figure pipeline collapsed to one DSL and one agent-driven route — `TODO(human-export)` markers retired from `drafts/ch3_methodology.md` (figures 3.1, 3.2, 3.3) and `docs/draft-style.md` updated to treat new markers as a regression. Two plan §3 cheat-sheet items fell back per plan §10 risks: (a) `<b>...</b>` bold renders as literal text in `mmdc` sequence-diagram PDF output rather than degrading silently to plain text — stripped from all converted sources per the §10 risk #2 plain-text fallback (emphasis was decorative); (b) the puppeteer-config.json the plan said was already in repo was missing — added at repo root alongside a new mermaid-config.json (`securityLevel: loose` for HTML in flowchart labels). One Mermaid-parser quirk surfaced and was worked around: `;` inside note/message text is parsed as a statement separator and triggers a parse error — replaced with `,` or `—` in every affected label; the same quirk for raw `<` / `>` in note text is documented in the new authoring-notes paragraph in `wiki/diagrams/index.md` § Legend. Render quirk: with Markdown input, `mmdc` writes `<slug>-1.pdf` rather than `<slug>.pdf` — the canonical filename is reached via a post-render `mv`, documented in the same § Export section. Verification (plan §7): `grep -rE "\\`\\`\\`swimlanes" wiki/ drafts/ docs/` returns zero hits; `grep -r "TODO(human-export)" drafts/ wiki/` returns hits only in the post-migration meta-references (`drafts/review.html` is auto-generated and left alone, `wiki/diagrams/index.md` describes the retired mechanism); every Mermaid `.md` under `wiki/diagrams/` has a sibling `.pdf` with mtime ≥ the source.
+
+## [2026-05-27] code | task 37 — Week 7 decision gate (third-algorithm vs buffer)
+
+- role: Engineer
+- touched: `wiki/concepts/week7-decision.md` (new), `wiki/index.md`, `wiki/log.md`, `TASKS.md`
+- notes: Written assessment closing the W7 decision gate between Path A (implement a third protocol) and Path B (stabilise the two-protocol baseline + advance T40). Decision: **Path A — implement Snowman in W7 via T38; sequence Narwhal+Tusk to T38.1 post-W10**, defended on four axes (implementation cost, stability-debt paydown, downstream unblocking, scope risk). Author preference (Avalanche family) confirms the family; Snowman over DAG-Avalanche is structural — Snowman is the linearised production variant directly comparable to PBFT and Casper FFG under the same totally-ordered chain output ([[concepts/metric-reconciliation]] §1 asymmetry 1; [[algorithms/avalanche]] §Simulator mapping). **Narwhal+Tusk is sequenced, not removed**: new task T38.1 added to TASKS.md, scheduled between T55 (W10 adversarial summary) and T57 (W11 enhancement), so the three-protocol comparative adversarial evidence (the thesis's stated contribution per [[concepts/problem-statement]] §Contributions) lands before NWT competes for implementation time; the four-protocol final scope is preserved by sequence. T36.2 blocker text updated from "no Narwhal+Tusk implementation task scheduled" to "pending T38.1." Inputs to the decision: PBFT (T28/T29/T30) and Casper FFG (T32/T33/T34/T35) honest-path baselines green; T31 + T36 In Review (not blocking); `make test` green at 497 tests across 8 suites; Backlog hardening items deferred to their owning tasks (T18, T19/T27, T28/T29/T47, T57) rather than W7. Scope handed to T38: honest-path Snowman build-verification baseline at n=4/7/10 with byte-identical determinism (analogous to T30 / T35), implementation against [[concepts/system-design-protocols]] §4 as the non-binding reference sketch with expected divergences landing as `## Revisions` entries on that page, knobs from [[concepts/metric-reconciliation]] §Snowman parameter rescaling + §Calibration defaults, new `src/snowman/` package + `tests/snowman/` registered as a new Makefile suite. Explicit out-of-scope deferrals: adversarial Snowman → T18 / T51–T53; unified CSV → T40; Ch.3 Snowman extension → T36.1 (unblocks on T38); NWT honest path → T38.1; NWT adversarial → post-T38.1 follow-on. No changes to shared infrastructure (`src/scheduler/`, `src/network/`, `src/nodes/`, `src/event_log/`) — Snowman is a `Node` subclass over the existing handler surface. [[concepts/adversary-model]] §8 and [[concepts/experiment-matrix-runs]] §8 retain their "12 of 18" wording for now — the rewording to "9 in-scope / 3 deferred-with-T38.1 / 6 catalogued design space" lands as a `## Revisions` entry on T38.1, not now (TASKS.md Backlog entry added). Residual risks tracked inline on the page: Snowman is the first protocol whose inner loop draws on the per-Node RNG ([[concepts/node-model]] §8) — T38's determinism baseline must exercise the sampling path; T38.1 carries W12-cutoff timing risk — the [[drafts/ch1_intro]] four-protocol framing becomes a T61 *verify-and-amend-only-if-slipped* contingency, not a committed amendment. No `src/` or `drafts/` touched; no tests changed; the `make test` rig at 497 green is the state Path A inherits, not modifies.
+
+## [2026-05-27] code | task 38 — Snowman honest-path baseline
+
+- role: Engineer
+- touched: `src/snowman/` (new package: `__init__.py`, `parameters.py`, `messages.py`, `block.py`, `poll.py`, `node.py`), `tests/snowman/` (new suite: `_helpers.py` + 9 test files), `tests/integration/test_snowman_baseline.py` (new), `Makefile` (SUITES adds `snowman`), `wiki/experiments/2026-05-27_snowman-baseline.md` (new), `wiki/concepts/system-design-protocols.md` (Revisions), `wiki/concepts/message-types.md` (Revisions), `wiki/index.md`, `wiki/log.md`, `TASKS.md`
+- notes: Implements honest-path Snowman per [[concepts/week7-decision]] §4. New `SnowmanNode(Node)` running the full two-threshold Snowball update — per-block confidence accumulator, α_p preference-flip with counter reset, α_c counter-increment, β-acceptance — with the parameter rescaling rule from [[concepts/metric-reconciliation]] §Snowman parameter rescaling (`K = min(20, n-1)`, `α_p = ⌊K/2⌋+1`, `α_c = ⌈0.8·K⌉`, β = 15). Architecture: slot-timer + round-robin proposer (`slot % n == self.id`) emits BLOCK-ANNOUNCEMENT each slot; each announced block triggers a per-block `("poll", block_id)` timer loop sampling K peers via `self.rng.sample(...)`; round closes on the success-path early-close (`agree[current_pref] ≥ α_c`) or quorum (`responses == K`); Snowball update centralised in `poll.close_round`. Build-verification baseline at n ∈ {4, 7, 10} matches the T30 / T35 outcome triple plus byte-identical determinism on the K-peer RNG sampling path — [[concepts/week7-decision]] §5.1 watch-for closed by direct observation. Five sketch divergences from [[concepts/system-design-protocols]] §4 landed as Revisions (α_p/α_c split, ConflictSet keyed by parent_id, α-based early termination, self-announcement self-record, slot-driven proposer rotation); one behavioural clarification on [[concepts/message-types]] §5 landed as Revisions (permissive default when responder has not seen the queried block_id). Per-scenario event counts: 19·n announces and decided events per scenario; 19·n·β polls (every singleton conflict set trivially clears α_c, so counter advances 1 per round to β); first decided at t ≈ 1.000000045. `make test` green across all 9 suites (scheduler / nodes / network / event_log / config / pbft / pos / snowman / integration; ~560 tests). Scope-discipline: no edits to `src/scheduler/`, `src/network/`, `src/nodes/`, or `src/event_log/` — Snowman lives entirely in `src/snowman/` over the existing handler surface. Spec-divergence note: the design spec §6.1 listed the constructor with a conceptual `rng: random.Random | None` param; the implementation uses the inherited `(node_id, weight, endpoint, global_seed)` from `Node` and derives `self.rng` via `Node.__init__` per [[concepts/reproducibility]] (identical determinism — same seed → byte-identical sampling). Unblocks T36.1 (Ch.3 Snowman prose). The NWT column for T40 and the catalogue rewording on [[concepts/adversary-model]] §8 / [[concepts/experiment-matrix-runs]] §8 still land with T38.1.
+
+## [2026-05-27] code | task 39 — unified runner + fail-fast seam hardening
+
+- role: Engineer
+- touched: src/common/runner.py, src/common/__init__.py,
+    src/scheduler/scheduler.py, src/network/network.py,
+    tests/common/test_runner.py, tests/scheduler/test_scheduler.py,
+    tests/network/test_network.py,
+    tests/integration/test_pbft_baseline.py,
+    tests/integration/test_pos_baseline.py,
+    tests/integration/test_snowman_baseline.py,
+    src/pos/baseline.py, Makefile,
+    wiki/concepts/runner.md,
+    wiki/concepts/node-model.md, wiki/concepts/network-model.md,
+    wiki/concepts/simulation-design.md, wiki/concepts/reproducibility.md,
+    wiki/index.md, TASKS.md
+- notes: Lands the post-build run helper run_to_completion(handle, *,
+    t_max, logger) → (RunResult, EventLogger), collapsing ~12 LoC of
+    duplicated bootstrap-tail boilerplate across four callers. Closes
+    two bootstrap-seam fail-fast holes new in T39 (Scheduler.bind on
+    duplicate node_id; Network.start on second call); records the
+    three already-shipped W3 guards (A1/A2/B1) against the backlog
+    closure. T35-local CSV schema in src/pos/baseline.py untouched —
+    T40 owns reconciliation per [[concepts/output-format]] when it
+    lands. T39 entry rewritten to drop the W7-buffer counterfactual
+    framing.

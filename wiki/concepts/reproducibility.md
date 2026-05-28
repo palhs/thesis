@@ -141,6 +141,9 @@ Design contract; no primary-literature citations.
   order.
 - [[concepts/simulation-design-runtime]] §1 — scheduler determinism
   mechanisms.
+- [[concepts/runner]] — pass-through runner contract: attaching the
+  logger and entering `scheduler.run()` introduces no new RNG, no
+  reordering, no scheduler-layer adversary surface.
 - [[concepts/experiment-matrix]] §7 — seed enumeration policy and
   common-random-numbers across protocols.
 

@@ -163,6 +163,16 @@ class TestBind(unittest.TestCase):
         s.bind_network(net)
         self.assertIs(s.network, net)
 
+    def test_bind_rejects_duplicate_node_id(self):
+        s = Scheduler()
+        a = RecordingNode(7)
+        b = RecordingNode(7)   # same id; should fail loud, not clobber
+        s.bind(a)
+        with self.assertRaises(ValueError) as cm:
+            s.bind(b)
+        self.assertIn("duplicate", str(cm.exception))
+        self.assertIs(s.nodes[7], a)   # original still wired
+
     def test_emit_with_no_sink_is_silent(self):
         s = Scheduler()  # event_sink left as None
         node = RecordingNode(7)
