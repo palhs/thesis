@@ -137,8 +137,7 @@ supporting each row are given in the prose of those subsections.
 Each subsection follows the same four-paragraph structure: mechanism,
 guarantees and their assumption, the documented adversarial weakness
 within the §1.4 adversary taxonomy (silent non-participation, delayed
-voting, equivocation, selective dropping), and the role the family plays
-in the simulator.
+voting, equivocation), and the role the family plays in the simulator.
 
 ### 2.4.1 PBFT-style
 
@@ -264,12 +263,19 @@ view changes [11], [12]. Per-block message complexity is `O(n)`, with
 per-validator storage and bandwidth as the cost concession (the DAG must
 be retained until ordering passes through it).
 
-*Documented adversarial weakness.* The §1.4 adversary most relevant to
-this family is **selective dropping by a Byzantine sender attempting to
-withhold a block from a subset of receivers**, the case the
-reliable-broadcast layer is explicitly designed to defeat [11], [13]. The
-worst-case condition for the family combines sustained packet loss with
-adversarial mempool inputs that force longer DAG retention windows.
+*Documented adversarial weakness.* The §1.4 generic adversary most
+stressing this family is **delayed or dropped delivery** of mempool
+certificates and anchor references — a generic capability that applies
+verbatim to a DAG, with the reliable-broadcast layer absorbing adversarial
+timing into longer retention rather than into view changes [11], [12].
+Its sharpest form is the protocol-specific surface
+[[wiki/concepts/adversary-model#7-2-narwhal-tusk-data-availability-withholding]]
+of **data-availability withholding**: a Byzantine sender certifies a
+header to gather `2f+1` signatures but withholds the underlying batch
+from a subset of receivers, the case the reliable-broadcast layer is
+explicitly designed to defeat [11], [13]. The worst-case condition for
+the family combines sustained packet loss with adversarial mempool inputs
+that force longer DAG retention windows.
 
 *Simulator role.* The DAG-based module tests RQ3 (the `O(n)` scaling
 exponent) and RQ4 (reliable broadcast under packet loss), and contributes

@@ -137,10 +137,10 @@ Evaluation is conducted at the message-passing level inside a
 discrete-event simulator [[wiki/concepts/problem-statement#scope]].
 
 Within scope are configurable network delay (constant, uniform,
-exponential, heavy-tailed); configurable packet loss; four Byzantine
+exponential, heavy-tailed); configurable packet loss; three Byzantine
 validator behaviors representative of those discussed in the primary
-literature, namely silent non-participation, delayed voting, equivocation,
-and selective dropping [[wiki/concepts/adversary-model]]; and validator
+literature, namely silent non-participation, delayed voting, and
+equivocation [[wiki/concepts/adversary-model]]; and validator
 sets up to several hundred nodes.
 
 Out of scope are Proof-of-Work as a subject of comparison (it appears
@@ -189,9 +189,9 @@ synthesizes it.
   and identical network assumptions? *The question quantifies the
   asymptotic scaling each family claims, in a single measurement.*
 - **RQ4.** Under which adversarial strategies (silent non-participation,
-  delayed voting, equivocation, selective dropping) does each family
-  show liveness degradation, safety violation, or neither? *The question
-  maps each adversary onto the property each family claims to preserve.*
+  delayed voting, equivocation) does each family show liveness
+  degradation, safety violation, or neither? *The question maps each
+  adversary onto the property each family claims to preserve.*
 - **RQ5.** Does a consistent Pareto frontier of the performance–security
   tradeoff exist across the four families, and does any family dominate
   across all operating regimes? *The question is the comparative synthesis
