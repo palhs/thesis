@@ -71,6 +71,42 @@ class TestBaselineE2E(unittest.TestCase):
                 reader = _csv.DictReader(fh)
                 self.assertEqual(reader.fieldnames, list(COLUMN_ORDER))
 
+    def test_commit_hash_consistent_across_files(self):
+        """Regression guard for the determinism bug fixed in
+        `task 40: thread commit_hash …`. The pre-fix orchestrator
+        called `_resolve_commit_hash` per row inside `write_unified_csv`
+        BEFORE `path.open("w")`; the truncate-on-open would dirty the
+        tree, so `sanity_row`'s subsequent resolution returned `-dirty`
+        — inconsistent provenance within one pass. `main()` now
+        resolves once at the top and threads through. Asserts only
+        internal consistency, not the resolved value, so the test is
+        tree-state-tolerant (passes on clean, dirty, and CI sandboxes
+        where `_resolve_commit_hash` falls back to `WORKING_TREE`).
+        Does NOT monkeypatch `_resolve_commit_hash` — that mock is the
+        reason the original `test_byte_identical` would have missed
+        this bug.
+        """
+        with TemporaryDirectory() as td:
+            main_csv   = Path(td) / "baseline.csv"
+            sanity_csv = Path(td) / "snowman_n4_sanity.csv"
+            with patch.object(base, "_OUT",  main_csv), \
+                 patch.object(base, "_SANE", sanity_csv):
+                base.main()
+            with main_csv.open() as fh:
+                main_hashes = {r["commit_hash"]
+                               for r in _csv.DictReader(fh)}
+            with sanity_csv.open() as fh:
+                sanity_hashes = {r["commit_hash"]
+                                 for r in _csv.DictReader(fh)}
+        # All 9 baseline rows share one commit_hash.
+        self.assertEqual(len(main_hashes), 1,
+                         f"baseline.csv carries multiple commit_hash "
+                         f"values: {main_hashes!r}")
+        # Sanity row uses the same hash as the baseline rows.
+        self.assertEqual(sanity_hashes, main_hashes,
+                         f"sanity_row commit_hash {sanity_hashes!r} "
+                         f"differs from baseline.csv {main_hashes!r}")
+
 
 if __name__ == "__main__":
     unittest.main()
