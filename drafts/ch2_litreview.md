@@ -29,15 +29,15 @@ comparison, consistent with the scope contract in Chapter 1. Second, the chapter
 documented adversarial weakness; the simulator-level mechanics of each
 protocol are the concern of Chapter 3.
 
-The remainder of the chapter is organized as follows. §2.2 frames the
-consensus problem at the level of a replicated log and recalls the three
-foundational impossibilities every family inherits. §2.3 maps how those
-impossibilities carve out a four-region design space, summarized by
-Figure 2.1. §2.4 surveys each region in turn on a uniform skeleton, with
-Table 2.1 as the cross-family scorecard. §2.5 turns to the existing
-evaluations of those families and demonstrates, with Table 2.2, that the
-reporting vocabulary itself blocks comparative judgment. §2.6 states the
-resulting unified-harness gap and passes the reader into Chapter 3.
+The rest of the chapter proceeds as follows. §2.2 frames the consensus
+problem at the level of a replicated log and recalls the three foundational
+impossibilities every family inherits. From there, §2.3 shows how those
+impossibilities carve out a four-region design space, summarized by Figure
+2.1, and §2.4 walks each region in turn on a uniform skeleton, using Table
+2.1 as the cross-family scorecard. The existing evaluations come under
+scrutiny in §2.5, where Table 2.2 makes the case that the reporting
+vocabulary itself blocks comparative judgment. §2.6 draws out the resulting
+unified-harness gap and hands the reader to Chapter 3.
 
 ## 2.2 Blockchains and the consensus problem
 
@@ -86,9 +86,9 @@ validator), and Termination (every honest validator eventually commits)
 space and trade off against one another whenever the assumed model is
 violated.
 
-No fifth foundational result permits a free lunch; every Layer-1 protocol
-begins by choosing which of the existing constraints to relax. The next
-section maps how the four families chose.
+No further result lets a protocol escape these constraints; every Layer-1
+protocol begins by choosing which of them to relax. The next section maps
+how the four families chose.
 
 ## 2.3 The design space the impossibilities create
 
@@ -102,9 +102,9 @@ Generals Problem to the four families.
 **Figure 2.1 — From the Byzantine Generals Problem to the four families.**
 ([[diagrams/concepts/bft-families-tree]])
 
-The three non-PBFT branches are best read as answers to the question of
-which assumption to loosen further once PBFT's partial-synchrony,
-`3f+1`-quorum point has been fixed.
+The three non-PBFT branches each answer the same question: once PBFT's
+partial-synchrony, `3f+1`-quorum point is fixed, which assumption do you
+loosen next?
 PoS-finality retains `3f+1` and partial synchrony but adds an *economic*
 layer — accountable safety via slashing — converting the Byzantine fault
 model from an external assumption into a behaviorally disincentivized one
@@ -223,10 +223,10 @@ form. The tolerated Byzantine fraction is set by the parameter choice:
 with time-to-finality growing without bound only as the Byzantine
 fraction approaches `n/2`. Liveness holds asynchronously, on the
 assumption that the Byzantine set is fixed in advance rather than
-adaptive. Per-validator message cost is `O(K · β)` — proportional to
-the sample size `K` and the confidence parameter `β`, and independent of
-the validator-set size `n` — a structural asymmetry with respect to the
-three quorum-based families.
+adaptive. Per-validator message cost is `O(K · β)`, proportional to the sample size
+`K` and the confidence parameter `β` and independent of the validator-set
+size `n`. This is a structural asymmetry with respect to the three
+quorum-based families.
 
 *Documented adversarial weakness.* The weakness most relevant to this
 thesis's adversary taxonomy is **equivocation**: an adversary that
@@ -306,8 +306,8 @@ commit latency [11]–[13]. Table 2.2 collects the headline numbers.
 
 **Table 2.2 — Reported metric vocabulary across families.** Headline
 numbers compiled from the primary sources listed in the Source column.
-The columns are not directly comparable; this incomparability is precisely
-the obstacle.
+The columns are not directly comparable, and that incomparability is the
+obstacle itself.
 
 | Family | Throughput (reported) | Latency (reported) | Fault threshold | Source |
 | :---- | :---- | :---- | :---- | :---- |
@@ -324,9 +324,9 @@ assumption differ between every pair of rows. A reader cannot infer from
 Table 2.2 whether Mysticeti's >200 ktps reflects an intrinsic family
 advantage or a more permissive harness; nor whether Avalanche's 1.35 s
 confirmation is a structural cost of probabilistic finality or an artifact
-of a particular `K, β` choice. The vocabulary fragmentation makes the
-comparative question difficult to phrase even before it is difficult to
-answer.
+of a particular `K, β` choice. The fragmented vocabulary makes the
+comparative question hard even to state, well before anyone tries to
+answer it.
 
 ### 2.5.2 Surveys, critiques, and the methodological precedent
 

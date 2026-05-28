@@ -104,9 +104,9 @@ FFG carries three (`BLOCK-PROPOSAL`, `ATTESTATION`,
 Byzantine behavior attaches as an optional per-validator
 `AdversaryProfile` slot, not as a scheduler-layer hook
 [[wiki/concepts/adversary-model]]. A profile intercepts the host
-validator's outbound calls — for example, suppressing a vote,
-duplicating it to two recipients with disjoint payloads, or delaying
-its emission — but adds no component and no event class
+validator's outbound calls (suppressing a vote, say, or duplicating it to
+two recipients with disjoint payloads, or delaying its emission) but adds
+no component and no event class
 [[wiki/concepts/adversary-model-runtime]]. The catalog contains four
 generic capabilities (silent non-participation, delayed voting,
 equivocation, leader disruption) that cover the four families with one
@@ -134,19 +134,19 @@ Casper FFG ([[wiki/concepts/adversary-model]] §6), mechanically
 overlapping data-availability withholding at Narwhal+Tusk
 ([[wiki/concepts/adversary-model]] §7.2), and at PBFT duplicating the
 view-change weakness already documented for the family in §2.4.1. All
-four cells therefore degenerate — by `N/A`, by mechanical overlap, or
-by duplication of an already-documented weakness — which is why the row
-is not raised to an RQ4 axis. Chapter 5 reads this degeneracy itself as
+four cells therefore degenerate, whether by `N/A`, by mechanical overlap,
+or by duplication of an already-documented weakness, and that is why the
+row is not raised to an RQ4 axis. Chapter 5 reads this degeneracy itself as
 a structural observation about the four families' adversary surface
 rather than as coverage; no claim is made that leader-disruption results
 have been indirectly produced by the equivocation or delay runs.
 
 ## 3.3 Algorithms
 
-Each protocol subsection follows the same four-part skeleton —
-mechanism, simulator mapping, simplifications, and event-handler shape
-— paralleling the per-family layout of Chapter 2 §2.4 but narrowed to
-the concrete implementations under `src/`.
+Each protocol subsection follows the same four-part skeleton (mechanism,
+simulator mapping, simplifications, and event-handler shape), paralleling
+the per-family layout of Chapter 2 §2.4 but narrowed to the concrete
+implementations under `src/`.
 
 ### 3.3.1 PBFT
 
