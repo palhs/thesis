@@ -311,3 +311,29 @@
 - role: Engineer
 - touched: `src/snowman/` (new package: `__init__.py`, `parameters.py`, `messages.py`, `block.py`, `poll.py`, `node.py`), `tests/snowman/` (new suite: `_helpers.py` + 9 test files), `tests/integration/test_snowman_baseline.py` (new), `Makefile` (SUITES adds `snowman`), `wiki/experiments/2026-05-27_snowman-baseline.md` (new), `wiki/concepts/system-design-protocols.md` (Revisions), `wiki/concepts/message-types.md` (Revisions), `wiki/index.md`, `wiki/log.md`, `TASKS.md`
 - notes: Implements honest-path Snowman per [[concepts/week7-decision]] §4. New `SnowmanNode(Node)` running the full two-threshold Snowball update — per-block confidence accumulator, α_p preference-flip with counter reset, α_c counter-increment, β-acceptance — with the parameter rescaling rule from [[concepts/metric-reconciliation]] §Snowman parameter rescaling (`K = min(20, n-1)`, `α_p = ⌊K/2⌋+1`, `α_c = ⌈0.8·K⌉`, β = 15). Architecture: slot-timer + round-robin proposer (`slot % n == self.id`) emits BLOCK-ANNOUNCEMENT each slot; each announced block triggers a per-block `("poll", block_id)` timer loop sampling K peers via `self.rng.sample(...)`; round closes on the success-path early-close (`agree[current_pref] ≥ α_c`) or quorum (`responses == K`); Snowball update centralised in `poll.close_round`. Build-verification baseline at n ∈ {4, 7, 10} matches the T30 / T35 outcome triple plus byte-identical determinism on the K-peer RNG sampling path — [[concepts/week7-decision]] §5.1 watch-for closed by direct observation. Five sketch divergences from [[concepts/system-design-protocols]] §4 landed as Revisions (α_p/α_c split, ConflictSet keyed by parent_id, α-based early termination, self-announcement self-record, slot-driven proposer rotation); one behavioural clarification on [[concepts/message-types]] §5 landed as Revisions (permissive default when responder has not seen the queried block_id). Per-scenario event counts: 19·n announces and decided events per scenario; 19·n·β polls (every singleton conflict set trivially clears α_c, so counter advances 1 per round to β); first decided at t ≈ 1.000000045. `make test` green across all 9 suites (scheduler / nodes / network / event_log / config / pbft / pos / snowman / integration; ~560 tests). Scope-discipline: no edits to `src/scheduler/`, `src/network/`, `src/nodes/`, or `src/event_log/` — Snowman lives entirely in `src/snowman/` over the existing handler surface. Spec-divergence note: the design spec §6.1 listed the constructor with a conceptual `rng: random.Random | None` param; the implementation uses the inherited `(node_id, weight, endpoint, global_seed)` from `Node` and derives `self.rng` via `Node.__init__` per [[concepts/reproducibility]] (identical determinism — same seed → byte-identical sampling). Unblocks T36.1 (Ch.3 Snowman prose). The NWT column for T40 and the catalogue rewording on [[concepts/adversary-model]] §8 / [[concepts/experiment-matrix-runs]] §8 still land with T38.1.
+
+## [2026-05-27] code | task 39 — unified runner + fail-fast seam hardening
+
+- role: Engineer
+- touched: src/common/runner.py, src/common/__init__.py,
+    src/scheduler/scheduler.py, src/network/network.py,
+    tests/common/test_runner.py, tests/scheduler/test_scheduler.py,
+    tests/network/test_network.py,
+    tests/integration/test_pbft_baseline.py,
+    tests/integration/test_pos_baseline.py,
+    tests/integration/test_snowman_baseline.py,
+    src/pos/baseline.py, Makefile,
+    wiki/concepts/runner.md,
+    wiki/concepts/node-model.md, wiki/concepts/network-model.md,
+    wiki/concepts/simulation-design.md, wiki/concepts/reproducibility.md,
+    wiki/index.md, TASKS.md
+- notes: Lands the post-build run helper run_to_completion(handle, *,
+    t_max, logger) → (RunResult, EventLogger), collapsing ~12 LoC of
+    duplicated bootstrap-tail boilerplate across four callers. Closes
+    two bootstrap-seam fail-fast holes new in T39 (Scheduler.bind on
+    duplicate node_id; Network.start on second call); records the
+    three already-shipped W3 guards (A1/A2/B1) against the backlog
+    closure. T35-local CSV schema in src/pos/baseline.py untouched —
+    T40 owns reconciliation per [[concepts/output-format]] when it
+    lands. T39 entry rewritten to drop the W7-buffer counterfactual
+    framing.

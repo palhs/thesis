@@ -273,6 +273,8 @@ Visual: [[diagrams/scheduler/bootstrap]].
 No `Scheduler → Network` reference is ever created; Network already
 holds a scheduler ref from its constructor.
 
+Post-build execution is owned by [[concepts/runner]].
+
 ## 8. Sources
 
 Design contract; no primary-literature citations. Companion wiki page:
@@ -356,3 +358,14 @@ deadline may have masked further activity. It also matches the
 `test_empty_run_with_past_deadline_returns_deadline` pins this behaviour.
 §6.5's pseudocode is illustrative, not normative on this tie; the
 implementation is authoritative.
+
+### [2026-05-27] T39 — R4: `Scheduler.bind` rejects duplicate `node.id`; post-build half is `[[concepts/runner]]`
+
+- **2026-05-27 (T39):** `Scheduler.bind(node)` rejects duplicate
+  `node.id` with `ValueError` (B2; symmetric with the
+  unregistered-`node_id` `KeyError` path in `_dispatch._node`). The
+  post-build half of the six-phase bootstrap is now
+  `[[concepts/runner]]` — `run_to_completion(handle, *, t_max,
+  logger) -> (RunResult, EventLogger)`. Test surface:
+  `tests/scheduler/test_scheduler.py::test_bind_rejects_duplicate_node_id`,
+  `tests/common/test_runner.py`.

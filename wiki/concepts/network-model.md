@@ -428,3 +428,15 @@ construction-time kickoff method invoked once during bootstrap
 phase 5. Internal-only; the §5 outbound binding for `send` /
 `broadcast` is unchanged, and the honest-infrastructure adversary
 boundary (§6) is unchanged.
+
+### 2026-05-27 — §3.2 / §5 fail-fast guards on `register` and `start`
+
+- **2026-05-27 (T39):** `Network.register(node)` rejects duplicate
+  `node.id` with `ValueError` (B1; shipped with T23, recorded here
+  against the backlog closure — symmetric with the unregistered-`dst`
+  `KeyError` in `_try_deliver`). `Network.start()` rejects a second
+  call with `RuntimeError` (B3; new in T39 — re-running `start` would
+  re-schedule every interior `PhaseAdvance` boundary, double-firing
+  phase rollovers). Test surface:
+  `tests/network/test_network.py::test_duplicate_register_rejected`,
+  `test_start_rejects_double_call`.

@@ -685,3 +685,16 @@ name now fails fast (`NameError`) rather than silently producing an
 unrecognised event. The §7 mandatory-event table is unchanged in content —
 the emitted strings are byte-identical; only their definition site moved.
 No other §s affected.
+
+### 2026-05-27 — §2 / §8 constructor guards on `node_id` and `weight`
+
+- **2026-05-27 (T39, retroactive):** `Node.__init__` rejects
+  `node_id < 0` with `ValueError` (A1; `node_id = -1` is the
+  `PhaseAdvance` sentinel — would scramble `(t, node_id, seq)`
+  ordering) and non-finite `weight` with `ValueError` (A2;
+  `float('nan') < 0` is `False`, so the existing `weight < 0` check
+  let `NaN` / `±inf` slip past). Both guards shipped with T22; T39
+  records them here against the backlog closure. Test surface:
+  `tests/nodes/test_node.py::test_negative_node_id_rejected`,
+  `test_nan_weight_rejected`, `test_pos_inf_weight_rejected`,
+  `test_neg_inf_weight_rejected`.
