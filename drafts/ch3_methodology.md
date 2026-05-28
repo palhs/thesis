@@ -5,7 +5,10 @@
 Chapter 1 stated the research questions that drive this thesis and
 Chapter 2 documented the unified-harness gap in the existing comparative
 literature. The present chapter describes the methodology that closes
-that gap and operationalizes RQ1–RQ4 [[wiki/concepts/research-questions]].
+that gap and operationalizes RQ1–RQ4 [[wiki/concepts/research-questions]];
+its construction is the realisation of Contribution 4 (§1.6), extending
+the instrumented-metric harness methodology of Gervais *et al.* [17]
+from Proof-of-Work to the four BFT families in scope.
 The methodology rests on three claims about how the simulator is built:
 a single system model serves all four families without protocol-specific
 concessions [[wiki/concepts/system-design]]; a uniform metric schema
@@ -106,11 +109,37 @@ duplicating it to two recipients with disjoint payloads, or delaying
 its emission — but adds no component and no event class
 [[wiki/concepts/adversary-model-runtime]]. The catalog contains four
 generic capabilities (silent non-participation, delayed voting,
-equivocation, leader disruption) and three protocol-specific surfaces,
-giving eighteen valid `(adversary, protocol)` pairs. Twelve of those
-are exercised by the Week-10 experiments T51–T53; the remaining six are
-catalogued design space, retained for reference but deliberately out of
-experimental scope.
+equivocation, leader disruption) that cover the four families with one
+structural `N/A` (Snowman × leader disruption, since sampling is
+leaderless) and one noted reduction (Snowman × equivocation collapses to
+a "lying responder" because Snowman's vote-counting has no
+inter-message intersection step), plus three protocol-specific surfaces
+(Snowman colluding sub-sampler, Narwhal+Tusk data-availability
+withholding, Casper FFG slashable-equivocation refinements). The two
+asymmetric Snowman cells are themselves RQ4 findings, not catalog gaps.
+The full design space is therefore eighteen valid `(adversary, protocol)`
+pairs across the four families; of those, twelve generic-capability
+pairs are scheduled for the Week-10 experiments T51–T53 and the
+remaining six (leader disruption × 3 and the three protocol-specific
+surfaces) are catalogued design space deliberately out of experimental
+scope. At the present two-protocol implementation stage (PBFT and Casper
+FFG, §3.3), nine of the eighteen pairs are realisable in `src/`; the
+remaining nine arrive with T36.1 and T36.2. Catalog vocabulary and
+RQ4-axis vocabulary differ here: the catalog carries four generic
+capabilities, but RQ4 (§1.5) names only the three scheduled in T51–T53.
+Leader disruption is generic-in-catalog yet out-of-RQ4-axis because the
+row degenerates structurally across the four families — `N/A` at Snowman
+(no leader role), mechanically overlapping proposer-equivocation at
+Casper FFG ([[wiki/concepts/adversary-model]] §6), mechanically
+overlapping data-availability withholding at Narwhal+Tusk
+([[wiki/concepts/adversary-model]] §7.2), and at PBFT duplicating the
+view-change weakness already documented for the family in §2.4.1. All
+four cells therefore degenerate — by `N/A`, by mechanical overlap, or
+by duplication of an already-documented weakness — which is why the row
+is not raised to an RQ4 axis. Chapter 5 reads this degeneracy itself as
+a structural observation about the four families' adversary surface
+rather than as coverage; no claim is made that leader-disruption results
+have been indirectly produced by the equivocation or delay runs.
 
 ## 3.3 Algorithms
 
@@ -147,7 +176,14 @@ rather than a cryptographic prepared certificate, and the adversary
 catalog deliberately carries no evidence-forgery capability. The
 boundary affects no honest-path result and no equivocating-primary
 result; within-threshold safety against forged view-change evidence is
-assumed by construction [[wiki/algorithms/pbft]].
+assumed by construction [[wiki/algorithms/pbft]]. The classical variant
+sits at the worst-case end of the PBFT family's `O(n) → O(n²)`
+message-complexity range: HotStuff [5] and Tendermint [6] are retained
+as family context in [[wiki/algorithms/pbft]] §6 but are not simulator
+targets, so the RQ3 verdict reported for "PBFT-style" is a verdict on
+classical PBFT specifically. A HotStuff substitution would shift the
+measured exponent toward `O(n)` without changing the family's safety or
+liveness conclusions.
 
 *Event-handler shape.* Three inbound entry points dispatch the
 three-phase commit and the view-change recovery; the `decided` event
@@ -194,7 +230,11 @@ Delay-induced reorgs are out of scope until the delay sweep of Week 9.
 Attestation cadence is once per epoch at a configurable offset rather
 than once per slot; the per-slot head vote belongs to LMD-GHOST and
 contributes no extra information to the FFG gadget once fork choice is
-honest-path-linear.
+honest-path-linear. Slashing is modelled as a halt event with the
+offending validator's deposit logged as burned; no incentive dynamics
+are simulated and no validator's decision to attack is conditioned on
+stake-at-risk, consistent with the economic-and-incentive design
+exclusion in §1.4.
 
 *Event-handler shape.* The slot loop drives proposer selection and
 attestation emission; FFG vote aggregation transitions epoch state
@@ -264,7 +304,11 @@ axes and sweep one: Family A (Scaling) sweeps `n` under an honest
 validator set on the `static-baseline` network for RQ3; Family B
 (Delay) sweeps the network timeline at `n = 10` for RQ1; Family C
 (Adversarial) sweeps the `(adversary, intensity)` pair at `n = 10` for
-RQ2 and RQ4 jointly. Workload defaults are pinned at a Poisson arrival
+RQ2 and RQ4 jointly, with the sub-threshold intensity grid
+`f ∈ {1, 2, 3}` (the full range below the `f < n/3` Byzantine bound at
+`n = 10`) plus the above-threshold points `f ∈ {4, 5}` reserved for the
+T53 safety-cliff sweep on PBFT and Casper FFG
+[[wiki/concepts/experiment-matrix-runs]] §3. Workload defaults are pinned at a Poisson arrival
 process, 512-byte transactions matching the Narwhal benchmark [11], a
 zero conflict rate, and an offered rate of 100 transactions per second
 under the sub-saturation latency regime. Peak throughput is measured
@@ -330,7 +374,13 @@ before it reaches any validator, so end-to-end latency is comparable
 across protocols whether or not they carry a separate mempool.
 Wall-clock throughout means the simulator's model time, advanced only
 by events popped from the scheduler heap; no simulator number is a
-real-hardware claim.
+real-hardware claim. Published production figures serve as
+order-of-magnitude sanity checks (§1.4 assumption 4), not as validation
+targets: the methodology of this chapter does not back-validate
+simulator outputs against any deployed system, and the contribution it
+secures is internal consistency across families under matched
+assumptions rather than reproduction of any one production codebase's
+throughput.
 
 *Four structural asymmetries.* Four asymmetries arise when the schema
 is instantiated against the four-protocol scope, and a single companion
@@ -391,9 +441,20 @@ case Chapter 4 surfaces the crossover point rather than picking a
 winner [[wiki/concepts/metric-reconciliation]].
 
 *The output row.* One row of the comparative CSV is produced per
-`(config, seed)` after `n_runs` aggregation; every metric column is the
-mean over `n_runs` seeded trials at the row's full configuration, and
-95% confidence intervals are surfaced alongside each mean. The columns
+configuration after `n_runs` aggregation across the seed set. Three
+metric classes carry three aggregation rules. Continuous metrics
+(`commit_latency_ms`, `finality_latency_ms`, `round_latency_ms`, `tps`,
+`goodput`, `peak_tps`, `consensus_msgs_per_acu`, `mempool_msgs_per_acu`,
+`bytes_per_acu`) are reported as the mean over `n_runs` seeded trials
+with a 95% Gaussian confidence interval. Rate metrics (`fork_rate`,
+`success_rate`) are reported as the observed proportion over `n_runs`
+with a 95% binomial (Wilson) interval, so that a zero-violation outcome
+is stated as `0/n_runs` rather than as a mean with a degenerate
+interval. The threshold metric `f_max` — `f_max_count` for replica-based
+protocols and `f_max_stake` for stake-based protocols, exactly one
+populated per row — is the smallest adversary fraction at which the
+row's safety or liveness invariant first breaks across the seed set, not
+a mean. The columns
 Chapter 4 will read are `commit_latency_ms`, `finality_latency_ms`,
 `tps`, `goodput`, `peak_tps`, `consensus_msgs_per_acu`,
 `mempool_msgs_per_acu`, `bytes_per_acu`, `success_rate`, `fork_rate`,

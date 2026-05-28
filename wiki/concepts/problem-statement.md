@@ -100,7 +100,7 @@ four concrete objectives.
 | Four L1 consensus families: PBFT-style, PoS-finality, Avalanche-style, DAG-based. | Proof-of-Work consensus as a subject of comparison (covered only as methodological baseline [17]). |
 | Discrete-event simulation at the message-passing level. | Layer-2 protocols (rollups, payment channels, sidechains). |
 | Configurable network delay (constant, uniform, exponential, heavy-tailed) and packet loss. | Deployment on a real testnet or mainnet; no live-network measurements. |
-| Byzantine validator behaviours: silent non-participation, delayed voting, equivocation, selective dropping (see [[concepts/fault-model]]). | Economic/incentive design (reward schedules, token economics). |
+| Byzantine validator behaviours: silent non-participation, delayed voting, equivocation (see [[concepts/fault-model]]). | Economic/incentive design (reward schedules, token economics). |
 | Uniform metrics: latency, throughput, communication overhead, consensus reliability. | Cryptographic primitive performance (signature schemes, threshold cryptography internals). |
 | Validator sets up to hundreds of nodes (sized to support reproducible trials). | Governance, client software, or user-application concerns. |
 
