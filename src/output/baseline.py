@@ -18,7 +18,7 @@ import pos.baseline as pos_baseline
 import snowman.baseline as snowman_baseline
 from snowman.summarise import sanity_row
 
-from .csv import write_unified_csv
+from .csv import _resolve_commit_hash, write_unified_csv
 
 
 _OUT  = Path("results/baseline.csv")
@@ -37,11 +37,17 @@ def _collect_runs():
 
 
 def main() -> None:
+    # Snapshot the commit hash once before any writes so both output
+    # files share the same value (the main-file write would otherwise
+    # dirty the tree and shift sanity_row's hash mid-run; consecutive
+    # runs from any tree state would also drift). output-format.md §10.
+    commit_hash = _resolve_commit_hash()
     runs = _collect_runs()
-    write_unified_csv(_OUT, runs)
+    write_unified_csv(_OUT, runs, commit_hash=commit_hash)
     for records, result, meta in runs:
         if meta.protocol == "snowman" and meta.n == 4:
-            sanity_row(records, result, meta, _SANE)
+            sanity_row(records, result, meta, _SANE,
+                       commit_hash=commit_hash)
             break
 
 

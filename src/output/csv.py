@@ -74,13 +74,22 @@ def _total_msgs_per_acu(records: list[EventRecord],
 
 def _generic_cols(records: list[EventRecord],
                   result: RunResult,
-                  meta: ScenarioMeta) -> dict[str, object]:
+                  meta: ScenarioMeta,
+                  commit_hash: str | None = None) -> dict[str, object]:
+    """Generic row columns. If `commit_hash` is given, use it verbatim;
+    otherwise resolve via `_resolve_commit_hash()`. Callers that write
+    multiple files in one orchestrator pass should resolve once at the
+    top and thread the same value through — `_resolve_commit_hash` is
+    sensitive to the working-tree dirty state, so subsequent calls
+    after a write would otherwise see `-dirty` (output-format.md §10).
+    """
     return {
         "run_id":             meta.run_id,
         "protocol":           meta.protocol,
         "n":                  meta.n,
         "seed":               meta.seed,
-        "commit_hash":        _resolve_commit_hash(),
+        "commit_hash":        commit_hash if commit_hash is not None
+                              else _resolve_commit_hash(),
         "t_max":              meta.t_max,
         "total_msgs_per_acu": _total_msgs_per_acu(records, result),
     }
@@ -106,22 +115,33 @@ def _format_row(row: dict[str, object]) -> dict[str, str]:
 def write_unified_csv(
     path: Path,
     runs: Iterable[tuple[list[EventRecord], RunResult, ScenarioMeta]],
+    commit_hash: str | None = None,
 ) -> None:
     """Project each run to one CSV row in COLUMN_ORDER. Snowman n=4
-    rows are skipped (output-format.md §7). Raises:
+    rows are skipped (output-format.md §7).
 
+    `commit_hash`: if None, resolved once at the top of this call and
+    threaded through every row, so all rows share the same value
+    regardless of whether the writer's own output dirties the tree
+    mid-iteration. Pass an explicit value when calling from an
+    orchestrator that writes multiple files (e.g. main() pairing this
+    with `snowman.summarise.sanity_row`) so both files share the same
+    pre-write hash.
+
+    Raises:
       KeyError   — meta.protocol has no entry in _REDUCERS.
       ValueError — a reducer returned a key in _GENERIC_COLUMNS or a
-                   key not in COLUMN_ORDER (reducer-vs-generic clash or
-                   schema drift).
+                   key not in COLUMN_ORDER.
     """
+    if commit_hash is None:
+        commit_hash = _resolve_commit_hash()
     rows: list[dict[str, object]] = []
     for records, result, meta in runs:
         if meta.protocol == "snowman" and meta.n == 4:
             continue
         if meta.protocol not in _REDUCERS:
             raise KeyError(f"no reducer for protocol={meta.protocol!r}")
-        row = _generic_cols(records, result, meta)
+        row = _generic_cols(records, result, meta, commit_hash=commit_hash)
         protocol_cols = _REDUCERS[meta.protocol](records, result, meta)
         collisions = _GENERIC_COLUMNS & protocol_cols.keys()
         if collisions:

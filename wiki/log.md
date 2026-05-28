@@ -3,6 +3,30 @@
 > Append-only chronological record. Format:
 > ## [YYYY-MM-DD] <type> | task <N> — <title>
 
+## [2026-05-28] code | task 40 — fix orchestrator commit-hash determinism
+
+- role: Engineer
+- touched: `src/output/csv.py`, `src/output/baseline.py`,
+  `src/snowman/summarise.py`
+- notes: Surfaced during §M-verify (`shasum -c` on two consecutive
+  `python3 -m output.baseline` runs failed on `baseline.csv`).
+  `_resolve_commit_hash` was being called per-row inside
+  `write_unified_csv` BEFORE `path.open("w")`; from a clean tree, all
+  9 main-CSV rows captured the clean hash, then `path.open("w")`
+  truncated the file (dirtying the tree), so `sanity_row`'s subsequent
+  `_resolve_commit_hash` call returned `-dirty` — inconsistent
+  provenance within one orchestrator pass. Cross-run: each run dirtied
+  the tree for the next. Fix threads an optional `commit_hash` kwarg
+  through `write_unified_csv → _generic_cols` and `sanity_row →
+  _generic_cols`; `output.baseline.main` snapshots once at the top of
+  the pass and passes the same value to both writers. e2e test stays
+  green (it monkeypatches `_resolve_commit_hash` so it never observed
+  the bug). Determinism contract on `[[concepts/output-format]]` §10
+  now holds at the orchestrator level for any starting tree state.
+  The committed canonical CSVs are unaffected — they were generated
+  from an already-dirty Commit-5 tree so all rows had been internally
+  consistent at `c6082f3b-dirty`.
+
 ## [2026-05-28] code | task 40 — wire output orchestrator + canonical artifacts
 
 - role: Engineer

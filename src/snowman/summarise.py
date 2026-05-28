@@ -86,11 +86,16 @@ def summarise(records: list[EventRecord],
 def sanity_row(records: list[EventRecord],
                result: RunResult,
                meta: ScenarioMeta,
-               path: Path) -> None:
+               path: Path,
+               commit_hash: str | None = None) -> None:
     """Write the Snowman n=4 rescaling-boundary row to a sibling CSV.
 
     Same 18-column schema as the main CSV plus a `snowman_degenerate_n4`
     boolean flag column. Header-row + one data row.
+
+    `commit_hash`: if None, resolved internally. Pass through when
+    pairing with `write_unified_csv` from one orchestrator pass so both
+    files share the same pre-write hash.
     """
     from output.csv import _format_row, _generic_cols   # local import to
                                                          # avoid cycle
@@ -100,7 +105,7 @@ def sanity_row(records: list[EventRecord],
             f"sanity_row only valid for Snowman n=4, got "
             f"{meta.protocol!r} n={meta.n}"
         )
-    generic = _generic_cols(records, result, meta)
+    generic = _generic_cols(records, result, meta, commit_hash=commit_hash)
     protocol = summarise(records, result, meta)
     row = {**generic, **protocol, "snowman_degenerate_n4": True}
 
