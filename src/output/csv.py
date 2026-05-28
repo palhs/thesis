@@ -18,12 +18,17 @@ from typing import Iterable
 from event_log import EventRecord
 from scheduler import RunResult
 
+from pbft.summarise    import summarise as _pbft_summarise
+from pos.summarise     import summarise as _pos_summarise
+from snowman.summarise import summarise as _snowman_summarise
+
 from .schema import COLUMN_ORDER, ScenarioMeta
 
-# _REDUCERS is populated in Commit 6 (Task 24) once the three
-# per-protocol summarise modules exist. Tests in Commit 2 inject a
-# dispatch table via monkeypatch; tests in Commit 6 use the real one.
-_REDUCERS: dict[str, object] = {}
+_REDUCERS = {
+    "pbft":       _pbft_summarise,
+    "casper-ffg": _pos_summarise,
+    "snowman":    _snowman_summarise,
+}
 
 # Columns produced by _generic_cols. Used by the collision guard to
 # detect reducer drift at row-build time.

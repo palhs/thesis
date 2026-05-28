@@ -175,7 +175,9 @@ block reaches `decided` in every honest-baseline scenario.
 - `commit_latency_ms = finality_latency_ms` — Snowman has no separate
   pre-finality state in the implemented model; counter-`β` IS finality.
 - `latency_ms = 1000 · median{r.t : r.event_type == "decided"
-  ∧ r.fields["block_hash"] == first_block}`.
+  ∧ r.fields["instance_id"] == first_block}` (Snowman emits the block
+  identity under the `instance_id` field — same key as PBFT/FFG, with
+  the value being the block hash).
 - `tps = decided_count / meta.t_max`.
 - `consensus_msgs_per_acu = delivery_count / decided_count` (the ACU
   is one decided block; deliveries are the K-peer query / response

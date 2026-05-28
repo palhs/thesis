@@ -3,6 +3,33 @@
 > Append-only chronological record. Format:
 > ## [YYYY-MM-DD] <type> | task <N> — <title>
 
+## [2026-05-28] code | task 40 — wire output orchestrator + canonical artifacts
+
+- role: Engineer
+- touched: `src/output/csv.py` (real `_REDUCERS` populated),
+  `src/output/baseline.py` (new), `tests/output/test_baseline_e2e.py`
+  (new), `src/{pbft,pos,snowman}/{baseline,summarise}.py` (new + harmonised),
+  `tests/{pbft,pos,snowman}/test_summarise.py` (new),
+  `tests/integration/test_{pbft,pos,snowman}_baseline.py` (harmonised),
+  `results/baseline.csv` (new canonical artifact),
+  `results/snowman_n4_sanity.csv` (new sibling), `.gitignore`
+  (canonical CSVs exempted from blanket ignore),
+  `wiki/experiments/2026-05-28_unified-output.md` (new),
+  `wiki/concepts/output-format.md` (§5.3 `block_hash` → `instance_id`
+  correction to match real Snowman emit shape), `wiki/index.md`,
+  `wiki/log.md`
+- notes: T40 implementation complete. Three protocols' honest baselines
+  driven through one writer. Byte-identical determinism verified
+  (`shasum -c` after two consecutive `python3 -m output.baseline` runs;
+  also asserted by `tests/output/test_baseline_e2e.py`). T35-local CSV
+  writer retired. PBFT `tps` exposed as conservative under the
+  quiescence-tail denominator (`vc_delay=1000.0` advances `result.now`
+  even on the honest path); peak-throughput column deferred to T58 per
+  [[concepts/output-format]] §11. Snowman O(K·β) message cost vs PBFT
+  O(n²) surfaced honestly in `consensus_msgs_per_acu`. Wiki §5.3
+  `block_hash` typo fixed in the same commit (real Snowman emits
+  `instance_id`; surfaced by Commit-5 reviewer).
+
 ## [2026-05-28] code | task 40 — wiki contract for output-format
 
 - role: Engineer
