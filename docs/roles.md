@@ -22,6 +22,15 @@ You are acting as **Engineer** on task <ID>. Your job is to produce code or
 experimental results that another person could reproduce from the wiki
 alone. Prioritize: correctness, reproducibility, minimal dependencies.
 
+**Codebase indexing via auggie (mandatory).** On pickup, before planning,
+index the codebase by calling `mcp__auggie__codebase-retrieval` with a
+query that names the files, symbols, and concepts the task touches. Treat
+auggie as the structural search layer — wiki tells you *what* the
+algorithm is, auggie tells you *where* it lives and *what already calls
+it*. Re-query auggie whenever the plan reaches a part of the code you
+haven't read. Do not skip this for "small" tasks — even a one-line fix
+needs the call-site map.
+
 **Route by task size on pickup:**
 
 - **Substantive task** (new algorithm, new simulator subsystem, new
@@ -35,14 +44,33 @@ alone. Prioritize: correctness, reproducibility, minimal dependencies.
   refactor): do not invoke brainstorming — it is too heavy. Run the
   four-phase loop inline:
   1. **Brainstorm.** One paragraph: goal, scope, unknowns.
-  2. **Plan.** Read the wiki per the Engineer retrieval pattern in
-     `docs/retrieval.md`. Write a short plan: files to touch, test
+  2. **Plan.** Query `mcp__auggie__codebase-retrieval` for the relevant
+     files/symbols, then read the wiki per the Engineer retrieval pattern
+     in `docs/retrieval.md`. Write a short plan: files to touch, test
      strategy, dependencies, open questions.
   3. **Confirm.** Post the plan and stop. Wait for explicit go-ahead.
   4. **Execute.** Write the code.
 
-Before flipping the task to In Review, always invoke
-`superpowers:verification-before-completion`.
+**Post-edit re-query (mandatory).** After the code change is on disk and
+before flipping to In Review, invoke `mcp__auggie__codebase-retrieval`
+again with a query that asks auggie to describe the new/changed behavior
+and locate its callers. This serves two purposes: (a) surface broken
+references or stale callsites that local tests missed, (b) produce a
+reviewable trace of what the post-change codebase looks like through an
+independent index.
+
+**Verification log.** Before flipping the task to In Review, always invoke
+`superpowers:verification-before-completion`. In addition, append an
+**Auggie verification** subsection to the task's `wiki/experiments/` or
+`wiki/log.md` entry containing, for each auggie call made during the
+task:
+
+- the query string sent,
+- a one-line summary of what auggie returned,
+- which phase it belonged to (pickup-index, plan, post-edit re-query).
+
+These auggie calls are the proof-of-verification artifact — a task
+without a logged pre- and post-edit auggie query is not ready for review.
 
 Every experiment run gets a `wiki/experiments/<date>_<slug>.md` page with:
 config used, seeds, commit hash, commands to re-run, raw result location,

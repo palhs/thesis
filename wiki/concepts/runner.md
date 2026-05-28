@@ -181,3 +181,11 @@ Design contract; no primary-literature citations.
   sweep harness.
 - [[concepts/adversary-model]] (T18) — attaches faults at the `Node` boundary
   before the run.
+
+## Revisions
+
+- **2026-05-28 by T40.** The CSV-output gap noted in §What's outside the
+  runner / *CSV columns and output formatting → T40* is closed. The
+  runner stays at pass-through — no scheduler-layer adversary, no CSV
+  output. The comparative CSV is owned by `src/output/csv.py`; see
+  [[concepts/output-format]].

@@ -3,6 +3,19 @@
 > Append-only chronological record. Format:
 > ## [YYYY-MM-DD] <type> | task <N> — <title>
 
+## [2026-05-28] code | task 40 — wiki contract for output-format
+
+- role: Engineer
+- touched: `wiki/concepts/output-format.md` (new),
+  `wiki/concepts/event-log-schema.md` (Revisions block),
+  `wiki/concepts/runner.md` (Revisions block), `wiki/index.md`
+- notes: Landed the canonical comparative-CSV contract page pinned by
+  [[concepts/metric-reconciliation]] §T40. Wiki contract first, code
+  scaffolding lands next per spec §7. Two upstream Revisions blocks
+  acknowledge the new downstream consumer of the event-log substrate
+  and close T39's documented CSV-output gap. Closes L-W4 M1's 15
+  forward-references.
+
 ## [2026-04-20] sync | task S0 — Import BFT Foundation concepts
 - role: Researcher
 - touched: `wiki/concepts/byzantine-generals.md`, `wiki/concepts/flp-impossibility.md`, `wiki/concepts/cap-theorem.md`, `wiki/concepts/consensus-properties.md`, `wiki/concepts/synchrony-models.md`, `wiki/concepts/fault-model.md`, `wiki/concepts/quorum-arithmetic.md`, `wiki/concepts/consensus-families.md`, `wiki/index.md`, `TASKS.md`
