@@ -23,3 +23,5 @@ results/**/*.png
 .DS_Store
 Thumbs.db
 
+# Obsidian
+.obsidian
