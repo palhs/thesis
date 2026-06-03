@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 75 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 60 · In Review: 0 · In Progress: 0 · Not Started: 30 · Blocked: 3
+- Completed: 61 · In Review: 1 · In Progress: 0 · Not Started: 29 · Blocked: 2
 
 ## Legend
 
@@ -187,7 +187,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Same CSV format as PBFT · _Artifact:_ `wiki/experiments/<date>_pos-baseline.md`
 - `[x]` **T36** `M` Writer — Begin drafting Chapter 3 (Methodology)
   _Outcome:_ 2–3 pages: system model, algorithm descriptions, simulation setup, metrics. First pass covers the two protocols implemented by end of W6 (PBFT, Casper FFG); the remaining two protocols land via T36.1 and T36.2 so Ch. 3 stays consistent with `src/` as it grows. · _Artifact:_ `drafts/ch3_methodology.md`
-- `[!]` **T36.1** `M` Writer — Extend Ch. 3 methodology to cover Snowman (blocked: no Snowman implementation task scheduled)
+- `[?]` **T36.1** `M` Writer — Extend Ch. 3 methodology to cover Snowman (unblocked 2026-05-30: T38 Snowman baseline landed)
   _Outcome:_ Pick up once Snowman is implemented in `src/` (currently unscheduled; W7 T38 may absorb it). Add a Snowman subsection to the algorithm-descriptions section of `drafts/ch3_methodology.md`: mechanism (Snowflake → Snowball → Snowman lineage), safety/liveness posture, and how Snowman's parameter rescaling at thesis-scale `n` (`K`, `α_c`, `β`) is handled per [[concepts/metric-reconciliation]]. Update the simulation-setup and metrics sections to reflect Snowman's per-block finality semantics and the empirical safety-violation invariant `(1−α_c/K)^β`. Front matter is not wiki knowledge — append a `log.md` entry only; create no new wiki page. · _Artifact:_ updated `drafts/ch3_methodology.md` · _Verify:_ Ch. 3 covers three protocols (PBFT, Casper FFG, Snowman); the Snowman subsection cites [[algorithms/avalanche]] and the metric-reconciliation page; no `TODO(cite)` left dangling for content that exists in the wiki
 - `[!]` **T36.2** `M` Writer — Extend Ch. 3 methodology to cover Narwhal+Tusk (blocked: pending T38.1)
   _Outcome:_ Pick up once Narwhal+Tusk is implemented in `src/`. Add a Narwhal+Tusk subsection to the algorithm-descriptions section of `drafts/ch3_methodology.md`: DAG construction (Narwhal mempool), ordering (Tusk anchor commit), and how the mempool-vs-consensus message-count split and per-anchor-batch finality semantics defined in [[concepts/metric-reconciliation]] are surfaced in the metrics section. Update the system-model section if DAG-output structure forces any model changes beyond the linear-chain assumptions used by the first three protocols. Front matter is not wiki knowledge — append a `log.md` entry only; create no new wiki page. · _Artifact:_ updated `drafts/ch3_methodology.md` · _Verify:_ Ch. 3 covers all four protocols (PBFT, Casper FFG, Snowman, Narwhal+Tusk); the Narwhal+Tusk subsection cites [[algorithms/dag-based]] and the metric-reconciliation page; the metrics section explicitly handles the linear-vs-DAG output asymmetry from T9.1
@@ -207,7 +207,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 8 — Baseline experiments
 
-- `[ ]` **T41** `H` Engineer — Run baseline: vary number of validators
+- `[x]` **T41** `H` Engineer — Run baseline: vary number of validators
   _Outcome:_ Results for n=4,7,10,16,25 per algorithm; 10+ seeded runs each · _Artifact:_ `results/baseline/` + experiment page
 - `[ ]` **T42** `H` Engineer — Collect latency, throughput, communication overhead
   _Outcome:_ Full CSV dataset verified for completeness · _Artifact:_ `results/baseline/metrics.csv`
