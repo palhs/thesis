@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 62 · In Review: 0 · In Progress: 1 · Not Started: 29 · Blocked: 2
+- Completed: 62 · In Review: 1 · In Progress: 0 · Not Started: 29 · Blocked: 2
 
 ## Legend
 
@@ -299,7 +299,7 @@ case) plus three wiki-overclaim corrections. Each fix is gated by a
 pre-defined rubric (eval set) recorded on the experiment page. Scope and
 the double+surround slashing decision were human-approved 2026-06-04.
 
-- `[~]` **T70** `H` Engineer — Close the six major impl-vs-paper fidelity gaps
+- `[?]` **T70** `H` Engineer — Close the six major impl-vs-paper fidelity gaps
   _Outcome:_ Address the six MAJOR findings from the 2026-06-04 audit, each
   gated by a rubric and demonstrated with step-logging on a simulated case.
   **Code fixes** — (1) *Casper FFG accountable safety* (audit #3): detect
@@ -339,6 +339,8 @@ the double+surround slashing decision were human-approved 2026-06-04.
 ## Backlog
 
 Agents append here when they notice out-of-scope issues during a task.
+
+- **PBFT baseline numbers shift after T70 client-finality fix — re-run T41/T42** (introduced by T70, 2026-06-04, rubric criterion RX.2). T70 finding #1 added the f+1-`REPLY` round so `finality_latency_ms` is now measured at client-observed finality (one network hop past the internal `COMMIT` quorum) instead of at the COMMIT quorum. The extra `REPLY` deliveries also feed `consensus_msgs_per_acu` and `bytes_per_acu`. So the PBFT rows in the T41 scaling dataset (`results/baseline/baseline.csv`) and the T42 metrics collection are now stale for PBFT (Casper FFG / Snowman rows unaffected). The honest-path *decided* behaviour and fork_rate=0 are unchanged; only the latency/overhead magnitudes move, and only for PBFT. Flagged in `src/pbft/baseline.py` docstring. Priority: M. **When T42** (collect latency/throughput/overhead) is picked up — or sooner if a comparison plot is drafted — regenerate the PBFT rows and note the measurement-point change (commit vs client-observed finality) in the Chapter 4 methodology so the cross-protocol latency comparison is on aligned semantics.
 
 - **Dashboard arithmetic.** `TASKS.md` dashboard line previously read "Not Started: 66" when the actual sum was 65 after S0–S5 and T1–T10 completions (total 81 slots across T-tasks + S-tasks + L-tasks, minus 16 completed = 65). Fixed incidentally as part of the S6 flip (now 65 Not Started, 1 In Progress). Watch for re-drift during future flips.
 - **Ava Labs documentation as a non-bibliography citation** (introduced by S9 reconciliation). [[algorithms/avalanche]] uses a `[ava-docs]` marker for production-variant details (Snowman, C-Chain / P-Chain / X-Chain, production parameters `K=20, α_c≈0.8K, β≈15`, "sub-second" finality). Per the citation policy, any quantitative claim should ultimately cite a primary paper; the Ava Labs URL is currently the only available source for some production details. Priority: L — watch for Writer tasks quoting `[ava-docs]`-backed performance numbers and flag them; ideally replace with primary-paper corroboration from [9] or [10] when possible.
