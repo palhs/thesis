@@ -5,8 +5,8 @@ work, push for review. Humans mark Completed on merge.
 
 ## Dashboard
 
-- Total tasks: 75 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 62 · In Review: 0 · In Progress: 0 · Not Started: 29 · Blocked: 2
+- Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
+- Completed: 62 · In Review: 0 · In Progress: 1 · Not Started: 29 · Blocked: 2
 
 ## Legend
 
@@ -286,6 +286,53 @@ specs); the `\include{biography}` line has been removed from the template.
   `../thesis-tex/MIT-thesis-template/abstract.tex`
 - `[ ]` **L-W12** `M` Linter — Final wiki lint pass
   _Outcome:_ Final report; any remaining `TODO(cite)` or dead links resolved before submission · _Artifact:_ `wiki/lint/<date>_report.md`
+
+---
+
+## Audit follow-up — fidelity fixes
+
+Cross-cutting follow-up from the 2026-06-04 multi-agent fidelity audit
+(implementation vs published-paper coverage). The audit surfaced six MAJOR
+findings; this task bundles them into one Engineer pass: three
+code-fidelity fixes (each with a step-logged demonstration on a simulated
+case) plus three wiki-overclaim corrections. Each fix is gated by a
+pre-defined rubric (eval set) recorded on the experiment page. Scope and
+the double+surround slashing decision were human-approved 2026-06-04.
+
+- `[~]` **T70** `H` Engineer — Close the six major impl-vs-paper fidelity gaps
+  _Outcome:_ Address the six MAJOR findings from the 2026-06-04 audit, each
+  gated by a rubric and demonstrated with step-logging on a simulated case.
+  **Code fixes** — (1) *Casper FFG accountable safety* (audit #3): detect
+  both double-vote and surround-vote slashing in `src/pos/`, emit a
+  `casper_slashing` event, surface a slashable-stake fraction; stop
+  `EpochState.record_vote` from silently swallowing a conflicting second
+  vote by an attester while preserving idempotent-duplicate handling. (2)
+  *Snowman genuine Snowball* (audit #5): drive `ConflictSet.preference`
+  from the accumulated confidence (argmax over `confidence`), not the last
+  sample majority (Snowflake), in `src/snowman/poll.py`; correct the
+  `close_round` / `ConflictSet` docstrings. (3) *PBFT client-observed
+  finality* (audit #1): add an f+1-matching `REPLY` round so
+  `finality_latency_ms` is measured at client-observed finality (one hop
+  after the internal `COMMIT` quorum), distinct from `commit_latency_ms`.
+  **Wiki corrections** — (4) `message-types.md` watermark contradiction
+  (audit #2): the body claims the simulator "caps it at the configured
+  high-water mark", which the code never enforces. (5) `pos.md`
+  Simulator-mapping overclaims (audit #4): slashing penalty, per-validator
+  attestation delay, LMD-GHOST reorgs, safety-cost budget, and validator
+  rotation are presented as implemented — rewrite to state what T70 now
+  implements (double/surround detection + slashable-stake metric) vs what
+  stays deferred (penalty application, LMD-GHOST, attestation delay). Add
+  `## Revisions` entries. Determinism preserved (step-logging gated; RNG
+  untouched); honest baselines unchanged; new unit + e2e tests per fix.
+  · _Artifact:_ `src/pos/`, `src/snowman/`, `src/pbft/`,
+  `tests/{pos,snowman,pbft}/`, updated `wiki/concepts/message-types.md`,
+  `wiki/algorithms/pos.md`, new
+  `wiki/experiments/2026-06-04_t70-fidelity-fixes.md`, `wiki/index.md`,
+  `wiki/log.md` · _Verify:_ rubric-coverage table all-green on the
+  experiment page; every pre-existing protocol suite still passes
+  (`make test`); byte-identical determinism re-run per protocol; each code
+  fix carries a logged simulated-case demonstration on the experiment page
+  that a reader can re-run from the documented command
 
 ---
 
