@@ -110,10 +110,17 @@ threshold-signature variants are not enumerated.
 payload-bearing ones — the asymmetry that makes the size column
 load-bearing for Chapter 4's bandwidth-vs-message-count discussion.
 
-`VIEW-CHANGE` evidence cardinality `k` is the number of prepared
-instances at or above the last stable checkpoint; the simulator
-caps it at the configured high-water mark per
-[[algorithms/pbft#view-change]] cost analysis. `NEW-VIEW` is the
+`VIEW-CHANGE` evidence cardinality `k` is, in classical PBFT, the
+number of prepared instances above the last stable checkpoint, with
+the protocol's low/high watermark window `[h, H]` bounding it per
+[[algorithms/pbft#view-change]] cost analysis. **The simulator does
+not model this.** It implements no low/high watermark `[h, H]`
+check — `src/pbft/node.py` enforces none of it on `PRE-PREPARE`, and
+checkpoints are unmodeled (T29 Decision D drops the checkpoint
+protocol entirely), so `last_stable_seq` is vestigial, pinned at
+`-1`. The simulator therefore applies **no cap** to `k`: the
+evidence is every instance the replica holds at state ≥ `PREPARED`
+(see the 2026-05-21 Revisions entries below). `NEW-VIEW` is the
 single message that justifies the family's `O(n³)` worst-case view
 change: a quadratic-sized payload broadcast to `n` recipients.
 
@@ -353,10 +360,12 @@ expected fit issues; any change beyond a typo lands as a
   Ethereum-fidelity studies; the row would gain an optional
   `BLOCK-PROPOSAL.slashing_evidence` field as a configuration
   toggle rather than spawn a new type.
-- **`VIEW-CHANGE` evidence size cap** (§3). `prepared_evidence`
-  cardinality is capped at the high-water mark. T29 may need a
-  stricter cap; parameterisation would land in
-  [[concepts/experiment-matrix]] (T19).
+- **`VIEW-CHANGE` evidence size cap** (§3). Classical PBFT bounds
+  `prepared_evidence` cardinality with its `[h, H]` watermark
+  window; the simulator applies **no cap** (T29 Decision D — see the
+  2026-05-21 Revisions entry). A bounded cap and its
+  parameterisation would land in [[concepts/experiment-matrix]]
+  (T19) as part of a future task that models checkpointing.
 
 ## 10. Sources
 
@@ -435,3 +444,15 @@ bibliography.
   three Snowman payloads (`BLOCK-ANNOUNCEMENT`, `QUERY`, `QUERY-RESPONSE`)
   carry no `signature` field — the simulator passes Python objects, not
   signed bytes.
+- **2026-06-04 (T70, audit finding #2).** The §3 prose previously asserted
+  that "the simulator caps [`VIEW-CHANGE` evidence cardinality `k`] at the
+  configured high-water mark", and the §9 item claimed `prepared_evidence`
+  "is capped at the high-water mark". Both contradicted the code:
+  `src/pbft/` implements **no** low/high watermark `[h, H]` check — the
+  `PRE-PREPARE` acceptance rules in `src/pbft/node.py` enforce none, and
+  `last_stable_seq` is pinned at `-1` (vestigial), consistent with the
+  2026-05-21 (T29) entries above (T29 Decision D drops checkpointing). The
+  §3 paragraph and the §9 item are corrected to state that the simulator
+  models no watermark/checkpoint cap; the paper's `[h, H]` theory is
+  retained but explicitly marked as not implemented. No code changed — this
+  is a wiki-vs-code reconciliation.
