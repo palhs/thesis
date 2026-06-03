@@ -39,14 +39,20 @@ def _meta(protocol: str, n: int, run_id: str | None = None) -> ScenarioMeta:
 
 
 def _ok_protocol_cols(records, result, meta):
-    """Mock reducer: returns all 11 non-generic columns with sentinel
-    values, NaN for Snowman params unless protocol is snowman."""
+    """Mock reducer: returns all 13 non-generic columns with sentinel
+    values, NaN for Snowman params unless protocol is snowman.
+
+    goodput + bytes_per_acu (T41) are per-protocol reducer outputs; the
+    real reducers fill them in Phase 3, so this stand-in supplies
+    sentinels to exercise the writer's full COLUMN_ORDER projection."""
     is_sn = meta.protocol == "snowman"
     return {
         "commit_latency_ms":      100.0,
         "finality_latency_ms":    100.0,
         "tps":                    1.0,
+        "goodput":                1.0,
         "consensus_msgs_per_acu": 1.0,
+        "bytes_per_acu":          1.0,
         "success_rate":           1.0,
         "fork_rate":              0.0,
         "K":             3   if is_sn else float("nan"),

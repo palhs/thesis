@@ -19,6 +19,7 @@ from event_log import EventRecord
 from network import DelayDist, Phase
 from output.schema import ScenarioMeta
 from scheduler import RunResult
+from workload import WorkloadConfig, generate_batches
 
 from . import SnowmanNode
 
@@ -30,6 +31,13 @@ _MINIMAL_DELAY = (
 _T_MAX = 20.0
 _SLOT_DURATION = 1.0
 _BETA = 15
+
+# Workload axis defaults (experiment-matrix §6 committed defaults). Held in
+# one place so ScenarioMeta and the generator config cannot drift apart.
+_ARRIVAL_PROCESS = "poisson"
+_OFFERED_RATE = 100.0
+_TX_BYTES = 512
+_CONFLICT_RATE = 0.0
 
 
 def _config(n: int) -> Config:
@@ -44,23 +52,58 @@ def _config(n: int) -> Config:
     )
 
 
+def _slot_workload(global_seed: int) -> list[tuple[bytes, ...]]:
+    """Build the slot-indexed batch stream for one run.
+
+    Generates the deterministic batch stream once from `global_seed`
+    (same `(config, global_seed)` -> identical stream — the generator's
+    byte-identical contract), one batch per slot. Every SnowmanNode holds
+    this same list; only the per-slot round-robin proposer reads its slot's
+    entry (snowman/node.py:_propose). We size to cover the window with a
+    small margin (`ceil(_T_MAX / _SLOT_DURATION) + 2`) so no slot the
+    window reaches ever falls past the stream.
+    """
+    cfg = WorkloadConfig(_ARRIVAL_PROCESS, _OFFERED_RATE,
+                         _TX_BYTES, _CONFLICT_RATE)
+    n_opportunities = math.ceil(_T_MAX / _SLOT_DURATION) + 2
+    batches = generate_batches(cfg, global_seed,
+                               n_opportunities=n_opportunities,
+                               interval=_SLOT_DURATION)
+    return [b for b in batches]
+
+
 def _factory(n: int):
     def make(node_id: int, global_seed: int) -> SnowmanNode:
         return SnowmanNode(
             node_id=node_id, weight=1.0, endpoint=None,
             global_seed=global_seed, n=n,
             slot_duration=_SLOT_DURATION, beta=_BETA,
+            workload=_slot_workload(global_seed),
         )
     return make
 
 
-SCENARIOS: tuple[ScenarioMeta, ...] = (
-    ScenarioMeta(run_id="snowman-n4",  protocol="snowman", n=4,
-                 variant=None, seed=42, t_max=_T_MAX),
-    ScenarioMeta(run_id="snowman-n7",  protocol="snowman", n=7,
-                 variant=None, seed=42, t_max=_T_MAX),
-    ScenarioMeta(run_id="snowman-n10", protocol="snowman", n=10,
-                 variant=None, seed=42, t_max=_T_MAX),
+def _scenario(n: int, seed: int) -> ScenarioMeta:
+    """One windowed Snowman scenario. run_id omits the seed — the `seed`
+    column disambiguates rows; row identity is (protocol, n, run_id, seed).
+    slots_per_epoch stays None (N/A for Snowman; per-block finality)."""
+    return ScenarioMeta(
+        run_id=f"snowman-n{n}", protocol="snowman", n=n, variant=None,
+        seed=seed, t_max=_T_MAX,
+        arrival_process=_ARRIVAL_PROCESS, tx_bytes=_TX_BYTES,
+        conflict_rate=_CONFLICT_RATE, offered_rate=_OFFERED_RATE,
+        interval=_SLOT_DURATION,
+    )
+
+
+# Scaling sweep: n in {4,7,10,16,25} x seed in range(20) = 100 scenarios.
+# n=4 stays in SCENARIOS — the orchestrator routes it to the sibling
+# snowman_n4_sanity.csv (it is excluded from the main file).
+_N_VALUES: tuple[int, ...] = (4, 7, 10, 16, 25)
+_SEEDS: tuple[int, ...] = tuple(range(20))
+
+SCENARIOS: tuple[ScenarioMeta, ...] = tuple(
+    _scenario(n, seed) for n in _N_VALUES for seed in _SEEDS
 )
 
 

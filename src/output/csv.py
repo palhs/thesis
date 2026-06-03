@@ -34,6 +34,8 @@ _REDUCERS = {
 # detect reducer drift at row-build time.
 _GENERIC_COLUMNS = frozenset({
     "run_id", "protocol", "n", "seed",
+    "workload_arrival_process", "workload_tx_bytes",
+    "workload_conflict_rate", "workload_offered_rate",
     "commit_hash", "t_max",
     "total_msgs_per_acu",
 })
@@ -84,14 +86,18 @@ def _generic_cols(records: list[EventRecord],
     after a write would otherwise see `-dirty` (output-format.md §10).
     """
     return {
-        "run_id":             meta.run_id,
-        "protocol":           meta.protocol,
-        "n":                  meta.n,
-        "seed":               meta.seed,
-        "commit_hash":        commit_hash if commit_hash is not None
-                              else _resolve_commit_hash(),
-        "t_max":              meta.t_max,
-        "total_msgs_per_acu": _total_msgs_per_acu(records, result),
+        "run_id":                   meta.run_id,
+        "protocol":                 meta.protocol,
+        "n":                        meta.n,
+        "seed":                     meta.seed,
+        "workload_arrival_process": meta.arrival_process,
+        "workload_tx_bytes":        meta.tx_bytes,
+        "workload_conflict_rate":   meta.conflict_rate,
+        "workload_offered_rate":    meta.offered_rate,
+        "commit_hash":              commit_hash if commit_hash is not None
+                                    else _resolve_commit_hash(),
+        "t_max":                    meta.t_max,
+        "total_msgs_per_acu":       _total_msgs_per_acu(records, result),
     }
 
 
@@ -103,8 +109,9 @@ def _format_row(row: dict[str, object]) -> dict[str, str]:
         v = row[col]
         if col.endswith("_ms"):
             out[col] = f"{v:.9f}" if isinstance(v, float) else str(v)
-        elif col in {"tps", "consensus_msgs_per_acu",
-                     "total_msgs_per_acu", "success_rate", "fork_rate",
+        elif col in {"tps", "goodput", "consensus_msgs_per_acu",
+                     "total_msgs_per_acu", "bytes_per_acu",
+                     "success_rate", "fork_rate",
                      "alpha_c_over_K"}:
             out[col] = f"{v:.6f}" if isinstance(v, float) else str(v)
         else:

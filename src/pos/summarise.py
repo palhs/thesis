@@ -14,8 +14,13 @@ import statistics
 from typing import Any
 
 from event_log import EventRecord
+from output.metrics import bytes_per_acu, goodput
 from output.schema import ScenarioMeta
 from scheduler import RunResult
+
+# FFG node default slots_per_epoch (src/pos/node.py CasperNode default).
+# Used when meta.slots_per_epoch is None (pre-Phase-4 metadata).
+_SLOTS_PER_EPOCH = 2
 
 
 def summarise(records: list[EventRecord],
@@ -51,11 +56,31 @@ def summarise(records: list[EventRecord],
     else:
         consensus_msgs_per_acu = float("nan")
 
+    # Workload axis (T41). FFG `decided` fires once per FINALISED EPOCH,
+    # but transactions live in per-SLOT blocks: each finalised epoch
+    # accounts for `slots_per_epoch` proposal opportunities. Indexing
+    # assumption: FFG proposes from slot 1 (slot 0 = genesis, no batch —
+    # src/pos/node.py `_on_start`). We map each distinct decided epoch to
+    # `slots_per_epoch` batch opportunities; this slightly over-counts the
+    # single genesis slot at the very start, an acceptable
+    # order-of-magnitude approximation for the goodput estimate.
+    # `slots_per_epoch` comes from meta (set by the FFG baseline in
+    # Phase 4); falls back to the node default when None.
+    slots_per_epoch = (meta.slots_per_epoch if meta.slots_per_epoch is not None
+                       else _SLOTS_PER_EPOCH)
+    n_epochs = len({r.fields.get("instance_id") for r in decided})
+    n_opportunities = n_epochs * slots_per_epoch
+    time_denom = float("nan") if math.isnan(meta.t_max) else meta.t_max
+    gp = goodput(meta, n_opportunities, time_denom)
+    bpa = bytes_per_acu(records, meta)
+
     return {
         "commit_latency_ms":      commit_latency_ms,
         "finality_latency_ms":    finality_latency_ms,
         "tps":                    tps,
+        "goodput":                gp,
         "consensus_msgs_per_acu": consensus_msgs_per_acu,
+        "bytes_per_acu":          bpa,
         "success_rate":           success_rate,
         "fork_rate":              0.0,   # honest baseline; never forks
         "K":                      float("nan"),

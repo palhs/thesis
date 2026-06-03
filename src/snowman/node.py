@@ -47,8 +47,10 @@ class SnowmanNode(Node):
         K: int | None = None,
         alpha_p: int | None = None,
         alpha_c: int | None = None,
-        workload: Sequence[bytes] | None = None,
+        workload: Sequence[tuple[bytes, ...]] | None = None,
     ) -> None:
+        """workload: indexed by slot; element = batch tuple. The proposer
+        at slot s carries workload[s]; missing/empty slot -> empty batch."""
         super().__init__(node_id, weight, endpoint, global_seed)
         if n < 2:
             raise ValueError(f"n must be >= 2, got {n}")
@@ -64,8 +66,7 @@ class SnowmanNode(Node):
         self.alpha_c: int = alpha_c if alpha_c is not None else c_d
         self.beta: int = beta
         self.slot_duration: float = slot_duration
-        self.workload: list[bytes] = list(workload or [])
-        self._workload_cursor: int = 0
+        self.workload: list[tuple[bytes, ...]] = list(workload or [])
 
         self.chain: Chain = Chain()
         self.conflict_sets: dict[bytes, ConflictSet] = {}    # parent_id -> CS
@@ -104,18 +105,21 @@ class SnowmanNode(Node):
     def _propose(self, slot: int, t: float) -> None:
         """Build, announce, and self-record a new block at this slot."""
         parent_id = self.chain.tip
-        if self._workload_cursor < len(self.workload):
-            tx: tuple[bytes, ...] = (self.workload[self._workload_cursor],)
-            self._workload_cursor += 1
-        else:
-            tx = ()
+        # T41: workload is indexed by SLOT; the block at slot s carries
+        # workload[s] directly. Every round-robin proposer holds the same
+        # slot-indexed list, so the block at a given slot is identical no
+        # matter which node proposes it. No/empty workload -> empty batch.
+        txs: tuple[bytes, ...] = (
+            self.workload[slot]
+            if (self.workload and slot < len(self.workload))
+            else ())
         block_id = hash_block(slot=slot, parent_id=parent_id,
-                              proposer_idx=self.id, transactions=tx)
+                              proposer_idx=self.id, transactions=txs)
         block = Block(block_id=block_id, parent_id=parent_id, slot=slot,
-                      proposer_idx=self.id, transactions=tx)
+                      proposer_idx=self.id, transactions=txs)
         payload = BlockAnnouncementPayload(
             slot=slot, block_id=block_id, parent_id=parent_id,
-            transactions=tx, proposer_idx=self.id)
+            transactions=txs, proposer_idx=self.id)
         # Self-record before broadcast (Network.broadcast excludes sender).
         self._record_announce(block, t)
         self.broadcast("BLOCK-ANNOUNCEMENT", payload, t)

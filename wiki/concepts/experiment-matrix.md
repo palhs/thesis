@@ -303,4 +303,28 @@ the CSV schema whose axes this page pins.
 
 ## Revisions
 
-None.
+### [2026-06-03] T41 — peak-throughput ramp deferred (model cannot saturate)
+
+The §6 peak-throughput offered-load ramp (`{25,50,…,1600}` tx/s, hold
+`W=10 s`, sustained-until-`commit_latency_p99`-×1.5) assumes the protocol
+**saturates** as offered load rises. T41 found this is not realizable on
+the current simulator: the network is latency-only ([[concepts/network-model]]
+§1, no link-capacity model), nodes have no per-transaction or per-byte CPU
+cost, and message *counts* are per-instance, not per-transaction — so a
+block carrying 1 tx and one carrying 1 000 commit at identical simulated
+latency. Nothing saturates; a measured `peak_tps` would be a configuration
+artifact (the proposer cadence ceiling), not a protocol-performance
+property. **`peak_tps` is therefore deferred** to a task that first adds a
+capacity/cost model (candidate: T58 enhancement, or a dedicated task);
+[[concepts/output-format]] §13 records the matching column-register move.
+
+What T41 *did* land from §6: a real arrival-process workload
+([[concepts/output-format]] §13 — `poisson`/`constant`, `tx_bytes=512`,
+`conflict_rate=0.0`), the fixed sub-saturation `offered_rate = 100` tx/s
+operating point (Family A scaling runs), and the `goodput` measurement.
+The `offered_rate` was **not** recalibrated down (the §6 "Open to revision"
+clause): no protocol saturated below it — at sub-saturation `goodput`
+tracks `offered_rate` modulo the finality-tail effect (Casper FFG's
+per-epoch finality leaves the window's trailing slots unfinalized, so its
+in-window `goodput` sits ~20 % below offered, vs ~5 % for the per-instance
+PBFT/Snowman protocols). Evidence: [[experiments/2026-06-03_scaling-baseline]].
