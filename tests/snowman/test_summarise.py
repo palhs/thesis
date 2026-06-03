@@ -51,8 +51,9 @@ class TestSummarise(unittest.TestCase):
         from snowman.summarise import summarise
         row = summarise(_snowman_records(7), _result(), _meta(7))
         expected = {
-            "commit_latency_ms", "finality_latency_ms", "tps",
-            "consensus_msgs_per_acu", "success_rate", "fork_rate",
+            "commit_latency_ms", "finality_latency_ms", "tps", "goodput",
+            "consensus_msgs_per_acu", "bytes_per_acu",
+            "success_rate", "fork_rate",
             "K", "alpha_p", "alpha_c", "beta", "alpha_c_over_K",
         }
         self.assertEqual(set(row.keys()), expected)
@@ -84,6 +85,37 @@ class TestSummarise(unittest.TestCase):
         self.assertEqual(row["K"], 20)
         self.assertEqual(row["alpha_c"], 16)
         self.assertAlmostEqual(row["alpha_c_over_K"], 0.8, places=6)
+
+
+def _const_meta(n: int, offered_rate: float = 10.0) -> ScenarioMeta:
+    """Constant arrival so batch sizes are exact integers."""
+    return ScenarioMeta(run_id=f"snowman-n{n}", protocol="snowman",
+                        n=n, variant=None, seed=42, t_max=20.0,
+                        arrival_process="constant",
+                        offered_rate=offered_rate, tx_bytes=512,
+                        conflict_rate=0.0, interval=1.0)
+
+
+class TestWorkloadColumns(unittest.TestCase):
+    def test_columns_are_floats(self):
+        from snowman.summarise import summarise
+        row = summarise(_snowman_records(7), _result(), _const_meta(7))
+        self.assertIsInstance(row["goodput"], float)
+        self.assertIsInstance(row["bytes_per_acu"], float)
+
+    def test_goodput_exact_value(self):
+        # One distinct decided block -> n_opportunities=1; constant
+        # offered_rate=10 -> 10 committed tx; t_max=20 -> 10/20 = 0.5.
+        from snowman.summarise import summarise
+        row = summarise(_snowman_records(7), _result(), _const_meta(7))
+        self.assertAlmostEqual(row["goodput"], 0.5, places=6)
+
+    def test_bytes_per_acu_exact_value(self):
+        # 7 QUERY deliveries (NOT tx-carrying): base = 8+32 = 40 each.
+        # 7 decided events. total = 7*40; / 7 = 40.0.
+        from snowman.summarise import summarise
+        row = summarise(_snowman_records(7), _result(), _const_meta(7))
+        self.assertAlmostEqual(row["bytes_per_acu"], 40.0, places=6)
 
 
 class TestSanityRow(unittest.TestCase):

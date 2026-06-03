@@ -54,8 +54,12 @@ class CasperNode(Node):
       attest_offset:   slot offset within an epoch at which the node
                        attests (default: slots_per_epoch // 2, so the
                        checkpoint block has time to propagate).
-      workload:        optional stub list[bytes]; the proposer pops one
-                       item per slot to fill a block's transactions.
+      workload:        optional list indexed by slot; element = batch
+                       tuple (`tuple[bytes, ...]`) of the transactions a
+                       block proposed at that slot carries. The slot-`s`
+                       proposer reads `workload[s]`, so the block content
+                       is deterministic regardless of which node proposes.
+                       None/empty or a slot past the end => empty block.
     """
 
     def __init__(self, node_id: int, weight: float, endpoint: object,
@@ -159,7 +163,8 @@ class CasperNode(Node):
     def _propose(self, slot: int, epoch: int, t: float) -> None:
         parent = self.chain.head
         txs: tuple[bytes, ...] = (
-            (self.workload.pop(0),) if self.workload else ()
+            self.workload[slot]
+            if (self.workload and slot < len(self.workload)) else ()
         )
         bh = block_hash(slot=slot, parent_hash=parent.block_hash,
                         proposer_idx=self.id, transactions=txs)

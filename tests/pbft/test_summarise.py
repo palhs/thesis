@@ -44,8 +44,9 @@ class TestSummarise(unittest.TestCase):
         from pbft.summarise import summarise
         row = summarise(_pbft_instance_records(4), _result(), _meta(4))
         expected_keys = {
-            "commit_latency_ms", "finality_latency_ms", "tps",
-            "consensus_msgs_per_acu", "success_rate", "fork_rate",
+            "commit_latency_ms", "finality_latency_ms", "tps", "goodput",
+            "consensus_msgs_per_acu", "bytes_per_acu",
+            "success_rate", "fork_rate",
             "K", "alpha_p", "alpha_c", "beta", "alpha_c_over_K",
         }
         self.assertEqual(set(row.keys()), expected_keys)
@@ -75,6 +76,45 @@ class TestSummarise(unittest.TestCase):
         row = summarise([], _result(), _meta(4))
         self.assertTrue(math.isnan(row["commit_latency_ms"]))
         self.assertEqual(row["success_rate"], 0.0)
+
+
+def _const_meta(n: int = 4, offered_rate: float = 10.0) -> ScenarioMeta:
+    """Constant arrival so batch sizes are exact integers."""
+    return ScenarioMeta(run_id=f"pbft-n{n}", protocol="pbft", n=n,
+                        variant=None, seed=42, t_max=math.nan,
+                        arrival_process="constant",
+                        offered_rate=offered_rate, tx_bytes=512,
+                        conflict_rate=0.0, interval=1.0)
+
+
+class TestWorkloadColumns(unittest.TestCase):
+    def test_goodput_is_float(self):
+        from pbft.summarise import summarise
+        row = summarise(_pbft_instance_records(4), _result(), _const_meta(4))
+        self.assertIsInstance(row["goodput"], float)
+        self.assertIsInstance(row["bytes_per_acu"], float)
+
+    def test_goodput_exact_value(self):
+        # One distinct decided instance ((0,0)) -> n_opportunities=1.
+        # constant offered_rate=10, interval=1.0 -> 10 committed tx.
+        # result.now=0.5 -> goodput = 10 / 0.5 = 20.0.
+        from pbft.summarise import summarise
+        row = summarise(_pbft_instance_records(4), _result(), _const_meta(4))
+        self.assertAlmostEqual(row["goodput"], 20.0, places=6)
+
+    def test_bytes_per_acu_exact_value(self):
+        # 4 PRE-PREPARE deliveries (tx-carrying), 4 decided events.
+        # base PRE-PREPARE = 8+8+32 = 48; tx component = 10*1.0*512 = 5120.
+        # per delivery = 48 + 5120 = 5168; total = 4*5168; /4 decided.
+        from pbft.summarise import summarise
+        row = summarise(_pbft_instance_records(4), _result(), _const_meta(4))
+        self.assertAlmostEqual(row["bytes_per_acu"], 5168.0, places=6)
+
+    def test_no_decided_bytes_per_acu_nan(self):
+        from pbft.summarise import summarise
+        row = summarise([], _result(), _const_meta(4))
+        self.assertTrue(math.isnan(row["bytes_per_acu"]))
+        self.assertTrue(math.isnan(row["goodput"]))
 
 
 if __name__ == "__main__":

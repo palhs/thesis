@@ -16,8 +16,8 @@ results/**/*.csv
 results/**/*.png
 !results/**/.gitkeep
 # T40 canonical comparative artifacts are tracked (wiki/concepts/output-format).
-!results/baseline.csv
-!results/snowman_n4_sanity.csv
+!results/baseline/
+!results/baseline/*.csv
 
 # OS
 .DS_Store

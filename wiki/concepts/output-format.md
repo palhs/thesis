@@ -67,26 +67,26 @@ in §11 below.
 | `n` | int | validators | yes | — |
 | `byzantine_fraction` | float | [0, 1] | no | T51–T54 |
 | `adversary_strategy` | str | — | no | T51–T54 |
-| `seed` | int | — | yes (=42 today) | T41 sweeps |
-| `workload_arrival_process` | str | — | no | T41 |
-| `workload_tx_bytes` | int | bytes | no | T41 |
-| `workload_conflict_rate` | float | [0, 1] | no | T41 |
-| `workload_offered_rate` | float | tx/s | no | T41 |
+| `seed` | int | — | yes (sweeps 0–19 at T41) | — |
+| `workload_arrival_process` | str | — | yes (T41) | — |
+| `workload_tx_bytes` | int | bytes | yes (T41) | — |
+| `workload_conflict_rate` | float | [0, 1] | yes (T41, =0.0) | — |
+| `workload_offered_rate` | float | tx/s | yes (T41) | — |
 | `network_phase_id` | str | — | no | T19 + T48 |
 | `n_runs` | int | — | no (=1 today) | T44 |
 | `commit_hash` | str | — | yes | — |
 | `commit_latency_ms` | float | ms | yes (PBFT, FFG, Snowman) | NWT row → T38.1 |
 | `finality_latency_ms` | float | ms | yes (PBFT, FFG, Snowman) | NWT row → T38.1 |
-| `round_latency_ms` | float | ms | no | T41 + T48 |
+| `round_latency_ms` | float | ms | no | T48 |
 | `tps` | float | tx/s | yes (PBFT, FFG, Snowman) | NWT row → T38.1 |
-| `goodput` | float | tx/s | no | T41 + T58 |
-| `peak_tps` | float | tx/s | no | T41 + T58 |
+| `goodput` | float | tx/s | yes (T41; PBFT/FFG/Snowman) | — |
+| `peak_tps` | float | tx/s | no | T58 + capacity model (T41-deferred, §13) |
 | `mempool_tps` | float | tx/s | no | T38.1 |
 | `consensus_msgs_per_acu` | float | msgs/ACU | yes (PBFT, FFG, Snowman) | NWT row → T38.1 |
 | `mempool_msgs_per_acu` | float | msgs/ACU | no | T38.1 |
 | `total_msgs_per_acu` | float | msgs/ACU | yes | NWT row → T38.1 |
-| `bytes_per_acu` | float | bytes/ACU | no | T41 + T58 |
-| `per_validator_state_bytes` | float | bytes | no | T41 + T58 |
+| `bytes_per_acu` | float | bytes/ACU | yes (T41; est., §13) | — |
+| `per_validator_state_bytes` | float | bytes | no | T58 |
 | `success_rate` | float | [0, 1] | yes (0/1 indicator) | becomes frequency at T44 |
 | `fork_rate` | float | [0, 1] | yes | — |
 | `view_change_or_reorg_count` | int | events | no | T54 |
@@ -107,14 +107,16 @@ one-line edit there plus an extension-register entry on this page.
 
 ## 4. Today's writer subset
 
-18 columns, ordered as `COLUMN_ORDER`:
+24 columns, ordered as `COLUMN_ORDER` (T41 added the four `workload_*`
+columns plus `goodput` and `bytes_per_acu` to the original 18 — §13):
 
 ```
 run_id, protocol, n, seed,
+workload_arrival_process, workload_tx_bytes, workload_conflict_rate, workload_offered_rate,
 commit_hash, t_max,
 commit_latency_ms, finality_latency_ms,
-tps,
-consensus_msgs_per_acu, total_msgs_per_acu,
+tps, goodput,
+consensus_msgs_per_acu, total_msgs_per_acu, bytes_per_acu,
 success_rate, fork_rate,
 K, alpha_p, alpha_c, beta, alpha_c_over_K
 ```
@@ -135,8 +137,13 @@ Per-block deterministic finality: every `decided` event at a given
   per-node decision time for the first decided instance,
   `1000 · median{r.t : r.event_type == "decided"
   ∧ r.fields["instance_id"] == first}`.
-- `tps = decided_count / result.now` (quiescence-stopped run; deciding
-  the throughput denominator from the stop time, not `t_max`).
+- `tps = decided_count / result.now`. **T41 re-baseline (§13):** PBFT now
+  runs windowed over a fixed `t_max` (fed a continuous arrival stream)
+  instead of quiescing after one instance, so `tps` / `consensus_msgs_per_acu`
+  / `total_msgs_per_acu` reflect honest windowed values rather than the
+  single-shot quiescence-tail figure. `commit_latency_ms` /
+  `finality_latency_ms` are unchanged (defined on the *first* decided
+  instance).
 - `consensus_msgs_per_acu = delivery_count / decided_count` (the ACU is
   one decided instance; PBFT consensus messages dominate the message
   total at the honest baseline).
@@ -303,12 +310,14 @@ below from `pending` to `live`.
 | `analytical_epsilon_bound` (Snowman `(1 − α_c/K)^β`) | T54 | pending |
 | `byzantine_fraction`, `adversary_strategy` | T51–T54 | pending |
 | `network_phase_id` | T19 + T48 | pending |
-| `workload_arrival_process`, `workload_tx_bytes`, `workload_conflict_rate`, `workload_offered_rate` | T41 | pending |
+| `workload_arrival_process`, `workload_tx_bytes`, `workload_conflict_rate`, `workload_offered_rate` | T41 | **live** (T41 — §13 Revision) |
+| `goodput` | T41 | **live** (T41 — §13 Revision) |
+| `bytes_per_acu` | T41 | **live** (T41 — §13 Revision, honest order-of-magnitude estimate) |
 | `view_change_or_reorg_count` | T54 | pending |
 | `f_max_count`, `f_max_stake` (mutually exclusive per §6 rule 2) | T54 | pending |
-| `peak_tps`, `goodput`, `bytes_per_acu`, `per_validator_state_bytes` | T41 + T58 | pending |
+| `peak_tps`, `per_validator_state_bytes` | T58 (+ capacity model) | pending — **`peak_tps` deferred at T41**, see §13 |
 | `n_runs` (becomes >1 once T44 sweeps; `success_rate` becomes a frequency, schema unchanged) | T44 | pending |
-| `round_latency_ms` | T41 + T48 | pending |
+| `round_latency_ms` | T48 | pending |
 
 T44 will choose the aggregated-file layout: either `*_ci_lo` /
 `*_ci_hi` columns rewritten in place, or a sibling
@@ -335,4 +344,35 @@ T44 will choose the aggregated-file layout: either `*_ci_lo` /
 
 ## 13. Revisions
 
-(none yet)
+### [2026-06-03] T41 — workload axis lands; PBFT throughput re-baselined; peak_tps deferred
+
+- **`COLUMN_ORDER` grows 18 → 24.** T41 adds the four `workload_*`
+  config columns plus `goodput` (committed tx/s) and `bytes_per_acu`
+  (honest order-of-magnitude wire-byte budget per ACU, from the
+  [[concepts/message-types]] §3–§7 size tables × delivery counts, with
+  transaction-carrying types adding `offered_rate · interval · tx_bytes`).
+  §3, §4, and the §11 register entries are flipped to `live`. The
+  `seed` column now sweeps `0…19` (20 trials per configuration,
+  [[concepts/experiment-matrix]] §7) instead of the constant `42`; the
+  per-trial file lives at `results/baseline/baseline.csv` and the Snowman
+  `n=4` sanity sibling at `results/baseline/snowman_n4_sanity.csv` (one
+  row per seed). The flat `results/baseline.csv` is retired.
+- **PBFT throughput/overhead re-baselined (§5.1).** PBFT moved from
+  single-instance quiescence to a windowed run over a fixed `t_max` fed by
+  the arrival stream, so `tps` / `consensus_msgs_per_acu` /
+  `total_msgs_per_acu` are now honest windowed values. `commit_latency_ms`
+  / `finality_latency_ms` are byte-unchanged (first-decided-instance
+  definition). FFG and Snowman landed columns are fully unchanged (block
+  content does not perturb their consensus timing).
+- **`peak_tps` deferred (was T41 + T58).** The offered-load saturation
+  ramp ([[concepts/experiment-matrix]] §6) is **not realizable** on the
+  current latency-only model: there is no per-tx/per-byte cost or queue,
+  so throughput never saturates as offered load rises and a ramp would
+  report a config artifact, not a protocol property. `peak_tps` and
+  `per_validator_state_bytes` move to T58 (the former gated on first
+  adding a capacity/cost model); `round_latency_ms` stays T48. The fixed
+  sub-saturation `offered_rate = 100` tx/s is used and not recalibrated
+  (no protocol saturates). See [[concepts/experiment-matrix]] §9 Revision.
+- **`bytes_per_acu` is an estimate.** Per [[concepts/message-types]] §7
+  the byte budgets are explicitly non-binding order-of-magnitude figures;
+  the column is labelled as such on [[experiments/2026-06-03_scaling-baseline]].

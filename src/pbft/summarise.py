@@ -13,6 +13,7 @@ import statistics
 from typing import Any
 
 from event_log import EventRecord
+from output.metrics import bytes_per_acu, goodput
 from output.schema import ScenarioMeta
 from scheduler import RunResult
 
@@ -45,11 +46,21 @@ def summarise(records: list[EventRecord],
     else:
         consensus_msgs_per_acu = float("nan")
 
+    # Workload axis (T41). PBFT: one decided instance = one batch
+    # opportunity, so n_opportunities is the distinct decided instance
+    # count; the throughput denominator matches `tps` (result.now,
+    # output-format.md §5.1).
+    n_opportunities = len({r.fields.get("instance_id") for r in decided})
+    gp = goodput(meta, n_opportunities, result.now)
+    bpa = bytes_per_acu(records, meta)
+
     return {
         "commit_latency_ms":      latency_ms,
         "finality_latency_ms":    latency_ms,   # PBFT: commit ≡ finality
         "tps":                    tps,
+        "goodput":                gp,
         "consensus_msgs_per_acu": consensus_msgs_per_acu,
+        "bytes_per_acu":          bpa,
         "success_rate":           success_rate,
         "fork_rate":              0.0,
         "K":                      float("nan"),

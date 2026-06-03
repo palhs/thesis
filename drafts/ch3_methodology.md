@@ -19,14 +19,14 @@ single-layer message structure without redefining any metric per family
 constructed so the independent variable of each research question is
 varied in isolation [[wiki/concepts/experiment-matrix]].
 
-This first pass establishes the framework end-to-end on the two
-protocols implemented through Week 6: PBFT and Casper FFG. The remaining
-two protocols, Snowman (§3.3.3) and Narwhal+Tusk (§3.3.4), are present
-as deferred subsections; their detailed treatment lands with tasks
-T36.1 and T36.2 once the corresponding implementations exist in `src/`.
-The system model (§3.2), the simulation setup (§3.4), and the
+This pass establishes the framework end-to-end on the three protocols
+implemented through Week 7: PBFT and Casper FFG (Week 6), and Snowman
+(§3.3.3, the Week-7 third protocol). The fourth protocol, Narwhal+Tusk
+(§3.3.4), is present as a deferred subsection; its detailed treatment
+lands with task T36.2 once the corresponding implementation exists in
+`src/`. The system model (§3.2), the simulation setup (§3.4), and the
 family-agnostic half of the metric schema (§3.5) are written so that
-they require no revision when the deferred subsections are filled.
+they require no revision when the deferred subsection is filled.
 
 ## 3.2 System model
 
@@ -122,9 +122,10 @@ pairs across the four families; of those, twelve generic-capability
 pairs are scheduled for the Week-10 experiments T51–T53 and the
 remaining six (leader disruption × 3 and the three protocol-specific
 surfaces) are catalogued design space deliberately out of experimental
-scope. At the present two-protocol implementation stage (PBFT and Casper
-FFG, §3.3), nine of the eighteen pairs are realisable in `src/`; the
-remaining nine arrive with T36.1 and T36.2. Catalog vocabulary and
+scope. At the present three-protocol implementation stage (PBFT, Casper FFG,
+and Snowman, §3.3), thirteen of the eighteen pairs are realisable in
+`src/`; the remaining five are the Narwhal+Tusk pairs, which arrive
+once that protocol is implemented (§3.3.4). Catalog vocabulary and
 RQ4-axis vocabulary differ here: the catalog carries four generic
 capabilities, but RQ4 (§1.5) names only the three scheduled in T51–T53.
 Leader disruption is generic-in-catalog yet out-of-RQ4-axis because the
@@ -247,14 +248,76 @@ double or surround votes.
 
 ### 3.3.3 Snowman
 
-`TODO(T36.1).` Snowman is the deterministically-ordered linearization
-of the Avalanche family deployed on Avalanche's C-Chain and Subnet
-stack [9]. The simulator's Snowman implementation does not yet exist;
-T36.1 picks up this subsection once it does. The parameter-rescaling
-rule that holds Snowman comparable to the other three protocols at
-thesis-scale `n` is pinned in
-[[wiki/concepts/metric-reconciliation]], and the empirical
-safety-violation invariant `ε ≤ (1 − α_c/K)^β` carries through to §3.5.
+*Mechanism.* Snowman [9] is the linearized production form of the
+Avalanche family — the Slush → Snowflake → Snowball → Snowman lineage —
+deployed on Avalanche's C-Chain, P-Chain, and post-Cortina X-Chain
+[[wiki/algorithms/avalanche]]. It departs from the quorum reasoning of
+PBFT and Casper FFG: rather than collecting a `2f+1` supermajority in a
+single round, each validator repeatedly polls a small random sample of
+`K` peers and accumulates confidence over many short rounds. The
+production engine decouples the single threshold of the original
+Snowball into two: `α_p` (AlphaPreference) is the sample-majority that
+switches a validator's preferred block, and `α_c` (AlphaConfidence) is
+the higher sample-majority that increments a per-block decision counter.
+A block is accepted once that counter reaches `β` consecutive
+`α_c`-majorities. Finality is therefore probabilistic rather than
+categorical: the probability that two honest validators accept
+conflicting blocks is bounded by `ε ≤ (1 − α_c/K)^β`, which is
+exponential in `β` and so drives any target `ε` arbitrarily low by
+parameter choice [[wiki/algorithms/avalanche]]. Per-validator message
+cost is `O(K·β)`, independent of `n`, which is the architectural
+contrast with PBFT's `O(n²)`.
+
+*Simulator mapping.* Only the linearized Snowman variant is implemented;
+full DAG-Avalanche is out of scope, which keeps the chain structure
+directly comparable to PBFT and Casper FFG under the shared `Node`
+interface [[wiki/algorithms/avalanche]]. The four subsampling parameters
+`(K, α_p, α_c, β)` and the sampling seed are exposed to experiments.
+Production Snowman runs on validator sets in the thousands with
+`(K, α_p, α_c, β) = (20, 11, 16, 15)`, so the thesis-scale sweep
+`n ∈ {4, 7, 10, 16, 25}` requires a rescaling rule that holds the
+protocol comparable across `n`: `K = min(20, n−1)`,
+`α_p = ⌊K/2⌋ + 1`, `α_c = ⌈0.8·K⌉`, with `β = 15` held fixed
+[[wiki/concepts/metric-reconciliation]]. Holding `α_c/K ≈ 0.8`
+preserves the shape of the safety bound across the sweep, and holding
+`β` fixed keeps the safety exponent — and therefore the
+probabilistic-finality semantics — invariant in `n`. Proposer
+assignment is round-robin `slot % n`; Snowman is not stake-weighted, so
+the protocol carries no headcount-versus-weight distinction and no
+non-uniform-stake scenario analogous to Casper FFG's. The honest-path
+implementation is verified at `n ∈ {4, 7, 10}` by the T38 baseline,
+in which every validator decides every announced block with no forks
+and byte-identical replay [[experiments/2026-05-27_snowman-baseline]].
+
+*Simplifications.* The protocol assumes an honest peer distribution for
+its random sampling; Sybil resistance is external — production grafts
+stake-weighted sampling onto the engine — and is not modelled. As with
+the other protocols, no cryptographic signatures are carried; the
+sampling seed and message digests serve reproducibility only. The
+preference-flip path guarded by `α_p` is present but inactive on the
+honest path, where the conflict set — the candidate blocks extending a
+given parent — is a singleton, so every poll agrees and the counter
+advances unflipped to `β`. The `n = 4` point is a degenerate boundary
+of the rescaling rule rather than Snowman proper: at `n = 4` the rule
+yields `α_c = K = 3`, so a poll demands unanimity and the analytical
+bound `(1 − α_c/K)^β` collapses to zero, reducing the protocol to
+flood-vote-with-counter. The `n = 4` Snowman row is therefore excluded
+from the comparative tables of Chapters 4 and 5 and reported once as a
+rescaling sanity check; PBFT and Casper FFG are reported at `n = 4` as
+usual [[wiki/concepts/metric-reconciliation]]. As with classical PBFT
+(§3.3.1), the Snowman results reported in Chapters 4 and 5 are therefore
+a verdict on this linearized, rescaled variant specifically, not on
+DAG-Avalanche or on production-scale Snowman.
+
+*Event-handler shape.* A slot timer announces one block per slot; for
+each announced block the validator runs up to `β` poll rounds, each
+unicasting a `QUERY` to a fresh random `K`-sample and tallying the
+`QUERY-RESPONSE` replies against `α_p` and `α_c`; the `decided` event
+fires when the counter reaches `β`. Figure 3.4 gives the
+handler-dispatch shape.
+
+**Figure 3.4 ([[diagrams/protocols/snowman]]).** Snowman subsampled
+`K`-peer poll loop for one block, accepting at counter `≥ β`.
 
 ### 3.3.4 Narwhal+Tusk
 
@@ -334,6 +397,16 @@ sensitivity sweep when the delay sweep of Family B demands it. The
 simulator runner refuses an incoherent pairing rather than silently
 producing mislabelled numbers [[wiki/concepts/metric-reconciliation]].
 
+*Snowman rescaling constraint.* Snowman's `(K, α_p, α_c)` are not free
+matrix axes but functions of `n` fixed by the rescaling rule of §3.3.3,
+with `β = 15` held at production parity as the cross-protocol baseline
+and the reduced regime `β ∈ {3, 5}` reserved for the RQ4 sensitivity
+sweep, where a smaller safety exponent makes empirical `ε` observable
+[[wiki/concepts/metric-reconciliation]]. Because the rescaling degenerates
+at `n = 4` (§3.3.3), that abscissa carries no Snowman data point in the
+comparative `n`-sweep; the point is reported once as a rescaling sanity
+check, leaving PBFT and Casper FFG at `n = 4` unaffected.
+
 A run terminates under any of three OR-composed predicates:
 `quiescence` (the heap is empty), `deadline` (the virtual clock has
 reached `t_max`), or `predicate` (a caller-supplied `stop_when()`
@@ -397,35 +470,35 @@ anchor-batch for Narwhal+Tusk; the same denominator therefore admits
 both layered and single-layer protocols without a conditional formula.
 
 *Per-protocol instantiation.* Table 3.1 collects the latency and
-throughput formulas for the two protocols implemented at this stage;
-Table 3.2 collects the overhead and reliability formulas. Snowman and
-Narwhal+Tusk rows are reserved for T36.1 and T36.2; the table
-structure is fixed now so the deferred subsections fill rows rather
-than restructure columns.
+throughput formulas for the three protocols implemented at this stage;
+Table 3.2 collects the overhead and reliability formulas. The
+Narwhal+Tusk column is reserved for T36.2; the table structure is fixed
+now so the deferred subsection fills the column rather than restructures
+the layout.
 
 **Table 3.1 — Latency and throughput per protocol.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
 
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
 | :-- | :-- | :-- | :-- | :-- |
-| `commit_latency_ms` | tx submit → containing block enters `PRE-PREPARE` and persists through commit | tx submit → containing block proposed at next slot | `TODO(T36.1)` | `TODO(T36.2)` |
-| `finality_latency_ms` | tx submit → `2f+1` `COMMIT` collected for same block | tx submit → checkpoint containing tx is finalized (≥ 2 epochs later) | `TODO(T36.1)` | `TODO(T36.2)` |
-| `round_latency_ms` | one of three phases | one slot | `TODO(T36.1)` | `TODO(T36.2)` |
-| `tps` | committed-tx count / window | finalized-tx count / window | `TODO(T36.1)` | `TODO(T36.2)` |
-| `goodput` | identical to `tps` (no reorg-before-finality) | `tps` restricted to checkpoints that survive to finalization | `TODO(T36.1)` | `TODO(T36.2)` |
-| `mempool_tps` | `0` (no separate mempool) | `0` | `TODO(T36.1)` | `TODO(T36.2)` |
+| `commit_latency_ms` | tx submit → containing block enters `PRE-PREPARE` and persists through commit | tx submit → containing block proposed at next slot | tx submit → containing block enters the protocol's preference set | `TODO(T36.2)` |
+| `finality_latency_ms` | tx submit → `2f+1` `COMMIT` collected for same block | tx submit → checkpoint containing tx is finalized (≥ 2 epochs later) | tx submit → decision counter reaches `β` on containing block (reported with `ε`) | `TODO(T36.2)` |
+| `round_latency_ms` | one of three phases | one slot | one poll round | `TODO(T36.2)` |
+| `tps` | committed-tx count / window | finalized-tx count / window | decided-block tx count / window | `TODO(T36.2)` |
+| `goodput` | identical to `tps` (no reorg-before-finality) | `tps` restricted to checkpoints that survive to finalization | `tps` (post-`β` reorg bounded by `ε`, reported separately) | `TODO(T36.2)` |
+| `mempool_tps` | `0` (no separate mempool) | `0` | `0` (no separate mempool) | `TODO(T36.2)` |
 
 **Table 3.2 — Overhead and reliability per protocol.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
 
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
 | :-- | :-- | :-- | :-- | :-- |
-| `consensus_msgs_per_acu` | `1 + 2n + 2n² = O(n²)` | `O(n)` FFG attestations per epoch, BLS-aggregated | `TODO(T36.1)` | `TODO(T36.2)` |
-| `mempool_msgs_per_acu` | `0` | `0` | `TODO(T36.1)` | `TODO(T36.2)` |
-| `bytes_per_acu` | dominated by signatures × `O(n²)` | dominated by aggregated attestation + payload per slot | `TODO(T36.1)` | `TODO(T36.2)` |
-| `success_rate` | fraction of rounds reaching `COMMIT` quorum | fraction of epoch boundaries producing a justified→finalized pair | `TODO(T36.1)` | `TODO(T36.2)` |
-| `fork_rate` | `0` by construction | fraction of proposed blocks reorged before their checkpoint finalizes | `TODO(T36.1)` | `TODO(T36.2)` |
-| `f_max` | empirical `f_max_count`; theoretical `f < n/3` | empirical `f_max_stake`; theoretical `f < 1/3` of stake | `TODO(T36.1)` | `TODO(T36.2)` |
+| `consensus_msgs_per_acu` | `1 + 2n + 2n² = O(n²)` | `O(n)` FFG attestations per epoch, BLS-aggregated | `O(K·β)` per validator (queries + replies); independent of `n` | `TODO(T36.2)` |
+| `mempool_msgs_per_acu` | `0` | `0` | `0` | `TODO(T36.2)` |
+| `bytes_per_acu` | dominated by signatures × `O(n²)` | dominated by aggregated attestation + payload per slot | `O(K·β)` query/response payloads | `TODO(T36.2)` |
+| `success_rate` | fraction of rounds reaching `COMMIT` quorum | fraction of epoch boundaries producing a justified→finalized pair | fraction of announced blocks reaching counter `β` | `TODO(T36.2)` |
+| `fork_rate` | `0` by construction | fraction of proposed blocks reorged before their checkpoint finalizes | pre-`β` preference-switch rate (post-`β` reorg bounded by `ε`, reported separately) | `TODO(T36.2)` |
+| `f_max` | empirical `f_max_count`; theoretical `f < n/3` | empirical `f_max_stake`; theoretical `f < 1/3` of stake | empirical `f_max_count`; theoretical parameter-dependent (not a fixed `1/3`) | `TODO(T36.2)` |
 
 *Calibration defaults and sensitivity sweeps.* Calibration defaults are
 committed at the metric-reconciliation layer before any baseline
@@ -460,18 +533,25 @@ Chapter 4 will read are `commit_latency_ms`, `finality_latency_ms`,
 `mempool_msgs_per_acu`, `bytes_per_acu`, `success_rate`, `fork_rate`,
 `view_change_or_reorg_count`, and the two mutually exclusive
 `f_max_count` and `f_max_stake` columns, of which exactly one is
-populated per row. The finalized CSV layout is `TODO(cite)` —
-`wiki/concepts/output-format` is the open T40 deliverable.
+populated per row. Snowman's probabilistic finality adds five
+protocol-specific columns that carry `NaN` on every non-Snowman row:
+the four rescaled parameters `K`, `alpha_p`, `alpha_c`, `beta` and the
+derived ratio `alpha_c_over_K`, the last of which surfaces each row's
+position against the production `0.8` so a near-unanimity margin is
+visible in the table itself. The empirical and analytical sides of the
+safety-violation invariant `(1 − α_c/K)^β` are reserved as the
+`empirical_epsilon` and `analytical_epsilon_bound` columns and populate
+with the RQ4 adversarial sweep (T54). The finalized CSV layout is fixed
+in [[wiki/concepts/output-format]].
 
 ## 3.6 Chapter summary
 
 The system model (§3.2) and metric schema (§3.5) are family-agnostic;
 the four families' structural asymmetries are absorbed upstream of any
 experiment by the ACU denominator, the layered-versus-single-layer
-message split, and the per-protocol finality semantics. Two protocols
-are implemented at this stage — PBFT and Casper FFG — and the deferred
-subsections §3.3.3 and §3.3.4 are explicit placeholders for the
-Snowman and Narwhal+Tusk implementations that T36.1 and T36.2 will
-fill. Chapter 4 reports the baseline, delay, and adversarial sweeps the
-matrix prescribes and answers RQ1–RQ4 against the metric schema fixed
-here.
+message split, and the per-protocol finality semantics. Three protocols
+are implemented at this stage — PBFT, Casper FFG, and Snowman — and the
+deferred subsection §3.3.4 is the explicit placeholder for the
+Narwhal+Tusk implementation that T36.2 will fill. Chapter 4 reports the
+baseline, delay, and adversarial sweeps the matrix prescribes and
+answers RQ1–RQ4 against the metric schema fixed here.
