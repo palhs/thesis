@@ -24,11 +24,16 @@ The per-message wire-byte budget used by `bytes_per_acu`
 tx_bytes`, not from the concatenated blob length, so the canonical join
 does not perturb the overhead columns.
 
-First-instance latency invariant. `commit_latency_ms` /
-`finality_latency_ms` are defined on the FIRST decided instance
-(output-format.md §5.1). Node logic and the propose cadence (PROPOSE_DELAY)
-are unchanged, so the first instance's commit time is byte-identical to the
-pre-T41 value; only the throughput / overhead columns re-baseline.
+First-instance latency invariant. `commit_latency_ms` is defined on the
+FIRST decided instance (output-format.md §5.1) at the 2f+1 COMMIT quorum.
+Node logic and the propose cadence (PROPOSE_DELAY) are unchanged, so the
+first instance's commit time is byte-identical to the pre-T41 value; only
+the throughput / overhead columns re-baseline. T70 finding #1 adds a REPLY
+round: `finality_latency_ms` is now the client-observed finality (f+1
+matching REPLYs), one network hop past the COMMIT quorum and strictly
+greater than `commit_latency_ms`; the REPLY deliveries also raise the
+delivery counts feeding consensus_msgs_per_acu / bytes_per_acu, so those
+columns (and the T41/T42 baseline dataset) should be re-run.
 
 Design spec: docs/superpowers/specs/2026-05-30-t41-scaling-workload-design.md
 """

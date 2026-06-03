@@ -14,6 +14,7 @@ T29 wires the full classical protocol:
 """
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from nodes import Message, Node
@@ -25,9 +26,18 @@ from .messages import (
     NewViewPayload,
     PreparePayload,
     PrePreparePayload,
+    ReplyPayload,
     ViewChangePayload,
 )
 from .viewchange import collect_evidence, compute_reissue
+
+
+# T70 finding #1 — step logger for the pre-prepare -> prepare -> commit ->
+# reply -> client-finalize trace. Library code never configures handlers or
+# calls basicConfig (the demo enables logging); these calls are side-effect-
+# free w.r.t. RNG and FSM state. Lazy %-formatting keeps them free when the
+# logger is disabled.
+log = logging.getLogger("t70.pbft")
 
 
 PBFT_REJECTED = "pbft_rejected"            # T28
@@ -36,6 +46,7 @@ PBFT_PREPARED = "pbft_prepared"            # T29 — instance reached PREPARED
 PBFT_COMMITTED = "pbft_committed"          # T29 — instance reached COMMITTED
 PBFT_VIEW_CHANGE = "pbft_view_change"      # T29 — one per view-change initiated
 PBFT_NEW_VIEW = "pbft_new_view"            # T29 — emitted inside _enter_new_view
+PBFT_CLIENT_FINALIZED = "pbft_client_finalized"  # T70 — f+1 matching REPLYs
 
 
 class PBFTNode(Node):
@@ -88,6 +99,12 @@ class PBFTNode(Node):
         self._new_view_sent: set[int] = set()
         self._new_view_installed: set[int] = set()
         self._decided_seqs: set[int] = set()
+        # T70 finding #1 — client-reply collector state. When this node is the
+        # primary of a committing view it collects REPLYs keyed by
+        # (view, seq, digest) -> set of replica_ids; on f+1 matching it emits
+        # `pbft_client_finalized` once per seq (tracked in `_finalized_seqs`).
+        self._replies: dict[tuple[int, int, bytes], set[int]] = {}
+        self._finalized_seqs: set[int] = set()
 
     # --- Lifecycle hooks (spec § 7.2 / § 7.3). ---
 
@@ -102,6 +119,8 @@ class PBFTNode(Node):
             self._handle_prepare(msg, t)
         elif msg.type == "COMMIT":
             self._handle_commit(msg, t)
+        elif msg.type == "REPLY":
+            self._handle_reply(msg, t)
         elif msg.type == "VIEW-CHANGE":
             self._handle_view_change(msg, t)
         elif msg.type == "NEW-VIEW":
@@ -190,6 +209,8 @@ class PBFTNode(Node):
         inst.state = InstanceState.PRE_PREPARED
         inst.digest = d
         inst.request_payload = payload          # for view-change evidence
+        log.info("pre-prepare node=%d view=%d seq=%d digest=%s src=%d t=%s",
+                 self.id, view, seq, d.hex()[:8], src, t)
         self.emit(PBFT_PRE_PREPARED,
                   {"view": view, "seq": seq, "digest": d.hex(),
                    "src": src}, t)
@@ -230,6 +251,8 @@ class PBFTNode(Node):
 
     def _accept_prepare(self, inst: Instance, t: float) -> None:
         inst.state = InstanceState.PREPARED
+        log.info("prepare node=%d view=%d seq=%d quorum=%d t=%s",
+                 self.id, inst.view, inst.seq, inst.matching_prepares(), t)
         self.emit(PBFT_PREPARED,
                   {"view": inst.view, "seq": inst.seq,
                    "digest": inst.digest.hex()}, t)
@@ -270,10 +293,73 @@ class PBFTNode(Node):
         self._cancel_view_change_timer(inst.view, inst.seq)
         if inst.seq not in self._decided_seqs:
             self._decided_seqs.add(inst.seq)
+            log.info("commit node=%d view=%d seq=%d digest=%s t=%s",
+                     self.id, inst.view, inst.seq, inst.digest.hex()[:8], t)
             self.emit(PBFT_COMMITTED,
                       {"view": inst.view, "seq": inst.seq,
                        "digest": inst.digest.hex()}, t)
             self._emit_decided(inst.digest.hex(), (inst.view, inst.seq), t)
+        # T70 finding #1: client-observed finality is one hop past the COMMIT
+        # quorum. On COMMITTED-local every replica sends a REPLY toward the
+        # committing view's primary, the designated client-reply collector
+        # (node = view mod n). broadcast excludes the sender, so a direct
+        # `send` is used — when this node IS the collector it delivers the
+        # REPLY to itself, keeping the f+1 count over distinct replica_ids
+        # uniform. `_accept_commit` runs once per instance (COMMITTED guard in
+        # `_check_commit_quorum`), so each replica replies exactly once.
+        self._send_reply(inst, t)
+
+    def _send_reply(self, inst: Instance, t: float) -> None:
+        """Send a REPLY for a committed instance toward the view's primary,
+        the designated client-reply collector. When this replica IS that
+        collector it self-records directly (broadcast/send excludes the
+        sender, so there is no network loopback to self); otherwise it
+        unicasts the REPLY."""
+        collector = inst.view % self.n
+        log.info("reply node=%d -> collector=%d view=%d seq=%d t=%s",
+                 self.id, collector, inst.view, inst.seq, t)
+        if collector == self.id:
+            self._record_reply(inst.view, inst.seq, inst.digest, self.id, t)
+        else:
+            self.send(collector, "REPLY",
+                      ReplyPayload(view=inst.view, seq=inst.seq,
+                                   request_digest=inst.digest,
+                                   replica_id=self.id), t)
+
+    # --- Client-reply collection (T70 finding #1). ---
+
+    def _handle_reply(self, msg: Message, t: float) -> None:
+        """Collect a peer REPLY. Only the primary of the asserted view acts as
+        the client-reply collector for that view; a REPLY reaching a
+        non-collector (e.g. after a view change shifted the primary) is
+        dropped."""
+        rp = msg.payload
+        if not isinstance(rp, ReplyPayload):
+            self._reject(t, "malformed_payload",
+                         msg_type="REPLY", src=msg.src)
+            return
+        if self.id != rp.view % self.n:
+            return                              # not this view's collector
+        self._record_reply(rp.view, rp.seq, rp.request_digest,
+                            rp.replica_id, t)
+
+    def _record_reply(self, view: int, seq: int, d: bytes,
+                      replica_id: int, t: float) -> None:
+        """Record one REPLY (from `replica_id`) and finalize the seq on f+1
+        matching (view, seq, digest) REPLYs from distinct replicas, emitting
+        `pbft_client_finalized` exactly once per seq."""
+        if seq in self._finalized_seqs:
+            return                              # already finalized; ignore
+        key = (view, seq, d)
+        replicas = self._replies.setdefault(key, set())
+        replicas.add(replica_id)
+        if len(replicas) >= self.f + 1:
+            self._finalized_seqs.add(seq)
+            log.info("client-finalize collector=%d view=%d seq=%d "
+                     "replies=%d t=%s",
+                     self.id, view, seq, len(replicas), t)
+            self.emit(PBFT_CLIENT_FINALIZED,
+                      {"seq": seq, "view": view, "t": t}, t)
 
     # --- Primary detection (Decision D). ---
 

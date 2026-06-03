@@ -57,3 +57,23 @@ class NewViewPayload:
     new_view: int
     vc_proofs: list[ViewChangePayload] = field(default_factory=list)
     reissued: list[PrePreparePayload] = field(default_factory=list)
+
+
+# --- T70 finding #1: client-observed finality. ---
+
+@dataclass(frozen=True)
+class ReplyPayload:
+    """`REPLY` wire payload (T70 finding #1).
+
+    The paper's client-observed finality is one network hop past the
+    internal 2f+1 COMMIT quorum: on COMMITTED-local each replica sends a
+    REPLY to the client, which finalizes the request on f+1 matching
+    replies. The harness has no separate client node, so the primary of
+    the committing view (node = view mod n) doubles as the client-reply
+    collector. `replica_id` lets the collector count REPLYs from distinct
+    replicas (a single replica's duplicate REPLY counts once).
+    """
+    view: int
+    seq: int
+    request_digest: bytes
+    replica_id: int

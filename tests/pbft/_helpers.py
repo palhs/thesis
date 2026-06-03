@@ -27,6 +27,7 @@ from pbft.messages import (
     NewViewPayload,
     PreparePayload,
     PrePreparePayload,
+    ReplyPayload,
     ViewChangePayload,
 )
 from pbft.node import PBFTNode
@@ -134,6 +135,16 @@ def commit(src: int, view: int, seq: int, batch: bytes, *,
     d = digest_override if digest_override is not None else digest(batch)
     cp = CommitPayload(view=view, seq=seq, request_digest=d)
     return Message(src=src, dst=dst, type="COMMIT", payload=cp, t_sent=0.0)
+
+
+def reply(src: int, view: int, seq: int, batch: bytes, *,
+          dst: int = 0, digest_override: bytes | None = None) -> Message:
+    """A REPLY from replica `src` toward the client-reply collector
+    (T70 finding #1). `batch` is hashed for the matching digest unless
+    `digest_override` is given (used to exercise the digest-mismatch path)."""
+    d = digest_override if digest_override is not None else digest(batch)
+    rp = ReplyPayload(view=view, seq=seq, request_digest=d, replica_id=src)
+    return Message(src=src, dst=dst, type="REPLY", payload=rp, t_sent=0.0)
 
 
 def view_change(src: int, new_view: int, *,
