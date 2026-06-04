@@ -4,10 +4,10 @@
 
 A Layer-1 (L1) blockchain maintains a replicated, append-only log of
 transactions across a set of mutually distrusting validators
-[[wiki/concepts/consensus-overview#what-a-blockchain-is]]. Such systems
-are typically evaluated on two largely separate axes — throughput in
-their whitepapers and safety bounds in their proofs — but under network
-delay and adversarial pressure the two axes cease to be independent. At
+[[wiki/concepts/consensus-overview#what-a-blockchain-is]]. Most
+evaluations treat two axes separately: throughput, which whitepapers
+report, and safety bounds, which proofs establish. Under network delay and
+adversarial pressure, though, the two are interdependent. At
 each height the validator set must agree on a single block; the protocol
 that produces that agreement is the consensus protocol, and the four
 families evaluated in this thesis differ in how they produce it.
@@ -33,19 +33,20 @@ a different combination of synchrony assumption, fault threshold, and
 finality regime; each pays a different primary cost.
 
 PBFT-style protocols reach agreement through leader-driven, multi-phase
-voting among a fixed validator set, delivering deterministic finality at
-commit time at the cost of `O(n²)` message complexity that bounds the
-practical validator-set size. PoS-finality protocols separate block
-production from a stake-weighted finality gadget that confirms checkpoints
-across epochs, achieving deterministic finality at the cost of finality
-latency on the order of minutes. Avalanche-style protocols reach agreement
-through repeated random subsampling and metastable voting, achieving
-probabilistic finality with tunable confidence at the cost of giving up
-deterministic safety. DAG-based protocols decouple message dissemination
-from ordering by having validators continuously reference earlier vertices
-in a directed acyclic graph, achieving high throughput under good
-conditions at the cost of additional ordering-layer complexity and a
-higher per-validator memory footprint.
+voting among a fixed validator set. They finalize deterministically at
+commit time, but the `O(n²)` messages each block costs bound how large the
+validator set can practically grow. PoS-finality protocols take a different
+route: block production runs ahead while a stake-weighted gadget confirms
+checkpoints behind it across epochs, so finality stays deterministic but
+lags by minutes instead of arriving at commit. Avalanche-style protocols
+drop quorums altogether in favor of repeated random subsampling and
+metastable voting; the price of that asynchrony tolerance is giving up
+deterministic safety for a probabilistic bound the operator can tune.
+DAG-based protocols keep deterministic finality but split dissemination
+from ordering, having validators continuously reference earlier vertices in
+a directed acyclic graph. They buy high throughput under good conditions
+with a heavier per-validator memory footprint and a deeper pipeline before
+order is fixed.
 
 ## 1.2 Motivation
 
@@ -54,8 +55,8 @@ users depend: the consensus protocol determines whether a transaction is
 final, whether the chain continues to advance, and whether two honest
 validators can ever commit incompatible histories at the same height
 [[wiki/concepts/consensus-overview#why-consensus-is-needed]]. The choice of
-family is important in production. Ethereum is secured by a PoS-finality
-protocol [8]; Sui is secured by a DAG-based protocol [13]; Cosmos chains
+family is a production decision, not a theoretical abstraction: Ethereum is
+secured by a PoS-finality protocol [8]; Sui is secured by a DAG-based protocol [13]; Cosmos chains
 are secured by a PBFT-style protocol [6]; the Avalanche mainnet is secured
 by the Avalanche-style protocol from which the family takes its name [9].
 
@@ -73,36 +74,35 @@ attestation-processing pressure on consensus clients [20]. Cosmos Hub
 halted following its v17.1 upgrade in June 2024 [21]; Sui suffered a
 complete crash-loop network halt in November 2024 and a six-hour
 consensus divergence in January 2026 traced to an edge-case bug in
-commit processing [22]. These incidents do not invalidate the protocols'
-theoretical guarantees — they demonstrate that the conditions under which
-those guarantees hold are routinely exited in deployment. Isolating which
-condition triggers which failure, however, requires controlled measurement
-that live networks do not afford.
+commit processing [22].
+
+None of these incidents invalidates the protocols'
+theoretical guarantees. What they show instead is that the conditions those
+guarantees depend on are routinely exited in deployment. Working out which
+condition triggers which failure, though, takes controlled measurement that
+live networks cannot provide.
 
 The primary literature evaluates each protocol under scattered,
 harness-specific conditions: each study fixes its own network model, fault
 assumptions, and workload, and varies one disturbance at a time. Live operation
 combines those disturbances rather than isolating them.
-Validators are geographically distributed; messages are delayed, reordered,
-and dropped; a sizable fraction of the active set is, at any given
-moment, slow, offline, or adversarial. The conditions under which a
-consensus protocol is tested most severely are exactly the conditions its
-publication benchmarks do not combine. Both the canonical taxonomic survey
-[14] and the methodological critique of Cachin and Vukolić [16] identify
-the absence of comparable stress-condition evaluation as the main
-obstacle to honest cross-family comparison. Combining those disturbances
-is exactly the condition under which performance and security cease to
-be independent variables.
+Validators are geographically distributed; messages are delayed,
+reordered, and dropped; at any given moment a sizable fraction of the
+active set is slow, offline, or adversarial. A protocol is stressed hardest
+under just the combination of conditions its publication benchmarks hold
+apart. Both the canonical taxonomic survey [14] and the methodological
+critique of Cachin and Vukolić [16] name the absence of comparable
+stress-condition evaluation as the main obstacle to honest cross-family
+comparison.
 
-The gap would be of academic interest only if performance and security
-remained separate. They do not. Under combined network delay and
-adversarial pressure the two become linked: a protocol that only
-*slows* under load may also miss finality, fork, or allow conflicting
-commits across honest validators. The performance–security coupling is
-invisible to benign-condition benchmarks. This thesis is motivated by that
-coupling, and by the absence of a unified harness in which it can be
-measured across the four families on matched assumptions
-[[wiki/concepts/problem-statement#the-gap]].
+This would be an academic curiosity if performance and security stayed
+separate, but they do not. Under combined network delay and adversarial
+pressure the two couple: a protocol that merely *slows* under load may also
+miss finality, fork, or let honest validators commit conflicting blocks. A
+benchmark run under benign conditions never sees that coupling. That blind
+spot — together with the absence of a unified harness in which the coupling
+can be measured across the four families on matched assumptions — motivates
+this thesis [[wiki/concepts/problem-statement#the-gap]].
 
 ## 1.3 Problem statement
 
@@ -111,11 +111,11 @@ the four Layer-1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
 PoS-finality [[wiki/algorithms/pos]], Avalanche-style
 [[wiki/algorithms/avalanche]], and DAG-based [[wiki/algorithms/dag-based]]
 — under controlled network delay and adversarial conditions, using a
-unified discrete-event simulator. The contribution is not a benchmark of
-production systems; it is a reproducible cross-family evaluation framework
-in which latency, throughput, communication cost, and the safety and
-liveness response to adversarial pressure are measured under matched
-assumptions [[wiki/concepts/problem-statement#thesis-contribution]].
+unified discrete-event simulator. The thesis contributes a reproducible
+cross-family evaluation framework rather than a benchmark of production
+systems: latency, throughput, communication cost, and the safety
+and liveness response to adversarial pressure are all measured under
+matched assumptions [[wiki/concepts/problem-statement#thesis-contribution]].
 Performance is measured as commit latency, sustained throughput, and
 communication overhead; security as safety and liveness under adversarial
 pressure. The unified metric schema is defined in Chapter 3
@@ -160,9 +160,9 @@ level matches that of prior simulation studies of consensus. Third, the adversar
 strategies evaluated are those most frequently discussed in the primary
 literature; attacks requiring specialized cryptographic or economic
 modeling are left to future work. Fourth, literature-reported figures
-are treated as order-of-magnitude sanity checks rather than as validation
-targets; the simulator's contribution is internal consistency across
-families under matched assumptions, not the reproduction of production
+serve as order-of-magnitude sanity checks, not validation targets: what the
+simulator secures is internal consistency across families under matched
+assumptions, and it does not try to reproduce any production system's
 throughput.
 
 Simulation is chosen over testnet or live-network measurement for three
