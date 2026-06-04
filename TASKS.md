@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 62 · In Review: 1 · In Progress: 0 · Not Started: 29 · Blocked: 2
+- Completed: 63 · In Review: 0 · In Progress: 0 · Not Started: 29 · Blocked: 2
 
 ## Legend
 
@@ -299,7 +299,7 @@ case) plus three wiki-overclaim corrections. Each fix is gated by a
 pre-defined rubric (eval set) recorded on the experiment page. Scope and
 the double+surround slashing decision were human-approved 2026-06-04.
 
-- `[?]` **T70** `H` Engineer — Close the six major impl-vs-paper fidelity gaps
+- `[x]` **T70** `H` Engineer — Close the six major impl-vs-paper fidelity gaps
   _Outcome:_ Address the six MAJOR findings from the 2026-06-04 audit, each
   gated by a rubric and demonstrated with step-logging on a simulated case.
   **Code fixes** — (1) *Casper FFG accountable safety* (audit #3): detect
