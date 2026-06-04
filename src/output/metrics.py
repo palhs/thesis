@@ -47,6 +47,9 @@ _BASE_BUDGET: dict[str, int] = {
     "PRE-PREPARE": 8 + 8 + 32,                 # view + seq + request_digest
     "PREPARE":     8 + 8 + 32,                 # view + seq + request_digest
     "COMMIT":      8 + 8 + 32,                 # view + seq + request_digest
+    "REPLY":       8 + 8 + 32 + 4,             # view + seq + request_digest
+                                               #   + replica_id (T70 finding #1
+                                               #   client-observed finality)
     "VIEW-CHANGE": 8 + 8,                      # new_view + last_stable_seq
                                                #   (k·evidence = 0 on the
                                                #   honest path; §3 + T29 Rev)

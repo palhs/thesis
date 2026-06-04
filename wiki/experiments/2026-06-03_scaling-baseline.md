@@ -117,6 +117,59 @@ throughout (recorded per the role's verification-log requirement):
   removed Snowman `_workload_cursor` has zero references, and the slot-indexed
   `_propose` change is the only node-layer edit per protocol.
 
+## Revisions
+
+**[2026-06-04] PBFT rows regenerated after the T70 client-finality fix.**
+The dataset was re-run with `PYTHONPATH=src python3 -m output.baseline` on
+the T70 branch (provenance `commit_hash` now `24a491a4`, was
+`1348a5da-dirty`). T70 finding #1 added an `f+1` REPLY round to PBFT, so
+`finality_latency_ms` is now measured at **client-observed** finality — one
+network hop past the internal `2f+1` COMMIT quorum — and the REPLY messages
+are counted in PBFT's overhead columns. The original PBFT rows above were
+generated with the pre-T70 code and are superseded by the regenerated CSV.
+
+PBFT before/after (means over 20 seeds; deltas hold per-seed — the
+per-protocol metrics carry zero variance across seeds at fixed `n`):
+
+| metric | n=4 | n=7 | n=10 | n=16 | n=25 |
+| :-- | --: | --: | --: | --: | --: |
+| commit_latency_ms (old=new) | 1000.000003 | 1000.000003 | 1000.000003 | 1000.000003 | 1000.000003 |
+| finality_latency_ms old | 1000.000003 | 1000.000003 | 1000.000003 | 1000.000003 | 1000.000003 |
+| finality_latency_ms new | 1000.000004 | 1000.000004 | 1000.000004 | 1000.000004 | 1000.000004 |
+| consensus_msgs/ACU old | 6.750 | 12.857 | 18.900 | 30.938 | 48.960 |
+| consensus_msgs/ACU new | 7.500 | 13.714 | 19.800 | 31.875 | 49.920 |
+| Δ consensus_msgs/ACU | +0.750 | +0.857 | +0.900 | +0.938 | +0.960 |
+| bytes/ACU old | 38 724 | 44 502.9 | 46 987.2 | 49 485 | 51 502.1 |
+| bytes/ACU new | 38 763 | 44 547.4 | 47 034 | 49 533.8 | 51 552 |
+| Δ bytes/ACU (≈+0.10 %) | +39 | +44.6 | +46.8 | +48.8 | +49.9 |
+| tps (old=new) | 3.800 | 6.650 | 9.500 | 15.200 | 23.750 |
+| goodput (old=new) | 94.820 | 94.820 | 94.820 | 94.820 | 94.820 |
+
+Direction confirmed:
+- `finality_latency_ms` increases by one network-hop tick (`+1e-6` ms in the
+  model's time units) and now **strictly exceeds** `commit_latency_ms`
+  (1000.000004 > 1000.000003) — finality is the client-observed event, one
+  hop past COMMIT. The absolute increment is tiny because the honest-path
+  network model encodes the extra REPLY hop as a minimal delay tick.
+- `consensus_msgs_per_acu` increases (+0.75 → +0.96 per ACU over
+  n=4→25). Cause: every replica now sends a REPLY on COMMITTED-local — all
+  `n` replicas reply and the collector self-records, so each committed
+  instance adds ≈`n−1` REPLY *deliveries* (`f+1`=2,3,4,6,9 is the
+  *finalization threshold*, i.e. how many matching replies the collector
+  waits for, not the message volume). Normalized per ACU the addition is
+  well under one message and its relative share shrinks as `n` grows and
+  the all-to-all PREPARE/COMMIT traffic dominates.
+- `bytes_per_acu` increases ≈0.10 % uniformly (REPLY messages are small).
+- `commit_latency_ms`, `tps`, `goodput` are unchanged — the COMMIT-quorum
+  timing and committed-throughput are unaffected by the added client round.
+
+Casper FFG and Snowman rows are **unchanged in every value column** (only
+`commit_hash` moved, since HEAD advanced from the T41 commit to the T70
+commit `24a491a4`); their node code was untouched by T70. Determinism
+re-verified: two independent clean-tree regenerations are byte-identical.
+The "Results" and "Observations" sections above retain the original PBFT
+numbers as the pre-T70 record; use the regenerated CSV for current values.
+
 ## Cross-references
 
 - [[concepts/output-format]] §13 — schema/register lift this dataset realises.

@@ -58,12 +58,16 @@ class CSState(Enum):
 class ConflictSet:
     """Snowball state for all blocks claiming one parent_id.
 
-    confidence[b] is the monotonic per-block accumulator (Snowball's
-    "highest-confidence preference" semantics): incremented every round
-    where b is the round's majority block with count >= alpha_p.
+    confidence[b] is the monotonic per-block accumulator: incremented every
+    round where b is the round's majority block with count >= alpha_p. It
+    drives genuine Snowball's "highest-confidence preference" semantics —
+    `preference` is set in close_round to argmax(confidence) and flips only
+    when a challenger's accumulated confidence STRICTLY exceeds the current
+    preference's (tie-break lowest block_id). The preference does NOT track
+    whichever block won this single round's sample (that is Snowflake).
     counter is the *consecutive* alpha_c-hits on the current preference;
-    reset on a flip or on an alpha_c miss. state transitions to ACCEPTED
-    when counter >= beta.
+    reset on an actual preference change or on an alpha_c miss. state
+    transitions to ACCEPTED when counter >= beta.
     """
     parent_id: bytes
     members: dict[bytes, Block] = field(default_factory=dict)

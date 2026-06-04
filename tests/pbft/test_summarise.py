@@ -22,9 +22,18 @@ def _result():
                      events_processed=50, events_tombstoned=0)
 
 
-def _pbft_instance_records(n: int, t_commit: float = 0.4
+def _pbft_instance_records(n: int, t_commit: float = 0.4,
+                           t_final: float | None = None
                            ) -> list[EventRecord]:
-    """n decided events at t_commit for instance_id=(0, 0)."""
+    """n decided events at t_commit for instance_id=(0, 0), plus a single
+    `pbft_client_finalized` (T70 finding #1) at `t_final` (default one hop
+    past commit) emitted by the collector for the same seq.
+
+    Pass `t_final=None` AND drop the finalize via `_no_finalize=True`-style
+    callers is not supported here; use `_pbft_records_no_finalize` for the
+    degenerate fallback path."""
+    if t_final is None:
+        t_final = t_commit * 1.5            # one network hop past the commit
     # Mock some delivery events too (consensus_msgs_per_acu ≠ NaN).
     recs: list[EventRecord] = []
     for i in range(n):
@@ -36,7 +45,19 @@ def _pbft_instance_records(n: int, t_commit: float = 0.4
         recs.append(EventRecord(t=t_commit, node_id=i,
                                 event_type="decided", seq=-1,
                                 fields={"instance_id": (0, 0)}))
+    # The view-0 collector (node 0) finalizes seq 0 one hop later.
+    recs.append(EventRecord(t=t_final, node_id=0,
+                            event_type="pbft_client_finalized", seq=0,
+                            fields={"seq": 0, "view": 0, "t": t_final}))
     return recs
+
+
+def _pbft_records_no_finalize(n: int, t_commit: float = 0.4
+                              ) -> list[EventRecord]:
+    """Decided events only, no `pbft_client_finalized` — the degenerate
+    fallback path where finality collapses back onto commit."""
+    return [r for r in _pbft_instance_records(n, t_commit)
+            if r.event_type != "pbft_client_finalized"]
 
 
 class TestSummarise(unittest.TestCase):
@@ -51,14 +72,33 @@ class TestSummarise(unittest.TestCase):
         }
         self.assertEqual(set(row.keys()), expected_keys)
 
-    def test_commit_equals_finality_for_pbft(self):
+    def test_commit_measured_at_quorum(self):
         from pbft.summarise import summarise
         row = summarise(_pbft_instance_records(4, t_commit=0.4),
                         _result(), _meta(4))
-        self.assertEqual(row["commit_latency_ms"],
-                         row["finality_latency_ms"])
+        # commit_latency stays at the 2f+1 COMMIT quorum time (0.4 s).
         self.assertAlmostEqual(row["commit_latency_ms"], 400.0,
                                places=6)
+
+    def test_finality_strictly_greater_than_commit(self):
+        # T70 finding #1: client-observed finality is one hop past the COMMIT
+        # quorum. With a finalize at t=0.6 vs commit at t=0.4, finality > commit.
+        from pbft.summarise import summarise
+        row = summarise(_pbft_instance_records(4, t_commit=0.4, t_final=0.6),
+                        _result(), _meta(4))
+        self.assertAlmostEqual(row["commit_latency_ms"], 400.0, places=6)
+        self.assertAlmostEqual(row["finality_latency_ms"], 600.0, places=6)
+        self.assertGreater(row["finality_latency_ms"],
+                           row["commit_latency_ms"])
+
+    def test_finality_falls_back_to_commit_without_finalize(self):
+        # Degenerate: a run that decided but logged no client-finalize keeps
+        # finality == commit so the row is still summarisable.
+        from pbft.summarise import summarise
+        row = summarise(_pbft_records_no_finalize(4, t_commit=0.4),
+                        _result(), _meta(4))
+        self.assertEqual(row["commit_latency_ms"],
+                         row["finality_latency_ms"])
 
     def test_fork_rate_zero_by_construction(self):
         from pbft.summarise import summarise

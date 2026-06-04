@@ -38,10 +38,16 @@ from pbft.baseline import (
 )
 from pbft.summarise import summarise
 
-# Pre-T41 first-instance latency at n=4, seed=42 (captured before the
-# windowing change; output-format.md §5.1 defines latency on the first
-# decided instance). The windowing must leave this byte-identical.
-_BASELINE_LATENCY_MS = 1000.0000030000002
+# Pre-T41 first-instance COMMIT-quorum latency at n=4, seed=42 (captured
+# before the windowing change; output-format.md §5.1 defines latency on the
+# first decided instance). The windowing must leave this byte-identical, and
+# T70 finding #1 leaves `commit_latency_ms` measured at this 2f+1 COMMIT
+# quorum unchanged.
+_BASELINE_COMMIT_LATENCY_MS = 1000.0000030000002
+# T70 finding #1: client-observed finality is one network hop (1e-9 s under
+# the minimal-delay baseline) past the COMMIT quorum, so the first instance's
+# `finality_latency_ms` sits exactly one hop after the commit value.
+_BASELINE_FINALITY_LATENCY_MS = 1000.0000040000003
 
 def _representative(scenarios):
     """One meta per distinct (n, variant) pair — the lowest-seed scenario
@@ -165,6 +171,33 @@ class TestPBFTHonestWindow(unittest.TestCase):
                 self.assertEqual(_count_msg_type(records, "VIEW-CHANGE"), 0)
                 self.assertEqual(_count_msg_type(records, "NEW-VIEW"), 0)
 
+    def test_every_committed_seq_reaches_client_finality(self):
+        """T70 finding #1 core invariant: every seq that commits inside the
+        window is later client-finalized exactly once (the collector emits one
+        `pbft_client_finalized` per committed seq), and each client-finalize
+        is strictly later than that seq's COMMIT quorum."""
+        for meta in _REPRESENTATIVE:
+            with self.subTest(run_id=meta.run_id, seed=meta.seed):
+                records, _, _ = run_scenario(meta)
+                # Earliest commit ('decided') time per seq across all nodes.
+                commit_t: dict[int, float] = {}
+                for r in _decided(records):
+                    seq = r.fields["instance_id"][1]
+                    commit_t[seq] = min(commit_t.get(seq, r.t), r.t)
+                final = [r for r in records
+                         if r.event_type == "pbft_client_finalized"]
+                final_by_seq: dict[int, list[float]] = {}
+                for r in final:
+                    final_by_seq.setdefault(r.fields["seq"], []).append(r.t)
+                # Every committed seq finalizes exactly once.
+                self.assertEqual(set(final_by_seq), set(commit_t),
+                                 "committed seqs and finalized seqs differ")
+                for seq, ts in final_by_seq.items():
+                    self.assertEqual(len(ts), 1,
+                                     f"seq {seq} finalized {len(ts)} times")
+                    self.assertGreater(ts[0], commit_t[seq],
+                                       f"seq {seq} finalized before/at commit")
+
     def test_finalization_latency_logged(self):
         """Outcome 3: every `decided` event's `t` is finite, positive, and
         strictly later than the t=PROPOSE_DELAY first proposal."""
@@ -190,13 +223,24 @@ class TestPBFTWindowingContract(unittest.TestCase):
         self.records, self.result, _ = run_scenario(self.meta)
         self.row = summarise(self.records, self.result, self.meta)
 
-    def test_first_instance_latency_unchanged(self):
-        """REGRESSION: commit_latency_ms / finality_latency_ms are defined on
-        the FIRST decided instance (output-format.md §5.1). Windowing must
-        not perturb it — assert byte-identical to the captured pre-T41 value.
-        If this moves, the windowing broke the first-instance definition."""
-        self.assertEqual(self.row["commit_latency_ms"], _BASELINE_LATENCY_MS)
-        self.assertEqual(self.row["finality_latency_ms"], _BASELINE_LATENCY_MS)
+    def test_first_instance_commit_latency_unchanged(self):
+        """REGRESSION: commit_latency_ms is defined on the FIRST decided
+        instance (output-format.md §5.1) at the 2f+1 COMMIT quorum. Neither
+        windowing nor T70 finding #1 may perturb it — assert byte-identical to
+        the captured value. If this moves, the COMMIT-quorum measurement broke.
+        """
+        self.assertEqual(self.row["commit_latency_ms"],
+                         _BASELINE_COMMIT_LATENCY_MS)
+
+    def test_first_instance_finality_one_hop_past_commit(self):
+        """T70 finding #1: client-observed finality (f+1 matching REPLYs) is
+        one network hop past the COMMIT quorum, so finality_latency_ms is
+        strictly greater than commit_latency_ms and equals the captured
+        one-hop-later value."""
+        self.assertEqual(self.row["finality_latency_ms"],
+                         _BASELINE_FINALITY_LATENCY_MS)
+        self.assertGreater(self.row["finality_latency_ms"],
+                           self.row["commit_latency_ms"])
 
     def test_decides_more_than_one_instance(self):
         """The window now commits MANY instances (it used to commit exactly
