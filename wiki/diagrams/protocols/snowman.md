@@ -13,39 +13,39 @@
 ## Diagram
 
 ```mermaid
-%% Snowman — subsampled poll loop for one block (sample K peers, accept on counter >= β)
 sequenceDiagram
+    %% Snowman subsampled poll loop for one block (sample K peers, accept on counter >= β)
     autonumber
     participant Poller
     participant PeerB
     participant PeerC
     participant PeerD
 
-    Note over Poller,PeerD: instance keyed by block_id — starts polling with (preference, counter=0). No leader role — every validator polls independently.
+    Note over Poller,PeerD: instance keyed by block_id -- starts polling with [preference, counter=0]. No leader role -- every validator polls independently.
 
-    Poller->>Poller: on_message(BLOCK-ANNOUNCEMENT) — register block_id in state polling
+    Poller->>Poller: on_message[BLOCK-ANNOUNCEMENT] -- register block_id in state polling
 
     rect rgb(240,240,240)
-        Note over Poller,PeerD: one poll round — repeats until accepted
+        Note over Poller,PeerD: one poll round -- repeats until accepted
 
-        Poller->>Poller: on_timer(poll) — sample K peers via self.rng
-        Poller->>PeerB: QUERY(request_id, block_id)
-        Poller->>PeerC: QUERY(request_id, block_id)
-        Poller->>PeerD: QUERY(request_id, block_id)
-        PeerB-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
-        PeerC-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
-        PeerD-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
+        Poller->>Poller: on_timer[poll] -- sample K peers via self.rng
+        Poller->>PeerB: QUERY[request_id, block_id]
+        Poller->>PeerC: QUERY[request_id, block_id]
+        Poller->>PeerD: QUERY[request_id, block_id]
+        PeerB-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        PeerC-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        PeerD-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
 
         alt >= α_c of the K responses agree on one block
-            Note over Poller: adopt that block as preference — counter += 1 (counter resets to 1 if the preference flipped)
+            Note over Poller: adopt that block as preference -- counter += 1 [resets to 1 if the preference flipped]
         else
             Note over Poller: counter = 0
         end
 
         alt counter >= β
-            Note over Poller,PeerD: polling → accepted — emit decided(block_hash, block_id)
+            Note over Poller,PeerD: polling => accepted -- emit decided[block_hash, block_id]
         else
-            Poller->>Poller: set_timer(poll) — arm the next poll round
+            Poller->>Poller: set_timer[poll] -- arm the next poll round
         end
     end
 ```

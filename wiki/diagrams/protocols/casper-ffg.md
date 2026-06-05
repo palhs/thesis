@@ -13,43 +13,43 @@
 ## Diagram
 
 ```mermaid
-%% Casper FFG — justify-then-finalise for one epoch (stake threshold >= 2/3)
 sequenceDiagram
+    %% Casper FFG justify-then-finalise for one epoch (stake threshold >= 2/3)
     autonumber
     participant Proposer
     participant AttesterB
     participant AttesterC
     participant AttesterD
 
-    Note over Proposer,AttesterD: FFG instance keyed by epoch — checkpoint starts unjustified. on_timer(slot) drives each slot of the epoch.
+    Note over Proposer,AttesterD: FFG instance keyed by epoch -- checkpoint starts unjustified. on_timer[slot] drives each slot of the epoch.
 
     rect rgb(240,240,240)
-        Note over Proposer,AttesterD: slot — propose
-        Proposer->>Proposer: on_timer(slot) — slot proposer = deterministic(global_seed, epoch), batch mempool
-        Proposer->>AttesterB: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
-        Proposer->>AttesterC: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
-        Proposer->>AttesterD: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
-        Note over AttesterB,AttesterD: feeds the LMD-GHOST head view — no direct FFG transition
+        Note over Proposer,AttesterD: slot -- propose
+        Proposer->>Proposer: on_timer[slot] -- slot proposer = deterministic[global_seed, epoch], batch mempool
+        Proposer->>AttesterB: BLOCK-PROPOSAL[slot, epoch, parent_hash, block_hash, txs]
+        Proposer->>AttesterC: BLOCK-PROPOSAL[slot, epoch, parent_hash, block_hash, txs]
+        Proposer->>AttesterD: BLOCK-PROPOSAL[slot, epoch, parent_hash, block_hash, txs]
+        Note over AttesterB,AttesterD: feeds the LMD-GHOST head view -- no direct FFG transition
     end
 
     rect rgb(240,240,240)
-        Note over Proposer,AttesterD: slot — attest
-        AttesterB->>Proposer: ATTESTATION(head_vote, ffg_source=(Se, Sh), ffg_target=(Te, Th))
-        AttesterB->>AttesterC: ATTESTATION(head_vote, ffg_source, ffg_target)
-        AttesterB->>AttesterD: ATTESTATION(head_vote, ffg_source, ffg_target)
-        Note over Proposer,AttesterD: AttesterC and AttesterD attest likewise (arrows omitted)
+        Note over Proposer,AttesterD: slot -- attest
+        AttesterB->>Proposer: ATTESTATION[head_vote, ffg_source=[Se, Sh], ffg_target=[Te, Th]]
+        AttesterB->>AttesterC: ATTESTATION[head_vote, ffg_source, ffg_target]
+        AttesterB->>AttesterD: ATTESTATION[head_vote, ffg_source, ffg_target]
+        Note over Proposer,AttesterD: AttesterC and AttesterD attest likewise, arrows omitted
     end
 
-    Note over Proposer,AttesterD: … attestations accumulate across the epoch's slots
+    Note over Proposer,AttesterD: ... attestations accumulate across the epoch's slots
 
-    Note over Proposer,AttesterD: stake-weighted FFG votes for link (S, T) reach >= 2/3 of stake — epoch T unjustified → justified
-    Note over Proposer,AttesterD: next supermajority link out of T justifies — epoch T justified → finalised, emit decided(checkpoint_root, epoch)
+    Note over Proposer,AttesterD: stake-weighted FFG votes for link [S, T] reach >= 2/3 of stake -- epoch T unjustified => justified
+    Note over Proposer,AttesterD: next supermajority link out of T justifies -- epoch T justified => finalised, emit decided[checkpoint_root, epoch]
 
-    Note over Proposer,AttesterD: accountable-safety branch — slashable equivocation observed
+    Note over Proposer,AttesterD: accountable-safety branch -- slashable equivocation observed
 
     opt a node observes two slashable ATTESTATIONs from one attester
-        AttesterC->>Proposer: SLASHING-EVIDENCE(offender_idx, double_vote | surround_vote, vote_pair)
-        Note over Proposer,AttesterD: verified evidence — offender → halted{slashed}, deposit burned
+        AttesterC->>Proposer: SLASHING-EVIDENCE[offender_idx, double_vote | surround_vote, vote_pair]
+        Note over Proposer,AttesterD: verified evidence -- offender => halted{slashed}, deposit burned
     end
 ```
 
