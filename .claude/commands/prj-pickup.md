@@ -21,9 +21,8 @@ Argument (may be empty): $ARGUMENTS
 In order:
 
 1. Read the full task entry from `TASKS.md`. Capture: ID, role, priority, outcome, artifact paths, any verify/source/target fields.
-2. Read `CLAUDE.md` if not already in context.
-3. Read the matching role prompt from `docs/roles.md` (Researcher / Engineer / Writer / Linter). This is your operating mode for this task — follow its flow (including any superpowers skill invocations) once execution begins.
-4. Read `wiki/index.md`. Per `docs/retrieval.md`, this is always the first read of every task. Note which existing pages relate to this task.
+2. Read the matching role prompt from `docs/roles.md` (Researcher / Engineer / Writer / Linter). This is your operating mode for this task — follow its flow (including any superpowers skill invocations) once execution begins.
+3. Read `wiki/index.md`. Per `docs/retrieval.md`, this is always the first read of every task. Note which existing pages relate to this task.
 
 ## Step 3 — Report and stop
 

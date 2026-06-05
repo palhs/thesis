@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 63 · In Review: 0 · In Progress: 0 · Not Started: 29 · Blocked: 2
+- Completed: 64 · In Review: 0 · In Progress: 0 · Not Started: 28 · Blocked: 2
 
 ## Legend
 
@@ -209,7 +209,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 - `[x]` **T41** `H` Engineer — Run baseline: vary number of validators
   _Outcome:_ Results for n=4,7,10,16,25 per algorithm; 10+ seeded runs each · _Artifact:_ `results/baseline/` + experiment page
-- `[ ]` **T42** `H` Engineer — Collect latency, throughput, communication overhead
+- `[x]` **T42** `H` Engineer — Collect latency, throughput, communication overhead
   _Outcome:_ Full CSV dataset verified for completeness · _Artifact:_ `results/baseline/metrics.csv`
 - `[ ]` **T43** `H` Engineer — Generate baseline comparison plots
   _Outcome:_ 4+ plots: latency vs n, throughput vs n, msgs vs n, success rate vs n · _Artifact:_ `results/baseline/plots/`
