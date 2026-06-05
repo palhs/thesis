@@ -70,6 +70,19 @@ them.
 | [16] | `cachin2017wild`          | `@online`        | [[sources/2026-04-21_cachin-vukolic-blockchain-wild-2017]] |
 | [17] | `gervais2016powsecurity`  | `@inproceedings` | [[sources/2026-04-21_gervais-pow-security-2016]] |
 | [18] | `gilbert2002cap`          | `@article`       | [[sources/2026-05-06_gilbert-lynch-cap-2002]] |
+| [19] | `helius2024solanaoutages` | `@online`        | _pending — Backlog (incident postmortems)_ |
+| [20] | `monnot2022reorg`         | `@online`        | _pending — Backlog (incident postmortems)_ |
+| [21] | `offchainlabs2023finality`| `@online`        | _pending — Backlog (incident postmortems)_ |
+| [22] | `cosmos2024v17halt`       | `@online`        | _pending — Backlog (incident postmortems)_ |
+| [23] | `sui2024outage`           | `@online`        | _pending — Backlog (incident postmortems)_ |
+
+`[19]–[23]` are production-incident postmortems cited in Chapter 1 §1.2
+(the motivation). They are web sources (vendor blogs, foundation forums,
+core-dev post-mortems), not peer-reviewed papers, so they are encoded as
+`@online` with `url` + `urldate` and **no** `eprint`. Their `wiki/sources/`
+pages and verbatim entries in [[concepts/annotated-bibliography]] are a
+deferred Researcher task (see `TASKS.md` Backlog); the `.bib` records and
+this mapping are added now so Chapter 1 compiles with resolved citations.
 
 ## Encoding notes
 
