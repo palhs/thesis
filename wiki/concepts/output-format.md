@@ -137,6 +137,12 @@ Per-block deterministic finality: every `decided` event at a given
   per-node decision time for the first decided instance,
   `1000 · median{r.t : r.event_type == "decided"
   ∧ r.fields["instance_id"] == first}`.
+  **[Superseded post-T70 — see §13 Revisions [2026-06-05].** The two columns
+  no longer coincide: T70 finding #1 moved `finality_latency_ms` to the
+  `f+1` client `REPLY` round (`pbft_client_finalized`), one network hop past
+  the `decided` COMMIT quorum that still defines `commit_latency_ms`. The
+  PBFT-only split makes `finality_latency_ms` non-comparable across
+  protocols; cross-protocol latency uses `commit_latency_ms`.]**
 - `tps = decided_count / result.now`. **T41 re-baseline (§13):** PBFT now
   runs windowed over a fixed `t_max` (fed a continuous arrival stream)
   instead of quiescing after one instance, so `tps` / `consensus_msgs_per_acu`
@@ -376,3 +382,64 @@ T44 will choose the aggregated-file layout: either `*_ci_lo` /
 - **`bytes_per_acu` is an estimate.** Per [[concepts/message-types]] §7
   the byte budgets are explicitly non-binding order-of-magnitude figures;
   the column is labelled as such on [[experiments/2026-06-03_scaling-baseline]].
+
+### [2026-06-05] Measurement-point split — `commit_latency_ms` is the cross-protocol latency column; `finality_latency_ms` is no longer apples-to-apples
+
+**The contradiction.** T70 finding #1 (PBFT client-observed finality,
+[[experiments/2026-06-04_t70-fidelity-fixes]] R1.*) added an `f+1`-matching
+`REPLY` round to PBFT only. As a result `finality_latency_ms` is now measured
+at the client-reply collector's `pbft_client_finalized` event — one network
+hop past the internal `2f+1` COMMIT quorum — while `commit_latency_ms` stays
+at the COMMIT quorum (`src/pbft/summarise.py`). §5.1 above was written pre-T70
+and still asserts `commit_latency_ms = finality_latency_ms` for PBFT; that
+equality is **false in the current dataset**. Every PBFT row in
+`results/baseline/baseline.csv` now has `commit_latency_ms` (1000.000003 ms) ≠
+`finality_latency_ms` (1000.000004 ms); the per-row magnitudes are tabulated
+in [[experiments/2026-06-03_scaling-baseline]] §Revisions. This entry records
+the contradiction per the `docs/wiki-spec.md` Revisions rule (new data
+contradicts a claim → Revisions, do not silently overwrite); the §5.1 bullet
+carries an inline supersession flag pointing here.
+
+**The asymmetry.** Only PBFT carries the client-observation hop. Casper FFG
+(§5.2) and Snowman (§5.3) still satisfy `commit_latency_ms =
+finality_latency_ms` — neither has an implemented post-commit client round, so
+their `finality_latency_ms` is the *internal* finalisation time. Putting all
+three protocols' `finality_latency_ms` on one axis therefore compares PBFT's
+client-observed timestamp against the other two protocols' internal
+timestamps — not apples-to-apples.
+
+**The contract (binding on downstream consumers).**
+
+1. **Cross-protocol latency comparisons use `commit_latency_ms`.** It is the
+   only latency column uniformly defined for all three protocols today —
+   median per-node time to the first internal `decided` instance — so it is
+   the apples-to-apples axis post-T70. This binds the T43 plots and the
+   T45/T56 Chapter 4 latency prose: the cross-protocol latency figure and any
+   "protocol X is faster than Y" claim are built from `commit_latency_ms`, not
+   `finality_latency_ms`.
+2. **`finality_latency_ms` is a PBFT-internal refinement only.** Its valid use
+   is *within* PBFT — compared against PBFT's own `commit_latency_ms`, where it
+   shows the client-observation hop costs exactly one network delay (one
+   `decided`→`pbft_client_finalized` tick). It must **not** appear on a
+   cross-protocol latency axis until the hop is uniform across protocols (see
+   the structural-fix follow-up below).
+3. **The fix is structural, not a Chapter 4 footnote.** A committee review
+   noted that prose caveats get skipped, so the comparable-column choice lives
+   here in the binding schema page that governs figure construction, not as a
+   methodology aside in Chapter 4. Chapter 4 still *states* the
+   measurement-point difference, but correctness does not depend on the reader
+   noticing that sentence.
+
+**Corrected PBFT formulas (supersede the §5.1 bullet).**
+
+- `commit_latency_ms = 1000 · median{r.t : r.event_type == "decided"
+  ∧ r.fields["instance_id"] == first}` (the `2f+1` COMMIT quorum) — unchanged.
+- `finality_latency_ms = 1000 · median{r.t : r.event_type ==
+  "pbft_client_finalized" ∧ r.fields["instance_id"] == first}` (the `f+1`
+  client `REPLY` round), falling back to `commit_latency_ms` if a run decided
+  but logged no client-finalize (`src/pbft/summarise.py`).
+
+**Making `finality_latency_ms` genuinely uniform** — i.e. adding an
+equivalent client-observation hop to Casper FFG and Snowman so the column
+becomes cross-protocol comparable — is real code work, scoped as a separate
+follow-up in the `TASKS.md` Backlog. Until that lands, contract item 2 holds.
