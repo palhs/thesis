@@ -4,28 +4,22 @@
 
 A Layer-1 blockchain commits one block per height across a set of mutually
 distrusting validators; producing that agreement despite validators that may
-behave arbitrarily is an instance of the Byzantine Generals Problem [1]
-[[wiki/concepts/byzantine-generals]]. Chapter 1 introduced the three results
-that bound any solution — the `3f+1` Byzantine threshold [1], the FLP
-impossibility [2], and the partial-synchrony relaxation that makes consensus
-solvable for `f < n/3` [3] [[wiki/concepts/synchrony-models]]. A two-thirds
-supermajority is the recurring quorum those results impose; what they jointly
-produce is a design space of concessions.
+behave arbitrarily is the Byzantine Generals Problem [1]
+[[wiki/concepts/byzantine-generals]]. Chapter 1 fixed the three results that
+bound any solution — the `3f+1` Byzantine threshold [1], the FLP impossibility
+[2], and the partial-synchrony relaxation that makes consensus solvable for
+`f < n/3` [3] [[wiki/concepts/synchrony-models]]. What they jointly produce is
+not a single protocol but a design space of concessions: every Layer-1
+protocol concedes along the synchrony axis (synchronous, partial-synchronous,
+asynchronous, or probabilistic), the fault-model axis (crash, omission, or
+Byzantine, with stake-weighting where applicable [[wiki/concepts/fault-model]]),
+or both. Wherever a family preserves deterministic safety, the `3f+1`
+quorum-intersection arithmetic recurs [[wiki/concepts/quorum-arithmetic]].
 
-Every Layer-1 protocol concedes along the synchrony axis
-(synchronous, partial-synchronous, asynchronous, or probabilistic), the
-fault-model axis (crash, omission, or Byzantine, with stake-weighting where
-applicable [[wiki/concepts/fault-model]]), or both. Wherever a family
-preserves deterministic safety, the `3f+1` quorum-intersection arithmetic
-recurs [[wiki/concepts/quorum-arithmetic]]. The CAP theorem [18] makes the
-operational consequence concrete: under partition a chain must choose
-Consistency (PBFT-style and PoS-finality halt safely) or Availability
-(Avalanche-style continues with weakened guarantees), with
-partition-tolerance non-negotiable [[wiki/concepts/cap-theorem]]. The three
-properties expected of any consensus protocol — Agreement, Validity, and
-Termination [[wiki/concepts/consensus-properties]] — sit on top of these
-concessions and trade off against one another whenever the assumed model is
-violated.
+The CAP theorem [18] makes the operational consequence concrete: under
+partition a chain must choose Consistency (PBFT-style and PoS-finality halt
+safely) or Availability (Avalanche-style continues with weakened guarantees),
+with partition-tolerance non-negotiable [[wiki/concepts/cap-theorem]].
 
 ## 2.2 The fork in the road
 
@@ -62,8 +56,7 @@ shared frame.
 Table 2.1 traces the same event — committing one proposed block — through
 all four families. They do one thing in common: accumulate *agreement* on a
 block until reversal is impossible. They differ on three axes — what counts
-as agreement, how much of it locks a block, and how many times that must
-happen. Read down those three rows: the three deterministic families are
+as agreement, how much is enough, and how many times that must happen. Read down those three rows: the three deterministic families are
 nearly identical (about two-thirds agreement, met twice, giving `ε = 0`),
 and Avalanche-style is the one that breaks the pattern (about 80% of a small
 random sample, repeated `β` times, giving a small positive `ε`).
