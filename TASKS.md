@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 64 · In Review: 0 · In Progress: 0 · Not Started: 28 · Blocked: 2
+- Completed: 64 · In Review: 4 · In Progress: 0 · Not Started: 24 · Blocked: 2
 
 ## Legend
 
@@ -217,8 +217,8 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ 20–30 runs per config; mean ± CI on all plots · _Artifact:_ updated plots + stats notes · _Done 2026-06-08:_ 20 seeds/config aggregated to `results/baseline/aggregated.csv` (Student-t df=19) via `src/output/aggregate.py`; plots regenerated with CI bars; statistical-accuracy/meaning audit + base-theory comparison in [[experiments/2026-06-08_baseline-cis]]; structural metrics are deterministic (zero-width CI), only goodput varies (CV≈2.2%)
 - `[?]` **T45** `H` Writer — Draft Chapter 4 baseline section
   _Outcome:_ 3–4 pages with plots and initial observations · _Artifact:_ `drafts/ch4_results.md` · _KPI checkpoint_ · _Done 2026-06-08:_ §4.1 roadmap + §4.2 baseline (statistical reliability, latency, throughput/goodput, overhead-vs-base-theory for RQ3, reliability, measurement-point note, Table 4.1); cites Figures 4.1–4.6 + the T43/T44 experiment pages; §4.3/§4.4 reserved for T50/T56
-- `[ ]` **L-W8** `M` Linter — Wiki lint pass (end of Week 8)
-  _Outcome:_ Report before testing phase begins · _Artifact:_ `wiki/lint/<date>_report.md`
+- `[?]` **L-W8** `M` Linter — Wiki lint pass (end of Week 8)
+  _Outcome:_ Report before testing phase begins · _Artifact:_ `wiki/lint/<date>_report.md` · _Done 2026-06-09:_ [[lint/2026-06-09_report]] — no High; M1 stale protocol-diagram PDFs, M2 data-plot figure convention/lint gap; 3 Low; all other checks clean
 
 ## Week 9 — Network delay experiments
 
