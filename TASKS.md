@@ -215,8 +215,8 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ 4+ plots: latency vs n, throughput vs n, msgs vs n, success rate vs n · _Artifact:_ `results/baseline/plots/` · _Done 2026-06-08:_ 6 figures (PNG+PDF) via `src/output/{analysis,plots}.py` from the T41/T70 dataset; latency on the comparable `commit_latency_ms` column (output-format §13); see [[experiments/2026-06-08_baseline-plots]]
 - `[?]` **T44** `H` Engineer — Multiple seeds; compute 95% CIs
   _Outcome:_ 20–30 runs per config; mean ± CI on all plots · _Artifact:_ updated plots + stats notes · _Done 2026-06-08:_ 20 seeds/config aggregated to `results/baseline/aggregated.csv` (Student-t df=19) via `src/output/aggregate.py`; plots regenerated with CI bars; statistical-accuracy/meaning audit + base-theory comparison in [[experiments/2026-06-08_baseline-cis]]; structural metrics are deterministic (zero-width CI), only goodput varies (CV≈2.2%)
-- `[ ]` **T45** `H` Writer — Draft Chapter 4 baseline section
-  _Outcome:_ 3–4 pages with plots and initial observations · _Artifact:_ `drafts/ch4_results.md` · _KPI checkpoint_
+- `[?]` **T45** `H` Writer — Draft Chapter 4 baseline section
+  _Outcome:_ 3–4 pages with plots and initial observations · _Artifact:_ `drafts/ch4_results.md` · _KPI checkpoint_ · _Done 2026-06-08:_ §4.1 roadmap + §4.2 baseline (statistical reliability, latency, throughput/goodput, overhead-vs-base-theory for RQ3, reliability, measurement-point note, Table 4.1); cites Figures 4.1–4.6 + the T43/T44 experiment pages; §4.3/§4.4 reserved for T50/T56
 - `[ ]` **L-W8** `M` Linter — Wiki lint pass (end of Week 8)
   _Outcome:_ Report before testing phase begins · _Artifact:_ `wiki/lint/<date>_report.md`
 
