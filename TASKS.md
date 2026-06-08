@@ -211,8 +211,8 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Results for n=4,7,10,16,25 per algorithm; 10+ seeded runs each · _Artifact:_ `results/baseline/` + experiment page
 - `[x]` **T42** `H` Engineer — Collect latency, throughput, communication overhead
   _Outcome:_ Full CSV dataset verified for completeness · _Artifact:_ `results/baseline/metrics.csv`
-- `[ ]` **T43** `H` Engineer — Generate baseline comparison plots
-  _Outcome:_ 4+ plots: latency vs n, throughput vs n, msgs vs n, success rate vs n · _Artifact:_ `results/baseline/plots/`
+- `[?]` **T43** `H` Engineer — Generate baseline comparison plots
+  _Outcome:_ 4+ plots: latency vs n, throughput vs n, msgs vs n, success rate vs n · _Artifact:_ `results/baseline/plots/` · _Done 2026-06-08:_ 6 figures (PNG+PDF) via `src/output/{analysis,plots}.py` from the T41/T70 dataset; latency on the comparable `commit_latency_ms` column (output-format §13); see [[experiments/2026-06-08_baseline-plots]]
 - `[ ]` **T44** `H` Engineer — Multiple seeds; compute 95% CIs
   _Outcome:_ 20–30 runs per config; mean ± CI on all plots · _Artifact:_ updated plots + stats notes
 - `[ ]` **T45** `H` Writer — Draft Chapter 4 baseline section
