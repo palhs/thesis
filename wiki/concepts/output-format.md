@@ -310,7 +310,7 @@ below from `pending` to `live`.
 
 | column(s) | depends-on task | status |
 | :--- | :--- | :--- |
-| `*_ci_lo`, `*_ci_hi` for every metric | T44 | pending |
+| `*_ci_lo`, `*_ci_hi` for every metric | T44 | **live** (T44 — §13 Revision; sibling wide file `results/baseline/aggregated.csv`, not in-place columns) |
 | `mempool_msgs_per_acu`, `mempool_tps`, NWT row population on `commit_latency_ms` / `finality_latency_ms` / `tps` / `consensus_msgs_per_acu` / `total_msgs_per_acu` | T38.1 | pending |
 | `empirical_epsilon` (Snowman observed ε) | T54 | pending |
 | `analytical_epsilon_bound` (Snowman `(1 − α_c/K)^β`) | T54 | pending |
@@ -322,7 +322,7 @@ below from `pending` to `live`.
 | `view_change_or_reorg_count` | T54 | pending |
 | `f_max_count`, `f_max_stake` (mutually exclusive per §6 rule 2) | T54 | pending |
 | `peak_tps`, `per_validator_state_bytes` | T58 (+ capacity model) | pending — **`peak_tps` deferred at T41**, see §13 |
-| `n_runs` (becomes >1 once T44 sweeps; `success_rate` becomes a frequency, schema unchanged) | T44 | pending |
+| `n_runs` (becomes >1 once T44 sweeps; `success_rate` becomes a frequency, schema unchanged) | T44 | **live** (T44 — `n_runs=20` per scenario in the aggregated file; `success_rate` carried as the across-seed mean) |
 | `round_latency_ms` | T48 | pending |
 
 T44 will choose the aggregated-file layout: either `*_ci_lo` /
@@ -443,3 +443,18 @@ timestamps — not apples-to-apples.
 equivalent client-observation hop to Casper FFG and Snowman so the column
 becomes cross-protocol comparable — is real code work, scoped as a separate
 follow-up in the `TASKS.md` Backlog. Until that lands, contract item 2 holds.
+
+### [2026-06-08] T44 — aggregated CSV layout; CI / `n_runs` registers go live
+
+The §2 pipeline's aggregation step is realised as a **sibling wide file**
+`results/baseline/aggregated.csv` (`src/output/aggregate.py`), not as
+in-place `*_ci_lo`/`*_ci_hi` columns on the per-trial file. Rationale: the
+per-trial `baseline.csv` stays the long-format substrate that later sweeps
+(T48 delay, T51–T54 adversarial) append rows to; the wide aggregated file is
+the plot/table feed. One row per `run_id`; columns
+`<metric>_{mean,ci_lo,ci_hi,cv}` for the eight comparison metrics; `n_runs`
+is the realised seed count (20); `success_rate` is carried as the
+across-seed mean (the frequency §3 anticipates). 95% CIs use Student-t with
+`df = 19`. The §11 register entries for the CI columns and `n_runs` flip
+`pending → live`. Statistical-meaning audit and per-protocol theory
+comparison: [[experiments/2026-06-08_baseline-cis]].
