@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ch.3 §3.2 — Runtime figures review (rev. 3)</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#555; --line:#ddd; --accentA:#3366aa; --accentB:#aa5555; --accentP:#557755; --bg:#fafafa; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.page { border-bottom: 2px solid var(--line); padding-bottom: 16px; margin-bottom: 8px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; }
+  h2 { font-size: 20px; margin: 40px 0 4px; padding-top: 8px; }
+  h2 .num { color: var(--muted); font-weight: 600; margin-right: 6px; }
+  h2 .tag { font-size:12px; font-weight:600; vertical-align:middle; padding:2px 8px; border-radius:10px; color:#fff; margin-left:8px; }
+  .tagP { background: var(--accentP); } .tagA { background: var(--accentA); } .tagB { background: var(--accentB); }
+  h3 { font-size: 15px; margin: 22px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); font-size: 15px; }
+  .figbox { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px; margin:14px 0;
+            overflow-x:auto; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .mermaid { text-align:center; }
+  table.cmp { width:100%; border-collapse:collapse; margin:14px 0; font-size:14px; }
+  table.cmp th, table.cmp td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  table.cmp th { background:#eef3ee; color:#2f5030; }
+  table.cmp td:first-child { font-weight:600; white-space:nowrap; }
+  table.cmp code { background:#e7f0e7; }
+  .divtable { width:100%; border-collapse:collapse; margin:14px 0; font-size:14.5px; }
+  .divtable th, .divtable td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  .divtable th { background:#f0f3f7; }
+  .crosslink { display:inline-block; margin:10px 8px 10px 0; padding:8px 12px; border-radius:8px; font-size:14px;
+               text-decoration:none; border:1px solid var(--line); background:#fff; color:var(--ink); }
+  .crosslink:hover { background:#eef3fb; border-color:var(--accentA); }
+  ul.tight { margin:6px 0; padding-left:20px; } ul.tight li { margin:3px 0; }
+  code { background:#f0f0f0; padding:1px 5px; border-radius:4px; font-size:13.5px; }
+  .keynote { background:#f6f8fb; border:1px solid #d7e0ec; border-left:4px solid var(--accentA); border-radius:8px;
+            padding:10px 16px; margin:14px 0; font-size:14px; }
+  .note { background:#fff8e6; border:1px solid #e8d9a0; border-radius:8px; padding:12px 16px; margin:16px 0; font-size:14px; }
+  .note b { color:#8a6d1a; }
+  .reviewonly { background:#f3f3f3; border:1px dashed #bbb; border-radius:8px; padding:12px 16px; margin:16px 0; font-size:13px; color:#444; }
+  footer { margin-top:40px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+  .anchor { scroll-margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>Chapter 3 §3.2 — How the simulator works</h1>
+    <div class="sub">Review draft, rev. 3 · three pieces, problem → solution → mechanism. Principle: each figure carries the shape and a plain-language name; the precise statement and the honest caveats live in the table, captions, and §3.2 prose.</div>
+  </header>
+
+  <p class="lead">
+    The four protocols decide in genuinely different ways — that heterogeneity is the comparison problem.
+    <b>(1) The four protocols</b> sets up the problem; <b>(2) Figure A — the harness</b> is the solution (one fixed engine, the protocol is the only swappable part);
+    <b>(3) Figure B — the event loop</b> is how it runs. Read in order.
+  </p>
+
+  <!-- ============================ PART 1 — PROTOCOLS ============================ -->
+  <h2 id="protocols" class="anchor"><span class="num">1.</span>The four protocols we compare <span class="tag tagP">the problem</span></h2>
+  <p class="lead">Each protocol reaches a decision by a different rule, and the four do not even produce the <i>same kind</i> of decision.
+     This table is the reference the harness figure points back to; the exact rules stay here so the figures can stay light.</p>
+
+  <table class="cmp">
+    <thead><tr>
+      <th>Protocol</th><th>How it decides (plain)</th><th>Decides exactly when (precise)</th><th>Leader?</th><th>One "decision" (ACU) =</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td>PBFT</td>
+        <td>A leader proposes; replicas vote in two rounds.</td>
+        <td>A replica <i>commits</i>: it gathers <code>2f+1</code> PREPARE, then <code>2f+1</code> COMMIT — <b>two</b> quorums, not one.</td>
+        <td>Yes (rotating primary)</td>
+        <td>one committed block</td>
+      </tr>
+      <tr>
+        <td>Casper FFG</td>
+        <td>Validators attest each epoch; finality takes two rounds.</td>
+        <td>A checkpoint is <i>final</i> when it is justified <b>and its direct child is justified</b> — two consecutive ≥ ⅔-stake links, ≥ 2 epochs. One ≥ ⅔ link alone is only justification.</td>
+        <td>Yes (slot proposer)</td>
+        <td>one finalized checkpoint (+ its ancestors)</td>
+      </tr>
+      <tr>
+        <td>Snowman</td>
+        <td>Repeatedly poll K random peers until confident.</td>
+        <td>Accepted after <code>β</code> consecutive polls that each clear a confidence threshold (<code>α_c</code>); preference flips at a separate threshold (<code>α_p</code>).</td>
+        <td>No (leaderless)</td>
+        <td>one accepted block</td>
+      </tr>
+      <tr>
+        <td>Narwhal + Tusk</td>
+        <td>A DAG mempool spreads data; Tusk then orders it.</td>
+        <td>An anchor commits once enough round-(r+1) certificates reference it. Ordering adds <b>zero</b> messages — but rides on ≈ <code>r·n²</code> mempool messages per round.</td>
+        <td>Yes (anchor)</td>
+        <td>one committed anchor (a batch / sub-DAG)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="keynote">
+    <code>f</code> = the most faulty nodes a protocol tolerates. <code>ACU</code> (atomic commit unit) = the per-protocol thing one decision commits, shown in the last column. Because a PBFT block, an FFG checkpoint-plus-ancestors, a Snowman block, and a Narwhal anchor-batch are <i>different sizes of thing</i>, every rate is reported <b>per ACU</b> so the four land on one scale.
+    <br><b>The takeaway that sets up Figure A:</b> four different deciding rules, two different decision shapes, one protocol leaderless, one with two layers — so the comparison can only be fair if a single fixed engine runs them all and a reconcile step normalizes their output.
+  </div>
+
+  <!-- ============================ PART 2 — FIGURE A ============================ -->
+  <h2 id="figA" class="anchor"><span class="num">2.</span>Figure A — The harness: one engine, any protocol <span class="tag tagA">the solution</span></h2>
+  <p class="lead">A configuration cell enters at the top, flows down through one fixed engine, and leaves as one comparable data point.
+     The engine is identical for every protocol — the only swappable part is the protocol logic (one of the four above).</p>
+
+  <div class="figbox">
+  <pre class="mermaid">
+flowchart TD
+    IN["<b>INPUT — one experiment-matrix cell + seed</b><br/>protocol · n = 4 to 25 validators<br/>network conditions: delay, loss, partitions (configure the NETWORK below)<br/>adversary (behaviour + strength) · workload (transactions) · seed"]
+
+    subgraph HARNESS["THE HARNESS — identical for every protocol; only the protocol logic is swapped"]
+        direction TB
+        HB["<b>BUILDER</b> — assembles the system and loads the workload"]
+        SCH["<b>SCHEDULER</b> — the single run loop and virtual clock<br/><i>one turn of this loop is Figure B ↓</i>"]
+        SLOT["<b>PROTOCOL LOGIC</b> — the only swappable part<br/>a state machine for one of the four protocols (see the table above)"]
+        NET["<b>NETWORK</b> — delivers messages with delay, loss and partitions<br/>(models timing only — no CPU or signature cost)"]
+        LOG["<b>LOGGER</b> — records what happened: decided, halted, messages"]
+        HB --- SCH
+        SCH --- SLOT
+        SLOT --- NET
+        SLOT -. "results &amp; messages" .-> LOG
+    end
+
+    RED["<b>REDUCE + RECONCILE</b><br/>the four emit different kinds of decision — put them on one common scale<br/>(under stated conventions): per ACU · split Narwhal's two layers · rescale Snowman"]
+    OUT["<b>OUTPUT — one row of results.csv (one comparable data point)</b><br/>time-to-finality · throughput (per ACU)<br/>message &amp; byte overhead per ACU (mempool / consensus split for the DAG)<br/>reliability: agreement · fork / safety rate · liveness · run outcome"]
+    RQ["comparison plots that answer the five research questions (stated in §3.1)"]
+
+    IN -- "build + load workload" --> HARNESS
+    HARNESS -- "flush events" --> RED
+    RED --> OUT
+    OUT --> RQ
+
+    classDef io fill:#eef6ff,stroke:#3366aa,color:#000
+    classDef eng fill:#f4f4f4,stroke:#666,color:#000
+    classDef proto fill:#eefaee,stroke:#557755,color:#000
+    classDef red fill:#f3eefb,stroke:#7755aa,color:#000
+    classDef rq fill:#fff4e6,stroke:#bb8833,color:#000
+    class IN,OUT io
+    class RED red
+    class RQ rq
+    class HB,SCH,NET,LOG eng
+    class SLOT proto
+  </pre>
+  </div>
+
+  <h3>What it shows</h3>
+  <ul class="tight">
+    <li><b>Input is one cell of the experiment matrix</b> — the knobs we vary (protocol, n, network, adversary, workload, seed) are the independent variables the research questions sweep.</li>
+    <li><b>The engine is fixed, but that alone is not "fairness."</b> A shared Builder / Scheduler / Network / Logger removes <i>harness</i> confounds, so any difference comes from the protocol logic — but making four different decisions <i>comparable</i> is the separate <b>reduce + reconcile</b> step, and that is where commensurability is established, under stated conventions (not in the engine being shared).</li>
+    <li><b>The adversary is not a separate component</b> — it attaches to a node and alters that node's outgoing messages; its effect is protocol-specific (there is no leader to disrupt in Snowman). Drawn as an input knob for brevity.</li>
+    <li><b>Output is one comparable data point → the RQs</b>, all per ACU.</li>
+  </ul>
+
+  <a class="crosslink" href="#protocols">↑ what plugs into the slot: the four protocols</a>
+  <a class="crosslink" href="#figB">↓ how a single event runs through the engine: Figure B</a>
+
+  <!-- ============================ PART 3 — FIGURE B ============================ -->
+  <h2 id="figB" class="anchor"><span class="num">3.</span>Figure B — One turn of the event loop <span class="tag tagB">the mechanism</span></h2>
+  <p class="lead">A zoom into the Scheduler. The engine repeats one cycle until the run ends:
+     take the next-soonest event, advance the clock to it, let a node react, and put whatever that produces back on the queue.</p>
+
+  <div class="figbox">
+  <pre class="mermaid">
+flowchart TD
+    Q["<b>EVENT QUEUE</b><br/>min-heap ordered by (time t, node, sequence)"]
+    N["<b>NODE</b> — runs its protocol logic for this event"]
+    NET["<b>NETWORK</b> — turns a send into a future delivery<br/>at time t + delay (loss / partitions applied here)"]
+    ENQ(["future event<br/>(a delivery, or a timer)"])
+    STOP["<b>STOP</b> — the run ends when:<br/>nothing left to do · the time limit is reached · the caller's stop condition fires"]
+
+    Q -- "pop next, advance clock" --> N
+    N -- "react: send · set timer · emit result" --> NET
+    NET -- "schedule at t + delay" --> ENQ
+    ENQ -- "back on the queue" --> Q
+    Q -. "loop ends" .-> STOP
+
+    classDef eng fill:#eef6ff,stroke:#3366aa,color:#000
+    classDef proto fill:#eefaee,stroke:#557755,color:#000
+    classDef net fill:#f4f4f4,stroke:#666,color:#000
+    classDef stop fill:#fff0f0,stroke:#aa5555,color:#000
+    class Q,ENQ eng
+    class N proto
+    class NET net
+    class STOP stop
+  </pre>
+  </div>
+
+  <div class="keynote">
+    The three ways a run ends are recorded as <code>quiescence</code> (nothing left to do), <code>deadline</code> (time limit reached), and <code>predicate</code> (caller's condition). A <code>deadline</code> stop is <b>not</b> automatically a failure — whether it is a real liveness failure is judged separately, by whether the target decision was reached before the deadline.
+  </div>
+
+  <h3>What it shows</h3>
+  <ul class="tight">
+    <li><b>The clock jumps, it does not tick.</b> Each turn the scheduler takes the earliest event and sets the virtual clock straight to its time <code>t</code>, skipping idle gaps. (This is about efficiency, not yet reproducibility.)</li>
+    <li><b>Why a run replays identically.</b> Determinism rests on three things together: the queue's total order <code>(t, node, sequence)</code> (so even same-time events have one order), per-node RNGs seeded from the run seed, and the rule that nothing reads a wall clock or iterates in a nondeterministic order. Clock-jumping alone would not guarantee it.</li>
+    <li><b>One feedback path drives everything.</b> A node only reacts by sending a message, setting a timer, or emitting a result (decided / halted, which the Logger records). Sends and timers become future events; there is no other source of work.</li>
+    <li><b>The node is generic here</b> — this loop is identical for all four protocols; what runs inside is the swappable protocol logic from the table.</li>
+  </ul>
+
+  <a class="crosslink" href="#figA">↑ where this loop sits in the whole system: Figure A</a>
+
+  <!-- ============================ CONNECTION ============================ -->
+  <h2>How the three pieces connect</h2>
+  <ul class="tight">
+    <li><b>The table</b> is what the harness's swappable slot holds — four heterogeneous deciding rules.</li>
+    <li><b>Figure A's SCHEDULER</b> box <i>is</i> the loop drawn in <b>Figure B</b> — A says "there is a run loop," B shows one turn.</li>
+    <li>The <code>decided</code> / <code>halted</code> results a node emits in Figure B are what the Logger captures and Figure A's <b>reduce + reconcile</b> step turns into the per-ACU <code>results.csv</code> row.</li>
+  </ul>
+
+  <!-- ============================ PROSE OBLIGATIONS ============================ -->
+  <div class="note">
+    <b>§3.2 prose checklist — these are obligations, not figure elements.</b> The figures defer the honest version of each claim to the prose; §3.2 is not complete until each is discharged (and cited against the wiki):
+    <ul class="tight">
+      <li><b>Commensurability.</b> Where §3.2 first calls the comparison fair, cite the metric-reconciliation layer and state the conventions it assumes (per-ACU denominators per the table, Narwhal layer split, Snowman rescaling) — and concede it makes the four <i>plottable on one scale under conventions</i>, not literally the same event.</li>
+      <li><b>No compute / crypto cost.</b> Name it as a threat to validity; it favours signature-heavy protocols (PBFT <code>O(n²)</code>, Narwhal mempool). Bound which verdicts (overhead, latency) it could bias.</li>
+      <li><b>FFG ↔ network coherence.</b> State the guard <code>E[delay] ≤ slot_duration/4</code> and that the runner refuses incoherent pairings, so delay sweeps cannot silently produce degraded-finality "Casper FFG" numbers.</li>
+      <li><b>Workload realism.</b> State that the load is pre-seeded / closed-loop and name its arrival process, conflict rate, offered rate.</li>
+      <li><b>Scaling range.</b> <code>n = 4..25</code> (f = 1,2,3,5,8) is a stated limit on the scaling claim (RQ3); note Snowman's n=4 exclusion so a missing plot point is explained.</li>
+      <li><b>Snowman rescaling validity.</b> Defend that a per-n-rescaled Snowman is still one protocol across the scaling sweep, not four parametrizations.</li>
+      <li><b>Deadline vs liveness failure.</b> Spell out which output column lets a reader reconstruct a truncated-healthy run from a real liveness failure, so RQ4 success rates are not contaminated.</li>
+      <li><b>Reliability family.</b> §3.2 must define agreement vs termination and the safety-violation rate (ε for Snowman) the OUTPUT box only names.</li>
+    </ul>
+  </div>
+
+  <div class="reviewonly">
+    <b>Review notes (delete before the LaTeX port — not thesis content).</b>
+    <ul class="tight">
+      <li><b>rev.3 changes:</b> protocols moved to a leading comparison table (problem→solution arc), so Figure A's slot is now generic and lighter; ACU defined concretely per protocol in the table (N1); REDUCE box reframed to state the problem first and stop claiming commensurability is "solved" (N3); OUTPUT reliability widened to agreement / safety-rate / liveness (N4); Figure B gains the third determinism leg; stop-reason jargon demoted to a caption; FFG coherence guard added to the prose checklist.</li>
+      <li><b>File plan:</b> Figure B → refine current <code>event-loop.md</code> (generic node); Figure A → new <code>architecture.md</code>; the table → likely belongs with §3.3 or as Figure A's companion caption, not a diagram. Overlap to resolve: existing <code>macro.md</code> tells the same "cell → row" story as a sequence diagram — decide if Figure A replaces it for §3.2. Then update <code>diagrams/index.md</code> + <code>wiki/log.md</code>, render PDFs.</li>
+      <li><b>RQ roster:</b> the figure references "the five research questions" — §3.2 should cross-reference the RQ1–RQ5 roster from §3.1 / <code>concepts/research-questions</code>, not restate it (and not be invented here).</li>
+    </ul>
+  </div>
+
+  <footer>
+    Rendered live via mermaid.js (CDN) — open in a browser with internet access. If a diagram shows as raw text, the CDN did not load; the Mermaid source is still readable inline.
+  </footer>
+
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'base', flowchart: { htmlLabels: true, curve: 'basis' } });
+</script>
+</body>
+</html>
