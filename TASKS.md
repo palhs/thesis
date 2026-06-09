@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 64 · In Review: 0 · In Progress: 0 · Not Started: 28 · Blocked: 2
+- Completed: 68 · In Review: 0 · In Progress: 0 · Not Started: 24 · Blocked: 2
 
 ## Legend
 
@@ -152,7 +152,7 @@ specs); the `\include{biography}` line has been removed from the template.
 - `[x]` **T24** `M` Engineer — Add logging for consensus events
   _Outcome:_ Structured event log — core columns `t, node_id, event_type, seq` plus an open `fields` dict — exportable to CSV (Decision A: `round` / `msg_id` have no source in the current event stream; they are `fields` keys populated by protocol code in T28+, not columns) · _Artifact:_ `src/event_log/` (renamed from `src/logging/` — Decision E: a `logging` package on `PYTHONPATH=src` shadows the stdlib module)
 - `[x]` **T25** `H` Engineer — Test basic message exchange among nodes
-  _Outcome:_ Integration test with 4 nodes; delay distribution matches config · _Artifact:_ `src/tests/` + experiment page
+  _Outcome:_ Integration test with 4 nodes; delay distribution matches config · _Artifact:_ `tests/` + experiment page
 - `[x]` **T26** `H` Engineer — Set up repo scaffolding: /src, /tests, /configs, /results
   _Outcome:_ Clean structure, README, .gitignore, initial commit · _Artifact:_ repo root
 - `[x]` **T27** `M` Engineer — Set up reproducibility: seed control, YAML configs
@@ -173,7 +173,7 @@ specs); the `\include{biography}` line has been removed from the template.
 - `[x]` **T30** `H` Engineer — Test PBFT correctness under honest nodes
   _Outcome:_ Finalizes with 4/7/10 nodes; no forks; latency logged · _Artifact:_ `wiki/experiments/<date>_pbft-baseline.md`
 - `[x]` **T31** `M` Engineer — Write unit tests for PBFT
-  _Outcome:_ 5+ tests: happy path, insufficient votes, timeout, message loss, multi-round · _Artifact:_ `src/tests/pbft/`
+  _Outcome:_ 5+ tests: happy path, insufficient votes, timeout, message loss, multi-round · _Artifact:_ `tests/pbft/`
 
 ## Week 6 — PoS implementation + start Ch. 3
 
@@ -211,14 +211,14 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ Results for n=4,7,10,16,25 per algorithm; 10+ seeded runs each · _Artifact:_ `results/baseline/` + experiment page
 - `[x]` **T42** `H` Engineer — Collect latency, throughput, communication overhead
   _Outcome:_ Full CSV dataset verified for completeness · _Artifact:_ `results/baseline/metrics.csv`
-- `[ ]` **T43** `H` Engineer — Generate baseline comparison plots
-  _Outcome:_ 4+ plots: latency vs n, throughput vs n, msgs vs n, success rate vs n · _Artifact:_ `results/baseline/plots/`
-- `[ ]` **T44** `H` Engineer — Multiple seeds; compute 95% CIs
-  _Outcome:_ 20–30 runs per config; mean ± CI on all plots · _Artifact:_ updated plots + stats notes
-- `[ ]` **T45** `H` Writer — Draft Chapter 4 baseline section
-  _Outcome:_ 3–4 pages with plots and initial observations · _Artifact:_ `drafts/ch4_results.md` · _KPI checkpoint_
-- `[ ]` **L-W8** `M` Linter — Wiki lint pass (end of Week 8)
-  _Outcome:_ Report before testing phase begins · _Artifact:_ `wiki/lint/<date>_report.md`
+- `[x]` **T43** `H` Engineer — Generate baseline comparison plots
+  _Outcome:_ 4+ plots: latency vs n, throughput vs n, msgs vs n, success rate vs n · _Artifact:_ `results/baseline/plots/` · _Done 2026-06-08:_ 6 figures (PNG+PDF) via `src/output/{analysis,plots}.py` from the T41/T70 dataset; latency on the comparable `commit_latency_ms` column (output-format §13); see [[experiments/2026-06-08_baseline-plots]]
+- `[x]` **T44** `H` Engineer — Multiple seeds; compute 95% CIs
+  _Outcome:_ 20–30 runs per config; mean ± CI on all plots · _Artifact:_ updated plots + stats notes · _Done 2026-06-08:_ 20 seeds/config aggregated to `results/baseline/aggregated.csv` (Student-t df=19) via `src/output/aggregate.py`; plots regenerated with CI bars; statistical-accuracy/meaning audit + base-theory comparison in [[experiments/2026-06-08_baseline-cis]]; structural metrics are deterministic (zero-width CI), only goodput varies (CV≈2.2%)
+- `[x]` **T45** `H` Writer — Draft Chapter 4 baseline section
+  _Outcome:_ 3–4 pages with plots and initial observations · _Artifact:_ `drafts/ch4_results.md` · _KPI checkpoint_ · _Done 2026-06-08:_ §4.1 roadmap + §4.2 baseline (statistical reliability, latency, throughput/goodput, overhead-vs-base-theory for RQ3, reliability, measurement-point note, Table 4.1); cites Figures 4.1–4.6 + the T43/T44 experiment pages; §4.3/§4.4 reserved for T50/T56
+- `[x]` **L-W8** `M` Linter — Wiki lint pass (end of Week 8)
+  _Outcome:_ Report before testing phase begins · _Artifact:_ `wiki/lint/<date>_report.md` · _Done 2026-06-09:_ [[lint/2026-06-09_report]] — no High; M1 stale protocol-diagram PDFs, M2 data-plot figure convention/lint gap; 3 Low; all other checks clean
 
 ## Week 9 — Network delay experiments
 

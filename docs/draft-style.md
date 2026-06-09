@@ -116,6 +116,44 @@ pattern; the migration plan is
 No new `TODO(human-export)` markers should appear — the lint check
 treats them as a regression.
 
+### Data-plot figures (matplotlib)
+
+The thesis has two figure families, with parallel but distinct
+conventions. The Mermaid rules above govern **diagram figures** —
+schematic, hand-authored, no data. **Data-plot figures** — empirical
+charts rendered from a results CSV (Chapter 4 onward) — follow these
+rules instead.
+
+- **Source of truth is the generator + dataset, not a DSL.** A data plot
+  is produced by a matplotlib generator (`src/output/plots.py`) reading a
+  committed results CSV (e.g. `results/baseline/baseline.csv`). The
+  figure is not hand-drawn; it regenerates deterministically from data,
+  so the script and CSV — not the image — are authoritative.
+- **Location.** Rendered figures live beside their dataset under
+  `results/<experiment>/plots/<slug>.pdf`. The **vector PDF is tracked in
+  git** (thesis import); the **`.png` companion is `.gitignore`d** (screen
+  preview, regenerable). This mirrors the vector-not-raster rule for
+  diagrams, but the plots sit under `results/`, not `wiki/diagrams/`,
+  because they are experiment artifacts.
+- **Regeneration command** is recorded in two places: the generator's
+  module docstring and the experiment page's `## Re-run` block. For the
+  baseline figures: `PYTHONPATH=src python3 -m output.plots` (add
+  `--no-ci` for trend-only curves). matplotlib is a plotting-only
+  dependency (`requirements-dev.txt`); the simulator and aggregation stay
+  stdlib-only.
+- **Citation pattern in prose:** `Figure 4.3 ([[experiments/<page>]])`.
+  Because data plots are not under `wiki/diagrams/`, the back-reference is
+  the **experiment page**, which holds the figure-number ↔ plot-file map,
+  the generator, and the input CSV. The figure number is the front-stage
+  handle; the wikilink resolves to source-of-truth, exactly as the
+  diagram pattern `Figure 3.1 ([[diagrams/...]])` does. (Retrofitting the
+  inline experiment-page wikilinks onto Chapter 4's existing figure
+  references is T62 figure-polish work, not a prerequisite for the
+  convention.)
+
+L-W12 / lint check 8 verifies the tracked PDF exists for every data-plot
+figure reference, the same way it does for diagram figures.
+
 ## What this does NOT change
 
 - Wiki pages keep their technical/synthesis register.

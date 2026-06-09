@@ -305,9 +305,9 @@ below are the ones a downstream implementation can use unchanged.
 
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
 | :---- | :---- | :---- | :---- | :---- |
-| `consensus_msgs_per_acu` | `1 + 2·n + 2·n² ≈ O(n²)` (PRE-PREPARE + PREPARE + COMMIT) [4] | `O(n)` FFG votes per epoch, BLS-aggregated; per-ACU cost amortises over the epoch | `O(K·β)` per validator (queries + replies); independent of `n` [9], [ava-docs] | `0` (Tusk derives order from existing DAG references) [11] |
+| `consensus_msgs_per_acu` | `1 + 2·n + 2·n² ≈ O(n²)` (PRE-PREPARE + PREPARE + COMMIT) [4] | simulator (per FFG paper [1]): `O(n²)` — `n` individually-signed votes broadcast all-to-all per epoch; measured `≈1.125n` per-ACU. Production (BLS-aggregated): `O(n)`. Aggregation not modelled — see [[algorithms/pos#communication-complexity]] | `O(K·β)` per validator (queries + replies); independent of `n` [9], [ava-docs] | `0` (Tusk derives order from existing DAG references) [11] |
 | `mempool_msgs_per_acu` | `0` (no separate mempool layer) | `0` (block-proposal layer carries payload; not a separate mempool) | `0` | `O(r · n²)` over `r` rounds × `n` certificates × `2f+1` signatures [11] |
-| `bytes_per_block` | dominated by signatures × `O(n²)` | dominated by aggregated attestation + payload per slot; per-epoch amortised | `O(K·β)` query/reply bytes per validator | dominated by mempool payload bytes; consensus layer adds none |
+| `bytes_per_block` | dominated by signatures × `O(n²)` | simulator: per-validator (un-aggregated) attestation + payload per slot, `O(n²)`; production BLS would amortise to one aggregate per committee | `O(K·β)` query/reply bytes per validator | dominated by mempool payload bytes; consensus layer adds none |
 | `per_validator_state` | vote caches + view-change log; `O(n)` per recent block | attestation buffers per slot + finalised-checkpoint chain | Snowball preference + counter per pending block; independent of `n` | full DAG retention until pruned at anchor commit — **largest of the four** |
 
 ### Reliability
