@@ -29,7 +29,8 @@ untested, matching the `plots.py` convention.
 2. **`theory_vs_measured`** — measured `total_msgs_per_acu` markers over each
    protocol's *predicted* slope (dashed): PBFT `2n`, Casper `1.2n`, Snowman
    `2·K·β` with `K=min(20,n−1), β≈15`. Markers sit on the dashed lines →
-   visual proof the simulator tracks published complexity
+   visual check the simulator tracks published complexity (largest gaps
+   ≈6–7% at n=4; see [[experiments/2026-06-08_baseline-cis]])
    ([[algorithms/pbft#communication-complexity]],
    [[algorithms/pos#communication-complexity]],
    [[algorithms/avalanche#parameters-and-communication-complexity]]).
@@ -47,6 +48,12 @@ untested, matching the `plots.py` convention.
    speed), Snowman fast-but-expensive (0.04 frugality).
 6. **`overview`** — 2×2 dashboard (latency, goodput, msg-cost, decision-rate
    vs `n`) for a one-screen read of all four trends.
+7. **`pbft_2n_validation`** — derives PBFT's `≈2n` per-unit cost from its
+   message phases: (a) one all-to-all phase = `n(n−1)` (n×n send matrix at
+   n=4), (b) per instance the two all-to-all phases (PREPARE, COMMIT)
+   dominate → `2(n²−1)` total, (c) ÷ `n` decisions/instance gives
+   `2n − 2/n → 2n`, with measured points on the closed form. Phase counts
+   confirmed exact against the simulator (`tests/output/test_explain.py`).
 
 ## Interpretation guards carried into the charts
 

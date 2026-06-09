@@ -381,6 +381,91 @@ def overview(agg):
     return _save(fig, "overview")
 
 
+# --------------------------------------------------------------------------
+# 7. PBFT 2n validation — derive the per-ACU cost from the message phases.
+# --------------------------------------------------------------------------
+# Per-instance delivery counts by phase, read off the simulator's message
+# model (src/pbft/node.py; broadcast excludes the sender). Empirically
+# confirmed exact at n in {4,7,10,16,25}: total deliveries / decided events
+# reproduces total_msgs_per_acu to the last digit (e.g. n=4 -> 30/4 = 7.5).
+def _pbft_phase_counts(n):
+    """Deliveries per PBFT instance, by phase. Two all-to-all phases
+    (PREPARE, COMMIT) at n(n-1) dominate; the leader's PRE-PREPARE and the
+    REPLY hop are O(n). One instance yields n `decided` events."""
+    return {
+        "PRE-PREPARE (leader→all)": n - 1,
+        "PREPARE (all→all)":        n * (n - 1),
+        "COMMIT (all→all)":         n * (n - 1),
+        "REPLY (all→collector)":    n - 1,
+    }
+
+
+PBFT_DECISIONS_PER_INSTANCE = lambda n: n  # one `decided` event per node.
+
+
+def pbft_2n_validation(agg):
+    fig, axes = plt.subplots(1, 3, figsize=(15.0, 4.6))
+    blue = STYLE["pbft"]["color"]
+
+    # (a) The "why n^2": one all-to-all phase as an n x n send matrix at n=4.
+    ax = axes[0]
+    demo_n = 4
+    grid = [[0 if i == j else 1 for j in range(demo_n)] for i in range(demo_n)]
+    ax.imshow(grid, cmap="Blues", vmin=0, vmax=1.4)
+    for i in range(demo_n):
+        for j in range(demo_n):
+            ax.text(j, i, "—" if i == j else "msg", ha="center", va="center",
+                    fontsize=8, color="0.4" if i == j else "white")
+    ax.set_xticks(range(demo_n)); ax.set_yticks(range(demo_n))
+    ax.set_xticklabels([f"r{j}" for j in range(demo_n)])
+    ax.set_yticklabels([f"r{i}" for i in range(demo_n)])
+    ax.set_xlabel("recipient"); ax.set_ylabel("sender")
+    ax.set_title(f"(a) One all-to-all phase at n={demo_n}\n"
+                 f"n(n−1) = {demo_n*(demo_n-1)} messages (no self-send)")
+
+    # (b) Per-instance message budget by phase, stacked, vs n.
+    ax = axes[1]
+    phases = list(_pbft_phase_counts(4).keys())
+    shades = ["#9ecae1", "#3182bd", "#08519c", "#c6dbef"]
+    bottoms = [0.0] * len(NS)
+    for ph, sh in zip(phases, shades):
+        vals = [_pbft_phase_counts(n)[ph] for n in NS]
+        ax.bar([str(n) for n in NS], vals, bottom=bottoms, color=sh, label=ph)
+        bottoms = [b + v for b, v in zip(bottoms, vals)]
+    ax.plot([str(n) for n in NS], [2 * (n * n - 1) for n in NS],
+            color="black", marker="o", linewidth=1.3, markersize=4,
+            label="total = 2(n²−1)")
+    ax.set_xlabel("validator-set size $n$")
+    ax.set_ylabel("message deliveries per instance")
+    ax.set_title("(b) Per instance: two all-to-all phases\n"
+                 "dominate → O(n²) total")
+    ax.legend(frameon=False, fontsize=7.5)
+    ax.grid(True, axis="y", linestyle=":", alpha=0.6)
+
+    # (c) Divide by n decisions → measured msgs/ACU lands on 2n − 2/n → 2n.
+    ax = axes[2]
+    xs, ys = _series(agg, "pbft", "total_msgs_per_acu_mean")
+    fine = list(range(4, 26))
+    ax.plot(fine, [2 * n for n in fine], linestyle="--", color="0.4",
+            label="asymptote 2n")
+    ax.plot(fine, [2 * n - 2 / n for n in fine], color=blue, linewidth=1.4,
+            label="closed form 2n − 2/n")
+    ax.plot(xs, ys, linestyle="none", marker="o", markersize=9, color=blue,
+            markeredgecolor="black", label="measured (sim)")
+    ax.set_xlabel("validator-set size $n$")
+    ax.set_ylabel("messages per committed unit")
+    ax.set_title("(c) ÷ n decisions per instance\n"
+                 "2(n²−1)/n = 2n − 2/n  →  2n")
+    ax.set_xticks(list(NS))
+    ax.legend(frameon=False, fontsize=8)
+    ax.grid(True, linestyle=":", alpha=0.6)
+
+    fig.suptitle("Validating PBFT's ≈2n messages per committed unit  "
+                 "(honest baseline)", fontsize=13)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    return _save(fig, "pbft_2n_validation")
+
+
 def generate():
     agg = load_agg()
     trials = load_trials()
@@ -391,6 +476,7 @@ def generate():
         goodput_spread(trials, agg),
         profile_panel(agg),
         overview(agg),
+        pbft_2n_validation(agg),
     ]
     return made
 

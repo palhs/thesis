@@ -80,5 +80,32 @@ class TestTheoryLine(unittest.TestCase):
                 self.assertLess(rel, 0.075, f"{proto} n={n}: {rel:.3f}")
 
 
+class TestPbftPhaseDerivation(unittest.TestCase):
+    """The 2n validation: per-instance phase counts must reduce to the
+    measured total_msgs_per_acu = 2(n^2-1)/n = 2n - 2/n."""
+
+    def test_phase_counts_sum_to_2_n2_minus_1(self):
+        for n in explain.NS:
+            total = sum(explain._pbft_phase_counts(n).values())
+            self.assertEqual(total, 2 * (n * n - 1), f"n={n}")
+
+    def test_two_all_to_all_phases_are_n_times_n_minus_1(self):
+        counts = explain._pbft_phase_counts(4)
+        self.assertEqual(counts["PREPARE (all→all)"], 4 * 3)
+        self.assertEqual(counts["COMMIT (all→all)"], 4 * 3)
+        self.assertEqual(counts["PRE-PREPARE (leader→all)"], 3)
+        self.assertEqual(counts["REPLY (all→collector)"], 3)
+
+    def test_derivation_matches_measured_per_acu(self):
+        agg = explain.load_agg()
+        for n in explain.NS:
+            total = sum(explain._pbft_phase_counts(n).values())
+            derived = total / explain.PBFT_DECISIONS_PER_INSTANCE(n)
+            self.assertAlmostEqual(
+                derived, agg[("pbft", n)]["total_msgs_per_acu_mean"],
+                places=4, msg=f"n={n}")
+            self.assertAlmostEqual(derived, 2 * n - 2 / n, places=9)
+
+
 if __name__ == "__main__":
     unittest.main()
