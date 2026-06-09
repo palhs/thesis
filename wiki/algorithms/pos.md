@@ -41,9 +41,14 @@ differ in what the underlying chain looks like:
 - **Weak subjectivity.** New or long-offline nodes must trust a recent
   checkpoint from a social consensus source. No purely on-chain mechanism
   can distinguish a valid long-range history from an adversarial rewrite.
-- **Signature aggregation.** Modern implementations use BLS so that
-  thousands of attestations fit in a single aggregated vote — the
-  enabling mechanism for validator sets in the tens of thousands.
+- **Signature aggregation.** Not part of the original Casper FFG paper
+  [1], whose votes are individually signed (Table 1: `S = signature …
+  from the validator's private key`) and counted, with no aggregation and
+  no message-complexity analysis. BLS aggregation is an Ethereum
+  beacon-chain *production* optimisation: it lets thousands of
+  attestations fit in a single aggregated vote — the enabling mechanism
+  for validator sets in the tens of thousands. The simulator does **not**
+  model it (see Communication complexity).
 - **Validator set.** In real Gasper the active set rotates at epoch
   boundaries (activations, exits, slashings) and is fixed within an epoch.
   *Simulator note:* the simulator does **not** model rotation — the
@@ -157,17 +162,25 @@ meaningful only in the PoS setting.
 
 ## Communication complexity
 
-| Aspect | Per-slot cost | Per-epoch cost | Finality latency |
-| :---- | :---- | :---- | :---- |
-| **Attestations** | `n` per slot (BLS-aggregated to ~1) | `n` total | — |
-| **FFG votes** | — | `O(n)` aggregated | 2 epochs (justify + finalise) |
-| **Slashing evidence** | rare; carried in blocks | rare | — |
+Two regimes must be kept apart — the original FFG paper / this simulator
+(individually-signed votes) versus Ethereum production (BLS-aggregated):
 
-BLS aggregation reduces the per-slot communication from `O(n)` distinct
-messages to a single aggregated attestation per committee — the enabling
-mechanism for the large validator sets that PBFT-family protocols cannot
-reach. The simulator models aggregation as a fixed cost per committee to
-keep per-validator instrumentation comparable across families.
+| Aspect | FFG paper & simulator | Ethereum production (BLS) | Finality latency |
+| :---- | :---- | :---- | :---- |
+| **Attestations / FFG votes** | `n` individually-signed votes per epoch, broadcast all-to-all → `O(n²)` deliveries | aggregated to ~1 per committee → `O(n)` | 2 epochs (justify + finalise) |
+| **Slashing evidence** | rare; carried in blocks | rare; carried in blocks | — |
+
+The original Casper FFG paper [1] specifies individually-signed votes and
+no aggregation, and does not analyse message complexity. **The simulator
+follows the paper, not production:** `src/pos/node.py::_attest` has every
+validator broadcast its own signed `ATTESTATION` to every peer, so the
+measured per-epoch attestation cost is `O(n²)` deliveries (empirically
+`9·n(n−1)` over the baseline window), giving `total_msgs_per_acu ≈ 1.125n`
+after dividing by the per-epoch decisions. BLS aggregation — which would
+collapse this to `O(n)` and is the enabling mechanism for the large
+validator sets PBFT-family protocols cannot reach — is **not modelled**;
+adding it is recorded as future work
+([`docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md`](../../docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md)).
 
 ## Simulator mapping
 

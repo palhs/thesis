@@ -81,3 +81,18 @@ states this explicitly so the comparison is not misread.
 `grep`/`Read` used. Confirmed `aggregate.py` consumes only `analysis.py`
 (stdlib) + the committed CSV, writes one sibling file, and has no caller into
 the simulator core; `plots.py` is its only peer consumer of `analysis`.
+
+## Revisions
+
+**[2026-06-09]** The Casper FFG row of the base-theory table cites the
+theory as "`O(n)` aggregated/epoch." This is the *Ethereum production*
+(BLS-aggregated) cost, not the original Casper FFG paper [1], whose votes are
+individually signed and counted with no aggregation (arXiv:1710.09437,
+Table 1). The simulator follows the paper: every validator broadcasts its own
+signed `ATTESTATION` all-to-all, so the attestation phase is `O(n²)` (measured
+`9·n(n−1)` deliveries/window) and the measured `≈1.2n` per-ACU validates that
+*un-aggregated* model — not an aggregated `O(n)` one. The slope sits below
+PBFT's because of the rounds-to-decisions ratio (one attestation phase, more
+decisions per round), not aggregation. See
+[[algorithms/pos#communication-complexity]]; adding aggregation is future work
+([`docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md`](../../docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md)).

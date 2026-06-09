@@ -81,3 +81,13 @@ used local `grep`/`Read`: confirmed `src/output/` houses the T40 writer
 (`csv.py`, `schema.py`, `baseline.py`) and `metrics_view.py`; the new
 `analysis.py` / `plots.py` add the read-only view layer with no caller into
 the simulator core, and `analysis.py` has no non-stdlib import.
+
+## Revisions
+
+**[2026-06-09]** The theory-anchor line "Casper FFG `O(n)` aggregated per
+epoch" describes *Ethereum production* (BLS aggregation), not the original
+Casper FFG paper [1] (individually-signed votes, no aggregation). The
+simulator follows the paper: attestations are broadcast all-to-all (`O(n²)`),
+so the plotted `msgs_vs_n` Casper curve is the un-aggregated cost. See
+[[experiments/2026-06-08_baseline-cis#revisions]] and
+[[algorithms/pos#communication-complexity]].

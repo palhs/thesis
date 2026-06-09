@@ -110,10 +110,16 @@ asymptotic cost. PBFT's normal-case cost is `O(n²)` messages per block
 [[wiki/algorithms/pbft#communication-complexity]]; the per-unit metric reads
 `O(n)` because the atomic-commit-unit denominator counts one decision per
 validator per instance, absorbing exactly one factor of `n` from the
-all-to-all prepare and commit phases. Casper FFG's single attestation round
-per epoch is the cheaper `O(n)` aggregated cost
-[[wiki/algorithms/pos#communication-complexity]], which is why its slope sits
-below PBFT's. Snowman's measured overhead matches `2·K·β` to within half a
+all-to-all prepare and commit phases. Casper FFG's attestation phase is also
+all-to-all, and therefore `O(n²)` per epoch under the individually-signed-vote
+model that the original protocol specifies and that the simulator implements
+[[wiki/algorithms/pos#communication-complexity]]; its per-unit slope sits below
+PBFT's not because of aggregation but because a single attestation phase serves
+more committed decisions per round than PBFT's two broadcast phases. The
+production BLS aggregation that would reduce this cost to `O(n)` is not part of
+the original Casper FFG specification and is not modelled here; introducing it,
+together with the corresponding threshold-signature variant of PBFT, is
+identified as future work in §6.3. Snowman's measured overhead matches `2·K·β` to within half a
 percent across the sweep — the factor of two is the query-and-response pair of
 each poll — confirming the per-validator `O(K·β)` cost that the Avalanche
 family is built around [[wiki/algorithms/avalanche#parameters-and-communication-complexity]].
