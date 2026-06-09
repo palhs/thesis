@@ -176,7 +176,7 @@ Taxonomic framing for Ch. 2; no numeric claim in the thesis cites a survey.
 ## Coverage
 
 All 18 canonical entries `[1]–[18]` have dedicated
-[[sources/|source pages]]. S6 created 12 pages (the three original
+[[index#Sources|source pages]]. S6 created 12 pages (the three original
 foundational papers [1]–[3], one primary protocol per family plus
 PBFT-family variants [4]–[7], [9], [11]–[13], and the principal survey
 [14]); S9 added the next five ([8], [10], [15]–[17]); L-W2.2 added [18]
