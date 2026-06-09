@@ -5,7 +5,8 @@ A **read-only view** over the frozen Week-8 baseline artifacts
 human-legible charts that surface the *meaning* of the CSV columns rather than
 re-plotting them. **Touches no existing logic**: `analysis.py`, `aggregate.py`,
 and `plots.py` are unchanged; the new `src/output/explain.py` only reads
-`aggregated.csv` / `metrics.csv` and writes to a fresh `results/baseline/explain/`.
+`aggregated.csv` / `metrics.csv` and writes to a fresh `results/baseline/explain/`
+(plus one promoted thesis PDF, `theory_vs_measured`, into `results/baseline/plots/`).
 
 ## Re-run
 
@@ -34,6 +35,12 @@ untested, matching the `plots.py` convention.
    ([[algorithms/pbft#communication-complexity]],
    [[algorithms/pos#communication-complexity]],
    [[algorithms/avalanche#parameters-and-communication-complexity]]).
+   **Promoted to a thesis figure (Chapter 4, Figure 4.7):** additionally
+   rendered as a tracked vector PDF to `results/baseline/plots/theory_vs_measured.pdf`
+   beside the canonical `plots.py` figures, and cited from [[drafts/ch4_results]]
+   §4.2.4 as the visual form of the RQ3 theory-match claim. (The data-plot
+   figure convention is still Mermaid-only in `draft-style.md`; extending it is
+   the open L-W8 lint item M2, to settle at T62.)
 3. **`variance_heatmap`** — coefficient of variation per metric × protocol.
    Everything is `0` (deterministic) except `goodput` (≈2.2–2.3%). Makes the
    T44 dominant finding — *the baseline is deterministic except for workload

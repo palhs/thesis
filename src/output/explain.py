@@ -17,6 +17,8 @@ figures), this module renders the *interpretation*:
      protocol's *predicted* slope (PBFT 2n, Casper 1.2n, Snowman 2*K*beta).
      Visual check that the simulator tracks published theory (markers sit on
      the lines; the largest gaps, ~6-7%, are at n=4 — see the cis report).
+     Promoted to a thesis figure (Ch4 Figure 4.7): also rendered as a tracked
+     vector PDF into PLOT_DIR alongside the canonical plots.py figures.
   3. variance_heatmap     — coefficient of variation per metric x protocol.
      Shows at a glance that everything is deterministic (CV=0) except
      workload-driven goodput (CV ~= 2.2%).
@@ -52,6 +54,10 @@ import matplotlib.pyplot as plt
 AGG_PATH = "results/baseline/aggregated.csv"
 TRIAL_PATH = "results/baseline/metrics.csv"
 OUT_DIR = "results/baseline/explain"
+# Thesis-figure dir (the canonical Chapter-4 figures from plots.py live here as
+# tracked vector PDFs). One explanatory chart — theory_vs_measured — is promoted
+# to a thesis figure (Ch4 Figure 4.7) and additionally rendered as PDF here.
+PLOT_DIR = "results/baseline/plots"
 
 # Same palette as plots.py so the explanatory charts read identically to the
 # Chapter-4 figures (copied, not imported, to avoid coupling).
@@ -126,7 +132,12 @@ def _series(agg, proto, col):
     return xs, ys
 
 
-def _save(fig, name):
+def _save(fig, name, pdf_dir=None):
+    """Save the figure PNG to OUT_DIR (companion). If pdf_dir is given, also
+    emit a vector PDF there first (for a chart promoted to a thesis figure)."""
+    if pdf_dir is not None:
+        os.makedirs(pdf_dir, exist_ok=True)
+        fig.savefig(os.path.join(pdf_dir, f"{name}.pdf"))
     os.makedirs(OUT_DIR, exist_ok=True)
     path = os.path.join(OUT_DIR, f"{name}.png")
     fig.savefig(path, dpi=150)
@@ -200,7 +211,9 @@ def theory_vs_measured(agg):
              "(PBFT 2n,  Casper 1.2n,  Snowman 2·K·β, K=min(20,n−1))",
              ha="center", fontsize=8, style="italic")
     fig.tight_layout(rect=(0, 0.04, 1, 1))
-    return _save(fig, "theory_vs_measured")
+    # Promoted to Chapter-4 Figure 4.7: also emit a tracked vector PDF beside
+    # the canonical thesis figures.
+    return _save(fig, "theory_vs_measured", pdf_dir=PLOT_DIR)
 
 
 # --------------------------------------------------------------------------
