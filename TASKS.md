@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 76 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 68 · In Review: 0 · In Progress: 0 · Not Started: 24 · Blocked: 2
+- Completed: 68 · In Review: 0 · In Progress: 1 · Not Started: 23 · Blocked: 2
 
 ## Legend
 
@@ -222,7 +222,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 9 — Network delay experiments
 
-- `[ ]` **T46** `H` Engineer — Inject moderate delay (100–500ms)
+- `[~]` **T46** `H` Engineer — Inject moderate delay (100–500ms)
   _Outcome:_ Per-algorithm latency/throughput changes · _Artifact:_ `wiki/experiments/<date>_delay-moderate.md`
 - `[ ]` **T47** `H` Engineer — Inject heavy delay (1–5s) + packet loss
   _Outcome:_ Degradation under 5–20% loss; success rate measured · _Artifact:_ `wiki/experiments/<date>_delay-heavy.md`
