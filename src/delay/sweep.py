@@ -30,8 +30,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import sys
 from pathlib import Path
 
+from common import run_grid
+from common.sweep import estimate_runtime
 from event_log import EventRecord
 from output.csv import _generic_cols, _format_row, _resolve_commit_hash
 from output.metrics import goodput as _goodput
@@ -124,31 +128,90 @@ def _build_row(records: list[EventRecord], result: RunResult,
     return row
 
 
-def run_sweep(seeds: tuple[int, ...] | None = None,
+# --- Driver adapter (T46.1). --------------------------------------------
+#
+# The grid is a list of plain tuples `(protocol, timeline_name, n, seed)`
+# driven through the shared `common.sweep.run_grid`. The four functions
+# below are MODULE-LEVEL (no closures) so they pickle under the macOS
+# `spawn` start method when `--jobs > 1`.
+
+# Schema tag pinned into every fingerprint: a column-set change invalidates
+# all sidecars (a row's shape changed), forcing a recompute on resume.
+_SCHEMA_TAG = (tuple(COLUMN_ORDER), _DELAY_COLUMNS)
+
+
+def _cell_key(cell: tuple) -> str:
+    """Stable, total-order, filesystem-safe identity — used for BOTH the
+    sidecar filename and the collect-sort order."""
+    proto, tl_name, n, seed = cell
+    return f"{proto}__{tl_name}__n{n}__seed{seed:02d}"
+
+
+def _timeline_by_name(tl_name: str) -> cfg.Timeline:
+    return next(t for t in cfg.TIMELINES if t.name == tl_name)
+
+
+def _phase_canon(ph) -> tuple:
+    """Canonical, deterministic form of one network Phase. `repr` of the
+    float fields is the shortest round-tripping decimal (stable in
+    Python 3), so semantically-equal configs fingerprint equal."""
+    return (ph.t_start, ph.t_end, ph.delay.kind,
+            tuple(sorted(ph.delay.params.items())), ph.p_drop,
+            repr(ph.partitions))
+
+
+def _param_fingerprint(cell: tuple) -> str:
+    """blake2b over the cell's canonicalized config (design spec §4). Binds
+    the sidecar to the params that produced it. Canonicalizes over the
+    timeline's PHASE TUPLE, so it covers single-phase production timelines
+    and the multi-phase / p_drop>0 witness timelines uniformly — the
+    delay-kind, params, phase boundaries and drop probability all enter the
+    hash. `seed` is the cell identity (in the filename), not a param, so it
+    is excluded here."""
+    proto, tl_name, n, seed = cell
+    tl = _timeline_by_name(tl_name)
+    canon = repr((proto, n, tl.name,
+                  tuple(_phase_canon(ph) for ph in tl.phases()),
+                  cfg.T_MAX, _SCHEMA_TAG))
+    return hashlib.blake2b(canon.encode(), digest_size=16).hexdigest()
+
+
+def _run_cell(cell: tuple, run_constants: dict) -> dict[str, object]:
+    """Pure per-cell row builder: runner -> clip -> _build_row. The
+    `commit_hash` is THREADED IN from run_constants (resolved once in the
+    parent), never resolved here (review B1)."""
+    proto, tl_name, n, seed = cell
+    timeline = _timeline_by_name(tl_name)
+    records, result, meta = RUNNERS[proto](timeline, n, seed)
+    kept, stats = clip_records(records, cfg.WINDOW_S, cfg.ONE_ROUND_S[proto])
+    return _build_row(kept, result, meta, timeline, stats.clipped_fraction,
+                      run_constants["commit_hash"])
+
+
+def run_sweep(seeds: tuple[int, ...] | None = None, *,
+              out: Path = _OUT, jobs: int = 1, fresh: bool = False,
+              progress_stream=None,
               ) -> tuple[list[dict[str, object]], float]:
-    """Execute the full sweep. Returns `(rows, worst_clipped_fraction)`.
+    """Execute the full sweep via the resumable/parallel driver. Returns
+    `(rows, worst_clipped_fraction)`.
 
     `seeds=None` uses the locked 20-seed set; pass a subset for smoke runs.
-    The worst clipped-fraction is surfaced so the orchestrator can assert
-    the < 5 % calibration guard before trusting the dataset.
+    The checkpoint dir lives next to `out` (`<out_dir>/.sweep`), so distinct
+    output paths checkpoint independently. `commit_hash` is resolved ONCE
+    here in the parent and broadcast as a run constant. The worst
+    clipped-fraction is surfaced for the < 5 % calibration guard.
     """
     seeds = cfg.SEEDS if seeds is None else seeds
-    commit_hash = _resolve_commit_hash()
-    rows: list[dict[str, object]] = []
-    worst = 0.0
-    for protocol in _PROTOCOLS:
-        runner = RUNNERS[protocol]
-        one_round = cfg.ONE_ROUND_S[protocol]
-        for timeline in cfg.TIMELINES:
-            for n in cfg.N_VALUES:
-                for seed in seeds:
-                    records, result, meta = runner(timeline, n, seed)
-                    kept, stats = clip_records(records, cfg.WINDOW_S,
-                                               one_round)
-                    worst = max(worst, stats.clipped_fraction)
-                    rows.append(_build_row(kept, result, meta, timeline,
-                                           stats.clipped_fraction,
-                                           commit_hash))
+    commit_hash = _resolve_commit_hash()             # ONCE, in the parent
+    cells = [(p, tl.name, n, s)
+             for p in _PROTOCOLS for tl in cfg.TIMELINES
+             for n in cfg.N_VALUES for s in seeds]
+    rows = run_grid(cells, _run_cell, _cell_key,
+                    checkpoint_dir=Path(out).parent / ".sweep",
+                    run_constants={"commit_hash": commit_hash},
+                    param_fingerprint=_param_fingerprint,
+                    jobs=jobs, fresh=fresh, progress_stream=progress_stream)
+    worst = max((r["clipped_fraction"] for r in rows), default=0.0)
     return rows, worst
 
 
@@ -180,19 +243,54 @@ def write_csv(rows: list[dict[str, object]], path: Path = _OUT) -> None:
             writer.writerow(formatted)
 
 
+def _preflight_estimate(seeds: tuple[int, ...], jobs: int, stream) -> None:
+    """Pre-flight wall-clock estimate (item d): time one cell per protocol
+    at the smallest n / first timeline, then project per-protocol and total
+    wall-clock to stderr. Rough — sampled at the smallest n, so it
+    under-counts the Snowman n=25 tier; from-scratch (ignores already
+    checkpointed cells). Timing is stderr-only, never persisted."""
+    commit_hash = _resolve_commit_hash()
+    n0 = min(cfg.N_VALUES)
+    tl0 = cfg.TIMELINES[0].name
+    samples = [(p, tl0, n0, seeds[0]) for p in _PROTOCOLS]
+    timings = estimate_runtime(samples, _run_cell,
+                               {"commit_hash": commit_hash})
+    per_proto_cells = len(cfg.TIMELINES) * len(cfg.N_VALUES) * len(seeds)
+    total = 0.0
+    for (proto, _, _, _), sec in timings.items():
+        proj = per_proto_cells * sec
+        total += proj
+        stream.write(f"[estimate] {proto}: ~{sec:.1f}s/cell (n={n0}) "
+                     f"× {per_proto_cells} cells ≈ {proj / 60:.1f} min\n")
+    eff = total / max(1, jobs)
+    stream.write(f"[estimate] total ≈ {total / 60:.1f} min sequential, "
+                 f"~{eff / 60:.1f} min at jobs={jobs} "
+                 f"(rough, smallest-n sample, from scratch)\n")
+    stream.flush()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Family B delay sweep (T46).")
     ap.add_argument("--smoke", action="store_true",
                     help="1 seed only (fast sanity, not the real dataset).")
     ap.add_argument("--out", default=str(_OUT),
                     help="output CSV path.")
+    ap.add_argument("--jobs", type=int, default=1,
+                    help="parallel worker processes (default 1: "
+                         "single-process, clean provenance).")
+    ap.add_argument("--fresh", action="store_true",
+                    help="clear the checkpoint dir first (ignore resumable "
+                         "sidecars and recompute every cell).")
     args = ap.parse_args()
 
-    seeds = (0,) if args.smoke else None
-    rows, worst = run_sweep(seeds=seeds)
-    write_csv(rows, Path(args.out))
+    seeds = (0,) if args.smoke else cfg.SEEDS
+    out = Path(args.out)
+    _preflight_estimate(seeds, args.jobs, sys.stderr)
+    rows, worst = run_sweep(seeds=seeds, out=out, jobs=args.jobs,
+                            fresh=args.fresh, progress_stream=sys.stderr)
+    write_csv(rows, out)
     guard = "PASS" if worst < 0.05 else "FAIL (> 5% — see calibration)"
-    print(f"wrote {len(rows)} rows -> {args.out}")
+    print(f"wrote {len(rows)} rows -> {out}")
     print(f"worst clipped_fraction = {worst*100:.2f}%  [{guard}]")
 
 

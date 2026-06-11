@@ -21,6 +21,9 @@ results/**/*.png
 # T46 Family B (delay) comparative dataset is tracked — the T48/T50 input.
 !results/delay/
 !results/delay/*.csv
+# T46.1 sweep checkpoint sidecars (per-cell .json) are runtime-only — never
+# tracked. Placed after the delay re-include so it wins for results/delay/.
+results/**/.sweep/
 
 # OS
 .DS_Store
