@@ -18,6 +18,9 @@ results/**/*.png
 # T40 canonical comparative artifacts are tracked (wiki/concepts/output-format).
 !results/baseline/
 !results/baseline/*.csv
+# T46 Family B (delay) comparative dataset is tracked — the T48/T50 input.
+!results/delay/
+!results/delay/*.csv
 
 # OS
 .DS_Store
