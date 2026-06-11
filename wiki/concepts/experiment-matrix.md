@@ -328,3 +328,42 @@ tracks `offered_rate` modulo the finality-tail effect (Casper FFG's
 per-epoch finality leaves the window's trailing slots unfinalized, so its
 in-window `goodput` sits ~20 % below offered, vs ~5 % for the per-instance
 PBFT/Snowman protocols). Evidence: [[experiments/2026-06-03_scaling-baseline]].
+
+### [2026-06-10] T46 — Family B locked methodology (n-axis, buffer/clip, comparison column)
+
+Human decision 2026-06-10 (Week 9) fixes the Family B (Delay) plan. This
+amends §3 and pins the buffer/clip and comparison-column rules the §3 table
+left to the delay tasks. Evidence: [[experiments/2026-06-10_delay-moderate]].
+
+- **`n` axis for Family B (amends §3).** Family B is no longer the fixed
+  `n = 10` of the §3 table; it sweeps **`n ∈ {10, 25}`**. `n = 10` is the
+  shared anchor with Family C; `n = 25` (`3f+1`, `f = 8`) amplifies delay
+  degradation. So Family B plots/aggregates gain an `n` dimension
+  (protocol × timeline × `n`). Snowman `(K, α_c, β)` rescale with `n`
+  (§ Snowman parameter rescaling, [[concepts/metric-reconciliation]]) — at
+  `n = 25`, `K = 20`, `α_c = 16`, `β = 15`; `n = 25` is a normal input, not
+  a margin case. The §3 "Why `n = 10` for Families B and C" paragraph now
+  applies to **Family C only**; Family C (adversarial, T51–T56) **stays at
+  `n = 10`** — the symmetric Family-C-at-`n=25` extension is parked in
+  `TASKS.md` Backlog (2026-06-10) and is not part of this Revision.
+- **Six-timeline Family B plan; T46 lands two.** Family B is the six
+  timelines of [[concepts/experiment-matrix-runs]] §2 (`delay-uniform`,
+  `delay-exponential`, `delay-heavy-tail`, `delay-heavy-tail-loss`,
+  `partial-sync-gst`, plus the `static-baseline` `constant` RQ1 point). T46
+  lands exactly **two**: `delay-uniform` (uniform[100, 500] ms, mean
+  300 ms) and `delay-exponential` (exponential mean 300 ms), both
+  `E[delay] = 300 ms` ⇒ FFG `slot_duration = 1200 ms` (§5). T47 owns the
+  heavy-tail / loss / partial-sync-gst timelines.
+- **Buffer/clip rule (pins the 2026-05-18 Backlog decision).** Time-bounded
+  delay runs run to `W + buffer` with `buffer ≥` one full protocol round;
+  metrics cover every instance that **started** in `[0, W]` even if it
+  finalizes in the buffer; events with `t > W` are clipped. Calibration is a
+  per-task self-check: probe one seed/regime → measure one-round latency →
+  set `buffer` to that, `W` large enough for `≥ 25` decisions, assert
+  clipped-fraction `< 5 %` (else flag Blocked). T46's calibration:
+  `W = 480 s`, `buffer = 48 s` (Snowman's ≈ 16 s `β`-poll tail is binding);
+  guard PASS.
+- **Cross-protocol latency column = `commit_latency_ms`** (uniformly defined
+  for all three protocols), **not** `finality_latency_ms` — see
+  [[concepts/output-format]] §13. Each timeline's `slot_duration` is recorded
+  on the output so plots can annotate it (§5 "reported not hidden").
