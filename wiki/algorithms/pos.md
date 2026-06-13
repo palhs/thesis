@@ -325,6 +325,22 @@ Hypotheses to evaluate in the results chapter:
     future-work hypotheses; they depend on penalty application and
     LMD-GHOST, both deferred.
 
+- **2026-06-12 (T47, heavy-delay robustness).** `CasperNode._attest` guards
+  its *source* checkpoint lookup symmetrically with the pre-existing target
+  guard. Under the T47 heavy-tail regime ([[experiments/2026-06-12_delay-heavy]]),
+  a node can mark an epoch justified from aggregated FFG votes before that
+  epoch's checkpoint **block** has been delivered locally (blocks and
+  attestations travel under independent heavy-tailed delay), so
+  `chain.checkpoint(highest_justified)` could miss and crash the run with a
+  `KeyError`. The node now skips that slot's attestation gracefully (emits
+  `casper_rejected`, reason `source_checkpoint_unavailable`) and retries on a
+  later slot once the block arrives — the "finalisation simply stalls"
+  behaviour [[#behaviour-under-network-delay]] already describes, now actually
+  realised in code rather than aborting. No-op under low delay (the source
+  block is always present), so the T46 moderate-delay dataset and the honest
+  baselines are byte-identical. Covered by
+  `tests/pos/test_node_attest_source_guard.py`.
+
 ## Sources
 
 Citations `[7]`, `[8]` resolve via [[concepts/annotated-bibliography]]

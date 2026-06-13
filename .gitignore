@@ -24,6 +24,8 @@ results/**/*.png
 # T46.1 sweep checkpoint sidecars (per-cell .json) are runtime-only — never
 # tracked. Placed after the delay re-include so it wins for results/delay/.
 results/**/.sweep/
+# T47 heavy-sweep checkpoint sidecars (same rationale).
+results/**/.sweep_heavy/
 
 # OS
 .DS_Store

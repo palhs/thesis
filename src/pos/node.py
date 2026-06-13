@@ -205,7 +205,21 @@ class CasperNode(Node):
             self._reject(t, "checkpoint_unavailable", epoch=epoch, slot=slot)
             return
         source_epoch = self.highest_justified
-        source_cp = self.chain.checkpoint(source_epoch)
+        # Symmetric to the target guard above: under heavy network delay a
+        # node can mark an epoch justified (from aggregated FFG votes) before
+        # that epoch's checkpoint BLOCK has been delivered locally, so the
+        # source-checkpoint lookup can miss. A validator cannot form a valid
+        # FFG vote without its source block, so it skips this slot's
+        # attestation and retries on a later slot once the block arrives.
+        # No-op under low delay (source block always present), so the T46 /
+        # honest baselines are byte-identical. Exposed by the T47 heavy-tail
+        # regime (see pos.md ## Revisions 2026-06-12).
+        try:
+            source_cp = self.chain.checkpoint(source_epoch)
+        except KeyError:
+            self._reject(t, "source_checkpoint_unavailable",
+                         epoch=epoch, slot=slot, source_epoch=source_epoch)
+            return
         ffg = FFGVote(source_epoch=source_epoch,
                       source_hash=source_cp.block_hash,
                       target_epoch=epoch,
