@@ -342,55 +342,64 @@ the double+surround slashing decision were human-approved 2026-06-04.
 
 ## Measurement follow-up — finality semantics
 
-Cross-cutting measurement fix surfaced by the 2026-06-14 T49 theory-vs-data
-validation and refined by T49.1: `finality_latency_ms` does not yet capture a
-genuine finality lag for the non-PBFT protocols. Consolidates the two related
-Backlog items (the 2026-06-05 client-observation-hop item and the 2026-06-14
-finality≠commit item) into one Engineer task. Not week-bound — but it gates any
-cross-protocol *finality* axis in Ch. 4 (T50/T56), so resolve before those lean
-on `finality_latency_ms`.
+Labeling/definition cleanup surfaced by the 2026-06-14 T49 validation and
+clarified in the T49.1 follow-up discussion. **Not a Ch. 4 blocker:** the
+cross-protocol latency comparison already routes through `commit_latency_ms`
+(output-format §13), and — see below — that column already measures the
+*irreversibility (finality)* milestone for all three protocols, so the T48/T49
+ranking and T50/T56 are unaffected. Consolidates the two related Backlog items
+(2026-06-05 client-observation-hop M + 2026-06-14 finality≠commit H) into one
+task. Not week-bound.
 
-- `[ ]` **T71** `H` Engineer — Resolve the FFG/Snowman `finality_latency_ms ≡ commit_latency_ms` gap (implement a genuine finality event, or formally retract the column)
-  _Outcome:_ The Casper FFG and Snowman reducers emit `finality_latency_ms`
-  equal to `commit_latency_ms` by construction (a single finalisation `decided`
-  event; no distinct pre-final commit state — `src/pos/summarise.py`,
-  `src/snowman/summarise.py`), so the cross-protocol finality axis is degenerate
-  and [[concepts/metric-reconciliation]] §Finality semantics' mandated commit↔finality
-  gap is unmeasured for those two protocols. **PBFT is already correct and out
-  of scope:** its T70 reducer emits a distinct `pbft_client_finalized` event, so
-  PBFT finality > commit on every row (≈10⁻⁶ ms at the zero-delay baseline,
-  growing to tens–hundreds of ms under delay). Pick **one** path, decided with
-  the user first (eval-methodology decision per the human-in-loop rule):
-  **(A) implement genuine finality** — FFG finalisation ≥ 2 epochs after the
-  containing block's commit (justify→finalise), Snowman finalisation after the
-  `β`-th successful poll — then regenerate the baseline + delay datasets so the
-  commit↔finality gap is real and per-protocol-documented; or **(B) formally
-  retract** `finality_latency_ms` from the schema, keep `commit_latency_ms` as
-  the sole canonical cross-protocol latency column, and document that this
-  simulator measures commit-time only. Consult the user on measurement
-  methodology before implementing. Determinism preserved; new unit + e2e tests;
-  honest baselines otherwise unchanged. Supersedes the two Backlog finality
-  items (2026-06-05 client-hop M + 2026-06-14 finality≠commit H). **Data-regeneration
-  scope (no T47 re-run by default):** path B, or path A done *additively* (a new
-  finality event layered on while the existing commit/`decided` event and
-  `commit_latency_ms` stay frozen), needs **no T41/T46/T47 re-run** — the
-  resilience ranking (T48/T49) and `finalization_rate` ride on commit/decided
-  semantics, which stay byte-identical. A sweep re-run is required only if path A
-  *redefines* the existing commit/`decided` event (shifting `commit_latency_ms`
-  or finalisation timing) or if a new cross-protocol *finality-latency-under-delay*
-  claim is introduced — neither is currently needed, so prefer the additive design
-  that avoids it. · _Artifact:_
-  `src/pos/`, `src/snowman/`, `src/output/`, regenerated `results/{baseline,delay}/*.csv`
-  (path A) or schema edit only (path B); `## Revisions` on
-  [[concepts/output-format]] + [[concepts/metric-reconciliation]] +
-  [[concepts/evaluation-metrics]]; experiment page if data regenerates ·
-  _Verify:_ either `finality_latency_ms` differs from `commit_latency_ms` for
-  FFG and Snowman with a documented per-protocol finality semantics and the
-  gap re-derives, **or** the column is removed from the schema and every page
-  that referenced it is updated; the T49.1 §Finality-semantics simulator notes
-  on `metric-reconciliation.md`/`evaluation-metrics.md` are reconciled to the
-  chosen path; `make test` green; byte-identical determinism re-run per protocol;
-  the loss-resilience ranking (uses `commit_latency_ms`) is unaffected
+- `[ ]` **T71** `M` Engineer — Relabel `commit_latency_ms` as the canonical finality/irreversibility latency + retract the redundant `finality_latency_ms` (optional: add an earlier commit/inclusion metric for FFG/Snowman)
+  _Outcome:_ **The existing comparison is already correct — this is a labeling
+  fix, not a data fix.** Each protocol's `decided` event already marks its
+  *irreversibility* ("point of no return") milestone: PBFT `2f+1` `COMMIT`, FFG
+  *finalised* checkpoint (justify→finalise, ≥ 2 epochs), Snowman *β-acceptance*
+  (`src/pos/summarise.py`, `src/snowman/summarise.py`). So today's
+  `commit_latency_ms` *already* aligns the three irreversibility milestones —
+  which is exactly why the T48/T49 resilience comparison on it is valid. The
+  defect is cosmetic + redundant: (i) the column named `commit_latency_ms`
+  actually holds *finality* for FFG/Snowman (mislabel), and (ii)
+  `finality_latency_ms` duplicates it — FFG/Snowman equal by construction; PBFT's
+  is the `f+1` client `REPLY`, a near-zero client-observation hop past `2f+1`
+  COMMIT, not a different irreversibility point. Pick a path, decided with the
+  user first (eval-methodology, human-in-loop):
+  **(B, recommended) Relabel + retract.** Document/rename `commit_latency_ms` as
+  the canonical *time-to-finality (irreversibility)* column for all three;
+  retract `finality_latency_ms` (or keep it explicitly scoped as PBFT-only
+  client-observed finality). Pure schema + doc edit; CSV values byte-identical;
+  **no T41/T46/T47 re-run.**
+  **(A, optional enrichment) Add the *earlier, reversible* commit/inclusion
+  milestone** — FFG block *inclusion* (before finalisation), Snowman *pre-β*
+  first-poll preference — as a NEW metric distinct from finality, so the genuine
+  commit(reversible)→finality(irreversible) lag becomes reportable. **Direction
+  matters: the missing milestone is *earlier* than today's `decided`, not later
+  — do NOT add a finality event after `decided`; `decided` already IS finality
+  (would double-count).** PBFT has no meaningful reversible-inclusion stage
+  (commit is immediately final), so its inclusion ≈ finality. Needs new
+  instrumentation + dataset regen to *populate the new column*, but the existing
+  irreversibility comparison stays valid on the current `commit_latency_ms`
+  values (T48/T49 unchanged).
+  **Caveat to document either way:** the three irreversibility milestones differ
+  in *nature* — PBFT/FFG deterministic (FFG accountable: reverting costs ≥ 1/3
+  slashed stake), Snowman *probabilistic* (residual revert prob `≤ ε = (1−α_c/K)^β`,
+  ≈ 10⁻¹⁵ at n=10). Ch. 4 should label Snowman finality as probabilistic-with-`ε`;
+  the empirical/analytical `ε` columns that quantify this residual are the
+  Family-C (T51+) deferral already flagged by T49.1. Determinism preserved; new
+  unit + e2e tests where code changes. Supersedes the two Backlog finality items.
+  · _Artifact:_ `## Revisions` on [[concepts/output-format]] +
+  [[concepts/metric-reconciliation]] + [[concepts/evaluation-metrics]] (path B);
+  plus `src/pos/`, `src/snowman/`, `src/output/` + regenerated
+  `results/{baseline,delay}/*.csv` + experiment page (path A) · _Verify:_ the
+  cross-protocol latency column is documented as the irreversibility/finality
+  milestone (PBFT 2f+1 COMMIT = FFG finalised = Snowman β-accepted) and
+  `finality_latency_ms` is either retracted or scoped to one well-defined
+  meaning; the T49.1 §Finality-semantics notes on
+  `metric-reconciliation.md`/`evaluation-metrics.md` reconcile to the chosen
+  path; `make test` green; under path B the CSVs are byte-identical (no re-run);
+  under path A the new inclusion column re-derives and the existing T48/T49
+  numbers are unchanged
 
 ---
 
