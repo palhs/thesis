@@ -16,7 +16,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from common.sweep import run_grid, estimate_runtime, SweepCellError
+from common.sweep import (run_grid, run_grid_tiered, estimate_runtime,
+                          SweepCellError)
 
 
 # --- Module-level fixtures (picklable under spawn). ----------------------
@@ -178,6 +179,70 @@ class TestJobsEquivalence(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d1, \
                 tempfile.TemporaryDirectory() as d2:
             self.assertEqual(run(1, d1), run(4, d2))
+
+
+def _heavy_n25(cell):
+    # The "memory-heavy" class for the tiered-scheduling tests: n >= 25.
+    _proto, n, _seed = cell
+    return n >= 25
+
+
+class TestTieredScheduling(unittest.TestCase):
+    # A mixed grid: light (n=7) + heavy (n=25) cells.
+    _CELLS = [("a", n, s) for n in (7, 25) for s in range(6)]
+
+    def _tiered(self, d, *, jobs, heavy_jobs):
+        return run_grid_tiered(
+            self._CELLS, _fake_run_cell, _key,
+            checkpoint_dir=Path(d) / ".sweep",
+            run_constants={"commit_hash": "H"}, param_fingerprint=_fp,
+            is_heavy=_heavy_n25, jobs=jobs, heavy_jobs=heavy_jobs)
+
+    def _plain(self, d, *, jobs):
+        return run_grid(self._CELLS, _fake_run_cell, _key,
+                        checkpoint_dir=Path(d) / ".sweep",
+                        run_constants={"commit_hash": "H"},
+                        param_fingerprint=_fp, jobs=jobs)
+
+    def test_tiered_equals_plain_run_grid(self):
+        # Tiering changes only scheduling: byte-identical collected rows to a
+        # single run_grid, so the sweep-harness induction is preserved.
+        with tempfile.TemporaryDirectory() as d1, \
+                tempfile.TemporaryDirectory() as d2:
+            self.assertEqual(self._tiered(d1, jobs=4, heavy_jobs=1),
+                             self._plain(d2, jobs=1))
+
+    def test_heavy_jobs_independent_of_result(self):
+        # The heavy-tier concurrency cannot perturb a row.
+        with tempfile.TemporaryDirectory() as d1, \
+                tempfile.TemporaryDirectory() as d2:
+            self.assertEqual(self._tiered(d1, jobs=4, heavy_jobs=1),
+                             self._tiered(d2, jobs=2, heavy_jobs=2))
+
+    def test_all_cells_present_and_partitioned(self):
+        with tempfile.TemporaryDirectory() as d:
+            rows = self._tiered(d, jobs=4, heavy_jobs=1)
+            self.assertEqual(len(rows), len(self._CELLS))   # nothing dropped
+            self.assertEqual(sum(1 for r in rows if r["n"] == 25), 6)
+            self.assertEqual(sum(1 for r in rows if r["n"] == 7), 6)
+
+    def test_resume_reuses_sidecars_across_tiers(self):
+        # A full tiered run, then a second run reuses every sidecar (no
+        # recompute) and returns identical rows.
+        with tempfile.TemporaryDirectory() as d:
+            first = self._tiered(d, jobs=2, heavy_jobs=1)
+            second = run_grid_tiered(
+                self._CELLS, _raise_if_recompute, _key,
+                checkpoint_dir=Path(d) / ".sweep",
+                run_constants={"commit_hash": "H"}, param_fingerprint=_fp,
+                is_heavy=_heavy_n25, jobs=2, heavy_jobs=1)
+            self.assertEqual(first, second)
+
+
+def _raise_if_recompute(cell, run_constants):
+    # Used only by the resume test: if invoked at all, a sidecar was wrongly
+    # recomputed instead of reused.
+    raise AssertionError(f"run_cell must not be invoked on resume: {cell}")
 
 
 class TestJobsClamp(unittest.TestCase):

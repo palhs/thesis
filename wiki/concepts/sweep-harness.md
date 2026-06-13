@@ -149,9 +149,43 @@ drop coin, phase advance) is [[concepts/network-model-phases]]. The T41
 baseline sweep (`src/output/baseline.py`) is untouched — adoption there is a
 separate decision.
 
+## 9. Memory-aware tiered scheduling (`run_grid_tiered`, T47)
+
+`run_grid`'s §6 memory ceiling — "`chunksize=1` bounds residency to `jobs`
+concurrent runs" — bounds the *count* of in-flight cells, not their *size*.
+When the heaviest cell is large, `jobs × heaviest-cell` can still exceed RAM:
+the T47 Snowman n=25 heavy sweep OOM'd at `jobs=2` because two cells each
+materialize ~20–30 M `EventRecord`s (~5 GB) and `2 × 5 GB` + the OS pushed a
+16 GB machine into swap-death (a worker was OS-killed and the `Pool` hung).
+
+`run_grid_tiered(cells, …, is_heavy, jobs, heavy_jobs)` fixes this at the
+scheduling layer: it partitions cells by `is_heavy(cell)` and runs the LIGHT
+tier at `jobs`, then the HEAVY tier at `heavy_jobs` (default 1, one at a
+time). Peak memory is bounded by `max(jobs × light-footprint, heavy_jobs ×
+heavy-footprint)` instead of `jobs × heaviest`.
+
+- **Byte-identical to `run_grid`.** Both tiers write into the same
+  `checkpoint_dir`, and the function ends with a full `run_grid(cells)` —
+  every sidecar is then present, so that final call computes nothing and just
+  collects, globally sorted by `cell_key`. Tiering changes only *scheduling*;
+  the §4 total order and the induction (§1, [[experiments/2026-06-12_sweep-harness]])
+  are untouched. A driver-level test asserts `tiered == plain run_grid`.
+- **`is_heavy` runs only in the parent** (partitioning), so it need not be
+  picklable — unlike `run_cell`/`cell_key`/`param_fingerprint` (§6).
+- **Mitigation, not cure.** It bounds memory but not per-cell wall-clock; the
+  heavy class still runs ~serially. The O(1)-memory cure is the streaming
+  reducer (TASKS.md Backlog 2026-06-12, supersedes deferred item (e)) — fold
+  metrics as events emit instead of materializing the full list — which would
+  let `heavy_jobs` rise. Land it before the larger T51–T56 sweeps.
+
 ## Revisions
 
-_None yet._ (When a future change contradicts a claim here — e.g. a
-streaming reducer that changes the memory ceiling (item (e)), or the T51–T56
-adversarial families adopting the driver — record the contradiction and date
-here per `docs/wiki-spec.md`.)
+### [2026-06-12] T47 — `run_grid_tiered` added (memory-aware scheduling)
+
+The §6 "Memory ceiling" bullet claimed `chunksize=1` bounds residency to
+`jobs` concurrent runs — true for cell *count* but not cell *size*. T47 hit
+the gap (Snowman n=25 heavy, ~5 GB/cell, OOM at `jobs=2`). `run_grid_tiered`
+(§9) is the scheduling-layer mitigation: heavy cells run at `heavy_jobs`.
+Additive (a new function; `run_grid` itself is unchanged), so no prior claim
+is contradicted — recorded here per the new-capability convention. The deep
+O(1)-memory fix (streaming reducer) is a filed follow-up.

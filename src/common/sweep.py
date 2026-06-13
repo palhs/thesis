@@ -128,6 +128,49 @@ def run_grid(cells, run_cell, cell_key, *, checkpoint_dir, run_constants,
     return _collect(cells, cell_key, checkpoint_dir)
 
 
+def run_grid_tiered(cells, run_cell, cell_key, *, checkpoint_dir,
+                    run_constants, param_fingerprint, is_heavy,
+                    jobs=1, heavy_jobs=1, fresh=False, progress_stream=None):
+    """Memory-aware `run_grid`: partition `cells` by `is_heavy(cell)` and run
+    the LIGHT tier at `jobs` then the HEAVY tier at `heavy_jobs`, sequentially.
+
+    Peak memory is bounded by the heavier of (`jobs` × light-cell footprint)
+    and (`heavy_jobs` × heavy-cell footprint), instead of `jobs` × the
+    heaviest cell — which is what OOM'd the T47 Snowman n=25 sweep at jobs=2
+    (two ~5 GB cells > 16 GB). The default `heavy_jobs=1` runs the heavy class
+    one cell at a time.
+
+    Output is BYTE-IDENTICAL to a single `run_grid(cells, jobs=...)`: both
+    tiers write into the same `checkpoint_dir`, and the function ends with a
+    full `run_grid` over the entire `cells` list — every sidecar is now
+    present, so that final call computes nothing and just collects, globally
+    sorted by `cell_key`. Tiering changes only the *scheduling*, never a row
+    (the sweep-harness induction is preserved). `is_heavy` runs only in the
+    parent (partitioning) and need not be picklable.
+    """
+    cells = list(cells)
+    light = [c for c in cells if not is_heavy(c)]
+    heavy = [c for c in cells if is_heavy(c)]
+    if light:
+        run_grid(light, run_cell, cell_key, checkpoint_dir=checkpoint_dir,
+                 run_constants=run_constants,
+                 param_fingerprint=param_fingerprint,
+                 jobs=jobs, fresh=fresh, progress_stream=progress_stream)
+    if heavy:
+        # fresh=False: a fresh light tier already cleared the dir; clearing
+        # again here would wipe the light sidecars just written.
+        run_grid(heavy, run_cell, cell_key, checkpoint_dir=checkpoint_dir,
+                 run_constants=run_constants,
+                 param_fingerprint=param_fingerprint,
+                 jobs=heavy_jobs, fresh=False, progress_stream=progress_stream)
+    # Final collect over the FULL grid (all sidecars present) — identical
+    # to a single run_grid(cells): pending is empty, so nothing recomputes.
+    return run_grid(cells, run_cell, cell_key, checkpoint_dir=checkpoint_dir,
+                    run_constants=run_constants,
+                    param_fingerprint=param_fingerprint,
+                    jobs=1, fresh=False, progress_stream=None)
+
+
 def estimate_runtime(sample_cells, run_cell, run_constants) -> dict:
     """Pre-flight wall-clock estimate (item d): time one full run per
     sample cell and return `{cell: seconds}`. The caller multiplies these
