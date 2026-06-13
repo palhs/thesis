@@ -52,11 +52,13 @@ sequenceDiagram
     Note over Primary,ReplicaD: liveness recovery — taken only if the instance stalls
 
     opt view-change timer fires before committed
-        ReplicaB->>ReplicaC: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
+        Note over Primary,ReplicaD: new_view = view + 1 = 1 — new primary = new_view mod n = ReplicaB
+        ReplicaC->>ReplicaB: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
+        ReplicaD->>ReplicaB: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
         Note over ReplicaB,ReplicaD: cross-instance — view_changing set, all (view, *) instances frozen
-        Note over Primary,ReplicaD: new primary = new_view mod n collects 2f+1 VIEW-CHANGE
-        ReplicaC->>Primary: NEW-VIEW(new_view, vc_proofs, reissued_pre_prepares)
-        Note over Primary,ReplicaD: advance current view — replay prepared-not-committed instances
+        Note over Primary,ReplicaD: ReplicaB (new primary) collects 2f+1 VIEW-CHANGE
+        ReplicaB->>Primary: NEW-VIEW(new_view, vc_proofs, reissued_pre_prepares)
+        Note over Primary,ReplicaD: ReplicaB also broadcasts NEW-VIEW to ReplicaC, ReplicaD (arrows omitted) — advance current view, replay prepared-not-committed
     end
 ```
 

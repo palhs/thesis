@@ -25,7 +25,7 @@ sequenceDiagram
 
     rect rgb(240,240,240)
         Note over Proposer,AttesterD: slot — propose
-        Proposer->>Proposer: on_timer(slot) — slot proposer = deterministic(global_seed, epoch), batch mempool
+        Proposer->>Proposer: on_timer(slot) — slot proposer = stake-weighted deterministic(global_seed, slot), batch mempool
         Proposer->>AttesterB: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
         Proposer->>AttesterC: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
         Proposer->>AttesterD: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
@@ -72,8 +72,8 @@ is a fraction of total stake ([[concepts/node-model]] §2); the handler
 sums `attester.weight`, it does not count attestations.
 
 **The proposer schedule is seed-derived, not RANDAO.** The slot
-proposer is `deterministic(global_seed, epoch)` — an FSM-level
-derivation identical on every node, independent of `self.rng`
+proposer is a stake-weighted `deterministic(global_seed, slot)` — an
+FSM-level derivation identical on every node, independent of `self.rng`
 ([[concepts/node-model]] §5). The simulator does not model RANDAO.
 
 **Slashing is a halt, not just a metric.** A verified
