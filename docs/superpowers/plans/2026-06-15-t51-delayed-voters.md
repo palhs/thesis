@@ -1186,6 +1186,7 @@ from pos.summarise import summarise as _pos_summarise
 from snowman.summarise import summarise as _snowman_summarise
 
 from delay.clip import clip_records
+from delay.sweep import _window_denominator_fix
 
 from . import config as cfg
 from .runners import RUNNERS
@@ -1233,6 +1234,7 @@ def _build_row(records: list[EventRecord], result: RunResult,
 
     row = _generic_cols(records, result, meta, commit_hash=commit_hash)
     row.update(_REDUCERS[meta.protocol](records, result, meta))
+    _window_denominator_fix(row, records, meta)
 
     view_changes = sum(1 for r in records
                        if r.event_type == PBFT_VIEW_CHANGE)
