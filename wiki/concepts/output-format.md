@@ -13,8 +13,11 @@ table. Four structural asymmetries from
 [[concepts/metric-reconciliation]] propagate into the column set: the
 linear-chain / DAG **output structure** (resolved via the ACU
 denominator on the `*_per_acu` columns); the four **finality regimes**
-(resolved into the `commit_latency_ms` / `finality_latency_ms` column
-split); the Narwhal+Tusk **mempool / consensus message split**
+(resolved into one canonical *time-to-finality (irreversibility)* column,
+`commit_latency_ms` — see §5 and §13 Revisions [2026-06-15]; the
+co-existing `finality_latency_ms` column is retained but scoped PBFT-only
+and must not carry a cross-protocol finality comparison); the Narwhal+Tusk
+**mempool / consensus message split**
 (resolved into two columns, `mempool_msgs_per_acu` and
 `consensus_msgs_per_acu`); and the **Snowman parameter rescaling**
 (resolved into five Snowman-only columns plus the `n=4` boundary policy
@@ -105,6 +108,22 @@ The source of truth for the ordering of the today subset is
 `src/output/schema.py:COLUMN_ORDER`. Adding a future column is a
 one-line edit there plus an extension-register entry on this page.
 
+**Latency-column semantics (T71, §13 Revisions [2026-06-15]).** Despite its
+name, `commit_latency_ms` is the canonical **time-to-finality
+(irreversibility)** column — the median per-node time to each protocol's
+*point of no return*: PBFT `2f+1` `COMMIT`, Casper FFG *finalised* checkpoint
+(justify→finalise), Snowman counter-`β` acceptance. Aligning these three
+irreversibility milestones is exactly what makes the cross-protocol latency
+comparison (T48/T49) valid. `finality_latency_ms` is **not** a second,
+cross-protocol finality axis: for Casper FFG / Snowman it is a structural
+duplicate of `commit_latency_ms` (equal by construction in the reducers); for
+PBFT it is the `f+1` client-`REPLY` observation hop one network step past the
+COMMIT quorum. It is therefore scoped **PBFT-only client-observed finality**
+and must not appear on a cross-protocol axis. The *earlier, reversible*
+commit/inclusion milestone (FFG block inclusion before finalisation, Snowman
+pre-`β` first-poll preference) is a distinct, unimplemented column — the
+deferred Path A enrichment, not anything held by these two columns today.
+
 ## 4. Today's writer subset
 
 24 columns, ordered as `COLUMN_ORDER` (T41 added the four `workload_*`
@@ -137,12 +156,19 @@ Per-block deterministic finality: every `decided` event at a given
   per-node decision time for the first decided instance,
   `1000 · median{r.t : r.event_type == "decided"
   ∧ r.fields["instance_id"] == first}`.
-  **[Superseded post-T70 — see §13 Revisions [2026-06-05].** The two columns
+  [**Superseded post-T70 — see §13 Revisions [2026-06-05].** The two columns
   no longer coincide: T70 finding #1 moved `finality_latency_ms` to the
   `f+1` client `REPLY` round (`pbft_client_finalized`), one network hop past
   the `decided` COMMIT quorum that still defines `commit_latency_ms`. The
   PBFT-only split makes `finality_latency_ms` non-comparable across
-  protocols; cross-protocol latency uses `commit_latency_ms`.]**
+  protocols; cross-protocol latency uses `commit_latency_ms`. **T71
+  [2026-06-15]** fixes the label: `commit_latency_ms` (the `2f+1` COMMIT
+  quorum) IS PBFT's irreversibility milestone and the canonical
+  cross-protocol *time-to-finality* column; `finality_latency_ms` is scoped
+  to PBFT-only client-observed finality (the one-hop client-`REPLY`
+  refinement). PBFT has no meaningful *earlier* reversible-inclusion stage —
+  COMMIT is immediately final — so the deferred Path A inclusion column
+  collapses to finality for PBFT.]
 - `tps = decided_count / result.now`. **T41 re-baseline (§13):** PBFT now
   runs windowed over a fixed `t_max` (fed a continuous arrival stream)
   instead of quiescing after one instance, so `tps` / `consensus_msgs_per_acu`
@@ -168,6 +194,17 @@ calibration delay regime.
   (block-included latency and epoch-finalised latency coincide when no
   reorg occurs; the column split is reserved for the T54
   pre-finality-reorg case where they diverge).
+  [**Corrected — T71, §13 Revisions [2026-06-15].** This bullet conflated two
+  milestones. The FFG `decided` event is emitted *only* at the **finalised
+  checkpoint** (`src/pos/node.py::_finalise`, gated on the justify→finalise
+  `finalised_source` rule, `≥ 2` epochs), **not** at block inclusion. So
+  `commit_latency_ms` holds the *finalisation (irreversibility)* time, and
+  `finality_latency_ms` is set equal to it in the reducer — a structural
+  duplicate carrying no extra information, not an independently-measured
+  finality. The genuine *earlier, reversible* block-inclusion latency (before
+  finalisation) is **not measured** in any column today; it is the deferred
+  Path A enrichment. `finality_latency_ms` therefore carries no FFG-specific
+  meaning and must not go on a cross-protocol finality axis.]
 - `latency_ms = 1000 · median{r.t : r.event_type == "decided"
   ∧ r.fields["instance_id"] == 1}` — per-node first-epoch finalisation
   time.
@@ -187,6 +224,16 @@ block reaches `decided` in every honest-baseline scenario.
 
 - `commit_latency_ms = finality_latency_ms` — Snowman has no separate
   pre-finality state in the implemented model; counter-`β` IS finality.
+  [**T71, §13 Revisions [2026-06-15]:** `commit_latency_ms` therefore holds
+  Snowman's *time-to-finality (irreversibility)* — the canonical
+  cross-protocol column — and `finality_latency_ms` is a structural duplicate
+  (equal by construction). The caveat the comparison must carry is on the
+  *nature* of the milestone, not its timing: Snowman finality is
+  **probabilistic**, with residual revert probability `≤ ε = (1 − α_c/K)^β`
+  (≈ 10⁻¹⁵ at n=10), versus PBFT/FFG deterministic finality. The `ε` columns
+  that quantify this are the Family-C (T51+) deferral. The *earlier,
+  reversible* pre-`β` first-poll preference is the unimplemented Path A
+  inclusion milestone.]
 - `latency_ms = 1000 · median{r.t : r.event_type == "decided"
   ∧ r.fields["instance_id"] == first_block}` (Snowman emits the block
   identity under the `instance_id` field — same key as PBFT/FFG, with
@@ -208,6 +255,14 @@ block reaches `decided` in every honest-baseline scenario.
 Lands with T38.1. The reducer is the open-to-revision surface; its
 addition is one new `src/narwhal_tusk/summarise.py` + one entry in the
 `_REDUCERS` dispatch table.
+
+**T71 note (2026-06-15).** The §3 schema cell and §11 register still list
+`finality_latency_ms` among the columns T38.1's NWT reducer populates; that
+predates the T71 relabel. Under T71, `finality_latency_ms` is scoped PBFT-only
+client-observed finality, so the NWT reducer should either leave it `NaN`
+(NWT's irreversibility milestone — the anchor-batch commit — belongs in
+`commit_latency_ms`, the canonical time-to-finality column) or T38.1 must
+revisit the scoping explicitly. See §13 Revisions [2026-06-15].
 
 ## 6. NaN dispatch policy
 
@@ -458,3 +513,75 @@ across-seed mean (the frequency §3 anticipates). 95% CIs use Student-t with
 `df = 19`. The §11 register entries for the CI columns and `n_runs` flip
 `pending → live`. Statistical-meaning audit and per-protocol theory
 comparison: [[experiments/2026-06-08_baseline-cis]].
+
+### [2026-06-15] T71 — `commit_latency_ms` relabelled as the canonical time-to-finality (irreversibility) column; `finality_latency_ms` retracted to PBFT-only
+
+**The defect is cosmetic, not a data error.** Each protocol's `decided` event
+already marks its *irreversibility* milestone — its point of no return —
+verified against the simulator:
+
+- **PBFT** `decided` fires at the `2f+1` `COMMIT` quorum
+  (`src/pbft/node.py::_accept_commit` → `_emit_decided`, gated on
+  `matching_commits() ≥ 2f+1`).
+- **Casper FFG** `decided` fires *only* at the **finalised** checkpoint
+  (`src/pos/node.py::_finalise`, gated on the justify→finalise
+  `finalised_source` rule, `≥ 2` epochs) — **not** at block inclusion.
+- **Snowman** `decided` fires at counter-`β` acceptance on the poll-close
+  finalise path (`src/snowman/node.py::_close_and_continue` → `_emit_decided`,
+  on `outcome.accepted` from `close_round(…, beta)`).
+
+`commit_latency_ms` is `1000 · median{r.t : r.event_type == "decided" ∧
+instance_id == first}`, so it *already* records each protocol's
+time-to-finality, and aligning these three irreversibility milestones is
+exactly why the T48/T49 cross-protocol resilience comparison on it is valid.
+Two purely-presentational problems remain: (i) the column is **named**
+`commit_*` but **holds** finality for FFG/Snowman (mislabel); (ii)
+`finality_latency_ms` is **redundant** — a structural duplicate of
+`commit_latency_ms` for FFG/Snowman (set equal in the reducers), and for PBFT
+the `f+1` client-`REPLY` observation hop one step past COMMIT, not a separate
+irreversibility point.
+
+**The contract (binding on downstream consumers; supersedes the §5.1/§5.2/§5.3
+`commit_latency_ms = finality_latency_ms` bullets and refines the [2026-06-05]
+entry).**
+
+1. **`commit_latency_ms` is the canonical cross-protocol time-to-finality
+   (irreversibility) column** for PBFT, Casper FFG, and Snowman. Read every
+   "time-to-finality" / "which protocol is faster to finalise" claim off this
+   column. It is the only latency column uniformly defined as the
+   irreversibility milestone across the three implemented protocols.
+2. **`finality_latency_ms` is retracted from cross-protocol use and scoped to
+   PBFT-only client-observed finality** (the `pbft_client_finalized` `f+1`
+   `REPLY` round). For Casper FFG / Snowman it is a structural duplicate of
+   `commit_latency_ms` carrying no independent measurement and must not appear
+   on a cross-protocol axis. The column is **retained physically** (the CSVs
+   are byte-identical — see below); only its documented meaning is narrowed.
+3. **The three irreversibility milestones differ in *nature*, and Chapter 4
+   must say so.** PBFT and Casper FFG finality is *deterministic* (FFG
+   *accountable*: reverting a finalised checkpoint costs `≥ 1/3` slashed
+   stake, [7]); Snowman finality is *probabilistic*, with residual revert
+   probability `≤ ε = (1 − α_c/K)^β` (≈ 10⁻¹⁵ at n=10). Label Snowman finality
+   as probabilistic-with-`ε`. The empirical/analytical `ε` columns that
+   quantify the residual remain the Family-C (T51+) deferral (T49.1).
+4. **The *earlier, reversible* commit/inclusion milestone is a distinct,
+   unimplemented column — the deferred Path A enrichment.** FFG block
+   *inclusion* (before finalisation) and Snowman *pre-`β`* first-poll
+   preference lie **earlier** than `decided`, not later. Adding them would
+   make the genuine reversible-commit → irreversible-finality lag reportable,
+   but needs new instrumentation + a dataset regen. PBFT has no meaningful
+   reversible-inclusion stage (COMMIT is immediately final), so its inclusion
+   ≈ finality. **Do not add a finality event *after* `decided`** — `decided`
+   already IS finality; doing so would double-count.
+
+**No data change.** This is a documentation/label edit only — no reducer,
+schema (`COLUMN_ORDER`), or writer change; `results/{baseline,delay}/*.csv`
+are byte-identical and **no T41/T46/T47 re-run is required**. The cross-
+protocol latency story (T48/T49, and T50/T56) is unaffected because it already
+ran on `commit_latency_ms`.
+
+**Supersedes** the two `TASKS.md` Backlog finality items (the 2026-06-05
+client-observation-hop follow-up and the 2026-06-14 finality≠commit item) and
+reconciles the T49.1 `metric-reconciliation.md` §Finality-semantics note:
+finality *is* measured (it is `commit_latency_ms`); the quantity that note
+called "not yet measured for FFG/Snowman" is the *earlier reversible*
+inclusion milestone (Path A), not finality itself.

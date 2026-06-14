@@ -94,6 +94,26 @@ to simulator output — see §Caveat.
 → Per-protocol formulas for every latency metric:
 [[concepts/metric-reconciliation#latency]].
 
+**Implementation note (T71, 2026-06-15) — column ↔ metric mapping.** Despite
+its name, the `commit_latency_ms` CSV column implements **Time-to-finality**
+above, *not* End-to-end commit latency. Its end-of-clock is each protocol's
+`decided` event, which fires at the **irreversibility** milestone: PBFT `2f+1`
+`COMMIT`, Casper FFG the *finalised* checkpoint (justify→finalise, `≥ 2`
+epochs, **not** block inclusion), Snowman counter-`β` acceptance. It is the
+canonical cross-protocol time-to-finality axis (basis of the T48/T49
+comparison). The `finality_latency_ms` column is **retracted** from
+cross-protocol finality use and scoped to PBFT-only client-observed finality
+(`f+1` client `REPLY`); for Casper FFG / Snowman it is a structural duplicate
+of `commit_latency_ms`, carrying no independent measurement. The **End-to-end
+commit latency** metric above — the *earlier, reversible* inclusion milestone,
+before finality — is **not implemented as a distinct column** for Casper FFG /
+Snowman; populating it is the deferred Path A enrichment. PBFT has no
+reversible-inclusion stage (COMMIT is immediately final), so its inclusion ≈
+finality. Binding contract: [[concepts/output-format]] §13 Revisions
+[2026-06-15]; companion reconciliation:
+[[concepts/metric-reconciliation#finality-semantics]] §Revisions [2026-06-15].
+See §Revisions below.
+
 ## Throughput metrics
 
 - **Transactions per second (tps).** Count of *committed* transactions per
@@ -377,3 +397,18 @@ definition prose honest about what the simulator actually measures:
 
 No metric was renamed or removed; `[[algorithms/pos]]` was already correct and
 is unchanged.
+
+**2026-06-15 (T71) — `commit_latency_ms` is the canonical time-to-finality
+column; `finality_latency_ms` retracted to PBFT-only.** Added the
+column ↔ metric mapping note under §Latency metrics. The `commit_latency_ms`
+CSV column implements the **Time-to-finality** metric defined here (each
+protocol's `decided` event marks its irreversibility milestone — PBFT `2f+1`
+`COMMIT`, FFG the finalised checkpoint, Snowman counter-`β`), *not*
+End-to-end commit latency despite its name; it is the canonical cross-protocol
+latency axis. `finality_latency_ms` is retracted from cross-protocol use and
+scoped to PBFT-only client-observed finality (structural duplicate for
+FFG/Snowman). The **End-to-end commit latency** metric (the earlier reversible
+inclusion milestone) is not implemented as a distinct column for FFG/Snowman —
+the deferred Path A enrichment. No metric renamed or removed; documentation
+edit only, CSVs byte-identical. Binding contract: [[concepts/output-format]]
+§13 Revisions [2026-06-15].
