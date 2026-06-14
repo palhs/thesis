@@ -327,9 +327,9 @@ def main() -> None:
                             heavy_jobs=args.heavy_jobs, fresh=args.fresh,
                             progress_stream=sys.stderr)
     write_csv(rows, out)
-    guard = "PASS" if worst < 0.05 else "FAIL (> 5% — see calibration)"
     print(f"wrote {len(rows)} rows -> {out}")
-    print(f"worst clipped_fraction = {worst*100:.2f}%  [{guard}]")
+    print(f"worst clipped_fraction = {worst*100:.2f}%  "
+          f"(reported, not guarded — Option-B W cap, human 2026-06-15)")
 
 
 if __name__ == "__main__":

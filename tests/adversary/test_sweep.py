@@ -11,10 +11,10 @@ from adversary import config as cfg
 
 class TestGrid(unittest.TestCase):
     def test_cells_per_proto_n_seed(self):
-        # 1 control (f=0) + 3 f × 3 m attack = 10 cells per (proto, n, seed).
+        # 1 control (f=0) + 3 f × 5 m attack = 16 cells per (proto, n, seed).
         cells = sweep._build_cells((0,))
         per = [c for c in cells if c[0] == "pbft" and c[1] == 10 and c[4] == 0]
-        self.assertEqual(len(per), 10)
+        self.assertEqual(len(per), 16)
         controls = [c for c in per if c[2] == 0.0]
         self.assertEqual(len(controls), 1)
         self.assertEqual(controls[0][3], 0.0)            # control m == 0.0

@@ -15,7 +15,7 @@ class TestAxes(unittest.TestCase):
         self.assertEqual(cfg.F_VALUES, (0.0, 0.10, 0.20, 0.30))
 
     def test_m_values(self):
-        self.assertEqual(cfg.M_VALUES, (2.0, 5.0, 10.0))
+        self.assertEqual(cfg.M_VALUES, (2.0, 4.0, 6.0, 8.0, 10.0))
 
     def test_seeds(self):
         self.assertEqual(cfg.SEEDS, tuple(range(20)))

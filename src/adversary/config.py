@@ -27,7 +27,7 @@ from network import DelayDist, Phase
 # to f > 0 cells. n=10 → {0,1,2,3} slow; n=25 → {0,2,5,7} slow (floor).
 N_VALUES: tuple[int, ...] = (10, 25)
 F_VALUES: tuple[float, ...] = (0.0, 0.10, 0.20, 0.30)
-M_VALUES: tuple[float, ...] = (2.0, 5.0, 10.0)
+M_VALUES: tuple[float, ...] = (2.0, 4.0, 6.0, 8.0, 10.0)
 SEEDS: tuple[int, ...] = tuple(range(20))
 
 # --- Per-protocol round cadence ref (shift = m·ref). ---------------------
@@ -48,28 +48,41 @@ SNOWMAN_BETA: int = 15
 FFG_SLOT_DURATION_S: float = 0.1
 FFG_SLOTS_PER_EPOCH: int = 2
 
-# --- Window / buffer / view-change calibration (PROBE-SET; later task). ---
-# Family C runs on the fast static-baseline (10 ms delay), so the window is
-# far shorter than the Family B delay sweeps. WINDOW_S must hold ≥ 25
-# in-window-started decisions for every protocol with clip < 5 %; the worst
-# attack cell (m=10) holds emissions by up to 10·ref = 10 s (PBFT/Snowman),
-# so the buffer must clear one such delayed round. Confirm via --probe.
-WINDOW_S: float = 120.0
-BUFFER_S: float = 24.0
+# --- Window / buffer / view-change calibration (PROBE-SET 2026-06-15). ----
+# Family C runs on the fast static-baseline (10 ms delay). Probe (worst attack
+# f=0.30, m=10): first-finality is 1.03 s (PBFT, unchanged — honest quorum of 7
+# is met without the ≤3 slow backups), 0.51 s (Casper FFG), but 71 s for
+# Snowman at n=10 / 61 s at n=25 (β=15 sequential polls repeatedly sampling a
+# slow responder). WINDOW_S=150 captures every protocol's worst first-finality
+# with margin, so the headline finality_delay_ratio (first in-window decision)
+# is well-defined for every cell. Per the human 2026-06-15 decision the clip is
+# REPORTED, not guarded at <5% (the T47 Option-B precedent): Snowman's heavily
+# attacked cells spill a large finalization tail past W (~37% at m=10) that no
+# tractable window removes, and that spill is itself a degradation signal.
+# BUFFER_S=80 ≥ one full Snowman block-finalization under the worst attack
+# (~71 s), so an instance started just before W can still finalize in-run.
+WINDOW_S: float = 150.0
+BUFFER_S: float = 80.0
 T_MAX: float = WINDOW_S + BUFFER_S
 
-# PBFT view-change timeout: realistic (≈ 3× honest round) so a slow backup that
-# pushes a vote past it trips an OBSERVABLE view-change (the §3 invariant),
-# while honest (f=0) cells never rotate. Probe-confirmed (view_change_count
-# = 0 at f=0, > 0 under attack at large m). PROBE-SET.
+# PBFT view-change timeout. Probe finding: at f ≤ 0.30 the honest quorum is met
+# without the slow backups, so PBFT never rotates the leader (view_change_count
+# = 0 at every f, m) — delayed *backups* below the fault threshold do not stall
+# the primary. vc_delay is kept realistic (≈ 3× honest round); it does not fire
+# in this experiment, which is itself the finding (reported in the experiment
+# page, not engineered around).
 PBFT_VC_DELAY_S: float = 3.0
 
 # Per-protocol one-round latency (the "started in [0,W]" scope bound for the
-# clip). PROBE-SET from the worst-magnitude probe cell.
+# clip). PROBE-SET 2026-06-15 from the worst-magnitude (m=10) cell: PBFT and
+# FFG finalize a round in ≈1 s and ≈0.5 s (scope bound 2 s); Snowman's worst
+# single-block finalization under attack is ≈71 s, so its scope bound is sized
+# to keep those crippled-but-finalizing instances in-scope (their inflated
+# latency is the headline, not noise to be dropped as "late").
 ONE_ROUND_S: dict[str, float] = {
-    "pbft":       12.0,
-    "casper-ffg": 4.0,
-    "snowman":   12.0,
+    "pbft":       2.0,
+    "casper-ffg": 2.0,
+    "snowman":   72.0,
 }
 
 # --- Workload axis (experiment-matrix §6 committed defaults). ------------
