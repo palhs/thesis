@@ -906,7 +906,7 @@ def run_pbft(n: int, f: float, m: float, seed: int) -> RunTriple:
 
     meta = _meta("pbft", f"pbft-n{n}", n, seed, propose, None)
     handle = build_run(_config(n), seed, make)
-    inject_delay(handle, slow_node_ids(n, f), m, cfg.REF_S["pbft"])
+    inject_delay(handle, slow_node_ids(n, f), m, cfg.REF_S["pbft"], f)
     result, logger = run_to_completion(handle, t_max=cfg.T_MAX)
     return logger.records, result, meta
 
@@ -927,7 +927,7 @@ def run_ffg(n: int, f: float, m: float, seed: int) -> RunTriple:
 
     meta = _meta("casper-ffg", f"casper-ffg-n{n}", n, seed, slot, spe)
     handle = build_run(_config(n), seed, make)
-    inject_delay(handle, slow_node_ids(n, f), m, cfg.REF_S["casper-ffg"])
+    inject_delay(handle, slow_node_ids(n, f), m, cfg.REF_S["casper-ffg"], f)
     result, logger = run_to_completion(handle, t_max=cfg.T_MAX)
     return logger.records, result, meta
 
@@ -945,7 +945,7 @@ def run_snowman(n: int, f: float, m: float, seed: int) -> RunTriple:
 
     meta = _meta("snowman", f"snowman-n{n}", n, seed, slot, None)
     handle = build_run(_config(n), seed, make)
-    inject_delay(handle, slow_node_ids(n, f), m, cfg.REF_S["snowman"])
+    inject_delay(handle, slow_node_ids(n, f), m, cfg.REF_S["snowman"], f)
     result, logger = run_to_completion(handle, t_max=cfg.T_MAX)
     return logger.records, result, meta
 
