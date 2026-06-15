@@ -281,3 +281,22 @@ page (or on [[concepts/adversary-model]]) when resolved.
 
 Inherits the bibliography of [[concepts/adversary-model#9-sources]].
 No additional sources are introduced on this page.
+
+## Revisions
+
+### [2026-06-14] T51 — `DelayProfile` implemented; fixed-magnitude delay needs no adversary RNG
+
+T51 implemented the §4 `DelayProfile` reference sketch as
+`src/adversary/profiles.py` (a frozen dataclass: `nodes`, `intensity` = realized
+`f`, `mult` = `m`, `kind="delay-emission"`), trimmed to what the delay capability
+needs. Key refinement to §5 (determinism): because the delay magnitude `m` is a
+**fixed constant**, the injected shift `m·ref` is deterministic and consumes **no
+adversary RNG** — each slow node's protocol RNG stream is byte-identical to
+honest; the node is only *late*. So the §5 per-node adversary RNG (seeded from
+`global_seed`) is **not exercised by `delay-emission`**; it is needed only by
+capabilities with randomized choices (e.g. T53's equivocation subset), and its
+verification is deferred to those tasks. The §3 effect-schema columns this page
+lists as not-yet-defined upstream remain a T40 follow-up; T51's CSV uses the
+existing T40 schema plus a Family-C annotation block (see
+[[concepts/output-format]] and the experiment page). Evidence:
+[[experiments/2026-06-14_delayed-voters]].

@@ -698,3 +698,20 @@ No other §s affected.
   `tests/nodes/test_node.py::test_negative_node_id_rejected`,
   `test_nan_weight_rejected`, `test_pos_inf_weight_rejected`,
   `test_neg_inf_weight_rejected`.
+
+### 2026-06-14 — §9 `delayer` realized at the bound outbound API, not FSM dispatch (T51)
+
+T51 ([[experiments/2026-06-14_delayed-voters]]) filled the `self.adversary` slot
+for the first time, with a `delay-emission` `DelayProfile`. The §9 matrix says
+the `delayer` capability "gates `broadcast` / `send`" and contemplates the FSM
+dispatching through `self.adversary`. T51 realized this **pragmatically**: it
+re-wraps the slow node's *bound* `send`/`broadcast` (the lambdas `Network.bind`
+installs) **after `build_run`**, shifting `t_sent` by a fixed `m·ref`, rather than
+threading the FSM through `self.adversary`. For the delay capability — which
+neither rewrites payloads nor drops/forks messages — the bind-seam wrap is
+behaviourally identical to FSM-level dispatch and far less invasive (no protocol
+FSM edits, all frozen baselines byte-identical). The `self.adversary` slot is
+still populated (with the `DelayProfile`, for provenance). The deeper "FSM
+dispatches through `self.adversary`" path the §9 matrix anticipates remains the
+contract for T52 (withhold) / T53 (equivocate), which *do* alter message content
+or participation. Binding semantics live in [[concepts/adversary-model]] §3.

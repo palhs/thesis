@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 77 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 72 · In Review: 0 · In Progress: 1 · Not Started: 20 · Blocked: 2
+- Completed: 72 · In Review: 1 · In Progress: 0 · Not Started: 20 · Blocked: 2
 
 ## Legend
 
@@ -237,7 +237,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 10 — Adversarial experiments
 
-- `[~]` **T51** `H` Engineer — Simulate delayed voters (intentionally slow nodes)
+- `[?]` **T51** `H` Engineer — Simulate delayed voters (intentionally slow nodes)
   _Outcome:_ 10–30% slow nodes (2–10× normal delay); impact on finality time · _Artifact:_ experiment page
 - `[ ]` **T52** `H` Engineer — Simulate non-participating validators (offline)
   _Outcome:_ 10–33% offline; success/failure boundary identified · _Artifact:_ experiment page

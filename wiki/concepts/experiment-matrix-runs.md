@@ -196,3 +196,24 @@ amendment is Family-B-only; the symmetric Family-C-at-`n=25` extension
 (which would roughly double the largest family) is a separate human roadmap
 decision parked in `TASKS.md` Backlog (2026-06-10) and is **not** folded
 into this budget.
+
+### [2026-06-14] T51 — Family C extended to `n ∈ {10,25}` + a swept magnitude axis (supersedes the n=10 freeze above)
+
+Human decisions (2026-06-14 / 2026-06-15) resolve the parked roadmap item: Family
+C now runs at **`n ∈ {10, 25}`** and adds a **magnitude axis `m ∈ {2,4,6,8,10}`**
+to the `delay-emission` intensity grid, with `f ∈ {0,0.10,0.20,0.30}` (`f=0` =
+honest control). The §3 design rationale is on [[concepts/experiment-matrix]]
+§Revisions.
+
+**Family C `delay-emission` budget (T51).** 3 protocols × 2 `n` ×
+(1 control + 3 `f` × 5 `m` = 16 cells) × 20 seeds = **1920 runs**
+(`results/adversary/delayed_voters.csv`). No seed cap was needed — Family C runs
+on the fast static-baseline (10 ms) network, so even the heaviest Snowman `n=25`
+cell is ~900k events (≈40 s wall), unlike the multi-GB T47 heavy-tail cells; the
+tiered scheduler ran the Snowman `n=25` tier at `--heavy-jobs 4`.
+
+**Budget impact.** This adds the 1920-run `delay-emission` block (T52 withhold /
+T53 equivocate will add comparable blocks on the same axes). The §4 grand total
+above (≈ 3000 runs, the three in-scope protocols) is correspondingly larger; the
+Family C portion is no longer the single-`n`, single-magnitude sketch the §4
+budget assumed. Evidence: [[experiments/2026-06-14_delayed-voters]].
