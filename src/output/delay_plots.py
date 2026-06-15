@@ -220,7 +220,8 @@ def fig_moderate_latency(moderate) -> str:
         ax.set_yscale("log")
         _grid(ax)
     axes[0].set_ylabel("commit latency (ms, log)")
-    axes[0].legend(frameon=False, title="moderate timeline (E=300 ms)")
+    axes[0].legend(loc="upper left", frameon=True, framealpha=0.9,
+                   title="moderate timeline (E=300 ms)")
     fig.suptitle("Latency under moderate delay (context for the loss sweep)")
     return _save(fig, "moderate_latency")
 
