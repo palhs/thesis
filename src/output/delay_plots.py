@@ -225,6 +225,44 @@ def fig_moderate_latency(moderate) -> str:
     return _save(fig, "moderate_latency")
 
 
+def fig_resilience_ranking(heavy, moderate) -> str:
+    """The ranking itself: AURC with 95% CI + survival-depth, faceted by n.
+
+    Bars are AURC (normalized area under the finalization-rate-vs-loss curve;
+    higher = more finality retained across the loss sweep). Error bars are the
+    95% Student-t CI over seeds — the interval the ``n=25`` statistical tie
+    turns on (overlapping CIs share a rank, ``delay_analysis.ranking_for_n``).
+    Each bar is annotated with its survival-depth ``p*`` (deepest loss with mean
+    finality > 0). This is the only figure that shows the AURC scalar with its
+    CI, so the reader can *see* the tie (overlap) and the survival-depth
+    tiebreak in one view. Reads the same ``ranking_for_n`` the ranking CSV is
+    written from, so the figure and the table cannot drift.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
+    for ax, n in zip(axes, da.NS):
+        ranked = {r.protocol: r for r in da.ranking_for_n(heavy, moderate, n)}
+        xs = range(len(PROTO_ORDER))
+        for x, proto in zip(xs, PROTO_ORDER):
+            r = ranked[proto]
+            ci_half = (r.aurc_ci_hi - r.aurc_ci_lo) / 2.0
+            ax.bar([x], [r.aurc], 0.62, yerr=[ci_half], capsize=4,
+                   color=STYLE[proto]["color"], alpha=0.85,
+                   edgecolor="0.3", linewidth=0.6)
+            ax.annotate(f"$p^*\\!=\\!{r.survival_depth_p:.2f}$",
+                        (x, r.aurc_ci_hi), textcoords="offset points",
+                        xytext=(0, 4), ha="center", fontsize=7,
+                        color=STYLE[proto]["color"])
+        ax.set_title(f"$n = {n}$")
+        ax.set_xticks(list(xs))
+        ax.set_xticklabels([STYLE[p]["label"] for p in PROTO_ORDER])
+        ax.set_ylim(0, 0.45)
+        _grid(ax)
+    axes[0].set_ylabel("AURC (area under retention curve)")
+    fig.suptitle("Loss-resilience ranking: AURC with 95% CI "
+                 "($p^*$ = survival depth; overlapping CIs share a rank)")
+    return _save(fig, "resilience_ranking")
+
+
 def generate() -> list[str]:
     heavy = da.load_rows(da.HEAVY_CSV)
     moderate = da.load_rows(da.MODERATE_CSV)
@@ -234,6 +272,7 @@ def generate() -> list[str]:
         fig_operator_pareto(heavy),
         fig_cost_of_survival(heavy),
         fig_moderate_latency(moderate),
+        fig_resilience_ranking(heavy, moderate),
     ]
 
 
