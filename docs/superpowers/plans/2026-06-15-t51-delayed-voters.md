@@ -1697,7 +1697,7 @@ import matplotlib
 matplotlib.use("Agg")  # headless / deterministic.
 import matplotlib.pyplot as plt
 
-from output.analysis import mean_ci
+from output.delay_analysis import mean_ci
 from output.plots import STYLE, PROTO_ORDER
 
 CSV_PATH = "results/adversary/delayed_voters.csv"
