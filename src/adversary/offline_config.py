@@ -31,3 +31,10 @@ BUFFER_S: float = 80.0
 T_MAX: float = WINDOW_S + BUFFER_S
 PBFT_VC_DELAY_S: float = 3.0
 ONE_ROUND_S: dict[str, float] = {"pbft": 2.0, "casper-ffg": 2.0, "snowman": 72.0}
+
+# Query-response timeout for Snowman polls. Set above T51's max injected delay
+# (10 s = mult 10 × ref 1 s) so a delayed-but-responsive validator still answers
+# before the timeout — the timeout is a no-op for responsive nodes and only
+# triggers for non-responding (offline) ones, keeping the delay (T51) and
+# withhold (T52) adversary families distinct.
+SNOWMAN_QUERY_TIMEOUT_S: float = 15.0

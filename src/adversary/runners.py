@@ -207,7 +207,8 @@ def run_snowman_offline(n: int, f: float, seed: int) -> RunTriple:
     def make(node_id: int, global_seed: int) -> SnowmanNode:
         return SnowmanNode(node_id=node_id, weight=1.0, endpoint=None,
                            global_seed=global_seed, n=n, slot_duration=slot,
-                           beta=ocfg.SNOWMAN_BETA, workload=batches)
+                           beta=ocfg.SNOWMAN_BETA, workload=batches,
+                           query_timeout=ocfg.SNOWMAN_QUERY_TIMEOUT_S)
 
     meta = _meta("snowman", f"snowman-n{n}", n, seed, slot, None, ocfg)
     handle = build_run(_config(n, ocfg), seed, make)
