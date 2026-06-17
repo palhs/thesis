@@ -16,6 +16,13 @@ from pbft.messages import CommitPayload, PreparePayload, PrePreparePayload
 from pos import CasperNode
 from pos.chain import GENESIS_HASH, block_hash
 from pos.messages import AttestationPayload, FFGVote
+from snowman import SnowmanNode
+from snowman.block import Block, hash_block
+from snowman.messages import (
+    BlockAnnouncementPayload,
+    QueryPayload,
+    QueryResponsePayload,
+)
 
 
 def split_recipients(node) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -131,3 +138,51 @@ class EquivocatingCasperNode(CasperNode):
                        AttestationPayload(slot=slot, epoch=epoch,
                                           ffg=alt_ffg, attester_idx=self.id),
                        t)
+
+
+class EquivocatingSnowmanNode(SnowmanNode):
+    """Byzantine Snowman validator: equivocating proposer + lying responder
+    (design §3.3). Overrides `_propose` (forks the BLOCK-ANNOUNCEMENT into two
+    blocks for the same (slot, parent) — a genuine 2-member conflict set, the
+    only thing there is to lie about) and `_handle_query` (returns a
+    NON-preference member). No RNG touched (the K-peer sampler in
+    _start_poll_round is unchanged), so per-cell replay stays byte-identical."""
+
+    def _propose(self, slot, t):
+        parent_id = self.chain.tip
+        txA, txB = conflicting_bytes("snow", slot, 0)
+        bidA = hash_block(slot=slot, parent_id=parent_id,
+                          proposer_idx=self.id, transactions=(txA,))
+        bidB = hash_block(slot=slot, parent_id=parent_id,
+                          proposer_idx=self.id, transactions=(txB,))
+        blockA = Block(block_id=bidA, parent_id=parent_id, slot=slot,
+                       proposer_idx=self.id, transactions=(txA,))
+        payloadA = BlockAnnouncementPayload(slot=slot, block_id=bidA,
+                                            parent_id=parent_id,
+                                            transactions=(txA,),
+                                            proposer_idx=self.id)
+        payloadB = BlockAnnouncementPayload(slot=slot, block_id=bidB,
+                                            parent_id=parent_id,
+                                            transactions=(txB,),
+                                            proposer_idx=self.id)
+        self._record_announce(blockA, t)            # self-prefer A, arm poll
+        lo, hi = split_recipients(self)
+        for dst in lo:
+            self.send(dst, "BLOCK-ANNOUNCEMENT", payloadA, t)
+        for dst in hi:
+            self.send(dst, "BLOCK-ANNOUNCEMENT", payloadB, t)
+
+    def _handle_query(self, msg, t):
+        p = msg.payload
+        if not isinstance(p, QueryPayload):
+            self._reject(reason="malformed_payload", t=t, msg_type=msg.type)
+            return
+        cs = self._conflict_set_for(p.block_id)
+        if cs is not None and len(cs.members) >= 2:
+            others = sorted(b for b in cs.members if b != cs.preference)
+            preferred = others[0] if others else cs.preference
+        else:
+            preferred = cs.preference if cs is not None else p.block_id
+        self.send(msg.src, "QUERY-RESPONSE",
+                  QueryResponsePayload(request_id=p.request_id,
+                                       preferred_block_id=preferred), t)

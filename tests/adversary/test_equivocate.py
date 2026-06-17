@@ -6,6 +6,7 @@ import unittest
 from adversary.equivocate import (
     EquivocatingCasperNode,
     EquivocatingPBFTNode,
+    EquivocatingSnowmanNode,
     conflicting_bytes,
     split_recipients,
 )
@@ -15,6 +16,8 @@ from pbft.instance import Instance
 from pos.chain import GENESIS_HASH, Block, block_hash
 from pos.messages import AttestationPayload, FFGVote
 from pos.node import CASPER_SLASHING, CasperNode
+from snowman.block import GENESIS_ID, Block as SnowBlock, ConflictSet, hash_block
+from snowman.messages import QueryPayload
 
 
 class _FakeNode:
@@ -194,6 +197,69 @@ class TestEquivocatingFFG(unittest.TestCase):
                         t_sent=5.0), 5.0)
         self.assertTrue(any(type == CASPER_SLASHING for type, _ in events))
         self.assertGreater(honest.slashable_stake_fraction(), 0.0)
+
+
+def _make_snowman(node_id=0, n=4):
+    """Build an EquivocatingSnowmanNode with capturing/no-op outbound stubs.
+    Returns (node, sent) where sent collects (dst, type, payload) tuples."""
+    node = EquivocatingSnowmanNode(node_id=node_id, weight=1.0, endpoint=None,
+                                   global_seed=0, n=n, slot_duration=1.0,
+                                   beta=15)
+    sent: list = []
+    node.send = lambda dst, type, payload, t: sent.append((dst, type, payload))
+    node.set_timer = lambda *a, **k: None
+    node.emit = lambda *a, **k: None
+    node.broadcast = lambda *a, **k: None
+    node.cancel_timer = lambda *a, **k: None
+    return node, sent
+
+
+class TestEquivocatingSnowman(unittest.TestCase):
+    def test_proposer_forks_announcement(self):
+        node, sent = _make_snowman(node_id=0, n=4)
+        node._propose(slot=4, t=1.0)            # slot 4 % 4 == 0 -> node 0 proposes
+        anns = [(dst, payload) for dst, type, payload in sent
+                if type == "BLOCK-ANNOUNCEMENT"]
+        lo, hi = split_recipients(node)
+        lo_dsts = {dst for dst, _ in anns if dst in lo}
+        hi_dsts = {dst for dst, _ in anns if dst in hi}
+        self.assertEqual(lo_dsts, set(lo))
+        self.assertEqual(hi_dsts, set(hi))
+        self.assertEqual({dst for dst, _ in anns}, set(lo) | set(hi))
+        self.assertEqual(set(lo) & set(hi), set())
+        # The two halves carry DIFFERENT block_ids, same slot/parent_id.
+        bidA = {p.block_id for dst, p in anns if dst in lo}
+        bidB = {p.block_id for dst, p in anns if dst in hi}
+        self.assertEqual(len(bidA), 1)
+        self.assertEqual(len(bidB), 1)
+        self.assertNotEqual(bidA, bidB)
+        slots = {p.slot for _, p in anns}
+        parents = {p.parent_id for _, p in anns}
+        self.assertEqual(slots, {4})
+        self.assertEqual(parents, {GENESIS_ID})
+
+    def test_lying_responder_returns_non_preference(self):
+        node, sent = _make_snowman(node_id=0, n=4)
+        parent_id = GENESIS_ID
+        cs = ConflictSet(parent_id=parent_id)
+        bid1 = hash_block(slot=1, parent_id=parent_id, proposer_idx=2,
+                          transactions=(b"one",))
+        bid2 = hash_block(slot=1, parent_id=parent_id, proposer_idx=2,
+                          transactions=(b"two",))
+        cs.add_block(SnowBlock(block_id=bid1, parent_id=parent_id, slot=1,
+                               proposer_idx=2, transactions=(b"one",)))
+        cs.add_block(SnowBlock(block_id=bid2, parent_id=parent_id, slot=1,
+                               proposer_idx=2, transactions=(b"two",)))
+        cs.preference = bid1
+        node.conflict_sets[parent_id] = cs
+        node._handle_query(
+            Message(src=2, dst=node.id, type="QUERY",
+                    payload=QueryPayload(request_id=7, block_id=bid1),
+                    t_sent=1.0), 1.0)
+        resps = [p for dst, type, p in sent if type == "QUERY-RESPONSE"]
+        self.assertEqual(len(resps), 1)
+        self.assertIn(resps[0].preferred_block_id, cs.members)
+        self.assertNotEqual(resps[0].preferred_block_id, cs.preference)
 
 
 if __name__ == "__main__":
