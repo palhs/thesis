@@ -30,3 +30,21 @@ class DelayProfile:
     intensity: float
     mult: float
     kind: str = "delay-emission"
+
+
+@dataclass(frozen=True)
+class OfflineProfile:
+    """The ``withhold-participation`` adversary profile for one run.
+
+    A non-participating (offline / crash-faulty) validator: it receives and
+    runs its FSM but emits nothing, so it contributes to no quorum or poll.
+    No magnitude field — offline is binary (skip vs participate), unlike
+    delay-emission's dosed ``mult`` (adversary-model.md §4).
+
+    - ``nodes``     -- the offline node ids (highest-id ⌊f·n⌋; select.py).
+    - ``intensity`` -- nominal fraction f of offline nodes.
+    - ``kind``      -- capability tag ("withhold-participation").
+    """
+    nodes: tuple[int, ...]
+    intensity: float
+    kind: str = "withhold-participation"
