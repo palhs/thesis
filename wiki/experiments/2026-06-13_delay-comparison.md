@@ -178,3 +178,24 @@ during the task (query, one-line result, phase):
   latency column.
 - [[concepts/research-questions]] — RQ4 (resilience under adverse networks),
   which this ranking answers descriptively.
+
+## Revisions
+
+### [2026-06-15] T50 — sixth Chapter-4 figure added (`resilience_ranking`)
+
+The Chapter-4 delay write-up (T50) added a sixth figure to
+`src/output/delay_plots.py`, `fig_resilience_ranking(heavy, moderate)` →
+`results/delay/plots/resilience_ranking.{pdf,png}`: an AURC bar chart with 95%
+Student-t CIs, faceted by `n` (10 / 25), each bar annotated with its
+survival-depth `p*`. It reads the same `ranking_for_n` that
+`resilience_ranking.csv` is written from, so figure and table cannot drift
+(verified: bar values reproduce the CSV to 6 decimals). Rationale: §Output
+artifacts lists five figures, none of which renders the AURC scalar with its
+CI, so the `n=25` PBFT/Snowman statistical tie (the overlapping AURC intervals)
+was visible only indirectly through the `finalization_degradation` curve
+crossover. The bar chart makes the overlap — and the survival-depth tiebreak —
+directly legible. Pure read of the frozen `resilience_ranking.csv`: no new runs
+and no data change. Re-running `PYTHONPATH=src python3 -m output.delay_plots`
+now emits six figures; the five pre-existing PDFs were left untouched
+(re-rendered only on demand) to avoid churning their committed blobs. Cited as
+Figure 4.10 in [[drafts/ch4_results]] §4.3.2.
