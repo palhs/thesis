@@ -32,6 +32,7 @@ from pos.node import CasperNode
 from snowman import SnowmanNode
 
 from . import config as cfg
+from . import offline_config as ocfg
 from .inject import inject_delay, inject_offline
 from .select import slow_node_ids
 
@@ -147,7 +148,7 @@ RUNNERS = {
 # shifting it (inject_delay). f=0 is a strict no-op == honest static-baseline.
 
 def run_pbft_offline(n: int, f: float, seed: int) -> RunTriple:
-    propose = cfg.PBFT_PROPOSE_DELAY_S
+    propose = ocfg.PBFT_PROPOSE_DELAY_S
     batches = [b"".join(b) for b in _batches(seed, propose)]
 
     def make(node_id: int, global_seed: int) -> PBFTNode:
@@ -155,18 +156,18 @@ def run_pbft_offline(n: int, f: float, seed: int) -> RunTriple:
         return PBFTNode(node_id=node_id, weight=1.0, endpoint=None,
                         global_seed=global_seed, n=n, workload=workload,
                         propose_delay=propose, initial_view=0,
-                        vc_delay=cfg.PBFT_VC_DELAY_S)
+                        vc_delay=ocfg.PBFT_VC_DELAY_S)
 
     meta = _meta("pbft", f"pbft-n{n}", n, seed, propose, None)
     handle = build_run(_config(n), seed, make)
     inject_offline(handle, slow_node_ids(n, f), f)
-    result, logger = run_to_completion(handle, t_max=cfg.T_MAX)
+    result, logger = run_to_completion(handle, t_max=ocfg.T_MAX)
     return logger.records, result, meta
 
 
 def run_ffg_offline(n: int, f: float, seed: int) -> RunTriple:
-    slot = cfg.FFG_SLOT_DURATION_S
-    spe = cfg.FFG_SLOTS_PER_EPOCH
+    slot = ocfg.FFG_SLOT_DURATION_S
+    spe = ocfg.FFG_SLOTS_PER_EPOCH
     stake = {i: 3.0 for i in range(n)}
     batches = [b for b in _batches(seed, slot)]
 
@@ -179,23 +180,23 @@ def run_ffg_offline(n: int, f: float, seed: int) -> RunTriple:
     meta = _meta("casper-ffg", f"casper-ffg-n{n}", n, seed, slot, spe)
     handle = build_run(_config(n), seed, make)
     inject_offline(handle, slow_node_ids(n, f), f)
-    result, logger = run_to_completion(handle, t_max=cfg.T_MAX)
+    result, logger = run_to_completion(handle, t_max=ocfg.T_MAX)
     return logger.records, result, meta
 
 
 def run_snowman_offline(n: int, f: float, seed: int) -> RunTriple:
-    slot = cfg.SNOWMAN_SLOT_DURATION_S
+    slot = ocfg.SNOWMAN_SLOT_DURATION_S
     batches = [b for b in _batches(seed, slot)]
 
     def make(node_id: int, global_seed: int) -> SnowmanNode:
         return SnowmanNode(node_id=node_id, weight=1.0, endpoint=None,
                            global_seed=global_seed, n=n, slot_duration=slot,
-                           beta=cfg.SNOWMAN_BETA, workload=batches)
+                           beta=ocfg.SNOWMAN_BETA, workload=batches)
 
     meta = _meta("snowman", f"snowman-n{n}", n, seed, slot, None)
     handle = build_run(_config(n), seed, make)
     inject_offline(handle, slow_node_ids(n, f), f)
-    result, logger = run_to_completion(handle, t_max=cfg.T_MAX)
+    result, logger = run_to_completion(handle, t_max=ocfg.T_MAX)
     return logger.records, result, meta
 
 
