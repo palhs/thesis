@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 77 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 77 · In Review: 0 · In Progress: 1 · Not Started: 17 · Blocked: 2
+- Completed: 77 · In Review: 1 · In Progress: 0 · Not Started: 17 · Blocked: 2
 
 ## Legend
 
@@ -241,7 +241,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 - `[x]` **T51** `H` Engineer — Simulate delayed voters (intentionally slow nodes)
   _Outcome:_ 10–30% slow nodes (2–10× normal delay); impact on finality time · _Artifact:_ experiment page
-- `[~]` **T52** `H` Engineer — Simulate non-participating validators (offline)
+- `[?]` **T52** `H` Engineer — Simulate non-participating validators (offline)
   _Outcome:_ 10–33% offline; success/failure boundary identified · _Artifact:_ experiment page
 - `[ ]` **T53** `H` Engineer — Simulate equivocating nodes
   _Outcome:_ Conflicting votes across the four-protocol scope; per-protocol safety invariant measured (see T54); intensity sweep includes above-threshold f > 1/3 runs (at least PBFT and Casper FFG) to expose the safety cliff that the catalog documents (`wiki/concepts/adversary-model.md` §5, §7.1, §7.3) · _Artifact:_ experiment page
