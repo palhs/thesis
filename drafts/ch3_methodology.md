@@ -565,7 +565,8 @@ The per-trial CSV carries one row per `(protocol, scenario, seed)`; a separate
 downstream aggregation produces a second file carrying one row per
 configuration, with the mean and 95% confidence interval over the seed set.
 Continuous metrics are reported as the mean over the seed set
-with a 95% Gaussian confidence interval; rate metrics (`fork_rate`,
+with a 95% Student-t confidence interval (a small-sample interval, at one
+degree of freedom below the seed count); rate metrics (`fork_rate`,
 `success_rate`) as the observed proportion with a 95% Wilson interval, so a
 zero-violation outcome is stated as `0/n_runs` rather than a degenerate mean.
 Snowman's probabilistic finality adds the four rescaled parameters and the
