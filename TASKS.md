@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 76 · In Review: 2 · In Progress: 0 · Not Started: 18 · Blocked: 2
+- Completed: 79 · In Review: 0 · In Progress: 0 · Not Started: 17 · Blocked: 2
 
 ## Legend
 
@@ -236,14 +236,14 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ 1–2 page analysis: breakpoints, which is most robust and why · _Artifact:_ `wiki/experiments/<date>_delay-analysis.md`
 - `[x]` **T49.1** `M` Researcher — Reconcile metric docs against the T49 theory-vs-data validation
   _Outcome:_ Body edits + `## Revisions` on `wiki/concepts/metric-reconciliation.md` + `evaluation-metrics.md` fixing the findings of the 2026-06-14 T49 validation: PBFT overhead (`1 + 2n + 2n²` → per-instance `2(n²−1)` / per-ACU `2n−2/n`), ε values (n=7 `6.5·10⁻¹²`→`2.1·10⁻¹²`, n=10 `4.4·10⁻¹⁴`→`4.9·10⁻¹⁵`), the finality≡commit modelling note (FFG/Snowman emit a single finalisation event — a modelling choice, not a bug), the `tps`/`goodput` protocol-dependent-crediting basis (tps = decided-event rate, granularity differs; goodput gap may be partly legitimate — verify `committed_tx`), the payload-dominated `bytes_per_acu` note, and a flag for the absent mandated schema columns (Snowman ε bound / `f_max_*` → bundle with Family C, **no standalone column now**). `pos.md` is already correct (do not edit); the T49 analysis page needs no change. Full plan + corrected numbers in the 2026-06-14 "[Agreed plan]" Backlog bullet. · _Artifact:_ `wiki/concepts/{metric-reconciliation,evaluation-metrics}.md`, `wiki/log.md` · _Verify:_ corrected numbers re-derive in python; no `1 + 2·n + 2·n²` / `4.4·10⁻¹⁴` / `6.5·10⁻¹²` left in either body; `pos.md` + `wiki/experiments/2026-06-13_delay-analysis.md` byte-unchanged. Pick up as its own session (T49 now merged).
-- `[?]` **T50** `H` Writer — Produce delay plots and written observations in Ch. 4
+- `[x]` **T50** `H` Writer — Produce delay plots and written observations in Ch. 4
   _Outcome:_ 6+ plots, 2-page observations integrated · _Artifact:_ `drafts/ch4_results.md`
 
 ## Week 10 — Adversarial experiments
 
-- `[?]` **T51** `H` Engineer — Simulate delayed voters (intentionally slow nodes)
+- `[x]` **T51** `H` Engineer — Simulate delayed voters (intentionally slow nodes)
   _Outcome:_ 10–30% slow nodes (2–10× normal delay); impact on finality time · _Artifact:_ experiment page
-- `[ ]` **T52** `H` Engineer — Simulate non-participating validators (offline)
+- `[x]` **T52** `H` Engineer — Simulate non-participating validators (offline)
   _Outcome:_ 10–33% offline; success/failure boundary identified · _Artifact:_ experiment page
 - `[ ]` **T53** `H` Engineer — Simulate equivocating nodes
   _Outcome:_ Conflicting votes across the four-protocol scope; per-protocol safety invariant measured (see T54); intensity sweep includes above-threshold f > 1/3 runs (at least PBFT and Casper FFG) to expose the safety cliff that the catalog documents (`wiki/concepts/adversary-model.md` §5, §7.1, §7.3) · _Artifact:_ experiment page

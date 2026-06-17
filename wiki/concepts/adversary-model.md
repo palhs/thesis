@@ -304,3 +304,32 @@ liveness-only — Snowman latency inflation, occasional Casper FFG non-finalizat
 via proposer overlap, PBFT unaffected. T52 (withhold) and T53 (equivocate) will
 need the deeper FSM hooks the §9 matrix anticipates. Evidence:
 [[experiments/2026-06-14_delayed-voters]].
+
+### [2026-06-17] T52 — `withhold-participation` realized as offline drop + the §4 Snowman invariant contradicted
+
+T52 implemented the §4 `withhold-participation` capability as the
+**offline-validator** experiment ([[experiments/2026-06-17_offline-validators]]).
+Mechanism realized: the same post-`build_run` bind-seam wrap as the T51
+`delay-emission` entry above, but the wrap **drops** each emission instead of
+time-shifting it (a shared `_wrap_outbound` helper backs both). The offline node
+still receives and runs its FSM but emits nothing — the consensus silent
+crash-faulty validator. This confirms the §4 claim that withhold "attaches
+through the same outbound-API gating point" — it shares the seam with delay,
+differing only in drop-vs-shift. Offline is **binary** (no magnitude axis).
+
+**The §4 Snowman invariant `accept rate ≥ (1 − f) · honest baseline` is
+CONTRADICTED for genuine offline.** That proportional-degradation expectation
+holds only when non-responders **eventually answer** (the delay regime, §3): a
+Snowman poll round closes on `α_c = ⌈0.8 K⌉` agreeing OR all-`K` responses, so a
+round sampling more than `K − α_c` *permanently silent* peers can never reach
+`α_c` — it does not degrade proportionally, it **stalls**. Empirically Snowman
+shows a **sharp liveness cliff with an n-dependent boundary** `f*` *below* the
+quorum protocols' 1/3 (`f* = 0.20` at n=10, `f* = 0.33` at n=25; slack `K − α_c`
+= 1 vs 4). Obtaining these results required adding a **Snowman query timeout** so
+a stalled round can close (see [[concepts/system-design-protocols#4]] Revisions);
+with it, the surviving cells finalize but a barely-surviving cell (n=25, f=0.20)
+is technically live yet practically crippled (`throughput_ratio ≈ 0.004`). The
+PBFT and Casper FFG §4 invariants held: PBFT a clean 1/3 quorum cliff (view
+changes fire only above threshold), Casper FFG graceful degradation across the
+0.10–0.33 band tracking `≈ (1−f)` then collapsing past 1/3. Evidence:
+[[experiments/2026-06-17_offline-validators]].

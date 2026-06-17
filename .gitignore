@@ -31,6 +31,17 @@ results/**/.sweep/
 results/**/.sweep_heavy/
 # T51 Family C sweep checkpoint sidecars (same rationale).
 results/**/.sweep_adversary/
+# T52 offline-validators sweep checkpoint sidecars (same rationale).
+results/**/.sweep_offline/
+# Sweep stderr progress/timing logs (e.g. heavy_pass*.err) — runtime-only
+# diagnostics with wall-clock timings; the durable record is the experiment
+# page + the CSV commit_hash provenance.
+results/**/*.err
+
+# Claude Code harness runtime artifacts (session-local; not project state).
+.claude/preview/
+.claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # OS
 .DS_Store

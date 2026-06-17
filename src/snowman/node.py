@@ -48,6 +48,7 @@ class SnowmanNode(Node):
         alpha_p: int | None = None,
         alpha_c: int | None = None,
         workload: Sequence[tuple[bytes, ...]] | None = None,
+        query_timeout: float | None = None,
     ) -> None:
         """workload: indexed by slot; element = batch tuple. The proposer
         at slot s carries workload[s]; missing/empty slot -> empty batch."""
@@ -67,6 +68,10 @@ class SnowmanNode(Node):
         self.beta: int = beta
         self.slot_duration: float = slot_duration
         self.workload: list[tuple[bytes, ...]] = list(workload or [])
+        # T52: optional query/response timeout. None => no timer is ever
+        # scheduled and the code path is byte-identical to the pre-T52 node
+        # (so the T51 delay sweep, which never passes this, is unchanged).
+        self.query_timeout: float | None = query_timeout
 
         self.chain: Chain = Chain()
         self.conflict_sets: dict[bytes, ConflictSet] = {}    # parent_id -> CS
@@ -99,6 +104,9 @@ class SnowmanNode(Node):
         elif isinstance(timer_id, tuple) and timer_id[0] == "poll":
             block_id = timer_id[1]
             self._start_poll_round(block_id, t)
+        elif isinstance(timer_id, tuple) and timer_id[0] == "query_timeout":
+            _, block_id, request_id = timer_id
+            self._on_query_timeout(block_id, request_id, t)
 
     # --- Proposer (design spec §6.3). ---
 
@@ -208,10 +216,39 @@ class SnowmanNode(Node):
         query = QueryPayload(request_id=request_id, block_id=block_id)
         for peer_id in peers:
             self.send(peer_id, "QUERY", query, t)
+        # T52: opt-in query timeout. Key on (block_id, request_id) so a stale
+        # timeout from an earlier round of the same block cannot close a newer
+        # one. None => no timer scheduled (T51 path unchanged).
+        if self.query_timeout is not None:
+            self.set_timer(("query_timeout", block_id, request_id),
+                           self.query_timeout, None, t)
+
+    def _on_query_timeout(self, block_id: bytes, request_id: int,
+                          t: float) -> None:
+        """T52: a poll round's query timeout fired. If the round is still the
+        in-flight poll for this block, still open, and its request_id matches
+        (stale-guard), close it NOW with the responses received so far via the
+        same close+advance path a normal close uses. Otherwise no-op."""
+        if self.query_timeout is None:
+            return
+        poll = self.polls.get(block_id)
+        if poll is None or poll.closed or poll.request_id != request_id:
+            return                       # already closed/gone or stale; no-op
+        cs = self._conflict_set_for(block_id)
+        if cs is None:
+            return
+        self._close_and_continue(poll, cs, t)
 
     def _close_and_continue(self, poll: Poll, cs: ConflictSet,
                             t: float) -> None:
-        """Apply close_round; emit events; arm next poll or finalise."""
+        """Apply close_round; emit events; arm next poll or finalise.
+
+        T52: when a query timeout is configured, cancel this round's pending
+        timeout so it becomes a no-op once the round has closed (covers both
+        the normal early/quorum close and the timeout-driven close itself)."""
+        if self.query_timeout is not None:
+            self.cancel_timer(
+                ("query_timeout", poll.block_id, poll.request_id))
         outcome = close_round(
             conflict_set=cs, poll=poll,
             alpha_p=self.alpha_p, alpha_c=self.alpha_c, beta=self.beta)

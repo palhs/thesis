@@ -217,3 +217,34 @@ T53 equivocate will add comparable blocks on the same axes). The §4 grand total
 above (≈ 3000 runs, the three in-scope protocols) is correspondingly larger; the
 Family C portion is no longer the single-`n`, single-magnitude sketch the §4
 budget assumed. Evidence: [[experiments/2026-06-14_delayed-voters]].
+
+### [2026-06-17] T52 — `withhold-participation` (offline) grid: f=0.40 extension + Snowman proportional-degradation expectation contradicted
+
+T52 ran the §3 `withhold-participation` row as the **offline-validator**
+experiment ([[experiments/2026-06-17_offline-validators]]). Two amendments to the
+§3 catalog, both human roadmap decisions (2026-06-17):
+
+**(1) Above-threshold f=0.40 extension for PBFT / Casper FFG.** The catalogued
+withhold grid `{0.10, 0.20, 0.33}` never crosses the 1/3 cliff under
+floor-rounding: at `f=0.33`, `⌊0.33·10⌋ = 3` offline leaves 7 honest = exactly
+the `2f+1 = 7` quorum, so the quorum protocols still finalize. A single
+above-threshold point `f=0.40` (`⌊0.40·10⌋ = 4` offline → 6 honest `< 7`) was
+added for **PBFT and Casper FFG only**, so the liveness success/failure boundary
+is directly measured rather than inferred. The realized offline counts:
+`f=0.33 → 3/10, 8/25`; `f=0.40 → 4/10, 10/25`. There is **no magnitude axis**
+(offline is binary), so the offline grid is `(5 + 5 + 4) protocol-cells × 2 n ×
+20 seeds = 560 runs`, much smaller than the 1920-run delay block.
+
+**(2) Snowman: the catalogued "proportional degradation" expectation is
+CONTRADICTED.** [[concepts/adversary-model]] §4 expected Snowman to degrade
+proportionally (`accept rate ≥ (1−f)·base`). Empirically, genuine offline (vs
+merely-delayed) validators give Snowman a **sharp liveness cliff with an
+n-dependent boundary** `f*` *below* the quorum protocols' 1/3:
+`f* = 0.20` at n=10, `f* = 0.33` at n=25 — because each poll round needs
+`α_c = ⌈0.8 K⌉` agreeing responses and offline non-responders make `α_c`
+unreachable once more than `K − α_c` are sampled (slack 1 at n=10, 4 at n=25).
+Snowman therefore omits `f=0.40` (its boundary is already crossed below 1/3).
+To obtain these results faithfully a **Snowman query timeout was added** (without
+it, a round sampling too many non-responders never closes) — see the Snowman spec
+Revision in [[concepts/system-design-protocols#4]]. The contradiction is also
+recorded on [[concepts/adversary-model#4]].

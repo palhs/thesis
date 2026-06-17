@@ -329,3 +329,31 @@ implement the §§2–5 loops; [[concepts/output-format]] (T40) fixes the
   records the specific divergences. The control spine — per-block
   subsampled `K`-peer poll, Snowball counter accumulator, `β`-acceptance,
   `decided` event on acceptance — is unchanged.
+- **2026-06-17 (T52).** The §4 Snowman poll round gained an **opt-in query
+  timeout**, resolving the "drop-resilience (a poll-deadline timer) defers
+  to T47" deferral noted in the T38 entry above (T47 took the no-timeout path;
+  T52's offline adversary forced the issue). Before this change a round closed
+  only on `α_c`-agreement (success early-close) OR all-`K` responses
+  (quorum-path) — so a round that sampled non-responding peers (offline
+  validators, [[experiments/2026-06-17_offline-validators]]) could **never
+  close**, stalling the leaderless K-poll forever. The new `query_timeout:
+  float | None` parameter on `SnowmanNode`: when `None` (the default) **no timer
+  is ever scheduled** and the code path is byte-identical to the pre-T52 node —
+  so the committed T51 delay dataset ([[experiments/2026-06-14_delayed-voters]])
+  is unaffected by construction (byte-identical re-run verified on the Snowman
+  control + the max-delay cell). When set, `_start_poll_round` arms a
+  per-round cancellable self-timer keyed `("query_timeout", block_id,
+  request_id)` (both ids in the key so a stale timeout can't close a newer
+  round); on fire, the still-open matching round closes **now** with whatever
+  responses arrived, routing through the same `close_round` / advance path (an
+  `α_c`-miss resets the success counter — a silent round is not a win; a
+  total-silence round is guarded against the empty-`agree_per_block` `min()`
+  crash). T52 sets `SNOWMAN_QUERY_TIMEOUT_S = 15.0 s`, chosen **above T51's max
+  injected delay of 10 s** (delay grid `m=10` × Snowman `ref = 1 s`) so a
+  delayed-but-responsive validator still answers before the timeout — keeping
+  the delay (T51) and withhold (T52) adversary families distinct. Real Avalanche
+  uses such a query timeout; the simulator now models it as an opt-in. The
+  catalogued `accept rate ≥ (1−f)·base` proportional-degradation expectation
+  ([[concepts/adversary-model#4]]) holds only when non-responders eventually
+  answer (the delay regime); for genuine offline it fails — the timeout is what
+  even lets the surviving Snowman cells finalize.

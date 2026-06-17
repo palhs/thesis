@@ -11,7 +11,9 @@ This realises the node-model.md §9 ``delayer`` cell (gate ``broadcast`` /
 ``send``). Intercepting at the bound outbound API is behaviourally identical to
 FSM-level dispatch for delay -- which neither changes payloads nor drops/forks
 messages -- and far less invasive (spec §3.2 / the node-model.md §9 Revision).
-T52/T53 will need deeper FSM hooks; T51 does not.
+T52 reuses THIS seam: ``inject_offline`` re-wraps the same bound outbound API
+to DROP every emission (offline = drop, no FSM hook). Only T53 (equivocate),
+which forks payloads per-recipient, will need deeper FSM hooks.
 
 Empty ``slow_ids`` is a strict no-op: the f=0 control is byte-identical to a
 plain honest static-baseline run (the finality_delay_ratio denominator anchor).
@@ -20,7 +22,7 @@ from __future__ import annotations
 
 from config.schema import RunHandle
 
-from .profiles import DelayProfile
+from .profiles import DelayProfile, OfflineProfile
 
 
 def _delayed_send(honest_send, shift):
@@ -38,9 +40,34 @@ def _delayed_broadcast(honest_broadcast, shift):
     return broadcast
 
 
+def _wrap_outbound(handle, ids, profile, send_factory, broadcast_factory,
+                   *, who: str) -> None:
+    """Shared bind-seam wrap: attach `profile` to each node in `ids` and rebind
+    its honest `send`/`broadcast` through the supplied factories. Call AFTER
+    build_run, BEFORE run_to_completion. No-op when `ids` is empty.
+
+    `who` only labels the double-injection error. The factories take the node's
+    honest bound fn and return the replacement (delay shifts t; offline drops).
+    """
+    if not ids:
+        return
+    for nid in ids:
+        node = handle.nodes[nid]
+        if node.adversary is not None:
+            raise RuntimeError(
+                f"{who}: node {nid} already has an adversary profile "
+                f"{node.adversary!r}; double-injection would silently stack")
+        node.adversary = profile
+        node.send = send_factory(node.send)
+        node.broadcast = broadcast_factory(node.broadcast)
+
+
 def inject_delay(handle: RunHandle, slow_ids: tuple[int, ...],
                  mult: float, ref: float, intensity: float) -> None:
-    """Re-wrap the slow nodes' outbound API to emit `mult·ref` s late.
+    """Re-wrap slow nodes' outbound API to emit `mult·ref` s late. (T51 §3.1.)
+
+    Behaviour byte-identical to the pre-refactor inject_delay — guarded by the
+    existing TestInjectDelay suite and the T51 byte-identical CSV re-run.
 
     Call AFTER ``build_run`` and BEFORE ``run_to_completion``. Mutates the
     nodes in place. A no-op when ``slow_ids`` is empty.
@@ -61,13 +88,36 @@ def inject_delay(handle: RunHandle, slow_ids: tuple[int, ...],
     shift = mult * ref
     profile = DelayProfile(nodes=tuple(slow_ids), intensity=intensity,
                            mult=mult)
-    for nid in slow_ids:
-        node = handle.nodes[nid]
-        if node.adversary is not None:
-            raise RuntimeError(
-                f"inject_delay: node {nid} already has an adversary profile "
-                f"{node.adversary!r}; double-injection would silently stack "
-                f"the delay shift")
-        node.adversary = profile
-        node.send = _delayed_send(node.send, shift)
-        node.broadcast = _delayed_broadcast(node.broadcast, shift)
+    _wrap_outbound(handle, slow_ids, profile,
+                   lambda honest: _delayed_send(honest, shift),
+                   lambda honest: _delayed_broadcast(honest, shift),
+                   who="inject_delay")
+
+
+def _dropped_send(honest_send):
+    """A send that drops the emission entirely (offline node, T52)."""
+    def send(dst, type, payload, t):
+        return
+    return send
+
+
+def _dropped_broadcast(honest_broadcast):
+    """A broadcast that drops the emission entirely (offline node, T52)."""
+    def broadcast(type, payload, t):
+        return
+    return broadcast
+
+
+def inject_offline(handle: RunHandle, offline_ids: tuple[int, ...],
+                   intensity: float) -> None:
+    """Re-wrap offline nodes' outbound API to drop every emission (T52 §3.2).
+
+    The node still receives and runs its FSM; it just emits nothing, so it
+    contributes to no quorum/poll — the consensus definition of a silent
+    crash-faulty / non-participating validator (adversary-model.md §4). No
+    magnitude axis. No adversary RNG consumed → per-cell byte-identical re-run;
+    empty `offline_ids` is a strict no-op (== honest static-baseline).
+    """
+    profile = OfflineProfile(nodes=tuple(offline_ids), intensity=intensity)
+    _wrap_outbound(handle, offline_ids, profile,
+                   _dropped_send, _dropped_broadcast, who="inject_offline")

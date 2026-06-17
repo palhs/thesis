@@ -41,5 +41,32 @@ class TestMonotoneSanity(unittest.TestCase):
                 msg=f"{proto}: attack {a:.3f}ms < control {c:.3f}ms")
 
 
+from adversary.runners import OFFLINE_RUNNERS
+
+
+class TestOfflineRunners(unittest.TestCase):
+    def test_control_finalizes_every_protocol(self):
+        for proto, runner in OFFLINE_RUNNERS.items():
+            records, result, meta = runner(n=7, f=0.0, seed=0)
+            self.assertTrue(_decided(records), msg=f"{proto} control empty")
+            self.assertEqual(meta.protocol, proto)
+
+    def test_offline_control_matches_honest_baseline_bytewise(self):
+        # f=0 offline == f=0 delay (both no-op) at the same (n, seed):
+        # same decided count and same first-decision time.
+        from adversary.runners import RUNNERS
+        for proto in OFFLINE_RUNNERS:
+            off, _, _ = OFFLINE_RUNNERS[proto](n=7, f=0.0, seed=3)
+            dly, _, _ = RUNNERS[proto](n=7, f=0.0, m=0.0, seed=3)
+            self.assertEqual(len(_decided(off)), len(_decided(dly)))
+            self.assertEqual(_first_latency_ms(off), _first_latency_ms(dly))
+
+    def test_pbft_above_threshold_stalls(self):
+        # n=10, f=0.40 -> 4 offline, 6 honest < 2f+1=7 quorum -> no finality.
+        records, result, meta = OFFLINE_RUNNERS["pbft"](n=10, f=0.40, seed=0)
+        self.assertFalse(_decided(records),
+                         msg="PBFT should stall above the 1/3 quorum threshold")
+
+
 if __name__ == "__main__":
     unittest.main()

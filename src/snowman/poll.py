@@ -95,6 +95,34 @@ def close_round(
     poll.closed = True
     prev_preference = conflict_set.preference
 
+    # Zero-response close (T52: a query-timeout round where every sampled peer
+    # was offline). No majority, so no confidence bump and no flip; the
+    # preference's agree count is 0 < alpha_c, so the consecutive-success
+    # counter resets and the block is not accepted. The normal close paths
+    # (early-close / K responses) always have >= 1 response, so this branch is
+    # exercised only by the timeout-on-total-silence case.
+    if not poll.agree_per_block:
+        conflict_set.counter = 0
+        if log.isEnabledFor(logging.INFO):
+            log.info(
+                "close_round parent=%s round_majority=<none> count=0 "
+                "alpha_p_hit=False conf_updated=False confidence=%s "
+                "preference=%s pref_confidence=%d prev_preference=%s "
+                "flipped=False counter=0 accepted=False",
+                conflict_set.parent_id.hex()[:8],
+                {bid.hex()[:8]: c
+                 for bid, c in conflict_set.confidence.items()},
+                conflict_set.preference.hex()[:8],
+                conflict_set.confidence.get(conflict_set.preference, 0),
+                prev_preference.hex()[:8],
+            )
+        return PollOutcome(
+            flipped=False,
+            new_preference=conflict_set.preference,
+            counter=conflict_set.counter,
+            accepted=False,
+        )
+
     # Step 1a: this round's majority + alpha_p -> bump confidence accumulator.
     majority_block, count_majority = min(
         poll.agree_per_block.items(),

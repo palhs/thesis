@@ -27,5 +27,16 @@ class TestDelayProfile(unittest.TestCase):
         self.assertEqual(p.kind, "delay-emission")
 
 
+class TestOfflineProfile(unittest.TestCase):
+    def test_offline_profile_fields(self):
+        from adversary.profiles import OfflineProfile
+        p = OfflineProfile(nodes=(8, 9), intensity=0.2)
+        self.assertEqual(p.nodes, (8, 9))
+        self.assertEqual(p.intensity, 0.2)
+        self.assertEqual(p.kind, "withhold-participation")
+        # No magnitude field: offline is binary, not dosed.
+        self.assertFalse(hasattr(p, "mult"))
+
+
 if __name__ == "__main__":
     unittest.main()
