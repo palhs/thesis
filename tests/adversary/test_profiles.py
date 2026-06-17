@@ -38,5 +38,30 @@ class TestOfflineProfile(unittest.TestCase):
         self.assertFalse(hasattr(p, "mult"))
 
 
+class TestEquivocateProfile(unittest.TestCase):
+    def test_fields_and_defaults(self):
+        from adversary.profiles import EquivocateProfile
+        p = EquivocateProfile(nodes=(8, 9), intensity=0.2)
+        self.assertEqual(p.nodes, (8, 9))
+        self.assertEqual(p.intensity, 0.2)
+        self.assertEqual(p.partition_strategy, "half-half")
+        self.assertEqual(p.kind, "equivocate-vote")
+        # No magnitude field: equivocate is binary, like offline.
+        self.assertFalse(hasattr(p, "mult"))
+
+    def test_is_frozen(self):
+        from adversary.profiles import EquivocateProfile
+        p = EquivocateProfile(nodes=(), intensity=0.0)
+        with self.assertRaises(FrozenInstanceError):
+            p.intensity = 0.5            # type: ignore[misc]
+
+    def test_importable_from_package_top_level(self):
+        # Mirrors how DelayProfile/OfflineProfile are re-exported by the
+        # adversary package (__init__.py import + __all__).
+        from adversary import EquivocateProfile as PkgEquivocateProfile
+        from adversary.profiles import EquivocateProfile
+        self.assertIs(PkgEquivocateProfile, EquivocateProfile)
+
+
 if __name__ == "__main__":
     unittest.main()
