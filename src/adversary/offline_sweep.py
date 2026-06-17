@@ -121,14 +121,18 @@ def _phase_canon(ph) -> tuple:
 
 def _param_fingerprint(cell: tuple) -> str:
     """blake2b over the cell's canonicalized config: (proto, n, f, the
-    static-baseline phase tuple, T_MAX, schema_tag). f enters the hash, so
-    every f point fingerprints distinctly. `seed` is the cell identity (in the
-    filename), not a param, so it is excluded."""
+    static-baseline phase tuple, T_MAX, WINDOW_S, BUFFER_S, schema_tag). f
+    enters the hash, so every f point fingerprints distinctly. WINDOW_S and
+    BUFFER_S are hashed independently of T_MAX: because T_MAX = WINDOW_S +
+    BUFFER_S, a re-probe that shifts WINDOW_S and BUFFER_S oppositely (T_MAX
+    constant) would otherwise leave stale checkpoints valid even though the clip
+    window changed. `seed` is the cell identity (in the filename), not a param,
+    so it is excluded."""
     proto, n, f, seed = cell
     canon = repr((proto, n, f, ocfg.STATIC_BASELINE.name,
                   tuple(_phase_canon(ph)
                         for ph in ocfg.STATIC_BASELINE.phases()),
-                  ocfg.T_MAX, _SCHEMA_TAG))
+                  ocfg.T_MAX, ocfg.WINDOW_S, ocfg.BUFFER_S, _SCHEMA_TAG))
     return hashlib.blake2b(canon.encode(), digest_size=16).hexdigest()
 
 
