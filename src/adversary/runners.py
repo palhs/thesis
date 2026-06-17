@@ -33,8 +33,11 @@ from snowman import SnowmanNode
 
 from . import config as cfg
 from . import offline_config as ocfg
+from . import equivocate_config as ecfg
 from .inject import inject_delay, inject_offline
-from .select import slow_node_ids
+from .equivocate import (EquivocatingPBFTNode, EquivocatingCasperNode,
+                         EquivocatingSnowmanNode)
+from .select import slow_node_ids, byzantine_node_ids
 
 RunTriple = tuple[list[EventRecord], RunResult, ScenarioMeta]
 
@@ -222,4 +225,76 @@ OFFLINE_RUNNERS = {
     "pbft":       run_pbft_offline,
     "casper-ffg": run_ffg_offline,
     "snowman":    run_snowman_offline,
+}
+
+
+# --- Equivocate runners (T53) -------------------------------------------
+# Each mirrors its offline sibling EXCEPT: the make-fn dispatches the
+# Equivocating* subclass for the low-id Byzantine prefix (byzantine_node_ids)
+# and the honest class otherwise, and there is NO inject_* call — the
+# equivocation behaviour lives entirely in the subclass. f=0 selects no
+# Byzantine ids, so every node is honest (== honest static-baseline).
+
+def run_pbft_equiv(n: int, f: float, seed: int) -> RunTriple:
+    propose = ecfg.PBFT_PROPOSE_DELAY_S
+    batches = [b"".join(b) for b in _batches(seed, propose, ecfg)]
+    byz = set(byzantine_node_ids(n, f))
+
+    def make(node_id: int, global_seed: int) -> PBFTNode:
+        cls = EquivocatingPBFTNode if node_id in byz else PBFTNode
+        workload = batches if node_id == 0 else None
+        return cls(node_id=node_id, weight=1.0, endpoint=None,
+                   global_seed=global_seed, n=n, workload=workload,
+                   propose_delay=propose, initial_view=0,
+                   vc_delay=ecfg.PBFT_VC_DELAY_S)
+
+    meta = _meta("pbft", f"pbft-n{n}", n, seed, propose, None, ecfg)
+    handle = build_run(_config(n, ecfg), seed, make)
+    result, logger = run_to_completion(handle, t_max=ecfg.T_MAX)
+    return logger.records, result, meta
+
+
+def run_ffg_equiv(n: int, f: float, seed: int) -> RunTriple:
+    slot = ecfg.FFG_SLOT_DURATION_S
+    spe = ecfg.FFG_SLOTS_PER_EPOCH
+    stake = {i: 3.0 for i in range(n)}
+    batches = [b for b in _batches(seed, slot, ecfg)]
+    byz = set(byzantine_node_ids(n, f))
+
+    def make(node_id: int, global_seed: int) -> CasperNode:
+        cls = EquivocatingCasperNode if node_id in byz else CasperNode
+        return cls(node_id=node_id, weight=stake[node_id],
+                   endpoint=None, global_seed=global_seed, n=n,
+                   stake_table=stake, slot_duration=slot,
+                   slots_per_epoch=spe, workload=batches)
+
+    meta = _meta("casper-ffg", f"casper-ffg-n{n}", n, seed, slot, spe, ecfg)
+    handle = build_run(_config(n, ecfg), seed, make)
+    result, logger = run_to_completion(handle, t_max=ecfg.T_MAX)
+    return logger.records, result, meta
+
+
+def run_snowman_equiv(n: int, f: float, seed: int) -> RunTriple:
+    slot = ecfg.SNOWMAN_SLOT_DURATION_S
+    batches = [b for b in _batches(seed, slot, ecfg)]
+    byz = set(byzantine_node_ids(n, f))
+
+    def make(node_id: int, global_seed: int) -> SnowmanNode:
+        cls = EquivocatingSnowmanNode if node_id in byz else SnowmanNode
+        return cls(node_id=node_id, weight=1.0, endpoint=None,
+                   global_seed=global_seed, n=n, slot_duration=slot,
+                   beta=ecfg.SNOWMAN_BETA, workload=batches,
+                   query_timeout=ecfg.SNOWMAN_QUERY_TIMEOUT_S)
+
+    meta = _meta("snowman", f"snowman-n{n}", n, seed, slot, None, ecfg)
+    handle = build_run(_config(n, ecfg), seed, make)
+    result, logger = run_to_completion(handle, t_max=ecfg.T_MAX)
+    return logger.records, result, meta
+
+
+# Dispatch table: protocol_id -> equivocate run builder.
+EQUIVOCATE_RUNNERS = {
+    "pbft":       run_pbft_equiv,
+    "casper-ffg": run_ffg_equiv,
+    "snowman":    run_snowman_equiv,
 }
