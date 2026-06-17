@@ -13,6 +13,9 @@ from __future__ import annotations
 from pbft import PBFTNode
 from pbft.digest import digest as _pbft_digest
 from pbft.messages import CommitPayload, PreparePayload, PrePreparePayload
+from pos import CasperNode
+from pos.chain import GENESIS_HASH, block_hash
+from pos.messages import AttestationPayload, FFGVote
 
 
 def split_recipients(node) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -79,3 +82,52 @@ class EquivocatingPBFTNode(PBFTNode):
                       CommitPayload(inst.view, inst.seq,
                                     _pbft_digest(reqB)), t)
         inst.commits[self.id] = inst.digest
+
+
+class EquivocatingCasperNode(CasperNode):
+    """Byzantine Casper FFG validator: double-vote (design §3.2).
+
+    Overrides ONLY `_attest`. After the honest CasperNode broadcasts and
+    self-records its real ATTESTATION (super call), this node broadcasts a
+    SECOND, CONFLICTING FFG vote for the same target epoch — same
+    source/target epoch as the honest vote, but a fabricated target_hash.
+    Both votes go to ALL peers (no half-half split): accountable-safety
+    detection requires a single honest node to receive BOTH votes so its
+    EpochState classifies the second as CONFLICT and slashes.
+
+    A forked BLOCK-PROPOSAL is deliberately NOT modelled: `EpochState.links`
+    aggregates stake by source_epoch and ignores target_hash, so a forked
+    proposal would spuriously "finalise" two checkpoints under an honest
+    supermajority — a model artifact, not a real safety break. The faithful
+    FFG break signal is `slashable_stake_fraction` (design contract).
+    """
+
+    def _attest(self, epoch, slot, t):
+        # Honest attestation first: broadcasts the real ATTESTATION and
+        # self-records (super call is the unmodified honest FSM step).
+        super()._attest(epoch, slot, t)
+        # Mirror the honest guard: only emit the conflicting vote if the
+        # honest vote itself would have been sent (both checkpoints present).
+        try:
+            target_cp = self.chain.checkpoint(epoch)
+            source_epoch = self.highest_justified
+            source_cp = self.chain.checkpoint(source_epoch)
+        except KeyError:
+            return
+        # Fabricate a target_hash distinct from the real checkpoint's; same
+        # source/target epoch so the recipient's epoch-match guard passes and
+        # EpochState.record_vote classifies it as CONFLICT (same attester +
+        # target_epoch, differing target_hash).
+        alt_hash = block_hash(slot=slot, parent_hash=GENESIS_HASH,
+                              proposer_idx=self.id,
+                              transactions=(b"EQV-ALT",))
+        if alt_hash == target_cp.block_hash:
+            return
+        alt_ffg = FFGVote(source_epoch=source_epoch,
+                          source_hash=source_cp.block_hash,
+                          target_epoch=epoch,
+                          target_hash=alt_hash)
+        self.broadcast("ATTESTATION",
+                       AttestationPayload(slot=slot, epoch=epoch,
+                                          ffg=alt_ffg, attester_idx=self.id),
+                       t)

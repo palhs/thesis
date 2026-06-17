@@ -4,12 +4,17 @@ from __future__ import annotations
 import unittest
 
 from adversary.equivocate import (
+    EquivocatingCasperNode,
     EquivocatingPBFTNode,
     conflicting_bytes,
     split_recipients,
 )
+from nodes import Message
 from pbft.digest import digest
 from pbft.instance import Instance
+from pos.chain import GENESIS_HASH, Block, block_hash
+from pos.messages import AttestationPayload, FFGVote
+from pos.node import CASPER_SLASHING, CasperNode
 
 
 class _FakeNode:
@@ -120,6 +125,75 @@ class TestEquivocatingPBFT(unittest.TestCase):
         self.assertNotEqual(digA, digB)
         # self-record uses the instance's own (honest) digest.
         self.assertEqual(inst.prepares[node.id], inst.digest)
+
+
+def _seed_epoch1_checkpoint(node):
+    """Accept a block at slot 2 (epoch 1's checkpoint, slots_per_epoch=2) so
+    `_attest(epoch=1, ...)` finds both its target (epoch 1) and source
+    (epoch 0 = genesis) checkpoints."""
+    bh = block_hash(slot=2, parent_hash=GENESIS_HASH, proposer_idx=0,
+                    transactions=())
+    block = Block(slot=2, epoch=1, parent_hash=GENESIS_HASH, block_hash=bh,
+                  transactions=(), proposer_idx=0)
+    node._accept_block(block, 0.0)
+    return bh
+
+
+def _make_casper(node_id=0, n=4):
+    stake = {i: 3.0 for i in range(n)}
+    node = EquivocatingCasperNode(node_id=node_id, weight=stake[node_id],
+                                  endpoint=None, global_seed=0, n=n,
+                                  stake_table=stake, slot_duration=1.0,
+                                  slots_per_epoch=2)
+    sent = []
+    node.broadcast = lambda type, payload, t: sent.append((type, payload))
+    node.send = lambda *a, **k: None
+    node.set_timer = lambda *a, **k: None
+    node.emit = lambda *a, **k: None
+    node.cancel_timer = lambda *a, **k: None
+    return node, sent
+
+
+def _make_honest_casper(node_id=0, n=4):
+    stake = {i: 3.0 for i in range(n)}
+    node = CasperNode(node_id=node_id, weight=stake[node_id],
+                      endpoint=None, global_seed=0, n=n,
+                      stake_table=stake, slot_duration=1.0,
+                      slots_per_epoch=2)
+    events = []
+    node.emit = lambda type, fields, t: events.append((type, fields))
+    node.broadcast = lambda *a, **k: None
+    node.send = lambda *a, **k: None
+    node.set_timer = lambda *a, **k: None
+    node.cancel_timer = lambda *a, **k: None
+    return node, events
+
+
+class TestEquivocatingFFG(unittest.TestCase):
+    def test_double_vote_same_epoch_diff_hash(self):
+        node, sent = _make_casper(node_id=0, n=4)
+        _seed_epoch1_checkpoint(node)
+        node._attest(epoch=1, slot=3, t=5.0)
+        atts = [payload for type, payload in sent if type == "ATTESTATION"]
+        self.assertEqual(len(atts), 2)
+        self.assertEqual(atts[0].ffg.target_epoch, atts[1].ffg.target_epoch)
+        self.assertEqual(atts[0].attester_idx, atts[1].attester_idx)
+        self.assertNotEqual(atts[0].ffg.target_hash, atts[1].ffg.target_hash)
+
+    def test_downstream_node_slashes(self):
+        adv, sent = _make_casper(node_id=0, n=4)
+        _seed_epoch1_checkpoint(adv)
+        adv._attest(epoch=1, slot=3, t=5.0)
+        atts = [payload for type, payload in sent if type == "ATTESTATION"]
+        self.assertEqual(len(atts), 2)
+
+        honest, events = _make_honest_casper(node_id=1, n=4)
+        for ap in atts:
+            honest._handle_attestation(
+                Message(src=0, dst=1, type="ATTESTATION", payload=ap,
+                        t_sent=5.0), 5.0)
+        self.assertTrue(any(type == CASPER_SLASHING for type, _ in events))
+        self.assertGreater(honest.slashable_stake_fraction(), 0.0)
 
 
 if __name__ == "__main__":
