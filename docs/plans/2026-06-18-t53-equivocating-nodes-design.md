@@ -109,23 +109,33 @@ per-id make-fn.
   `PRE-PREPARE` would never break safety even above `1/3`, so it would not
   expose the cliff.)
 
-### 3.2 Casper FFG (double-vote)
+### 3.2 Casper FFG (double-vote → accountable safety)
 
 `EquivocatingCasperNode(CasperNode)`:
-- **`_propose`** (on its slots): fork `BLOCK-PROPOSAL` — block A to the low
-  half, block B to the high half — splitting honest checkpoints.
-- **`_attest`**: **double-vote** — emit two `ATTESTATION`s for the same
-  target epoch with different target hashes (A to low half, B to high
-  half). The T70 machinery (`casper_slashing` event +
-  `slashable_stake_fraction()`) fires automatically on the conflicting
-  second vote.
-- **Below `1/3`:** detected, ≤ 1 checkpoint finalises, the accountable-
-  safety bound (≥ 1/3 stake slashable on any conflict) holds; safe.
-- **At/above `1/3`:** each honest half + Byzantine stake clears 2/3 → **two
-  finalised conflicting checkpoints** = break, with ≥ 1/3 stake slashable
-  (the accountable-safety theorem, confirmed empirically). Invariant:
-  *any two conflicting finalised checkpoints ⇒ ≥ 1/3 stake slashable*
-  (`adversary-model.md` §5 / §7.3).
+- **`_attest`**: **double-vote** — emit the honest `ATTESTATION` (real
+  checkpoint) **and** a second conflicting `ATTESTATION` for the **same**
+  target epoch with a different `target_hash`, **both broadcast to all**.
+  Broadcasting both to every node is what makes the T70 detector fire: a
+  single honest node must receive *both* of an attester's votes to classify
+  the second as `CONFLICT` (`casper_slashing` event +
+  `slashable_stake_fraction()`). A half-half *partition* of the two votes
+  would defeat detection (no node sees both) — so FFG does **not** partition.
+- **No forked `BLOCK-PROPOSAL`.** *Fidelity finding (2026-06-18, from
+  reading `src/pos/epoch.py`):* `EpochState.links` aggregates stake by
+  `source_epoch` only and **ignores `target_hash`**; there is one
+  `EpochState` per target epoch. A forked checkpoint would therefore make
+  two checkpoints "finalise" under an honest supermajority — a **model
+  artifact, not a real safety break** — so a forked proposal is excluded as
+  unfaithful. The genuine cross-node fork cliff is demonstrable only in
+  PBFT (§3.1), which tracks digests in its quorum math.
+- **Measured invariant = accountable safety.** `slashable_stake_fraction`
+  rises ≈ linearly with `f` and **crosses 1/3 at `f = 1/3`** — the
+  accountable-safety cliff: above 1/3 Byzantine stake a safety violation
+  becomes economically possible, but is always attributable to ≥ 1/3
+  slashable stake (`adversary-model.md` §5 / §7.3). The cross-node
+  `safety_violation` reducer reads **0** for FFG (the model does not fork),
+  which is the faithful outcome — accountable safety means *detect + slash*,
+  not *fork*.
 
 ### 3.3 Snowman (equivocating proposer + lying responders)
 

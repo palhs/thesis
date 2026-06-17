@@ -255,15 +255,18 @@ class EquivocatingPBFTNode(PBFTNode):
 
 **Files:** Modify `src/adversary/equivocate.py`; test `tests/adversary/test_equivocate.py`.
 
-**Mechanism (design §3.2).** Double-vote only.
-- `_propose(slot, epoch, t)`: when this node is the slot proposer, build two blocks (A, B) for the same `(slot, parent)` from `conflicting_bytes("ffg", slot, <parent int>)` as the tx blob; send `BLOCK-PROPOSAL(A)`→lo, `(B)`→hi; self-accept A. (Forking the checkpoint slot is what lets two checkpoints finalise above threshold.)
-- `_attest(epoch, slot, t)`: build the honest FFG vote (real `target_cp`), send `ATTESTATION(honest)`→lo; build a conflicting vote with the **same** `target_epoch` but an alternate `target_hash` (the B-block hash, or `conflicting_bytes`-derived), send `ATTESTATION(alt)`→hi; self-record the honest one. The T70 `_file_ffg_vote` on honest recipients flags the second as `double_vote` (`casper_slashing` + `slashable_stake_fraction`).
+**Mechanism (design §3.2 — corrected for FFG fidelity).** Double-vote only; **both votes broadcast to ALL** (no partition, no forked proposal).
+- `_attest(epoch, slot, t)`: run the honest attestation first (call `super()._attest(epoch, slot, t)` — it broadcasts the real `ATTESTATION` and self-records). Then build a **conflicting** `FFGVote` with the **same** `source_epoch`/`target_epoch` but a different `target_hash` (a fabricated 32-byte hash, e.g. `block_hash(slot=slot, parent_hash=GENESIS_HASH, proposer_idx=self.id, transactions=(b"EQV-ALT", ...))` or any value ≠ the real `target_cp.block_hash`), wrap it in an `AttestationPayload(slot, epoch, ffg=alt, attester_idx=self.id)`, and `self.broadcast("ATTESTATION", alt_payload, t)`. Both reach every honest node, so each honest `_file_ffg_vote` sees the attester's first (honest) vote as `NEW` then the second as `CONFLICT` → `casper_slashing` + `slashable_stake_fraction`.
+- **No `_propose` override / no forked `BLOCK-PROPOSAL`.** *Fidelity finding:* `EpochState.links` (`src/pos/epoch.py`) aggregates by `source_epoch` only and ignores `target_hash`, so a forked checkpoint would "finalise" two checkpoints under an honest supermajority — a model artifact, not a real break. The faithful FFG signal is accountable safety (`slashable_stake_fraction`), not a fork. (The cross-node fork cliff is demonstrated by PBFT only.)
+- Edge case: `super()._attest` may early-return (`checkpoint_unavailable` / `source_checkpoint_unavailable`) under delay — in that case emit no conflicting vote either (guard: only double-vote if the honest attestation was actually sent; simplest is to replicate the honest guards or detect via a captured-send flag). On the static-baseline (10 ms) timeline the guards never trip, so a straightforward `super()` call + conflicting broadcast is fine; just ensure the conflicting `target_epoch == epoch` so the recipient's `_handle_attestation` epoch-match guard passes.
 
-**Step 1 — failing tests** (`TestEquivocatingFFG`): assert `_attest` emits two `ATTESTATION`s with equal `ffg.target_epoch` and different `ffg.target_hash` to disjoint subsets; assert a downstream honest `CasperNode` receiving both emits a `casper_slashing` event.
+**Step 1 — failing tests** (`TestEquivocatingFFG`):
+- `test_double_vote_same_epoch_diff_hash`: drive `_attest`; capture broadcasts; assert two `ATTESTATION`s with equal `ffg.target_epoch` and **different** `ffg.target_hash`, both with `attester_idx == self.id`.
+- `test_downstream_node_slashes`: feed both attestations (as `Message`s) into a fresh honest `CasperNode` (`_handle_attestation`); assert it emits a `casper_slashing` event and `slashable_stake_fraction() > 0`.
 
 **Step 2 — run, expect fail.**
 
-**Step 3 — implement.** Add `EquivocatingCasperNode(CasperNode)` importing `AttestationPayload, BlockProposalPayload, FFGVote` from `pos.messages` and `block_hash` from `pos.chain`. Override `_attest` (and `_propose`) per the mechanism; reuse the honest `chain.checkpoint` lookups for the real vote, derive the alternate `target_hash` via `block_hash(...)` on a forked block or `conflicting_bytes`.
+**Step 3 — implement.** Add `EquivocatingCasperNode(CasperNode)` importing `AttestationPayload, FFGVote` from `pos.messages`, `block_hash, GENESIS_HASH` from `pos.chain`. Override only `_attest` per the mechanism above. Do **not** override `_propose`. Do not edit `src/pos/`.
 
 **Step 4 — run, expect pass.**
 
@@ -439,7 +442,7 @@ Mirror for `run_ffg_equiv` (Byzantine ids → `EquivocatingCasperNode`) and `run
 
 **Step 1.** `PYTHONPATH=src python3 -m adversary.equivocate_sweep --jobs 8 --heavy-jobs 1`. (Per the sandbox-multiprocessing memory, if `--jobs>1` hangs, fall back to `--jobs 1`, or hand the production sweep to the user's terminal.)
 
-**Step 2 — verify dataset.** Confirm 640 rows, single `commit_hash`, `f=0` rows all `safety_violation=0`, PBFT/FFG show `safety_violation=1` at/above the cliff (≥`f=0.40` at n=10) and `0` below, Snowman `safety_violation=0` throughout, FFG `max_slashable_stake_fraction ≈ f` at `f>0`.
+**Step 2 — verify dataset.** Confirm 640 rows, single `commit_hash`, `f=0` rows all `safety_violation=0`. Per-protocol expectation: **PBFT** `safety_violation=1` at/above the fork cliff (≥`f=0.40` at n=10) and `0` below; **FFG** `safety_violation=0` throughout (faithful — no forked proposal) but `max_slashable_stake_fraction ≈ f` at `f>0`, crossing 1/3 at `f≥0.33` (the accountable-safety cliff); **Snowman** `safety_violation=0` throughout (resists).
 
 **Step 3 — re-run determinism guard.** Re-run one control + one attack cell; assert byte-identical to the committed rows (modulo `commit_hash`). Re-run the honest baseline byte-identical guard to prove the honest FSMs are untouched.
 
@@ -488,7 +491,7 @@ Render only the minimum to *witness* the cliff for the experiment page: `safety_
 ## Notes / risks
 
 - **PBFT cliff arithmetic** (n=10): Byzantine help pushes each honest half to `2f+1` only once `byz ≥ 4` (`f=0.40`), so the safety break first appears at `f=0.40`, not `f=0.33` — the probe must confirm this. If it doesn't appear, check the half-half split sizes and that Byzantine backups fork *both* PREPARE and COMMIT.
-- **FFG conflicting finalization** depends on a Byzantine node proposing an epoch checkpoint slot (stake-weighted, seeded) — it is probabilistic per run. The **reliable** FFG signal is `max_slashable_stake_fraction ≈ f` (double-vote detection fires every time); conflicting finalization is reported when it occurs. Do not gate the task on observing it in every seed.
+- **FFG has no representable cross-node fork** in this simulator: `EpochState.links` ignores `target_hash` (`src/pos/epoch.py`), so the faithful FFG signal is `max_slashable_stake_fraction` (double-vote detection, fires reliably when both votes are broadcast to all), **not** a forked finalization. FFG `safety_violation` is expected to stay 0; that is correct, not a bug. Document this fidelity boundary on the experiment page and as an `adversary-model.md` §5 Revision.
 - **Sandbox multiprocessing** (memory `project_sweep_multiprocessing_sandbox`): `--jobs>1` may deadlock in-sandbox; default the in-sandbox run to `--jobs 1` or hand the full sweep to the user's terminal.
 - **`head` is shadowed** in this shell (memory): use `sed -n`/`tail`/`awk` to inspect CSV rows, not `head`.
 - **EventRecord attribute names**: verify `node_id`/`event_type`/`fields` against `src/event_log/` before relying on them in `safety.py`.
