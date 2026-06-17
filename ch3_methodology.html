@@ -113,14 +113,70 @@ same *kind* of decision, a fair comparison cannot be read off raw numbers: it
 needs both a single fixed engine that runs all four identically and a
 downstream step that reconciles their differing output onto one scale.
 
-The engine is a single-process discrete-event system, identical for every
-protocol, in which only the protocol-logic slot is swapped (Figure 3.1).
-Control flow is one-directional. The harness wires the components once and
-calls `Scheduler.run()`; thereafter each validator acts only through its
-outbound messaging API, never by calling another component directly, so that
-protocol behavior and scheduler infrastructure stay cleanly separated
-[[wiki/concepts/system-design]]. One experiment-matrix cell and a seed enter
-this fixed engine and leave as one comparable row of `results.csv` (Figure 3.1).
+The spine of that engine is short, and stating it plainly first makes the
+remainder of this section concrete (Figure 3.1). One seed and one
+configuration enter. The harness builds the runtime machinery — scheduler,
+network, validators, logger — in a form identical for every protocol, swapping
+only the protocol-logic slot. Events then flow through a single run loop: the
+scheduler pops the soonest event, advances a virtual clock to it, and hands it
+to a validator, which reacts and may schedule further events. A logger records
+each event as it is processed. When the run ends, a reducer turns the recorded
+event stream into one comparable row of results. The same machinery is run
+once per seed and once per cell of the experiment matrix (§3.4), so that the
+only thing that varies between two rows is the quantity under study.
+
+**Figure 3.1 ([[diagrams/runtime/architecture]]).** Structural view: a single
+fixed harness in which only the protocol-logic slot is swapped, turning one
+experiment-matrix cell and seed into one comparable per-trial row.
+
+A run is fully described by the configuration that enters it. The configuration
+loader requires seven top-level keys, shown here as the input contract:
+
+```yaml
+n: 10                      # validator-set size
+t_max: 20.0                # virtual-time deadline
+seeds:
+  n_runs: 20               # the harness enumerates seeds 0 … n_runs-1
+network:
+  phases:                  # a TIME-STAMPED sequence of phases, not a static setting
+    - t_start: 0.0
+      t_end:   20.0
+      delay: { kind: "...", params: { ... } }
+      p_drop: 0.0          # optional — per-phase message-loss probability
+      partitions: []       # optional — disjoint validator groups
+adversary:      { ... }    # opaque block — interpreted per protocol/adversary
+protocol_knobs: { ... }    # opaque block
+workload:       { ... }    # opaque block
+```
+
+Two features of this contract carry weight the rest of the chapter relies on.
+First, `network` is not a single static setting but a time-stamped sequence of
+phases, each fixing a delay regime, an optional message-loss probability, and
+an optional partition over a stated interval; this is the mechanism that lets
+one seeded run cross a partial-synchronous Global Stabilization Time without
+intervention, because the change of regime is scheduled in advance rather than
+applied by hand mid-run [[wiki/concepts/network-model-phases]]. Second, the
+three blocks `adversary`, `protocol_knobs`, and `workload` are deliberately
+opaque: the loader admits each as a whole and leaves its interpretation to the
+protocol and adversary that consume it. That opacity is part of how one harness
+admits four different protocols — each reads the knobs it understands from a
+schema it does not have to share [[wiki/concepts/system-design]].
+
+When the system is wired, each validator is granted exactly three capabilities,
+and these are the only ways a validator affects anything outside itself: it
+never calls another component directly. The capabilities, and the component that
+owns each, are:
+
+| Capability granted to a validator | Owned by | Purpose |
+|:--|:--|:--|
+| set / cancel a timer | scheduler | a validator schedules its own future wake-ups |
+| send / broadcast a message | network | a validator communicates with other validators |
+| emit an event (`decided`, `halted`, …) | logger | a validator records what happened |
+
+This three-capability contract is the concrete content of the split-ownership
+invariant: the scheduler owns time and event delivery, the network owns message
+transport, and the logger owns the record, so that protocol behavior and
+scheduler infrastructure stay cleanly separated [[wiki/concepts/system-design]].
 Because the builder, scheduler, network, and logger are identical across
 protocols, any difference between two rows is attributable to the protocol logic
 alone. The network models timing only: it delivers each message at most once and
@@ -128,41 +184,51 @@ unordered, under per-phase delay, loss, and partition. Every protocol's
 messages travel in one uniform envelope distinguished only by a per-protocol
 type (the catalog of Table 3.1).
 
-Isolation is not commensurability. Making four different kinds of decision
-comparable is a separate downstream step — the reconcile performed by the metric
-schema under stated conventions (§3.5) — not something the shared engine secures.
-
 The engine's mechanism is one run loop (Figure 3.2) — the scheduler box of
-Figure 3.1 seen up close. Each turn it pops the next-soonest event, advances
-the virtual clock to that event, lets the relevant node react, and enqueues
-whatever the node produces, repeating until the run ends on one of three
-termination paths. The loop is identical for all four protocols; only the
-state machine inside the node differs.
-
-**Figure 3.1 ([[diagrams/runtime/architecture]]).** Structural view: a single
-fixed harness in which only the protocol-logic slot is swapped, turning one
-experiment-matrix cell and seed into one comparable `results.csv` row.
+Figure 3.1 seen up close. One turn proceeds as follows. If the virtual clock
+has reached the deadline `t_max`, the run stops. If no events remain, the run
+stops on quiescence. Otherwise the scheduler pops the soonest event, identified
+by the triple `(t, node, seq)`, and advances the virtual clock to `t`. If that
+event is a timer that has since been cancelled, it is skipped. Otherwise the
+logger records it and the scheduler hands it to the target validator, which
+reacts and may schedule new events; the loop then checks the caller's stop
+predicate before taking the next turn. A run therefore ends on one of three
+termination paths — `quiescence` (the heap is empty), `deadline` (the clock
+reached `t_max`), or `predicate` (a caller-supplied condition became true). The
+loop is identical for all four protocols; only the state machine inside the
+validator differs.
 
 **Figure 3.2 ([[diagrams/runtime/event-loop]]).** One turn of the scheduler's
 event loop — pop the next event, advance the virtual clock to it, let a node
 react, enqueue what it produces — with the three termination paths.
 
-Two properties of this model carry the methodology. First, determinism:
-virtual time and every random draw derive from a single global seed. Each
+Two properties of this model carry the methodology. First, determinism. The
+event queue is a min-heap ordered by the triple `(t, node_id, seq)`, where `seq`
+is a per-node monotonically increasing counter; events scheduled for the same
+virtual time are therefore separated by a fixed total order without the
+scheduler ever comparing event contents, because the node identifier and the
+sequence counter already supply a unique tie-break [[wiki/concepts/simulation-design]].
+Virtual time and every random draw derive from a single global seed: each
 component's random stream is seeded by a stable hash of that seed and the
-stream's identity rather than by construction order — so the same seed
-reproduces the same draws regardless of which protocol consumes them — and
-simultaneous events are broken by a fixed total order
-[[wiki/concepts/simulation-design]]. A configuration paired with a seed
-therefore reproduces a byte-identical event stream, and any reported number is
-exactly reproducible [[wiki/concepts/reproducibility]].
+stream's identity rather than by construction order, so the same seed reproduces
+the same draws regardless of which protocol consumes them. A configuration
+paired with a seed therefore reproduces a byte-identical event stream, and any
+reported number is exactly reproducible [[wiki/concepts/reproducibility]].
 Second, network phases are scheduled in advance, so a single seeded run can
 cross a partial-synchronous Global Stabilization Time without intervention
-[[wiki/concepts/network-model-phases]]. An adversary is a per-node interceptor
-that alters a single validator's outgoing messages rather than a new component;
-the four Byzantine strategies a profile can apply are catalogued in
-[[wiki/concepts/adversary-model]], and §3.4 names the three the RQ4 sweep
-exercises.
+[[wiki/concepts/network-model-phases]].
+
+Isolation is not commensurability. Running four different kinds of decision
+through one identical engine secures only that the engine adds no difference of
+its own; making the four kinds of decision comparable is a separate downstream
+step — the reconcile performed by the metric schema under stated conventions
+(§3.5) — not something the shared engine secures. The single comparable row a
+run produces is written to a per-trial file, `results/baseline/baseline.csv`,
+and the reconcile onto one scale happens when those rows are read back (§3.5).
+An adversary is a per-node interceptor that alters a single validator's outgoing
+messages rather than a new component; the four Byzantine strategies a profile
+can apply are catalogued in [[wiki/concepts/adversary-model]], and §3.4 names
+the three the RQ4 sweep exercises.
 
 ## 3.3 Algorithms
 
@@ -325,15 +391,26 @@ The harness drives a fixed six-step bootstrap to wire the system
 
 - construct the scheduler, network, and validators;
 - register each validator with the network;
-- bind each to the scheduler and the network under a split-ownership invariant
-  (the scheduler owns the timer and event APIs; the network owns message
-  delivery);
+- bind each validator to the scheduler and the network under the split-ownership
+  invariant of §3.2 (the scheduler owns the timer and event capabilities; the
+  network owns message delivery);
 - attach the event logger;
-- call `Network.start()` and `Node.start(t=0)` to seed the heap;
-- call `Scheduler.run(t_max, stop_when)`.
+- start the network and start each validator at virtual time zero, so that the
+  validators' opening actions seed the event heap;
+- enter the scheduler's run loop, bounded by `t_max` and the caller's stop
+  predicate.
 
-The same configuration file paired with the same global seed produces a
-byte-identical event stream under the determinism contract of §3.2: the
+The configuration that drives a run follows the seven-key schema of §3.2, but a
+distinction matters for reproducibility. That schema is the input contract — the
+shape any run must take — and a run can be produced by loading a YAML file that
+satisfies it. The baseline experiments reported here, however, do not load a
+YAML file per run: they construct the configuration programmatically, as
+scenario definitions in code that build the same `Config` object the loader would
+produce [[wiki/concepts/simulation-design]]. The YAML schema is therefore the
+documented contract rather than an artifact on disk for every cell; either route
+yields the identical frozen configuration, and the determinism guarantee below
+holds for both. The same configuration paired with the same global seed produces
+a byte-identical event stream under the determinism contract of §3.2: the
 bootstrap above introduces no new randomness, leaving the scheduler-, node-,
 and network-scoped RNG streams it wires as the run's sole stochastic input
 [[wiki/concepts/reproducibility]].
@@ -342,7 +419,7 @@ A run terminates under any of three OR-composed predicates:
 
 - `quiescence` — the heap is empty;
 - `deadline` — the clock reaches `t_max`;
-- `predicate` — a caller-supplied `stop_when()` returns true.
+- `predicate` — a caller-supplied stop condition becomes true.
 
 Time-bounded runs use a buffer beyond the measurement window, and the analysis
 step clips out-of-window events so that in-window events are not truncated by
@@ -447,14 +524,40 @@ producing one `results.csv` row.
    committed-transaction count over the measurement window; and
    `consensus_msgs_per_acu` is the count of `PRE-PREPARE`, `PREPARE`, and
    `COMMIT` messages for the block — `1 + 2n + 2n² = O(n²)` at this `n`.
-6. **Output.** One row, tagged with `(protocol, n, seed)`, is appended to the
-   comparative CSV.
+6. **Output.** One per-trial row, tagged with `(protocol, n, seed)`, is
+   appended to the per-trial CSV.
 
-Repeating over seeds `0 … 19` under common random numbers yields the cell's
-mean and 95% confidence interval. Family B replaces the network phase, Family
-C attaches an `AdversaryProfile` to `f` of the validators, and the other three
-protocols substitute their own proposer, message types, and `decided`
-condition (Table 3.1) — but the six-phase lifecycle is identical for all four.
+The row this run appends has the following shape, shown with a few salient
+columns and the remainder elided:
+
+```text
+run_id,  protocol, n,  seed, …, commit_hash, t_max, commit_latency_ms, finality_latency_ms, …, success_rate, fork_rate, …
+pbft-n10, pbft,    10, 0,    …, 24a491a4,    20.0,  1000.000003,       1000.000004,         …, 1.0,          0.0,       …
+```
+
+The `commit_hash` (`24a491a4`) and `seed` columns embedded in every row are the
+hard evidence of reproducibility: together they pin the exact code and the exact
+random draws that produced the row, so any number can be regenerated from the
+record alone. The full 24-column schema is defined in §3.5 and is not repeated
+here.
+
+The walkthrough above produces one row of a single file, but the comparison
+rests on two files [[wiki/concepts/output-format]]. The first is a per-trial,
+long-format CSV — `results/baseline/baseline.csv` — that carries one row per
+`(protocol, scenario, seed)`; this is the file step 6 appends to, one row per
+run. The second is produced by a separate, downstream aggregation step: a wide
+CSV — `results/baseline/aggregated.csv` — that carries one row per configuration,
+holding the mean and 95% confidence interval of each metric across the seed set,
+and it is this aggregated file that feeds the Chapter 4 plots. The mean and
+confidence interval are therefore properties of the aggregation, not of any
+single per-trial row.
+
+Repeating the run over seeds `0 … 19` under common random numbers gives the
+aggregation step the sample it reduces to the cell's mean and 95% confidence
+interval. Family B replaces the network phase, Family C attaches an
+`AdversaryProfile` to `f` of the validators, and the other three protocols
+substitute their own proposer, message types, and `decided` condition (Table
+3.1) — but the six-phase lifecycle is identical for all four.
 
 ## 3.5 Metric schema
 
@@ -535,8 +638,10 @@ work.
 | `success_rate` | `0/1` indicator per run (`1.0` iff an instance decided); becomes a frequency after `n_runs` aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) | — |
 | `fork_rate` | `0` by construction | `0` on the honest baseline; a pre-finalization reorg arises only under adversarial load | `0` on the honest baseline; pre-`β` preference switches arise only under adversarial load | — |
 
-One row of the comparative CSV is produced per configuration after `n_runs`
-aggregation. Continuous metrics are reported as the mean over the seed set
+The per-trial CSV carries one row per `(protocol, scenario, seed)`; a separate
+downstream aggregation produces a second file carrying one row per
+configuration, with the mean and 95% confidence interval over the seed set.
+Continuous metrics are reported as the mean over the seed set
 with a 95% Gaussian confidence interval; rate metrics (`fork_rate`,
 `success_rate`) as the observed proportion with a 95% Wilson interval, so a
 zero-violation outcome is stated as `0/n_runs` rather than a degenerate mean.
