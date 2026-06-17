@@ -1,4 +1,81 @@
-# Chapter 3 — Methodology
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 3 — Methodology</title>
+<style>
+:root { --ink:#1a1a1a; --muted:#6b7280; --line:#e5e7eb; --accent:#3366aa; --bg:#ffffff; --soft:#f7f8fa; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; color:var(--ink); background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.65; }
+#layout { display:flex; align-items:flex-start; max-width:1280px; margin:0 auto; }
+#toc { position:sticky; top:0; align-self:flex-start; width:270px; max-height:100vh; overflow-y:auto;
+  padding:24px 16px 40px; border-right:1px solid var(--line); font-size:14px; }
+#toc .toc-title { font-weight:700; text-transform:uppercase; letter-spacing:.06em; font-size:12px; color:var(--muted); margin-bottom:10px; }
+#toc ul { list-style:none; margin:0; padding:0; }
+#toc li { margin:2px 0; }
+#toc li.lv3 { padding-left:14px; }
+#toc a { color:#374151; text-decoration:none; display:block; padding:3px 6px; border-radius:6px; }
+#toc li.lv2 a { font-weight:600; }
+#toc a:hover { background:var(--soft); color:var(--accent); }
+main { flex:1; min-width:0; padding:24px 40px 120px; }
+#banner { background:#eef6ff; border:1px solid #cfe0f5; color:#234; border-radius:10px;
+  padding:10px 14px; font-size:14px; margin-bottom:22px; }
+article { max-width:820px; }
+h1 { font-size:30px; line-height:1.25; margin:.2em 0 .6em; }
+h2 { font-size:23px; margin:1.7em 0 .5em; padding-bottom:.25em; border-bottom:1px solid var(--line); }
+h3 { font-size:19px; margin:1.4em 0 .4em; }
+p { margin:.7em 0; }
+code { background:var(--soft); border:1px solid var(--line); border-radius:4px; padding:.06em .35em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:.86em; }
+cite.wl { font-style:normal; color:#8a93a3; font-size:.8em; background:var(--soft);
+  border:1px solid var(--line); border-radius:4px; padding:.02em .3em; white-space:nowrap; }
+table { border-collapse:collapse; width:100%; margin:1em 0; font-size:14px; display:block; overflow-x:auto; }
+th, td { border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; }
+th { background:var(--soft); }
+ul, ol { padding-left:1.4em; }
+figure.diagram { margin:18px 0 6px; padding:14px; border:1px solid var(--line); border-radius:12px;
+  background:var(--soft); cursor:zoom-in; transition:box-shadow .15s, border-color .15s; }
+figure.diagram:hover { border-color:var(--accent); box-shadow:0 4px 18px rgba(51,102,170,.14); }
+figure.diagram .mermaid { display:flex; justify-content:center; background:#fff; border-radius:8px; padding:8px; }
+figure.diagram .mermaid svg { max-width:100%; height:auto; max-height:520px; }
+figure.diagram .zoomhint { text-align:center; font-size:12.5px; color:var(--muted); margin-top:8px; }
+#overlay { display:none; position:fixed; inset:0; background:rgba(15,18,24,.78);
+  z-index:1000; align-items:center; justify-content:center; }
+#modal { width:94vw; height:94vh; background:#fff; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
+#modal-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 14px;
+  border-bottom:1px solid var(--line); background:var(--soft); }
+#modal-title { font-size:13px; color:var(--muted); font-family:ui-monospace,Menlo,Consolas,monospace; }
+#modal-close { border:none; background:#e5e7eb; border-radius:8px; width:34px; height:30px; cursor:pointer; font-size:16px; }
+#modal-close:hover { background:#d1d5db; }
+#modal-body { flex:1; position:relative; min-height:0; }
+#modal-body svg { width:100%; height:100%; display:block; }
+@media (max-width:880px){ #toc{ display:none; } main{ padding:18px 18px 90px; } body{ font-size:16px; } }
+</style>
+</head>
+<body>
+<div id="layout">
+  <nav id="toc"><div class="toc-title">Mục lục</div><ul id="toc-list"></ul></nav>
+  <main>
+    <div id="banner">Sáu sơ đồ dưới đây là <b>vector</b> (render bằng Mermaid). <b>Nhấn vào sơ đồ để phóng to</b> — trong cửa sổ phóng to: lăn chuột để zoom, kéo để di chuyển, nút +/− để chỉnh, Esc để đóng. Cần kết nối Internet để tải thư viện.</div>
+    <article id="content"></article>
+  </main>
+</div>
+
+<div id="overlay">
+  <div id="modal">
+    <div id="modal-bar">
+      <span id="modal-title"></span>
+      <button id="modal-close" title="Đóng (Esc)">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script type="text/markdown" id="chapter-md"># Chapter 3 — Methodology
 
 ## 3.1 Overview
 
@@ -638,3 +715,368 @@ in Chapter 6.
 
 Chapter 4 reports the baseline, delay, and adversarial sweeps the matrix
 prescribes and answers RQ1–RQ4 against the schema fixed here.
+</script>
+<script type="text/x-mermaid" data-slug="diagrams/runtime/architecture">
+flowchart TD
+    IN["<b>INPUT — one experiment-matrix cell + seed</b><br/>protocol · n = 4 to 25 validators<br/>network conditions: delay, loss, partitions (configure the NETWORK below)<br/>adversary (behaviour + strength) · workload (transactions) · seed"]
+
+    subgraph HARNESS["THE HARNESS — identical for every protocol; only the protocol logic is swapped"]
+        direction TB
+        HB["<b>BUILDER</b> — assembles the system and loads the workload"]
+        SCH["<b>SCHEDULER</b> — the single run loop and virtual clock<br/><i>one turn of this loop is the event-loop figure</i>"]
+        SLOT["<b>PROTOCOL LOGIC</b> — the only swappable part<br/>a state machine for one of the four protocols"]
+        NET["<b>NETWORK</b> — delivers messages with delay, loss and partitions<br/>(models timing only — no CPU or signature cost)"]
+        LOG["<b>LOGGER</b> — records what happened: decided, halted, messages"]
+        HB --- SCH
+        SCH --- SLOT
+        SLOT --- NET
+        SLOT -. "results &amp; messages" .-> LOG
+    end
+
+    RED["<b>REDUCE + RECONCILE</b><br/>the four emit different kinds of decision — put them on one common scale<br/>(per ACU for overhead · split Narwhal's two layers · rescale Snowman)"]
+    OUT["<b>OUTPUT — one row of results.csv (one comparable data point)</b><br/>time-to-finality &amp; throughput (per transaction)<br/>message &amp; byte overhead (per ACU; mempool / consensus split for the DAG)<br/>reliability: agreement · safety · liveness (defined with the metrics) · run outcome"]
+    RQ["comparison plots that answer the research questions (§3.1)"]
+
+    IN -- "build + load workload" --> HARNESS
+    HARNESS -- "flush events" --> RED
+    RED --> OUT
+    OUT --> RQ
+
+    classDef io fill:#eef6ff,stroke:#3366aa,color:#000
+    classDef eng fill:#f4f4f4,stroke:#666,color:#000
+    classDef proto fill:#eefaee,stroke:#557755,color:#000
+    classDef red fill:#f3eefb,stroke:#7755aa,color:#000
+    classDef rq fill:#fff4e6,stroke:#bb8833,color:#000
+    class IN,OUT io
+    class RED red
+    class RQ rq
+    class HB,SCH,NET,LOG eng
+    class SLOT proto
+</script>
+<script type="text/x-mermaid" data-slug="diagrams/runtime/event-loop">
+flowchart TD
+    Q["<b>EVENT QUEUE</b><br/>min-heap ordered by (time t, node, sequence)"]
+    N["<b>NODE</b> — runs its protocol logic for this event"]
+    NET["<b>NETWORK</b> — turns a send into a future delivery<br/>at time t + delay (loss / partitions applied here)"]
+    ENQ(["future event<br/>(a delivery, or a timer)"])
+    STOP["<b>STOP</b> — the run ends when:<br/>nothing left to do · the time limit is reached · the caller's stop condition fires"]
+
+    Q -- "pop next, advance clock" --> N
+    N -- "react: send · set timer · emit result" --> NET
+    NET -- "schedule at t + delay" --> ENQ
+    ENQ -- "back on the queue" --> Q
+    Q -. "loop ends" .-> STOP
+
+    classDef eng fill:#eef6ff,stroke:#3366aa,color:#000
+    classDef proto fill:#eefaee,stroke:#557755,color:#000
+    classDef net fill:#f4f4f4,stroke:#666,color:#000
+    classDef stop fill:#fff0f0,stroke:#aa5555,color:#000
+    class Q,ENQ eng
+    class N proto
+    class NET net
+    class STOP stop
+</script>
+<script type="text/x-mermaid" data-slug="diagrams/protocols/pbft">
+%% PBFT — three-phase commit for one (view, seq) instance (n=4, f=1, quorum 2f+1=3)
+sequenceDiagram
+    autonumber
+    participant Primary
+    participant ReplicaB
+    participant ReplicaC
+    participant ReplicaD
+
+    Note over Primary,ReplicaD: FSM instance keyed by (view, seq) — every replica starts the instance in state idle.
+
+    rect rgb(240,240,240)
+        Note over Primary,ReplicaD: pre-prepare phase
+        Primary->>Primary: on_timer(propose) — batch local mempool, assign (view, seq), digest
+        Primary->>ReplicaB: PRE-PREPARE(view, seq, digest, request)
+        Primary->>ReplicaC: PRE-PREPARE(view, seq, digest, request)
+        Primary->>ReplicaD: PRE-PREPARE(view, seq, digest, request)
+        Note over ReplicaB,ReplicaD: on_message — validate, arm view-change timer, idle → pre_prepared
+    end
+
+    rect rgb(240,240,240)
+        Note over Primary,ReplicaD: prepare phase
+        ReplicaB->>Primary: PREPARE(view, seq, digest)
+        ReplicaB->>ReplicaC: PREPARE(view, seq, digest)
+        ReplicaB->>ReplicaD: PREPARE(view, seq, digest)
+        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast PREPARE likewise (arrows omitted)
+        Note over Primary,ReplicaD: on 2f+1 matching PREPARE collected — pre_prepared → prepared
+    end
+
+    rect rgb(240,240,240)
+        Note over Primary,ReplicaD: commit phase
+        ReplicaB->>Primary: COMMIT(view, seq, digest)
+        ReplicaB->>ReplicaC: COMMIT(view, seq, digest)
+        ReplicaB->>ReplicaD: COMMIT(view, seq, digest)
+        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast COMMIT likewise (arrows omitted)
+        Note over Primary,ReplicaD: on 2f+1 matching COMMIT — prepared → committed, cancel timer, emit decided(digest, (view, seq))
+    end
+
+    Note over Primary,ReplicaD: liveness recovery — taken only if the instance stalls
+
+    opt view-change timer fires before committed
+        Note over Primary,ReplicaD: new_view = view + 1 = 1 — new primary = new_view mod n = ReplicaB
+        ReplicaC->>ReplicaB: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
+        ReplicaD->>ReplicaB: VIEW-CHANGE(new_view, last_stable_seq, prepared_evidence)
+        Note over ReplicaB,ReplicaD: cross-instance — view_changing set, all (view, *) instances frozen
+        Note over Primary,ReplicaD: ReplicaB (new primary) collects 2f+1 VIEW-CHANGE
+        ReplicaB->>Primary: NEW-VIEW(new_view, vc_proofs, reissued_pre_prepares)
+        Note over Primary,ReplicaD: ReplicaB also broadcasts NEW-VIEW to ReplicaC, ReplicaD (arrows omitted) — advance current view, replay prepared-not-committed
+    end
+</script>
+<script type="text/x-mermaid" data-slug="diagrams/protocols/casper-ffg">
+%% Casper FFG — justify-then-finalise for one epoch (stake threshold >= 2/3)
+sequenceDiagram
+    autonumber
+    participant Proposer
+    participant AttesterB
+    participant AttesterC
+    participant AttesterD
+
+    Note over Proposer,AttesterD: FFG instance keyed by epoch — checkpoint starts unjustified. on_timer(slot) drives each slot of the epoch.
+
+    rect rgb(240,240,240)
+        Note over Proposer,AttesterD: slot — propose
+        Proposer->>Proposer: on_timer(slot) — slot proposer = stake-weighted deterministic(global_seed, slot), batch mempool
+        Proposer->>AttesterB: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
+        Proposer->>AttesterC: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
+        Proposer->>AttesterD: BLOCK-PROPOSAL(slot, epoch, parent_hash, block_hash, txs)
+        Note over AttesterB,AttesterD: feeds the LMD-GHOST head view — no direct FFG transition
+    end
+
+    rect rgb(240,240,240)
+        Note over Proposer,AttesterD: slot — attest
+        AttesterB->>Proposer: ATTESTATION(head_vote, ffg_source=(Se, Sh), ffg_target=(Te, Th))
+        AttesterB->>AttesterC: ATTESTATION(head_vote, ffg_source, ffg_target)
+        AttesterB->>AttesterD: ATTESTATION(head_vote, ffg_source, ffg_target)
+        Note over Proposer,AttesterD: AttesterC and AttesterD attest likewise (arrows omitted)
+    end
+
+    Note over Proposer,AttesterD: … attestations accumulate across the epoch's slots
+
+    Note over Proposer,AttesterD: stake-weighted FFG votes for link (S, T) reach >= 2/3 of stake — epoch T unjustified → justified
+    Note over Proposer,AttesterD: next supermajority link out of T justifies — epoch T justified → finalised, emit decided(checkpoint_root, epoch)
+
+    Note over Proposer,AttesterD: accountable-safety branch — slashable equivocation observed
+
+    opt a node observes two slashable ATTESTATIONs from one attester
+        AttesterC->>Proposer: SLASHING-EVIDENCE(offender_idx, double_vote | surround_vote, vote_pair)
+        Note over Proposer,AttesterD: verified evidence — offender → halted{slashed}, deposit burned
+    end
+</script>
+<script type="text/x-mermaid" data-slug="diagrams/protocols/snowman">
+%% Snowman — subsampled poll loop for one block (sample K of n peers, accept on counter >= β); K=4 of 7 peers shown
+sequenceDiagram
+    autonumber
+    participant Poller
+    participant P1
+    participant P2
+    participant P3
+    participant P4
+    participant P5
+    participant P6
+    participant P7
+
+    Note over Poller,P7: instance keyed by block_id — starts polling with (preference, counter=0). No leader role — every validator polls independently. Each round samples K = min(20, n−1) peers, K=4 of 7 shown.
+
+    Poller->>Poller: on_message(BLOCK-ANNOUNCEMENT) — register block_id in state polling
+
+    rect rgb(240,240,240)
+        Note over Poller,P7: one poll round — repeats until accepted
+
+        Poller->>Poller: on_timer(poll) — sample K peers via self.rng (here P2, P4, P5, P7 — a strict subset, no round ever touches all n)
+        Poller->>P2: QUERY(request_id, block_id)
+        Poller->>P4: QUERY(request_id, block_id)
+        Poller->>P5: QUERY(request_id, block_id)
+        Poller->>P7: QUERY(request_id, block_id)
+        P2-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
+        P4-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
+        P5-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
+        P7-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
+
+        alt ≥ α_p of the K responses agree on one block
+            Note over Poller: adopt that block as preference — reset counter to 1 if the preference flipped
+            alt ≥ α_c of the K responses agree (α_c ≥ α_p)
+                Note over Poller: counter += 1
+            end
+        else
+            Note over Poller: counter = 0
+        end
+
+        alt counter ≥ β
+            Note over Poller,P7: polling → accepted — emit decided(block_hash, block_id)
+        else
+            Poller->>Poller: set_timer(poll) — arm the next poll round
+        end
+    end
+</script>
+<script type="text/x-mermaid" data-slug="diagrams/runtime/macro">
+%% Simulator runtime — one config cell to one results.csv row
+sequenceDiagram
+    autonumber
+    participant Harness
+    participant Config
+    participant Builder
+    participant Simulator
+    participant Logger
+    participant Results
+
+    Note over Harness,Results: phase 1 — init — resolve one experiment-matrix cell + seed
+
+    Harness->>Config: load(experiment.yaml)
+    Config-->>Harness: {protocol, n, network_phases, adversary, workload, seed}
+    Harness->>Builder: build(config)
+    Note over Builder: constructs Scheduler + Network + n Nodes, then runs the six-phase bootstrap (construct, register, bind, observability, kickoff, run)
+    Builder-->>Harness: Simulator (Scheduler + Network + Nodes, wired)
+
+    Note over Harness,Simulator: phase 2 — workload — seed proposer mempools
+
+    Harness->>Simulator: load_workload(transactions)
+
+    rect rgb(240,240,240)
+        Note over Harness,Results: phase 3 — run loop
+    end
+
+    Harness->>Simulator: run(t_max, stop_when)
+    Note over Simulator: scheduler pops events — Nodes run protocol FSMs (pop, advance virtual time, dispatch, repeat)
+    Note over Harness,Results: … virtual time advances event-to-event
+    Simulator->>Logger: emit(decided / halted / message events)
+
+    Note over Harness,Simulator: phase 4 — stop — one of three exit paths fires
+
+    Simulator->>Harness: RunResult(stopped_by, now, events_processed)
+
+    Note over Harness,Results: phase 5 — flush + reduce
+
+    Harness->>Logger: flush()
+    Logger-->>Harness: per-event records
+    Harness->>Harness: reduce events to metrics (latency, throughput, msg_count, success)
+
+    rect rgb(240,240,240)
+        Note over Harness,Results: phase 6 — output
+    end
+
+    Harness->>Results: append one row {run_id, protocol, n, adversary, metrics...}
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<script>
+(function(){
+  var contentEl = document.getElementById('content');
+  if (typeof marked === 'undefined' || typeof mermaid === 'undefined') {
+    contentEl.innerHTML = '<p style="color:#b00020">Không tải được thư viện (marked / mermaid) từ CDN. Cần kết nối Internet để render nội dung và sơ đồ.</p>';
+    return;
+  }
+
+  var md = document.getElementById('chapter-md').textContent;
+
+  var dgms = {};
+  var sn = document.querySelectorAll('script[type="text/x-mermaid"]');
+  for (var i = 0; i < sn.length; i++) {
+    dgms[sn[i].getAttribute('data-slug')] = sn[i].textContent.trim();
+  }
+
+  md = md.replace(/\[\[([^\]]+)\]\]/g, function(_m, p1){
+    return '<cite class="wl">' + p1 + '</cite>';
+  });
+
+  marked.setOptions({ gfm:true, breaks:false });
+  contentEl.innerHTML = marked.parse(md);
+
+  var heads = contentEl.querySelectorAll('h2, h3');
+  var tl = document.getElementById('toc-list');
+  for (var h = 0; h < heads.length; h++) {
+    var el = heads[h];
+    el.id = 'sec-' + h;
+    var li = document.createElement('li');
+    li.className = el.tagName === 'H3' ? 'lv3' : 'lv2';
+    var a = document.createElement('a');
+    a.href = '#sec-' + h;
+    a.textContent = el.textContent;
+    li.appendChild(a);
+    tl.appendChild(li);
+  }
+
+  var ps = contentEl.querySelectorAll('p');
+  for (var k = 0; k < ps.length; k++) {
+    var p = ps[k];
+    var t = (p.textContent || '').trim();
+    if (/^Figure 3\.[0-9]/.test(t)) {
+      var cite = p.querySelector('cite.wl');
+      var slug = cite ? cite.textContent.trim() : '';
+      if (dgms[slug]) {
+        var fig = document.createElement('figure');
+        fig.className = 'diagram';
+        fig.setAttribute('data-slug', slug);
+        var holder = document.createElement('div');
+        holder.className = 'mermaid';
+        holder.textContent = dgms[slug];
+        fig.appendChild(holder);
+        var hint = document.createElement('div');
+        hint.className = 'zoomhint';
+        hint.textContent = 'Nhấn để phóng to · lăn để zoom · kéo để di chuyển';
+        fig.appendChild(hint);
+        p.parentNode.insertBefore(fig, p);
+      }
+    }
+  }
+
+  mermaid.initialize({
+    startOnLoad:false, theme:'neutral', securityLevel:'loose',
+    flowchart:{ htmlLabels:true, useMaxWidth:true },
+    sequence:{ useMaxWidth:true }
+  });
+
+  mermaid.run({ querySelector: '.diagram .mermaid' }).then(setupZoom).catch(function(err){ console.error(err); });
+
+  var overlay = document.getElementById('overlay');
+  var modalBody = document.getElementById('modal-body');
+  var modalTitle = document.getElementById('modal-title');
+  var pz = null;
+
+  function closeModal(){
+    if (pz) { try { pz.destroy(); } catch(e){} pz = null; }
+    modalBody.innerHTML = '';
+    overlay.style.display = 'none';
+  }
+  function openModal(svg, title){
+    if (typeof svgPanZoom === 'undefined') return;
+    var clone = svg.cloneNode(true);
+    clone.removeAttribute('style');
+    clone.setAttribute('width','100%');
+    clone.setAttribute('height','100%');
+    clone.style.maxWidth = 'none';
+    clone.style.maxHeight = 'none';
+    modalBody.innerHTML = '';
+    modalBody.appendChild(clone);
+    modalTitle.textContent = title || '';
+    overlay.style.display = 'flex';
+    pz = svgPanZoom(clone, {
+      zoomEnabled:true, controlIconsEnabled:true, fit:true, center:true,
+      minZoom:0.2, maxZoom:30, zoomScaleSensitivity:0.4
+    });
+  }
+  function setupZoom(){
+    var figs = document.querySelectorAll('figure.diagram');
+    for (var i = 0; i < figs.length; i++) {
+      (function(fig){
+        fig.addEventListener('click', function(){
+          var s = fig.querySelector('svg');
+          if (s) openModal(s, fig.getAttribute('data-slug'));
+        });
+      })(figs[i]);
+    }
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+})();
+</script>
+</body>
+</html>

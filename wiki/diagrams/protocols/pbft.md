@@ -13,7 +13,7 @@
 
 ```mermaid
 sequenceDiagram
-    %% PBFT three-phase commit for one [view, seq] instance (n=4, f=1, quorum 2f+1=3)
+%% PBFT — three-phase commit for one (view, seq) instance (n=4, f=1, quorum 2f+1=3)
     autonumber
     participant Primary
     participant ReplicaB
@@ -36,7 +36,7 @@ sequenceDiagram
         ReplicaB->>Primary: PREPARE[view, seq, digest]
         ReplicaB->>ReplicaC: PREPARE[view, seq, digest]
         ReplicaB->>ReplicaD: PREPARE[view, seq, digest]
-        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast PREPARE likewise, arrows omitted
+        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast PREPARE likewise [arrows omitted]
         Note over Primary,ReplicaD: on 2f+1 matching PREPARE collected -- pre_prepared => prepared
     end
 
@@ -45,18 +45,20 @@ sequenceDiagram
         ReplicaB->>Primary: COMMIT[view, seq, digest]
         ReplicaB->>ReplicaC: COMMIT[view, seq, digest]
         ReplicaB->>ReplicaD: COMMIT[view, seq, digest]
-        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast COMMIT likewise, arrows omitted
+        Note over Primary,ReplicaD: ReplicaC and ReplicaD broadcast COMMIT likewise [arrows omitted]
         Note over Primary,ReplicaD: on 2f+1 matching COMMIT -- prepared => committed, cancel timer, emit decided[digest, [view, seq]]
     end
 
     Note over Primary,ReplicaD: liveness recovery -- taken only if the instance stalls
 
     opt view-change timer fires before committed
-        ReplicaB->>ReplicaC: VIEW-CHANGE[new_view, last_stable_seq, prepared_evidence]
+        Note over Primary,ReplicaD: new_view = view + 1 = 1 -- new primary = new_view mod n = ReplicaB
+        ReplicaC->>ReplicaB: VIEW-CHANGE[new_view, last_stable_seq, prepared_evidence]
+        ReplicaD->>ReplicaB: VIEW-CHANGE[new_view, last_stable_seq, prepared_evidence]
         Note over ReplicaB,ReplicaD: cross-instance -- view_changing set, all [view, *] instances frozen
-        Note over Primary,ReplicaD: new primary = new_view mod n collects 2f+1 VIEW-CHANGE
-        ReplicaC->>Primary: NEW-VIEW[new_view, vc_proofs, reissued_pre_prepares]
-        Note over Primary,ReplicaD: advance current view -- replay prepared-not-committed instances
+        Note over Primary,ReplicaD: ReplicaB [new primary] collects 2f+1 VIEW-CHANGE
+        ReplicaB->>Primary: NEW-VIEW[new_view, vc_proofs, reissued_pre_prepares]
+        Note over Primary,ReplicaD: ReplicaB also broadcasts NEW-VIEW to ReplicaC, ReplicaD [arrows omitted] -- advance current view, replay prepared-not-committed
     end
 ```
 

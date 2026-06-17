@@ -69,6 +69,27 @@ Unchanged from `docs/wiki-spec.md`: every claim cites a wiki page inline as
 `[[wiki/...]]`; missing external citations are marked `TODO(cite)`; do not
 invent citations. Drafts introduce no claim not traceable to a wiki page.
 
+## No project-internal task references
+
+Draft prose is written for the examination committee, not for the project's
+work queue. Never name an internal task or ticket ID (`T36.2`, `T54`,
+`T38.1`, `L-W12`, and the like) in chapter prose, tables, or captions — they
+are `TASKS.md` scaffolding and mean nothing to an examiner. When a metric,
+column, or feature is deferred or conditional, explain it by the *mechanism
+or regime* that triggers it, never by the ticket that will deliver it:
+
+- not "the split is reserved for the T54 reorg case" → "the two diverge only
+  under an adversary that forces a pre-finality reorg, outside the honest
+  baseline";
+- not "filled with the Narwhal+Tusk implementation (T38.1)" → "filled once
+  the Narwhal+Tusk implementation lands";
+- not "f_max lands at T54" → "f_max is reported under the adversarial sweep".
+
+A draft that must point at future work names the *work* (the adversarial
+sweep, the capacity model, the Narwhal+Tusk family), never its ID. The
+ticket-to-mechanism mapping lives in `wiki/log.md` and `TASKS.md`, not in the
+thesis.
+
 ## Figures and diagrams
 
 Diagram sources live in `wiki/diagrams/<group>/<slug>.md` as Mermaid

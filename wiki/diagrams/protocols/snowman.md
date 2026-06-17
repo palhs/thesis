@@ -14,36 +14,45 @@
 
 ```mermaid
 sequenceDiagram
-    %% Snowman subsampled poll loop for one block (sample K peers, accept on counter >= β)
+%% Snowman — subsampled poll loop for one block (sample K of n peers, accept on counter >= β); K=4 of 7 peers shown
     autonumber
     participant Poller
-    participant PeerB
-    participant PeerC
-    participant PeerD
+    participant P1
+    participant P2
+    participant P3
+    participant P4
+    participant P5
+    participant P6
+    participant P7
 
-    Note over Poller,PeerD: instance keyed by block_id -- starts polling with [preference, counter=0]. No leader role -- every validator polls independently.
+    Note over Poller,P7: instance keyed by block_id -- starts polling with [preference, counter=0]. No leader role -- every validator polls independently. Each round samples K = min[20, n−1] peers, K=4 of 7 shown.
 
     Poller->>Poller: on_message[BLOCK-ANNOUNCEMENT] -- register block_id in state polling
 
     rect rgb(240,240,240)
-        Note over Poller,PeerD: one poll round -- repeats until accepted
+        Note over Poller,P7: one poll round -- repeats until accepted
 
-        Poller->>Poller: on_timer[poll] -- sample K peers via self.rng
-        Poller->>PeerB: QUERY[request_id, block_id]
-        Poller->>PeerC: QUERY[request_id, block_id]
-        Poller->>PeerD: QUERY[request_id, block_id]
-        PeerB-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
-        PeerC-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
-        PeerD-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        Poller->>Poller: on_timer[poll] -- sample K peers via self.rng [here P2, P4, P5, P7 -- a strict subset, no round ever touches all n]
+        Poller->>P2: QUERY[request_id, block_id]
+        Poller->>P4: QUERY[request_id, block_id]
+        Poller->>P5: QUERY[request_id, block_id]
+        Poller->>P7: QUERY[request_id, block_id]
+        P2-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        P4-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        P5-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        P7-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
 
-        alt >= α_c of the K responses agree on one block
-            Note over Poller: adopt that block as preference -- counter += 1 [resets to 1 if the preference flipped]
+        alt ≥ α_p of the K responses agree on one block
+            Note over Poller: adopt that block as preference -- reset counter to 1 if the preference flipped
+            alt ≥ α_c of the K responses agree [α_c ≥ α_p]
+                Note over Poller: counter += 1
+            end
         else
             Note over Poller: counter = 0
         end
 
-        alt counter >= β
-            Note over Poller,PeerD: polling => accepted -- emit decided[block_hash, block_id]
+        alt counter ≥ β
+            Note over Poller,P7: polling => accepted -- emit decided[block_hash, block_id]
         else
             Poller->>Poller: set_timer[poll] -- arm the next poll round
         end
@@ -61,13 +70,14 @@ there is no scheduler-visible loop construct ([[concepts/node-model]]
 **Cost is `O(K·β)`, independent of `n`.** Each round is `K` unicast
 `QUERY` / `QUERY-RESPONSE` pairs ([[concepts/message-types]] §5); a
 block is accepted after ~`β` successful rounds. No message ever touches
-all `n` validators — the property that distinguishes Snowman from the
-three quorum-broadcast protocols.
+all `n` validators — the diagram samples K=4 of 7 peers — the property
+that distinguishes Snowman from the three quorum-broadcast protocols.
 
 **Confidence accumulates; it does not vote.** There is no quorum and no
-commit message. The counter rises on each round where ≥ `α_c` of the
-sample agrees and resets to zero otherwise; acceptance at `counter ≥ β`
-is a purely local decision.
+commit message. Two thresholds act per round: a simple-majority `α_p`
+updates the preference, and the higher `α_c` raises the confidence
+counter; a round below `α_p` resets the counter to zero. Acceptance at
+`counter ≥ β` is a purely local decision.
 
 **Sampling must flow through `self.rng`.** Peer selection is the
 protocol's main randomness source and is seeded per-node
