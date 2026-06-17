@@ -1,6 +1,7 @@
 """Determinism contract for the delay-emission runners (T51, spec §8)."""
 from __future__ import annotations
 
+import math
 import unittest
 
 from adversary.runners import RUNNERS
@@ -30,6 +31,16 @@ class TestDeterminism(unittest.TestCase):
             b, _, _ = runner(n=7, f=0.0, m=10.0, seed=4)
             self.assertEqual(_key(a), _key(b),
                              msg=f"{proto}: f=0 must ignore m")
+
+    def test_offline_cell_byte_identical_rerun(self):
+        from adversary.offline_sweep import _run_cell
+        rc = {"commit_hash": "test"}
+        a = _run_cell(("snowman", 10, 0.20, 0), rc)
+        b = _run_cell(("snowman", 10, 0.20, 0), rc)
+        self.assertEqual({k: a[k] for k in a if not (isinstance(a[k], float)
+                         and math.isnan(a[k]))},
+                         {k: b[k] for k in b if not (isinstance(b[k], float)
+                         and math.isnan(b[k]))})
 
 
 if __name__ == "__main__":
