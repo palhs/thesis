@@ -1,6 +1,6 @@
 import unittest
 
-from pos.epoch import EpochFSM, EpochState
+from pos.epoch import EpochFSM, EpochState, VoteStatus
 
 
 class TestEpochState(unittest.TestCase):
@@ -17,9 +17,13 @@ class TestEpochState(unittest.TestCase):
 
     def test_dedupe_one_vote_per_attester(self):
         es = EpochState(epoch=1)
-        self.assertTrue(es.record_vote(0, attester_idx=0, stake=3.0))
-        # same attester again (any source) -> ignored, returns False
-        self.assertFalse(es.record_vote(0, attester_idx=0, stake=3.0))
+        # first vote for this target -> NEW, stake counted
+        self.assertIs(es.record_vote(0, attester_idx=0, stake=3.0),
+                      VoteStatus.NEW)
+        # byte-identical re-delivery (same source, default None hashes)
+        # -> DUPLICATE, stake unchanged
+        self.assertIs(es.record_vote(0, attester_idx=0, stake=3.0),
+                      VoteStatus.DUPLICATE)
         self.assertEqual(es.link_stake(0), 3.0)
 
     def test_link_stake_unknown_source_is_zero(self):

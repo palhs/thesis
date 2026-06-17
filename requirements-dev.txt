@@ -4,3 +4,10 @@
 # (Runtime requirements.txt is currently empty; the simulator is stdlib-only.)
 
 coverage>=7.0
+
+# Plotting only (T43+). matplotlib renders the Chapter-4 baseline figures
+# from the committed CSV via `PYTHONPATH=src python3 -m output.plots`. It is
+# NOT a simulator-runtime dependency: the simulator and src/output/analysis.py
+# stay stdlib-only and deterministic, so the dataset can be regenerated and
+# aggregated without matplotlib; only figure rendering needs it.
+matplotlib>=3.8

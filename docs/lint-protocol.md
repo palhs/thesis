@@ -17,7 +17,10 @@ the report.
    missing from disk.
 6. **Citation gaps** — `TODO(cite)` markers in `drafts/`.
 7. **Dead links** — wikilinks pointing to non-existent pages.
-8. **Figure-export gaps** — three checks:
+8. **Figure-export gaps** — the thesis has two figure families (Mermaid
+   *diagram figures* under `wiki/diagrams/`, matplotlib *data-plot
+   figures* under `results/**/plots/`; see `docs/draft-style.md`
+   § Figures). Four checks:
    - `TODO(human-export)` markers anywhere in `drafts/` or `wiki/`
      (legacy from the retired Swimlanes pipeline; the 2026-05-26
      Mermaid migration cleared them and no new ones should appear).
@@ -26,6 +29,14 @@ the report.
    - For every `wiki/diagrams/**/*.md` carrying a ```` ```mermaid ````
      block, a sibling `.pdf` exists with mtime ≥ the `.md`'s mtime
      (PDF is stale if older than its source).
+   - **Data plots:** for every `drafts/` data-plot figure reference —
+     resolved via the experiment page named in its
+     `Figure N.M ([[experiments/<page>]])` citation, which maps figure
+     number → plot slug — the tracked `results/**/plots/<slug>.pdf`
+     exists on disk. A data-plot PDF is stale if older than the results
+     CSV it was rendered from (the CSV is the provenance anchor); flag,
+     but treat a CSV-newer-than-PDF as Low unless the CSV's data
+     actually changed.
 
 ## Output
 

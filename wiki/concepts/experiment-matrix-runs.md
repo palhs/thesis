@@ -165,4 +165,55 @@ trace to the parent page and its sources.
 
 ## Revisions
 
-None.
+### [2026-06-10] T46 — Family B n-axis doubling + the two T46 timelines
+
+Human decision 2026-06-10 (Week 9) extends Family B from the fixed `n = 10`
+of the §4 budget to **`n ∈ {10, 25}`** (recorded as the §3 Revision on
+[[concepts/experiment-matrix]]). This doubles the Family B run volume on the
+`n` axis. Evidence + the realised first two timelines:
+[[experiments/2026-06-10_delay-moderate]].
+
+**Family B budget, restated for `n ∈ {10, 25}`.** Each of the six §2
+timelines now runs at two sizes:
+
+| Sub-family | Cells | Seeds | Subtotal |
+| :-- | :-- | :-- | :-- |
+| 6 timelines × 3 protocols × 2 `n` | 36 | 20 | 720 |
+| heavy-tail-loss extra `p_drop` (2) × 3 protocols × 2 `n` | 12 | 20 | 240 |
+
+So Family B is now ≈ **960 runs** (was ≈ 640 at fixed `n = 10`) — the §4
+total moves from ≈ 2 700 to ≈ **3 000 runs**. (Narwhal+Tusk stays out of the
+delay sweep until T38.1; the counts above are the three in-scope protocols.)
+
+**T46 lands 2 of the 6 timelines** at both sizes: `delay-uniform` +
+`delay-exponential` × 3 protocols × `n ∈ {10, 25}` × 20 seeds = **240 runs**
+(`results/delay/delay.csv`). The remaining four timelines (heavy-tail, loss,
+partial-sync-gst) are T47. Both T46 timelines have `E[delay] = 300 ms`, so
+the §2 FFG-slot pairing gives `slot_duration = 1200 ms` for each.
+
+**Family C (adversarial, T51–T56) stays at `n = 10`.** This n-axis
+amendment is Family-B-only; the symmetric Family-C-at-`n=25` extension
+(which would roughly double the largest family) is a separate human roadmap
+decision parked in `TASKS.md` Backlog (2026-06-10) and is **not** folded
+into this budget.
+
+### [2026-06-14] T51 — Family C extended to `n ∈ {10,25}` + a swept magnitude axis (supersedes the n=10 freeze above)
+
+Human decisions (2026-06-14 / 2026-06-15) resolve the parked roadmap item: Family
+C now runs at **`n ∈ {10, 25}`** and adds a **magnitude axis `m ∈ {2,4,6,8,10}`**
+to the `delay-emission` intensity grid, with `f ∈ {0,0.10,0.20,0.30}` (`f=0` =
+honest control). The §3 design rationale is on [[concepts/experiment-matrix]]
+§Revisions.
+
+**Family C `delay-emission` budget (T51).** 3 protocols × 2 `n` ×
+(1 control + 3 `f` × 5 `m` = 16 cells) × 20 seeds = **1920 runs**
+(`results/adversary/delayed_voters.csv`). No seed cap was needed — Family C runs
+on the fast static-baseline (10 ms) network, so even the heaviest Snowman `n=25`
+cell is ~900k events (≈40 s wall), unlike the multi-GB T47 heavy-tail cells; the
+tiered scheduler ran the Snowman `n=25` tier at `--heavy-jobs 4`.
+
+**Budget impact.** This adds the 1920-run `delay-emission` block (T52 withhold /
+T53 equivocate will add comparable blocks on the same axes). The §4 grand total
+above (≈ 3000 runs, the three in-scope protocols) is correspondingly larger; the
+Family C portion is no longer the single-`n`, single-magnitude sketch the §4
+budget assumed. Evidence: [[experiments/2026-06-14_delayed-voters]].

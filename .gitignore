@@ -18,6 +18,19 @@ results/**/*.png
 # T40 canonical comparative artifacts are tracked (wiki/concepts/output-format).
 !results/baseline/
 !results/baseline/*.csv
+# T46 Family B (delay) comparative dataset is tracked — the T48/T50 input.
+!results/delay/
+!results/delay/*.csv
+# T51 Family C (delayed-voters) adversarial dataset is tracked — the T56 input.
+!results/adversary/
+!results/adversary/*.csv
+# T46.1 sweep checkpoint sidecars (per-cell .json) are runtime-only — never
+# tracked. Placed after the delay re-include so it wins for results/delay/.
+results/**/.sweep/
+# T47 heavy-sweep checkpoint sidecars (same rationale).
+results/**/.sweep_heavy/
+# T51 Family C sweep checkpoint sidecars (same rationale).
+results/**/.sweep_adversary/
 
 # OS
 .DS_Store

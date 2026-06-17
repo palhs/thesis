@@ -94,18 +94,52 @@ to simulator output — see §Caveat.
 → Per-protocol formulas for every latency metric:
 [[concepts/metric-reconciliation#latency]].
 
+**Implementation note (T71, 2026-06-15) — column ↔ metric mapping.** Despite
+its name, the `commit_latency_ms` CSV column implements **Time-to-finality**
+above, *not* End-to-end commit latency. Its end-of-clock is each protocol's
+`decided` event, which fires at the **irreversibility** milestone: PBFT `2f+1`
+`COMMIT`, Casper FFG the *finalised* checkpoint (justify→finalise, `≥ 2`
+epochs, **not** block inclusion), Snowman counter-`β` acceptance. It is the
+canonical cross-protocol time-to-finality axis (basis of the T48/T49
+comparison). The `finality_latency_ms` column is **retracted** from
+cross-protocol finality use and scoped to PBFT-only client-observed finality
+(`f+1` client `REPLY`); for Casper FFG / Snowman it is a structural duplicate
+of `commit_latency_ms`, carrying no independent measurement. The **End-to-end
+commit latency** metric above — the *earlier, reversible* inclusion milestone,
+before finality — is **not implemented as a distinct column** for Casper FFG /
+Snowman; populating it is the deferred Path A enrichment. PBFT has no
+reversible-inclusion stage (COMMIT is immediately final), so its inclusion ≈
+finality. Binding contract: [[concepts/output-format]] §13 Revisions
+[2026-06-15]; companion reconciliation:
+[[concepts/metric-reconciliation#finality-semantics]] §Revisions [2026-06-15].
+See §Revisions below.
+
 ## Throughput metrics
 
 - **Transactions per second (tps).** Count of *committed* transactions per
   unit wall-clock time, averaged over a stable-state window. Sources:
-  [11]–[13], [15], [17].
+  [11]–[13], [15], [17]. **Implementation caveat (2026-06-14):** as built,
+  `tps` is a *decided-event* rate (`len(decided) / window`,
+  `src/{pbft,pos,snowman}/summarise.py`), whose granularity is per-block for
+  PBFT/Snowman and per-epoch for Casper FFG — so cross-protocol `tps` is **not**
+  on a common basis (`0.95·n` vs `0.40·n` in the baseline). The
+  committed-transaction quantity this bullet defines is carried by `goodput`.
+  See [[concepts/metric-reconciliation#revisions]].
 - **Goodput.** tps restricted to transactions that survive to finality;
   excludes transactions in reorganised forks. Identical to tps for PBFT
   (no reorg-before-finality) and Snowman (post-`β` reorgs bounded by
   `ε`, reported separately); distinct from tps for Casper FFG (LMD-GHOST
   reorgs before checkpoint finalisation [8]) and Narwhal+Tusk (orphan
   certificates not referenced by any committed anchor). Sources: [8],
-  [17].
+  [17]. **Implementation caveat (2026-06-14):** the *implemented* `goodput`
+  is computed directly as `committed_tx / window` (committed-application-tx
+  rate, `src/output/metrics.py`), **not** as `tps` minus reorged tx — in the
+  data `goodput ≫ tps` because the implemented `tps` is a decided-event rate
+  (see above). The Casper FFG goodput shortfall (`79.635` vs `94.82` tx/s) is
+  **not** LMD-GHOST reorg loss: LMD-GHOST fork choice and reorgs are *not
+  implemented* and `fork_rate = 0` ([[algorithms/pos#simulator-mapping]]); it
+  reflects FFG's epoch-paced finalisation accounting. Full reconciliation:
+  [[concepts/metric-reconciliation#revisions]].
 - **Peak throughput.** Maximum sustained tps before commit-latency
   diverges — the per-family saturation point. Operational definition:
   run an offered-load rate ramp where the workload generator's
@@ -154,7 +188,12 @@ to simulator output — see §Caveat.
   FFG-vs-PBFT bytes comparison: BLS aggregation collapses Casper FFG's
   per-epoch attestation cost from `O(n)` individual signatures to one
   aggregate signature + bit-vector, a factor-of-`n` swing depending on
-  T16's choice. Sources: [15], [17].
+  T16's choice. Sources: [15], [17]. **Implementation caveat (2026-06-14):**
+  the measured `bytes_per_acu` includes the 512-byte transaction payload and is
+  payload-dominated at the thesis workload, so it does *not* exhibit the
+  `O(n²)` / `O(K·β)` scaling this bullet describes; RQ3 byte-overhead claims
+  should use `consensus_msgs_per_acu` (message count) or a payload-subtracted
+  figure. See [[concepts/metric-reconciliation#revisions]].
 - **Per-validator state size.** Storage required per validator to operate
   the protocol: full DAG retention in Narwhal+Tusk (the largest of the
   four — the structural tradeoff against PBFT's per-block message cost),
@@ -189,7 +228,11 @@ Narwhal mempool/consensus message split:
   Snowman (parameter-dependent: `ε ≤ (1 − α_c/K)^β` [9]; report both
   analytical bound and empirical rate); zero by construction below
   threshold for PBFT, Casper FFG, and Narwhal+Tusk (measured above
-  threshold). Sources: [9], [10].
+  threshold). Sources: [9], [10]. **Status (2026-06-14):** `empirical_epsilon`
+  and `analytical_epsilon_bound` are not populated in the honest-only
+  baseline/delay CSVs (empirical `ε` is structurally zero with no Byzantine
+  axis); they are deferred to the Family C adversarial sweep (T51+). See
+  [[concepts/metric-reconciliation#revisions]].
 - **Fault-tolerance threshold (`f_max`).** Empirically largest adversarial
   fraction under which the protocol preserves safety *in the simulator*.
   Reported as **two CSV columns**: `f_max_count` (PBFT, Snowman,
@@ -331,4 +374,41 @@ and Narwhal + Tusk.
 
 ## Revisions
 
-None.
+**2026-06-14 (T49.1) — align definition-level metric prose with the T49
+theory-vs-data validation.** The companion page
+[[concepts/metric-reconciliation#revisions]] carries the full reconciliation
+and the corrected per-protocol formulas/numbers; this page holds the
+canonical *definitions*, so the edits here are caveats that keep the
+definition prose honest about what the simulator actually measures:
+
+- **`tps`** — flagged that the implemented metric is a decided-event rate with
+  protocol-dependent granularity (per-block vs per-epoch), not a cross-protocol
+  common basis; the committed-tx quantity is `goodput`.
+- **Goodput** — corrected the false implication that the Casper FFG `goodput <
+  tps` gap is LMD-GHOST reorg loss. LMD-GHOST and reorgs are *not implemented*
+  (`fork_rate = 0`, [[algorithms/pos#simulator-mapping]]); the implemented
+  `goodput` is `committed_tx / window` and `goodput ≫ tps` in the data.
+- **Bytes per block** — flagged that measured `bytes_per_acu` is
+  payload-dominated and does not show the `O(n²)`/`O(K·β)` scaling; RQ3 byte
+  claims should use `consensus_msgs_per_acu`.
+- **Safety-violation `ε`** — flagged that `empirical_epsilon` /
+  `analytical_epsilon_bound` are unpopulated in the honest-only Family-A/B CSVs
+  and are deferred to the Family C adversarial sweep (T51+).
+
+No metric was renamed or removed; `[[algorithms/pos]]` was already correct and
+is unchanged.
+
+**2026-06-15 (T71) — `commit_latency_ms` is the canonical time-to-finality
+column; `finality_latency_ms` retracted to PBFT-only.** Added the
+column ↔ metric mapping note under §Latency metrics. The `commit_latency_ms`
+CSV column implements the **Time-to-finality** metric defined here (each
+protocol's `decided` event marks its irreversibility milestone — PBFT `2f+1`
+`COMMIT`, FFG the finalised checkpoint, Snowman counter-`β`), *not*
+End-to-end commit latency despite its name; it is the canonical cross-protocol
+latency axis. `finality_latency_ms` is retracted from cross-protocol use and
+scoped to PBFT-only client-observed finality (structural duplicate for
+FFG/Snowman). The **End-to-end commit latency** metric (the earlier reversible
+inclusion milestone) is not implemented as a distinct column for FFG/Snowman —
+the deferred Path A enrichment. No metric renamed or removed; documentation
+edit only, CSVs byte-identical. Binding contract: [[concepts/output-format]]
+§13 Revisions [2026-06-15].

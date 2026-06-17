@@ -94,6 +94,50 @@ committed block. For PBFT this coincides with finality; for the other three
 it does not. The gap between commit and finality is itself an RQ1-relevant
 quantity.
 
+**Simulator note (2026-06-14).** For **Casper FFG and Snowman** the
+commit↔finality gap is *unpopulated*: `finality_latency_ms == commit_latency_ms`
+on every FFG and Snowman row of `results/{baseline,delay}/*.csv`. This is a
+**modelling choice, not a defect** — the FFG and Snowman reducers
+(`src/pos/summarise.py`, `src/snowman/summarise.py`) emit a single finalisation
+`decided` event and model no distinct pre-final "commit" state, so the two
+latencies coincide by construction. **PBFT is the exception:** its reducer
+(`src/pbft/summarise.py`, T70) emits a distinct `pbft_client_finalized` event,
+so `finality_latency_ms` (the `f+1` client `REPLY`) is strictly greater than
+`commit_latency_ms` (the `2f+1` `COMMIT` quorum) on every PBFT row — a
+near-instant hop at the zero-delay baseline (≈ 10⁻⁶ ms) that grows to
+tens–hundreds of ms under network delay (`delay.csv`). The genuine multi-epoch
+(FFG, ≥ 2 epochs) and multi-`β` (Snowman, `β` poll rounds) finality lag this
+section describes is therefore **not yet measured for FFG or Snowman** — any
+Chapter 4 commit-vs-finality comparison must treat their `finality_latency_ms`
+as a commit-time proxy until a distinct finality event is implemented (standing
+Backlog item, 2026-06-14). **[Superseded — see Relabel (T71, 2026-06-15)
+immediately below: finality IS already measured by `commit_latency_ms`; the
+unmeasured quantity is the *earlier reversible* inclusion milestone, not
+finality.]** See §Revisions [2026-06-14]. [4], [7], [9]
+
+**Relabel (T71, 2026-06-15) — what is mislabelled, and which direction the gap
+points.** The framing above is correct that a commit↔finality gap exists at the
+*metric* level, but it mislocates which column is the proxy. The simulator's
+`decided` event fires at each protocol's **irreversibility (finality)**
+milestone, not at reversible inclusion: PBFT `2f+1` `COMMIT`, FFG the
+**finalised** checkpoint (`src/pos/node.py::_finalise`, justify→finalise,
+`≥ 2` epochs — *not* block inclusion), Snowman counter-`β` acceptance. So
+`commit_latency_ms` (median time-to-first-`decided`) already **is**
+time-to-finality for all three; it is the column that is misnamed, and it is
+the canonical cross-protocol *time-to-finality* axis (the basis of the valid
+T48/T49 comparison). `finality_latency_ms` is **not** an upgradeable
+commit-proxy: for FFG/Snowman it is a structural duplicate of
+`commit_latency_ms`, and it is retracted to PBFT-only client-observed finality.
+The quantity genuinely *unmeasured* for FFG/Snowman is the **earlier,
+reversible** commit/inclusion milestone (FFG block inclusion before
+finalisation, Snowman pre-`β` first-poll preference) — it lies *before*
+`decided`, not after, and is the deferred Path A enrichment, **not** a finality
+event to be added after `decided` (that would double-count). The
+nature-of-milestone caveat stands: FFG finality is accountable-deterministic,
+Snowman finality is probabilistic-with-`ε ≤ (1 − α_c/K)^β`; the `ε` columns
+remain the Family-C (T51+) deferral. Binding contract: [[concepts/output-format]]
+§13 Revisions [2026-06-15]. See §Revisions [2026-06-15] below. [4], [7], [9]
+
 ## Narwhal mempool-consensus message split
 
 [[concepts/evaluation-metrics]] §Overhead defines `messages_per_block`
@@ -159,10 +203,10 @@ K   = min(20, n − 1)            # sample size; exclude self
 | `n` | `K` | `α_p` | `α_c` | `α_c/K` | `ε ≤ (1 − α_c/K)^β` |
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 4 | 3 | 2 | 3 | 1.000 | 0 (degenerate — unanimous) |
-| 7 | 6 | 4 | 5 | 0.833 | ≈ 6.5·10⁻¹² |
-| 10 | 9 | 5 | 8 | 0.889 | ≈ 4.4·10⁻¹⁴ |
-| 16 | 15 | 8 | 12 | 0.800 | ≈ 3.0·10⁻¹¹ |
-| 25 | 20 | 11 | 16 | 0.800 | ≈ 3.0·10⁻¹¹ |
+| 7 | 6 | 4 | 5 | 0.833 | ≈ 2.1·10⁻¹² |
+| 10 | 9 | 5 | 8 | 0.889 | ≈ 4.9·10⁻¹⁵ |
+| 16 | 15 | 8 | 12 | 0.800 | ≈ 3.3·10⁻¹¹ |
+| 25 | 20 | 11 | 16 | 0.800 | ≈ 3.3·10⁻¹¹ |
 
 **Comparative-claim exclusion at `n = 4`.** At `n = 4` the rescaling
 collapses Snowman to flood-vote-with-counter — every poll queries every
@@ -292,6 +336,22 @@ below are the ones a downstream implementation can use unchanged.
 | Time-to-finality | tx submit → `COMMIT` quorum (same block) | tx submit → checkpoint containing tx finalised (`≥ 2 epochs` later) | tx submit → counter `β` reached on containing block (report with `ε`) | tx submit → containing certificate is a DAG ancestor of a committed anchor |
 | Round latency | one of three phases | one slot | one Snowball poll of `K` peers | one DAG round (publish + collect `2f+1` parents) |
 
+**Column ↔ metric mapping (T71, 2026-06-15) — read this before cloning the
+table into a draft.** This table is the *metric* taxonomy: "End-to-end commit
+latency" (reversible inclusion) and "Time-to-finality" (irreversibility) are
+genuinely distinct rows. But the **implemented CSV columns do not map to them
+by name.** The `commit_latency_ms` column implements the **Time-to-finality**
+row, *not* End-to-end commit latency — the simulator's `decided` event (which
+the column keys on) fires at each protocol's irreversibility milestone (PBFT
+`2f+1` `COMMIT`, FFG the finalised checkpoint, Snowman counter-`β`; see
+§Finality semantics §Relabel). The `finality_latency_ms` column is retracted to
+**PBFT-only** client-observed finality and is a structural duplicate of
+`commit_latency_ms` for FFG/Snowman. The **End-to-end commit latency** row above
+(the *earlier, reversible* inclusion milestone) is **not implemented as any CSV
+column today** — it is the deferred Path A enrichment. Do not infer
+"`commit_latency_ms` = inclusion" from the column name. Binding contract:
+[[concepts/output-format]] §13 Revisions [2026-06-15].
+
 ### Throughput
 
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
@@ -301,14 +361,54 @@ below are the ones a downstream implementation can use unchanged.
 | Peak throughput | sustained `tps` before queueing diverges | sustained `tps` before attestation backlog stalls finalisation | sustained `tps` before per-validator `O(K·β)` cost saturates the round budget | sustained `tps` before DAG retention or `2f+1`-signature collection stalls |
 | Mempool throughput (`mempool_tps`) | `0` (no separate mempool layer) | `0` | `0` | certificate-included tx count / wall-clock window [11] |
 
+**Simulator note (2026-06-14) — `tps` and `goodput` are on different bases.**
+As implemented, `tps = len(decided) / window` (`src/{pbft,pos,snowman}/
+summarise.py`): a *decided-event rate*, not a committed-application-tx rate.
+Its granularity is protocol-dependent — PBFT and Snowman decide per block,
+Casper FFG decides per finalised epoch — so in `results/baseline/baseline.csv`
+`tps` is exactly `0.95·n` for PBFT and Snowman but `0.40·n` for Casper FFG, an
+artefact of per-block vs per-epoch crediting, not a like-for-like throughput.
+`goodput`, by contrast, is the committed-application-tx rate (`committed_tx /
+window`, `src/output/metrics.py`), flat in `n` (workload-driven), with mean
+`94.82` tx/s for PBFT/Snowman and `79.635` tx/s for Casper FFG (×1.19). Two
+consequences for the rows above: (i) `goodput ≫ tps` numerically (e.g. FFG at
+`n=10`: `tps=4.0` vs `goodput≈79.6`), so the "Goodput = `tps` restricted to
+surviving tx" framing does not describe the implemented metrics — they measure
+different quantities, not subsets; (ii) the Casper FFG goodput shortfall is
+**not** "LMD-GHOST reorgs subtracting": LMD-GHOST fork choice and reorgs are
+*not implemented* and `fork_rate = 0` on every row
+([[algorithms/pos#simulator-mapping]]). The FFG shortfall traces instead to
+its epoch-paced finalisation accounting (`n_opportunities = n_epochs ×
+slots_per_epoch` over *finalised* epochs only, `src/pos/summarise.py`) — FFG
+finalises fewer application-tx opportunities inside the window, which is partly
+legitimate (slower finality), not reorg loss. **Any cross-protocol throughput
+axis must use `goodput`, never `tps`.** See §Revisions [2026-06-14]. [7], [8]
+
 ### Overhead
 
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
 | :---- | :---- | :---- | :---- | :---- |
-| `consensus_msgs_per_acu` | `1 + 2·n + 2·n² ≈ O(n²)` (PRE-PREPARE + PREPARE + COMMIT) [4] | `O(n)` FFG votes per epoch, BLS-aggregated; per-ACU cost amortises over the epoch | `O(K·β)` per validator (queries + replies); independent of `n` [9], [ava-docs] | `0` (Tusk derives order from existing DAG references) [11] |
+| `consensus_msgs_per_acu` | per-instance `2(n²−1)` deliveries — all-to-all PREPARE + COMMIT `2n(n−1)` plus PRE-PREPARE + client `REPLY` `2(n−1)`, primary self-excluded; per-ACU `(2n²−2)/n = 2n − 2/n` after dividing by the `I·n` decided events (CSV-exact: 7.5 / 13.71 / 19.8 / 31.88 / 49.92 at `n = 4/7/10/16/25`). Traffic is `O(n²)` *per committed instance*; the `≈2n` per-ACU figure is that quadratic traffic normalised by an `n`-scaled decided-event denominator, **not** linear scaling — see §Revisions [2026-06-14] [4] | simulator (per FFG paper [1]): `O(n²)` — `n` individually-signed votes broadcast all-to-all per epoch; measured `≈1.125n` per-ACU. Production (BLS-aggregated): `O(n)`. Aggregation not modelled — see [[algorithms/pos#communication-complexity]] | `O(K·β)` per validator (queries + replies); independent of `n` [9], [ava-docs] | `0` (Tusk derives order from existing DAG references) [11] |
 | `mempool_msgs_per_acu` | `0` (no separate mempool layer) | `0` (block-proposal layer carries payload; not a separate mempool) | `0` | `O(r · n²)` over `r` rounds × `n` certificates × `2f+1` signatures [11] |
-| `bytes_per_block` | dominated by signatures × `O(n²)` | dominated by aggregated attestation + payload per slot; per-epoch amortised | `O(K·β)` query/reply bytes per validator | dominated by mempool payload bytes; consensus layer adds none |
+| `bytes_per_block` | dominated by signatures × `O(n²)` | simulator: per-validator (un-aggregated) attestation + payload per slot, `O(n²)`; production BLS would amortise to one aggregate per committee | `O(K·β)` query/reply bytes per validator | dominated by mempool payload bytes; consensus layer adds none |
 | `per_validator_state` | vote caches + view-change log; `O(n)` per recent block | attestation buffers per slot + finalised-checkpoint chain | Snowball preference + counter per pending block; independent of `n` | full DAG retention until pruned at anchor commit — **largest of the four** |
+
+**Simulator note (2026-06-14) — `bytes_per_acu` is payload-dominated, not
+signature/`O(n²)`-dominated.** The `bytes_per_block` row predicts the byte axis
+tracks each protocol's message-complexity law. In the measured data it does
+not: `bytes_per_acu` includes the 512-byte transaction payload
+(`workload_tx_bytes = 512`) on every tx-carrying delivery
+(`src/output/metrics.py::bytes_per_acu`), and at the thesis workload this
+payload term dominates and amortises. So `bytes_per_acu / n²` *falls* with `n`
+for PBFT (2423 → 82 across `n = 4..25`) and Casper FFG (5758 → 196), and
+`bytes_per_acu / (K·β)` falls for Snowman (568 → 244) — the opposite of the
+protocol-overhead scaling RQ3 is built to test. The scaling-exponent contrast
+(PBFT/FFG `O(n²)` vs Snowman `O(K·β)`) is visible in `consensus_msgs_per_acu`
+(message *count*) but **not** in `bytes_per_acu`. RQ3 byte-overhead claims
+should therefore use `consensus_msgs_per_acu`, or report a payload-subtracted
+protocol-byte figure (`bytes − payload·ACU`). No published claim currently
+asserts a `bytes_per_acu` scaling law, so this is a gap to close, not an error
+to retract. See §Revisions [2026-06-14].
 
 ### Reliability
 
@@ -352,7 +452,11 @@ run_id, protocol, n, byzantine_fraction, adversary_strategy, seed,
 ```
 
 `finality_latency_ms`, `empirical_epsilon`, and `analytical_epsilon_bound`
-populate via the per-protocol formulas in §Finality semantics. The Snowman
+populate via the per-protocol formulas in §Finality semantics — **except that
+under T71 (2026-06-15) `finality_latency_ms` is retracted to PBFT-only
+client-observed finality and is a structural duplicate of `commit_latency_ms`
+for FFG/Snowman, not an independent per-protocol value** (§Finality semantics
+§Relabel; [[concepts/output-format]] §13 Revisions [2026-06-15]). The Snowman
 parameter columns are required by §Snowman parameter rescaling and are
 left `NaN` for the other three protocols. Exactly one of `f_max_count`
 and `f_max_stake` is populated per row; the other is `NaN`. The choice
@@ -383,6 +487,20 @@ This is the minimum column set that satisfies the verify gate of T9.1
 columns (e.g., adversary intensity, network-delay distribution
 parameters) but must not drop any column above without re-opening the
 reconciliation.
+
+**Status note (2026-06-14) — several mandated columns are not yet populated.**
+The schema above lists `empirical_epsilon`, `analytical_epsilon_bound`,
+`f_max_count`, and `f_max_stake`, but no `results/*.csv` produced through
+Family B (baseline + delay) carries them: the honest-only Family-A/B runs have
+no Byzantine axis, so `f_max_*` is untestable and `empirical_epsilon` is
+structurally zero. These columns are deferred to the **Family C adversarial
+sweep (T51+)**, where empirical `ε` can be non-zero and `f_max_*` is
+measurable. `analytical_epsilon_bound` is a deterministic per-`n` constant
+already tabulated in §Snowman parameter rescaling (corrected this revision), so
+it is **not** added as a standalone per-row column now — as a per-row value it
+would be redundant; it lands alongside `empirical_epsilon` with Family C, where
+it is the comparison baseline. The absence is recorded here rather than left
+silent. See §Revisions [2026-06-14].
 
 ## Cross-references
 
@@ -424,4 +542,97 @@ and are catalogued in [[concepts/annotated-bibliography]].
 
 ## Revisions
 
-None.
+**2026-06-14 (T49.1) — reconcile metric docs against the T49 theory-vs-data
+validation.** A 29-agent adversarial pass over `results/{baseline,delay}/*.csv`
+(the T49 validation, [[experiments/2026-06-13_delay-analysis]] §"Issues outside
+T49 scope") surfaced five framework discrepancies between this page and the
+data. A read-only code investigation confirmed each and revised two severities
+down (the finality and `tps` items are documentation gaps, not bugs). All
+corrected numbers re-derive in Python and match the CSV to the quoted
+precision. The companion page [[concepts/evaluation-metrics]] carries the
+aligned definition-level edits; `[[algorithms/pos]]` was already correct (it
+states LMD-GHOST is not implemented) and is unchanged — the other two pages are
+aligned *to it*.
+
+1. **PBFT `consensus_msgs_per_acu` formula (§Overhead) was wrong.** The body
+   read `1 + 2·n + 2·n²` (≈ 41/113/221/545/1301 at `n = 4/7/10/16/25`), which
+   does not match the data. Corrected to per-instance `2(n²−1)` deliveries
+   (= all-to-all PREPARE + COMMIT `2n(n−1)` + PRE-PREPARE + client `REPLY`
+   `2(n−1)`, primary self-excluded) and per-ACU `(2n²−2)/n = 2n − 2/n`
+   (7.5/13.71/19.8/31.88/49.92) — CSV-exact. Added the caveat that the `≈2n`
+   per-ACU figure is `O(n²)` traffic-per-instance normalised by an `n`-scaled
+   decided-event denominator, **not** linear scaling, so Chapter 4 must not read
+   "2n" as "PBFT scales linearly".
+
+2. **Snowman analytical `ε` table (§Snowman parameter rescaling) was off.**
+   Recomputing `(1 − α_c/K)^β` with `β = 15`: `n=7` `6.5·10⁻¹² → 2.1·10⁻¹²`,
+   `n=10` `4.4·10⁻¹⁴ → 4.9·10⁻¹⁵` (one order of magnitude), `n=16`/`n=25`
+   `3.0·10⁻¹¹ → 3.3·10⁻¹¹`. The `K/α_p/α_c/(α_c/K)` columns were already
+   correct; only the `ε` column changed.
+
+3. **`finality_latency_ms ≡ commit_latency_ms` for FFG/Snowman is a modelling
+   choice, not a bug (§Finality semantics).** The FFG/Snowman reducers emit a
+   single finalisation `decided` event and model no separate pre-final commit
+   state, so the equality holds by construction. PBFT is the exception: it emits
+   a distinct `pbft_client_finalized` event (T70), so its `finality_latency_ms`
+   exceeds `commit_latency_ms` on every row — ≈ 10⁻⁶ ms at the zero-delay
+   baseline, growing to tens–hundreds of ms under delay. Added a simulator note:
+   the FFG/Snowman commit↔finality gap the schema reserves is unpopulated, so it
+   is a commit-time proxy until a distinct finality event is implemented
+   (standing Backlog item).
+
+4. **`tps` and `goodput` are on protocol-dependent bases (§Throughput).** `tps`
+   as implemented is a *decided-event* rate (per-block PBFT/Snowman ⇒ `0.95·n`;
+   per-epoch FFG ⇒ `0.40·n`), not a committed-tx count, so it is not a
+   cross-protocol common basis. `goodput` is the committed-application-tx rate
+   and is the correct cross-protocol axis. Corrected the false attribution of
+   the FFG goodput shortfall (`79.635` vs `94.82`) to "LMD-GHOST reorgs": reorgs
+   are not implemented (`fork_rate = 0`, [[algorithms/pos#simulator-mapping]]);
+   the shortfall is epoch-paced finalisation accounting and is partly legitimate.
+
+5. **`bytes_per_acu` is payload-dominated (§Overhead).** It does not follow the
+   `O(n²)` / `O(K·β)` law the `bytes_per_block` row predicts — the 512-byte
+   payload dominates and `bytes_per_acu / n²` (and `/(K·β)`) *falls* with `n`.
+   Steered RQ3 byte claims to `consensus_msgs_per_acu`. Gap to close, not a
+   published error.
+
+6. **Mandated reliability columns absent from every CSV (§T40 CSV schema).**
+   `empirical_epsilon` / `analytical_epsilon_bound` / `f_max_count` /
+   `f_max_stake` are unpopulated through Family B (no Byzantine axis). Flagged
+   the deferral to the Family C adversarial sweep (T51+); `analytical_epsilon_bound`
+   is the deterministic per-`n` constant already in the corrected ε table and is
+   **not** added as a standalone column now (decision recorded in the 2026-06-14
+   Backlog plan).
+
+**2026-06-15 (T71) — `commit_latency_ms` is the canonical time-to-finality
+column; `finality_latency_ms` retracted to PBFT-only.** Refines item #3 above.
+The 2026-06-14 item correctly classed `finality_latency_ms ≡ commit_latency_ms`
+(FFG/Snowman) as a modelling choice rather than a bug, but framed
+`commit_latency_ms` as a *commit-time proxy* awaiting a finality event. The
+chosen path (eval-methodology decision, Path B) inverts that framing: the
+`decided` event each protocol emits already fires at its **irreversibility
+(finality)** milestone — PBFT `2f+1` `COMMIT`, FFG the **finalised** checkpoint
+(`src/pos/node.py::_finalise`, justify→finalise, `≥ 2` epochs, **not** block
+inclusion), Snowman counter-`β` — so `commit_latency_ms` *already* measures
+time-to-finality and is the canonical cross-protocol latency axis (which is why
+the T48/T49 comparison on it is valid). The label is the only defect, and it is
+fixed at the binding contract page, [[concepts/output-format]] §13 Revisions
+[2026-06-15]:
+
+1. `commit_latency_ms` = canonical cross-protocol **time-to-finality
+   (irreversibility)** for PBFT, FFG, Snowman; read all "finality latency"
+   claims off it.
+2. `finality_latency_ms` is retracted from cross-protocol use and scoped to
+   PBFT-only client-observed finality (`f+1` client `REPLY`). For FFG/Snowman
+   it is a structural duplicate, not a measurement, and must not go on a
+   cross-protocol axis. Retained physically (CSVs byte-identical).
+3. The quantity §Finality-semantics above calls "not yet measured for
+   FFG/Snowman" is the **earlier, reversible** commit/inclusion milestone
+   (before `decided`) — the deferred Path A enrichment — **not** finality. Do
+   not add a finality event *after* `decided`; that would double-count.
+4. Nature-of-milestone caveat unchanged: FFG accountable-deterministic, Snowman
+   probabilistic-with-`ε`; the `ε` columns stay the Family-C (T51+) deferral.
+
+Documentation/label edit only — no reducer/schema/CSV change, no re-run;
+supersedes the two `TASKS.md` Backlog finality items. `[[algorithms/pos]]` and
+[[experiments/2026-06-13_delay-analysis]] are unaffected and unchanged.

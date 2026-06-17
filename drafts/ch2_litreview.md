@@ -99,8 +99,9 @@ treatment of each protocol is deferred to Chapter 3.
 
 **PBFT-style.** Beyond classical PBFT [4], HotStuff [5] linearizes leader
 replacement to `O(n)` with threshold signatures and Tendermint [6] rotates
-the leader round-robin. The documented weakness is leader-targeted delay: a
-Byzantine or delaying leader triggers successive view changes whose `O(n³)`
+the leader round-robin. The documented weakness — a *delayed-voting*
+adversary in the §1.4 sense — is leader-targeted: a Byzantine or delaying
+leader triggers successive view changes whose `O(n³)`
 cost in the original formulation [4] degrades latency well before any safety
 threshold is approached. Safety stays unconditional below `f < n/3` — an
 equivocating leader is caught at the prepare round, where no two-thirds
@@ -111,17 +112,17 @@ fork-choice rule and is the deployed Ethereum specification. The family's
 signature property is accountable safety: two conflicting finalized
 checkpoints imply that at least one-third of stake signed a slashable
 message, making a violation attributable, not merely infeasible [7]. The
-most-studied weakness is equivocation — slashing exists to deter it, and the
+most-studied weakness is *equivocation* — slashing exists to deter it, and the
 safety proof depends on that slashing being credibly enforced [7], [8];
-prolonged silent non-participation is secondary, leaking absent validators'
-stake to restore a quorum while the time-to-finality window widens
+*silent non-participation*, if prolonged, is the secondary one, leaking absent
+validators' stake to restore a quorum while the time-to-finality window widens
 [[wiki/algorithms/pos#behaviour-under-adversarial-conditions]].
 
 **Avalanche-style.** The production form is Snowman, the linearized variant of
 the Slush → Snowflake → Snowball → Avalanche cascade [9]. The family has no
 fixed `f < n/3` threshold — the tolerated Byzantine fraction is set by the
 parameter choice — and its per-validator cost `O(K·β)` is independent of `n`.
-The documented weakness is equivocation: Amores-Sesar, Cachin and Schneider
+The documented weakness is *equivocation*: Amores-Sesar, Cachin and Schneider
 [10] show that an adversary influencing as few as two undecided validators can
 stall the confidence counter beyond any number of rounds polynomial in `β`, a
 far worse cost than the original analysis [9] implies; the same work confirms
@@ -131,8 +132,10 @@ fast convergence absent such an adversary and proposes a fix.
 Narwhal+Tusk pattern, and Mysticeti [13] removes the certification step to
 reach the three-round BFT latency lower bound. The BFT kernel stays
 deterministic at `f < n/3`, with an asynchronous network model. The
-documented weakness is delayed or dropped delivery, absorbed into longer DAG
-retention rather than a stall [11], [12]; its sharpest form is
+documented weakness — the delivery-layer form of *delayed voting* in the §1.4
+sense — is delayed or dropped delivery of mempool certificates and anchor
+references, absorbed into longer DAG retention rather than a stall [11], [12];
+its sharpest form is
 data-availability withholding
 [[wiki/concepts/adversary-model#7-2-narwhal-tusk-data-availability-withholding]],
 where a sender certifies a header but withholds the underlying batch from

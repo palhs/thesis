@@ -16,15 +16,22 @@ LMD-GHOST fork choice (Decision B).
 """
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from nodes import Message, Node
 
 from .chain import Block, Chain, GENESIS_HASH, block_hash
-from .epoch import EpochFSM, EpochState
+from .epoch import EpochFSM, EpochState, VoteStatus
 from .finality import evaluate as evaluate_ffg
 from .messages import AttestationPayload, BlockProposalPayload, FFGVote
 from .selection import stake_weighted_proposer
+
+
+# Step-logging for the T70 accountable-safety demo. Library code never
+# configures logging or attaches handlers — the demo enables it. All
+# log.info(...) calls below are side-effect-free w.r.t. RNG and node state.
+log = logging.getLogger("t70.casper")
 
 
 CASPER_BLOCK_ACCEPTED = "casper_block_accepted"
@@ -32,6 +39,7 @@ CASPER_ATTESTED = "casper_attested"
 CASPER_JUSTIFIED = "casper_justified"
 CASPER_FINALISED = "casper_finalised"
 CASPER_REJECTED = "casper_rejected"
+CASPER_SLASHING = "casper_slashing"
 
 
 def _hexor(h: bytes | None) -> str | None:
@@ -122,6 +130,15 @@ class CasperNode(Node):
         self.highest_justified: int = 0
         self.highest_finalised: int = 0
         self.decided_epochs: set[int] = set()
+        # Accountable-safety state (T70, audit finding #3). Slashing spans
+        # epochs (surround votes relate two different target epochs), so the
+        # history lives on the node, not in any single per-epoch EpochState.
+        #   vote_history: attester_idx -> list of FFGVote filed by that
+        #                 attester (one entry per accepted distinct vote).
+        #   _slashable:   attester_idx of every validator with >=1 detected
+        #                 offence; backs slashable_stake_fraction().
+        self.vote_history: dict[int, list[FFGVote]] = {}
+        self._slashable: set[int] = set()
 
     # --- Lifecycle hooks (design spec §6.3, §6.4). ---
 
@@ -188,7 +205,21 @@ class CasperNode(Node):
             self._reject(t, "checkpoint_unavailable", epoch=epoch, slot=slot)
             return
         source_epoch = self.highest_justified
-        source_cp = self.chain.checkpoint(source_epoch)
+        # Symmetric to the target guard above: under heavy network delay a
+        # node can mark an epoch justified (from aggregated FFG votes) before
+        # that epoch's checkpoint BLOCK has been delivered locally, so the
+        # source-checkpoint lookup can miss. A validator cannot form a valid
+        # FFG vote without its source block, so it skips this slot's
+        # attestation and retries on a later slot once the block arrives.
+        # No-op under low delay (source block always present), so the T46 /
+        # honest baselines are byte-identical. Exposed by the T47 heavy-tail
+        # regime (see pos.md ## Revisions 2026-06-12).
+        try:
+            source_cp = self.chain.checkpoint(source_epoch)
+        except KeyError:
+            self._reject(t, "source_checkpoint_unavailable",
+                         epoch=epoch, slot=slot, source_epoch=source_epoch)
+            return
         ffg = FFGVote(source_epoch=source_epoch,
                       source_hash=source_cp.block_hash,
                       target_epoch=epoch,
@@ -203,12 +234,96 @@ class CasperNode(Node):
     def _file_ffg_vote(self, ffg: FFGVote, attester_idx: int,
                        t: float) -> None:
         """Record one FFG vote into the target epoch's state and run the
-        justify -> finalise transition check."""
+        justify -> finalise transition check.
+
+        Three outcomes (audit finding #3):
+          - DUPLICATE: byte-identical re-delivery -> idempotent no-op, as
+            before (Decision I). No history append, no detection, no emit.
+          - CONFLICT:  same attester voted differently for this target epoch
+            before -> a slashable signal. Run slashing detection against the
+            attester's prior votes; the link stake is NOT re-counted (the
+            offending second vote never justifies anything).
+          - NEW:       a fresh, non-conflicting vote -> count its stake, run
+            the FFG transition, and append it to the attester's history (so
+            later votes can be checked for surround against it).
+        """
         es = self._epoch_state(ffg.target_epoch)
         stake = self.stake_table[attester_idx]
-        if not es.record_vote(ffg.source_epoch, attester_idx, stake):
-            return                              # dedupe (Decision I)
+        status = es.record_vote(ffg.source_epoch, attester_idx, stake,
+                                source_hash=ffg.source_hash,
+                                target_hash=ffg.target_hash)
+        if status is VoteStatus.DUPLICATE:
+            return                              # idempotent re-delivery
+        if status is VoteStatus.CONFLICT:
+            # Same target epoch, differing link: an outright DOUBLE VOTE.
+            log.info(
+                "double_vote attester=%d target_epoch=%d "
+                "src=%d->tgt_hash=%s (conflicts prior vote)",
+                attester_idx, ffg.target_epoch, ffg.source_epoch,
+                _hexor(ffg.target_hash))
+            self._flag_slashing("double_vote", attester_idx,
+                                ffg=ffg, target_epoch=ffg.target_epoch, t=t)
+            # The conflicting vote is still recorded in history so that a
+            # subsequent vote can be surround-checked against it too.
+            self._check_surround(attester_idx, ffg, t)
+            self.vote_history.setdefault(attester_idx, []).append(ffg)
+            return
+        # status is NEW: honest path plus cross-epoch surround check.
+        self._check_surround(attester_idx, ffg, t)
+        self.vote_history.setdefault(attester_idx, []).append(ffg)
         self._run_ffg_transitions(ffg.source_epoch, ffg.target_epoch, t)
+
+    # --- Accountable-safety detection (T70, audit finding #3). ---
+
+    def _check_surround(self, attester_idx: int, ffg: FFGVote,
+                        t: float) -> None:
+        """Compare `ffg` against every prior vote by `attester_idx` for a
+        SURROUND offence: links (s1,t1) and (s2,t2) with
+        s1 < s2 < t2 < t1 (either ordering of new vs prior)."""
+        s2, t2 = ffg.source_epoch, ffg.target_epoch
+        for prior in self.vote_history.get(attester_idx, ()):
+            s1, t1 = prior.source_epoch, prior.target_epoch
+            if (s1 < s2 < t2 < t1) or (s2 < s1 < t1 < t2):
+                log.info(
+                    "surround_vote attester=%d wide=(%d,%d) inner=(%d,%d)",
+                    attester_idx,
+                    *( (s1, t1, s2, t2) if s1 < s2 else (s2, t2, s1, t1) ))
+                self._flag_slashing(
+                    "surround_vote", attester_idx,
+                    ffg=ffg, prior=prior, t=t,
+                    target_epoch=ffg.target_epoch)
+                return
+
+    def _flag_slashing(self, reason: str, attester_idx: int, *,
+                       ffg: FFGVote, t: float,
+                       prior: FFGVote | None = None,
+                       target_epoch: int | None = None) -> None:
+        """Mark `attester_idx` slashable and emit a `casper_slashing` event
+        carrying the updated slashable-stake fraction."""
+        self._slashable.add(attester_idx)
+        frac = self.slashable_stake_fraction()
+        fields: dict[str, Any] = {
+            "reason": reason,
+            "attester_idx": attester_idx,
+            "source_epoch": ffg.source_epoch,
+            "target_epoch": (target_epoch if target_epoch is not None
+                             else ffg.target_epoch),
+            "slashable_stake_fraction": frac,
+        }
+        if prior is not None:
+            fields["prior_source_epoch"] = prior.source_epoch
+            fields["prior_target_epoch"] = prior.target_epoch
+        self.emit(CASPER_SLASHING, fields, t)
+        log.info("slashing reason=%s attester=%d slashable_frac=%.4f",
+                 reason, attester_idx, frac)
+
+    def slashable_stake_fraction(self) -> float:
+        """Fraction of total stake held by validators with >=1 detected
+        slashable offence. Read accessor; never mutates state."""
+        if self.total_stake <= 0:
+            return 0.0
+        slashed = sum(self.stake_table[a] for a in self._slashable)
+        return slashed / self.total_stake
 
     def _run_ffg_transitions(self, source_epoch: int,
                              target_epoch: int, t: float) -> None:

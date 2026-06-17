@@ -13,8 +13,8 @@
 ## Diagram
 
 ```mermaid
-%% Snowman — subsampled poll loop for one block (sample K of n peers, accept on counter >= β); K=4 of 7 peers shown
 sequenceDiagram
+%% Snowman — subsampled poll loop for one block (sample K of n peers, accept on counter >= β); K=4 of 7 peers shown
     autonumber
     participant Poller
     participant P1
@@ -25,26 +25,26 @@ sequenceDiagram
     participant P6
     participant P7
 
-    Note over Poller,P7: instance keyed by block_id — starts polling with (preference, counter=0). No leader role — every validator polls independently. Each round samples K = min(20, n−1) peers, K=4 of 7 shown.
+    Note over Poller,P7: instance keyed by block_id -- starts polling with [preference, counter=0]. No leader role -- every validator polls independently. Each round samples K = min[20, n−1] peers, K=4 of 7 shown.
 
-    Poller->>Poller: on_message(BLOCK-ANNOUNCEMENT) — register block_id in state polling
+    Poller->>Poller: on_message[BLOCK-ANNOUNCEMENT] -- register block_id in state polling
 
     rect rgb(240,240,240)
-        Note over Poller,P7: one poll round — repeats until accepted
+        Note over Poller,P7: one poll round -- repeats until accepted
 
-        Poller->>Poller: on_timer(poll) — sample K peers via self.rng (here P2, P4, P5, P7 — a strict subset, no round ever touches all n)
-        Poller->>P2: QUERY(request_id, block_id)
-        Poller->>P4: QUERY(request_id, block_id)
-        Poller->>P5: QUERY(request_id, block_id)
-        Poller->>P7: QUERY(request_id, block_id)
-        P2-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
-        P4-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
-        P5-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
-        P7-->>Poller: QUERY-RESPONSE(request_id, preferred_block_id)
+        Poller->>Poller: on_timer[poll] -- sample K peers via self.rng [here P2, P4, P5, P7 -- a strict subset, no round ever touches all n]
+        Poller->>P2: QUERY[request_id, block_id]
+        Poller->>P4: QUERY[request_id, block_id]
+        Poller->>P5: QUERY[request_id, block_id]
+        Poller->>P7: QUERY[request_id, block_id]
+        P2-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        P4-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        P5-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
+        P7-->>Poller: QUERY-RESPONSE[request_id, preferred_block_id]
 
         alt ≥ α_p of the K responses agree on one block
-            Note over Poller: adopt that block as preference — reset counter to 1 if the preference flipped
-            alt ≥ α_c of the K responses agree (α_c ≥ α_p)
+            Note over Poller: adopt that block as preference -- reset counter to 1 if the preference flipped
+            alt ≥ α_c of the K responses agree [α_c ≥ α_p]
                 Note over Poller: counter += 1
             end
         else
@@ -52,9 +52,9 @@ sequenceDiagram
         end
 
         alt counter ≥ β
-            Note over Poller,P7: polling → accepted — emit decided(block_hash, block_id)
+            Note over Poller,P7: polling => accepted -- emit decided[block_hash, block_id]
         else
-            Poller->>Poller: set_timer(poll) — arm the next poll round
+            Poller->>Poller: set_timer[poll] -- arm the next poll round
         end
     end
 ```

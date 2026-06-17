@@ -284,3 +284,23 @@ Citations `[4]`, `[7]`, `[9]`, `[11]` resolve via
 - [[sources/2026-04-21_buterin-griffith-casper-ffg-2017]] (`[7]`)
 - [[sources/2026-04-21_team-rocket-avalanche-2019]] (`[9]`)
 - [[sources/2026-04-21_danezis-narwhal-tusk-2022]] (`[11]`)
+
+## Revisions
+
+### [2026-06-14] T51 — `delay-emission` gains a runtime realization (bind-seam wrap)
+
+T51 implemented the §3 `delay-emission` capability for the first time
+(`src/adversary/`). Mechanism realized: rather than dispatching through an FSM
+hook, a slow node's bound `send`/`broadcast` (set by `Network.bind`) are
+re-wrapped **after `build_run`** to shift the emission time `t_sent` forward by a
+fixed `m·ref` (`ref` = the protocol round cadence). For the delay capability this
+bind-seam wrap is behaviourally identical to FSM-level dispatch — delay neither
+rewrites payloads nor drops/forks messages — and leaves the honest
+network/scheduler/FSMs untouched (the §3 "attaches at the Node level"
+requirement; see also the [[concepts/node-model]] §9 Revision). The §3 intensity
+unit (fraction of nodes) and the safety-preserving / liveness-only classification
+held empirically: safety never broke, and at `f ≤ 1/3` the effect is
+liveness-only — Snowman latency inflation, occasional Casper FFG non-finalization
+via proposer overlap, PBFT unaffected. T52 (withhold) and T53 (equivocate) will
+need the deeper FSM hooks the §9 matrix anticipates. Evidence:
+[[experiments/2026-06-14_delayed-voters]].

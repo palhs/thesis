@@ -41,10 +41,19 @@ differ in what the underlying chain looks like:
 - **Weak subjectivity.** New or long-offline nodes must trust a recent
   checkpoint from a social consensus source. No purely on-chain mechanism
   can distinguish a valid long-range history from an adversarial rewrite.
-- **Signature aggregation.** Modern implementations use BLS so that
-  thousands of attestations fit in a single aggregated vote — the
-  enabling mechanism for validator sets in the tens of thousands.
-- **Validator set.** Rotates at epoch boundaries; fixed within an epoch.
+- **Signature aggregation.** Not part of the original Casper FFG paper
+  [1], whose votes are individually signed (Table 1: `S = signature …
+  from the validator's private key`) and counted, with no aggregation and
+  no message-complexity analysis. BLS aggregation is an Ethereum
+  beacon-chain *production* optimisation: it lets thousands of
+  attestations fit in a single aggregated vote — the enabling mechanism
+  for validator sets in the tens of thousands. The simulator does **not**
+  model it (see Communication complexity).
+- **Validator set.** In real Gasper the active set rotates at epoch
+  boundaries (activations, exits, slashings) and is fixed within an epoch.
+  *Simulator note:* the simulator does **not** model rotation — the
+  `stake_table` is supplied once at `CasperNode.__init__` and is fixed for
+  the entire run (see [[#simulator-mapping]]).
 
 ## Two-round finalisation
 
@@ -153,36 +162,95 @@ meaningful only in the PoS setting.
 
 ## Communication complexity
 
-| Aspect | Per-slot cost | Per-epoch cost | Finality latency |
-| :---- | :---- | :---- | :---- |
-| **Attestations** | `n` per slot (BLS-aggregated to ~1) | `n` total | — |
-| **FFG votes** | — | `O(n)` aggregated | 2 epochs (justify + finalise) |
-| **Slashing evidence** | rare; carried in blocks | rare | — |
+Two regimes must be kept apart — the original FFG paper / this simulator
+(individually-signed votes) versus Ethereum production (BLS-aggregated):
 
-BLS aggregation reduces the per-slot communication from `O(n)` distinct
-messages to a single aggregated attestation per committee — the enabling
-mechanism for the large validator sets that PBFT-family protocols cannot
-reach. The simulator models aggregation as a fixed cost per committee to
-keep per-validator instrumentation comparable across families.
+| Aspect | FFG paper & simulator | Ethereum production (BLS) | Finality latency |
+| :---- | :---- | :---- | :---- |
+| **Attestations / FFG votes** | `n` individually-signed votes per epoch, broadcast all-to-all → `O(n²)` deliveries | aggregated to ~1 per committee → `O(n)` | 2 epochs (justify + finalise) |
+| **Slashing evidence** | rare; carried in blocks | rare; carried in blocks | — |
+
+The original Casper FFG paper [1] specifies individually-signed votes and
+no aggregation, and does not analyse message complexity. **The simulator
+follows the paper, not production:** `src/pos/node.py::_attest` has every
+validator broadcast its own signed `ATTESTATION` to every peer, so the
+measured per-epoch attestation cost is `O(n²)` deliveries (empirically
+`9·n(n−1)` over the baseline window), giving `total_msgs_per_acu ≈ 1.125n`
+after dividing by the per-epoch decisions. BLS aggregation — which would
+collapse this to `O(n)` and is the enabling mechanism for the large
+validator sets PBFT-family protocols cannot reach — is **not modelled**;
+adding it is recorded as future work
+([`docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md`](../../docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md)).
 
 ## Simulator mapping
 
-The implementation is a simplified Casper-FFG-like gadget: a fixed-length
-epoch, stake-weighted validator set, per-validator attestation delay, and
-configurable slashing penalty. LMD-GHOST fork choice is modelled only to
-the degree needed to expose delay-induced reorgs; full Gasper integration
-is out of scope.
+The implementation in `src/pos/` is a deliberately partial Casper-FFG
+gadget. This section separates **what real Gasper / the paper specify**
+(described in the sections above) from **what this simulator actually
+implements**. Several mechanisms described above as Gasper theory are
+*not* built; they are listed under "Not implemented" so the gap between
+model and code is explicit. (Revised 2026-06-04 — see
+[[#revisions]] — the earlier version of this section claimed features
+that do not exist in the code.)
 
-Knobs exposed to experiments:
+### Implemented
 
-- **Epoch length** (slots per epoch) — trades per-epoch finality latency
+- **Stake-weighted two-round FFG.** Fixed-length epochs over a chain of
+  blocks; the `<source, target>` justify→finalise rule with a
+  stake-weighted `≥ 2/3` supermajority link (`src/pos/finality.py`,
+  `src/pos/epoch.py`, `src/pos/node.py`). The supermajority test is
+  division-free (`3·stake ≥ 2·total`) so whole-number stakes compare
+  exactly.
+- **Stake-weighted proposer selection** (T33) — see the next subsection.
+- **Slashing-condition *detection*** (T70). The simulator detects the two
+  provable misbehaviours defined under [[#slashing-conditions]]:
+  - **Double voting** — two distinct FFG votes by the same validator with
+    the same target epoch.
+  - **Surround voting** — a validator's vote `<S1, T1>` that surrounds one
+    of its own earlier votes `<S2, T2>` (`S1 < S2` and `T2 < T1`).
+  Detection identifies and records the offending validators.
+- **Slashable-stake-fraction metric** (T70) — reports the fraction of
+  total stake that has signed a slashable (double- or surround-vote)
+  message, the operational handle on [[#accountable-safety]].
+
+### Not implemented (deferred)
+
+These exist in real Gasper / Casper FFG but are absent from `src/pos/`.
+Treat any experiment claim that depends on them as out of scope until the
+corresponding code lands:
+
+- **Slashing *penalty* application / stake burn.** Detection records
+  offenders, but no deposit is destroyed and no stake is removed from the
+  active set. There is no penalty-magnitude knob.
+- **Safety-cost budget.** Because no stake is burned, the simulator does
+  *not* report the `~α/3`-of-stake economic cost of a safety attack
+  described under [[#behaviour-under-adversarial-conditions]]. That metric
+  is deferred until penalty application exists.
+- **LMD-GHOST fork choice and delay-induced reorgs.** The chain selects
+  the proposer's parent on a single known head; there is no
+  latest-message fork choice and no reorg dynamic (`src/pos/chain.py`
+  notes fork choice is deferred to T46–T50).
+- **Per-validator attestation delay.** Every node attests at a fixed
+  `attest_offset` within the epoch; there is no per-validator delay knob
+  driving fork-choice bias.
+- **Epoch-boundary validator-set rotation.** The `stake_table` is fixed
+  at `CasperNode.__init__` and never rotates (see [[#model-and-assumptions]]).
+- **Checkpoint tree across forks.** Finality is tracked on a single
+  justify chain; conflicting-checkpoint trees across forks are not
+  represented.
+
+### Knobs exposed to experiments
+
+- **Epoch length** (`slots_per_epoch`) — trades per-epoch finality latency
   against per-slot attestation overhead.
-- **Participation threshold** for justification (default `2/3` stake) —
-  to probe how close to the threshold the chain can operate before
-  finalisation stalls.
-- **Attestation delay per validator** — drives the LMD-GHOST reorg
-  dynamic and lets the adversarial-delay adversary be parameterised.
-- **Slashing penalty magnitude** — drives the safety-cost-budget metric.
+- **Participation / supermajority threshold** for justification (fixed at
+  `2/3` stake) — combined with adversarial non-participation, lets
+  experiments probe how close to the threshold the chain can operate
+  before finalisation stalls.
+
+(The earlier "attestation delay per validator" and "slashing penalty
+magnitude" knobs were never implemented and have been removed from this
+list.)
 
 **Proposer selection (T33).** The slot proposer is drawn by
 stake-weighted random sampling: `src/pos/selection.py`'s
@@ -226,8 +294,52 @@ Hypotheses to evaluate in the results chapter:
 - **Slashing calibration is load-bearing.** Penalties too small → the
   economic deterrent collapses; too large → honest validators fear
   equipment failure more than dishonesty and under-attest, eroding
-  liveness. The simulator treats penalty magnitude as an independent
-  knob for this reason.
+  liveness. *(In real Gasper this calibration is load-bearing; the
+  simulator does not yet apply penalties, so penalty magnitude is not a
+  knob — see [[#simulator-mapping]].)*
+
+## Revisions
+
+- **2026-06-04 (T70, finding #4).** The previous "Simulator mapping"
+  section presented unbuilt machinery as implemented. Corrected to
+  separate paper/Gasper theory from what `src/pos/` actually does:
+  - **Removed false simulator claims:** per-validator attestation delay,
+    configurable slashing penalty / stake burn, LMD-GHOST fork choice and
+    delay-induced reorgs, a safety-cost budget, and checkpoint trees
+    across forks. None of these exist in `src/pos/`. The two corresponding
+    experiment knobs (attestation-delay-per-validator, slashing-penalty
+    magnitude) were removed from the knobs list, and the trailing
+    "simulator treats penalty magnitude as a knob" clause under
+    [[#weaknesses-to-foreground]] was corrected.
+  - **Corrected validator-set claim** under [[#model-and-assumptions]]:
+    epoch-boundary rotation is real-Gasper theory only; the simulator's
+    `stake_table` is fixed at `CasperNode.__init__` for the whole run.
+  - **Added the newly implemented T70 features:** double-vote and
+    surround-vote slashing *detection* and the slashable-stake-fraction
+    metric, landing alongside as finding #3. These are detection-only —
+    no penalty is applied.
+  - **Still-open overclaim flagged for the human:** the safety-cost-budget
+    paragraph under [[#behaviour-under-adversarial-conditions]] and the
+    reorg-depth / economic-cost items under [[#expected-findings]] still
+    read as achievable simulator outputs. Left in place as paper-theory /
+    future-work hypotheses; they depend on penalty application and
+    LMD-GHOST, both deferred.
+
+- **2026-06-12 (T47, heavy-delay robustness).** `CasperNode._attest` guards
+  its *source* checkpoint lookup symmetrically with the pre-existing target
+  guard. Under the T47 heavy-tail regime ([[experiments/2026-06-12_delay-heavy]]),
+  a node can mark an epoch justified from aggregated FFG votes before that
+  epoch's checkpoint **block** has been delivered locally (blocks and
+  attestations travel under independent heavy-tailed delay), so
+  `chain.checkpoint(highest_justified)` could miss and crash the run with a
+  `KeyError`. The node now skips that slot's attestation gracefully (emits
+  `casper_rejected`, reason `source_checkpoint_unavailable`) and retries on a
+  later slot once the block arrives — the "finalisation simply stalls"
+  behaviour [[#behaviour-under-network-delay]] already describes, now actually
+  realised in code rather than aborting. No-op under low delay (the source
+  block is always present), so the T46 moderate-delay dataset and the honest
+  baselines are byte-identical. Covered by
+  `tests/pos/test_node_attest_source_guard.py`.
 
 ## Sources
 

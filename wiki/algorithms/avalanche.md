@@ -289,3 +289,24 @@ Per [[concepts/annotated-bibliography]] §citation-policy, quantitative
 claims must ultimately cite a primary paper; any `[ava-docs]`-backed
 performance number is therefore a weaker citation pending replacement or
 corroboration from [9] or [10].
+
+## Revisions
+
+- **[2026-06-04] T70 audit finding #5 — preference is argmax(confidence),
+  not the per-round sample majority.** The §Sampling-round pseudocode line
+  `if count >= α_p -> update preference` is shorthand and was read too
+  literally by the first simulator implementation, which flipped the
+  preference to *this round's* α_p sample majority (Snowflake's discard-on-
+  flip behaviour). That contradicted the §Snowball prose ("preference
+  informed by *all* historical α-majority observations"). The simulator's
+  `snowman/poll.py::close_round` now matches the prose: each round still
+  increments `confidence[b*]` for the round's α_p-majority block `b*`, but
+  `preference` is set to `argmax(confidence)` and flips only when a
+  challenger's accumulated confidence *strictly* exceeds the current
+  preference's (tie-break: lowest block_id). The α_c / β consecutive-
+  success counter semantics are unchanged; the counter resets to 0 on an
+  actual preference change. On a singleton conflict set (the honest
+  baseline) the two rules coincide, so the baseline event stream is
+  byte-identical. Read line 131 as "fold this round into the historical
+  confidence tally that the preference tracks," not "overwrite preference
+  with this round's winner."
