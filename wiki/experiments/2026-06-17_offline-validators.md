@@ -157,7 +157,7 @@ boundary ordering reorders the protocols relative to the flat 1/3 threshold.
 
 | protocol | `finalization_success_rate` per `f` (n=10 / n=25) | `f*` | view-changes | shape |
 | :-- | :-- | :-- | :-- | :-- |
-| **PBFT** | `1.00/1.00/1.00/1.00/0.00` (both n) | **0.40** | 0 at f≤0.33; **61 (n=10) / 151 (n=25) at f=0.40** | sharp cliff at 1/3 |
+| **PBFT** | `1.00/1.00/1.00/1.00/0.00` (both n) | **0.40** | 0 at f≤0.33; **50 (n=10) / 125 (n=25) at f=0.40** | sharp cliff at 1/3 |
 | **Casper FFG** | n=10 `1.00/0.85/0.75/0.60/0.00`; n=25 `1.00/0.90/0.75/0.60/0.00` | **0.10** | 0 (no leader rotation) | graceful degradation |
 | **Snowman** | n=10 `1.00/1.00/0.00/0.00`; n=25 `1.00/1.00/1.00/0.00` | **0.20 (n=10) / 0.33 (n=25)** | — | sharp cliff, n-dependent, **below 1/3** |
 
@@ -166,8 +166,8 @@ boundary ordering reorders the protocols relative to the flat 1/3 threshold.
 **PBFT — clean liveness cliff at 1/3.** `1.00` for all `f ≤ 0.33`, `0.00` at
 `f=0.40`, both sizes. Mechanism: the hard `2f+1` quorum. At `n=10` the quorum is
 7; `f=0.33` → 3 offline → exactly 7 honest → finalize; `f=0.40` → 4 offline → 6
-honest `< 7` → permanent stall. **View-changes FIRE at `f=0.40`** (61 at n=10,
-151 at n=25): the spared primary keeps proposing but never collects a commit
+honest `< 7` → permanent stall. **View-changes FIRE at `f=0.40`** (50 at n=10,
+125 at n=25): the spared primary keeps proposing but never collects a commit
 quorum, so backups time out and rotate — repeatedly, since rotation finds no
 healthy primary either. At `f ≤ 0.33`, `view_change_count = 0`.
 

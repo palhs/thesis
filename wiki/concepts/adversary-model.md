@@ -305,7 +305,7 @@ via proposer overlap, PBFT unaffected. T52 (withhold) and T53 (equivocate) will
 need the deeper FSM hooks the §9 matrix anticipates. Evidence:
 [[experiments/2026-06-14_delayed-voters]].
 
-### [2026-06-14] T52 — `withhold-participation` realized as offline drop + the §4 Snowman invariant contradicted
+### [2026-06-17] T52 — `withhold-participation` realized as offline drop + the §4 Snowman invariant contradicted
 
 T52 implemented the §4 `withhold-participation` capability as the
 **offline-validator** experiment ([[experiments/2026-06-17_offline-validators]]).
