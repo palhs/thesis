@@ -26,10 +26,19 @@ from snowman.messages import (
 
 
 def split_recipients(node) -> tuple[tuple[int, ...], tuple[int, ...]]:
-    """Split peers-minus-self into (lo, hi) halves; pure fn of (node.n, node.id)."""
-    peers = tuple(i for i in range(node.n) if i != node.id)
-    mid = len(peers) // 2
-    return peers[:mid], peers[mid:]
+    """Partition peers-minus-self into (even-id, odd-id) groups.
+
+    A GLOBAL, sender-independent rule (every Byzantine node classifies a given
+    recipient into the same group by that recipient's id parity). Crucial vs a
+    contiguous-half split: the Byzantine set is the low-id prefix {0..k-1}, so a
+    contiguous split would put every honest node (the high-id suffix) on one
+    side and no fork could form. Parity cuts ACROSS the prefix, splitting the
+    honest suffix so each half receives all b Byzantine forked votes and two
+    2f+1 quorums form exactly when b > f (the PBFT safety threshold). Pure fn of
+    (node.n, node.id); no RNG, so per-cell replay stays byte-identical."""
+    even = tuple(i for i in range(node.n) if i != node.id and i % 2 == 0)
+    odd = tuple(i for i in range(node.n) if i != node.id and i % 2 == 1)
+    return even, odd
 
 
 def conflicting_bytes(tag: str, k1: int, k2: int) -> tuple[bytes, bytes]:

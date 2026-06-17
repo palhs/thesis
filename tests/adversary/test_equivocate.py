@@ -26,10 +26,11 @@ class _FakeNode:
 
 
 class TestPartition(unittest.TestCase):
-    def test_split_node0_exact_halves(self):
+    def test_split_node0_parity_groups(self):
         lo, hi = split_recipients(_FakeNode(10, 0))
-        self.assertEqual(lo, (1, 2, 3, 4))
-        self.assertEqual(hi, (5, 6, 7, 8, 9))
+        # lo = even-id peers (self 0 excluded), hi = odd-id peers.
+        self.assertEqual(lo, (2, 4, 6, 8))
+        self.assertEqual(hi, (1, 3, 5, 7, 9))
 
     def test_split_excludes_self(self):
         lo, hi = split_recipients(_FakeNode(10, 0))
@@ -46,10 +47,12 @@ class TestPartition(unittest.TestCase):
         self.assertNotIn(5, lo)
         self.assertNotIn(5, hi)
         peers = tuple(i for i in range(10) if i != 5)
-        # lo+hi together cover all peers, disjoint, sizes differ by <= 1.
+        # lo+hi together cover all peers and are disjoint (parity partition).
         self.assertEqual(tuple(sorted(lo + hi)), peers)
         self.assertEqual(set(lo) & set(hi), set())
-        self.assertLessEqual(abs(len(lo) - len(hi)), 1)
+        # lo is exactly the even-id peers, hi the odd-id peers.
+        self.assertTrue(all(i % 2 == 0 for i in lo))
+        self.assertTrue(all(i % 2 == 1 for i in hi))
 
     def test_conflicting_bytes_distinct_and_bytes(self):
         a, b = conflicting_bytes("pbft", 0, 3)
