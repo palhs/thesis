@@ -9,13 +9,15 @@
 #   make test                 # every suite
 #   make test-pbft            # one suite (also: scheduler nodes network event_log config pos integration)
 #   make coverage             # branch coverage across all suites (report-only)
+#   make preview              # render a draft chapter to figures-inline HTML
 #   make clean                # remove __pycache__ and coverage artifacts
 
 PY            = python3
 SUITES        = scheduler nodes network event_log config common pbft pos snowman output workload delay adversary integration
 SUITE_TARGETS = $(addprefix test-,$(SUITES))
+PREVIEW_FILE  = drafts/ch4_results.md
 
-.PHONY: test coverage clean $(SUITE_TARGETS)
+.PHONY: test coverage preview clean $(SUITE_TARGETS)
 
 test: $(SUITE_TARGETS)
 
@@ -35,6 +37,15 @@ coverage:
 	done
 	$(PY) -m coverage combine
 	$(PY) -m coverage report
+
+# Render a draft chapter to a single self-contained HTML page with every figure
+# embedded inline at its reference point, then open it (macOS). Override the
+# target draft with FILE=...; output lands in /tmp (not a committed artifact).
+#   make preview
+#   make preview FILE=drafts/ch3_methodology.md
+# Requires pandoc; the figures' PNGs must already be rendered on disk.
+preview:
+	$(PY) scripts/preview_draft.py $(PREVIEW_FILE)
 
 clean:
 	find . -type d -name __pycache__ -prune -exec rm -rf {} +
