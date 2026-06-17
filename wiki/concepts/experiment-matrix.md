@@ -367,3 +367,27 @@ left to the delay tasks. Evidence: [[experiments/2026-06-10_delay-moderate]].
   for all three protocols), **not** `finality_latency_ms` — see
   [[concepts/output-format]] §13. Each timeline's `slot_duration` is recorded
   on the output so plots can annotate it (§5 "reported not hidden").
+
+### [2026-06-14] T51 — Family C gains `n ∈ {10,25}`, a magnitude axis, and the `f=0` control
+
+Human decisions (2026-06-14 / 2026-06-15) extend the §3 Family C (adversarial)
+design, resolving the 2026-06-10 Backlog item that had parked the Family-C-at-`n=25`
+question:
+
+- **`n ∈ {10, 25}`** (was fixed `n = 10`), matching the Family B n-axis.
+- **Magnitude axis `m ∈ {2,4,6,8,10}`** for `delay-emission`: the §3 "2–10× normal
+  delay" band is realized as a swept 5-point axis (a dose–response curve), not a
+  single point. `m` is the fixed delay multiple of each protocol's round cadence.
+- **Intensity `f ∈ {0, 0.10, 0.20, 0.30}`** with `f=0` as the honest **control**
+  (the `finality_delay_ratio` denominator); `m` applies only to `f>0` cells.
+- **Network = static-baseline** (constant 10 ms, loss-free) — Family C fixes the
+  network and sweeps the adversary, the mirror of Family B (fixes the adversary,
+  sweeps the network).
+- **FFG slot coherence (§5)** holds at `slot = 0.1 s` since static-baseline
+  `E[delay] = 10 ms` (`slot ≥ 4·E[delay] = 40 ms`); the FFG cadence asymmetry
+  (shorter `ref` ⇒ smaller absolute shift) is reported.
+
+T51 covers the `delay-emission` capability of this design; T52/T53 add
+withhold/equivocate on the same axes. Budget restated in
+[[concepts/experiment-matrix-runs]] §Revisions. Evidence:
+[[experiments/2026-06-14_delayed-voters]].
