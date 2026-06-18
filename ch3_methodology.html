@@ -1025,54 +1025,77 @@ phases run as follows; Figure 3.6 gives the same run as a temporal
 sequence.</p>
 <p><strong>Figure 3.6 (<span class="cite">[diagrams/runtime/macro]</span>).</strong> One seeded run
 as a temporal sequence of the six phases — init, workload, run loop,
-stop, flush, output — producing one <code>results.csv</code> row.</p>
+stop, flush, output — producing one <code>results.csv</code> row, with
+the run-loop branch showing where the delay (Family B) and adversarial
+(Family C) sweeps diverge from the honest baseline (Family A). The
+adversary is drawn inside the Validator lane, not as a separate
+component: it is the per-node interceptor of §3.2 that alters a bound
+validator’s outgoing messages.</p>
 <figure><pre class="mermaid">
-%% Simulator runtime — one config cell to one results.csv row
+%% Simulator runtime — one config cell → one results.csv row, with the three
+%% experiment-family run-loop branches (Family A baseline / B delay / C adversarial).
 sequenceDiagram
     autonumber
     participant Harness
-    participant Config
-    participant Builder
-    participant Simulator
+    participant Scheduler
+    participant Validator
+    participant Network
     participant Logger
-    participant Results
-
-    Note over Harness,Results: phase 1 — init — resolve one experiment-matrix cell + seed
-
-    Harness-&gt;&gt;Config: load(experiment.yaml)
-    Config--&gt;&gt;Harness: {protocol, n, network_phases, adversary, workload, seed}
-    Harness-&gt;&gt;Builder: build(config)
-    Note over Builder: constructs Scheduler + Network + n Nodes, then runs the six-phase bootstrap (construct, register, bind, observability, kickoff, run)
-    Builder--&gt;&gt;Harness: Simulator (Scheduler + Network + Nodes, wired)
-
-    Note over Harness,Simulator: phase 2 — workload — seed proposer mempools
-
-    Harness-&gt;&gt;Simulator: load_workload(transactions)
 
     rect rgb(240,240,240)
-        Note over Harness,Results: phase 3 — run loop
+        Note over Harness,Logger: phase 1 — init — resolve one experiment-matrix cell + seed
     end
-
-    Harness-&gt;&gt;Simulator: run(t_max, stop_when)
-    Note over Simulator: scheduler pops events — Nodes run protocol FSMs (pop, advance virtual time, dispatch, repeat)
-    Note over Harness,Results: … virtual time advances event-to-event
-    Simulator-&gt;&gt;Logger: emit(decided / halted / message events)
-
-    Note over Harness,Simulator: phase 4 — stop — one of three exit paths fires
-
-    Simulator-&gt;&gt;Harness: RunResult(stopped_by, now, events_processed)
-
-    Note over Harness,Results: phase 5 — flush + reduce
-
-    Harness-&gt;&gt;Logger: flush()
-    Logger--&gt;&gt;Harness: per-event records
-    Harness-&gt;&gt;Harness: reduce events to metrics (latency, throughput, msg_count, success)
+    Harness-&gt;&gt;Harness: load config (protocol, n, network_phases, adversary, workload, seed)
+    Harness-&gt;&gt;Harness: build_run() — construct + wire Scheduler, Network, n Validators
+    Note over Scheduler,Network: bootstrap binds each Validator's timer/emit (Scheduler)&lt;br/&gt;and send/broadcast (Network)
+    Note over Harness,Logger: the swept axis names the family —&lt;br/&gt;A: n · B: network_phases · C: adversary attached to φ Validators
 
     rect rgb(240,240,240)
-        Note over Harness,Results: phase 6 — output
+        Note over Harness,Logger: phase 2 — workload — seed proposer mempool
+    end
+    Harness-&gt;&gt;Validator: load_workload — Poisson transactions, each stamped t_submit
+
+    rect rgb(240,240,240)
+        Note over Harness,Logger: phase 3 — run loop — Scheduler drives, family behaviour branches
+    end
+    loop until a stop path fires (quiescence / deadline / predicate)
+        Scheduler-&gt;&gt;Validator: pop next event · advance virtual time · dispatch (on_message / on_timer)
+        alt Family A — honest baseline (static-baseline, constant 10 ms)
+            Validator-&gt;&gt;Network: send / broadcast (vote)
+            Network-&gt;&gt;Scheduler: schedule Delivery at t + constant delay
+            Note over Validator: honest quorum forms each instance
+            Validator-&gt;&gt;Logger: emit(decided) at nominal latency
+        else Family B — delay sweep (multi-phase timeline)
+            Scheduler-&gt;&gt;Network: advance_phase at each boundary (crosses GST)
+            Validator-&gt;&gt;Network: send / broadcast (vote)
+            Network-&gt;&gt;Scheduler: schedule Delivery at t + per-phase delay (drop / partition first)
+            Note over Validator: pre-GST no quorum, post-GST quorum completes&lt;br/&gt;Casper FFG slot_duration rescaled to E[delay]
+            Validator-&gt;&gt;Logger: emit(decided) at raised commit_latency
+        else Family C — adversarial sweep (φ bound Validators Byzantine)
+            Note over Validator: φ nodes Byzantine — send-wrapper (delay / withhold)&lt;br/&gt;or Byzantine subclass (equivocate)
+            Validator-&gt;&gt;Network: forked payloads to an even/odd recipient split (equivocate)
+            Network-&gt;&gt;Scheduler: schedule Delivery at t + constant delay
+            Note over Validator: equivocation above 1/3 → two honest Validators commit conflicting
+            Validator-&gt;&gt;Logger: emit(decided / halted) — fork_rate &gt; 0 above threshold
+        end
     end
 
-    Harness-&gt;&gt;Results: append one row {run_id, protocol, n, adversary, metrics...}
+    rect rgb(240,240,240)
+        Note over Harness,Logger: phase 4 — stop — one of three exit paths fires
+    end
+    Scheduler-&gt;&gt;Harness: RunResult(stopped_by, now, events_processed)
+
+    rect rgb(240,240,240)
+        Note over Harness,Logger: phase 5 — flush + reduce
+    end
+    Harness-&gt;&gt;Logger: read event records
+    Logger--&gt;&gt;Harness: per-event records (decided / halted / messages)
+    Harness-&gt;&gt;Harness: reduce events → metrics (latency, throughput, msg count, success / fork)
+
+    rect rgb(240,240,240)
+        Note over Harness,Logger: phase 6 — output
+    end
+    Harness-&gt;&gt;Harness: append one row {run_id, protocol, n, adversary, metrics…} → results.csv
 </pre><figcaption>Figure 3.6</figcaption></figure>
 <ol type="1">
 <li><strong>Init.</strong> The harness builds and wires the scheduler,

@@ -450,7 +450,11 @@ follows; Figure 3.6 gives the same run as a temporal sequence.
 
 **Figure 3.6 ([[diagrams/runtime/macro]]).** One seeded run as a temporal
 sequence of the six phases — init, workload, run loop, stop, flush, output —
-producing one `results.csv` row.
+producing one `results.csv` row, with the run-loop branch showing where the
+delay (Family B) and adversarial (Family C) sweeps diverge from the honest
+baseline (Family A). The adversary is drawn inside the Validator lane, not as
+a separate component: it is the per-node interceptor of §3.2 that alters a
+bound validator's outgoing messages.
 
 1. **Init.** The harness builds and wires the scheduler, network, and ten
    validators, and names one of them the primary.
