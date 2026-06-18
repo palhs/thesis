@@ -141,21 +141,25 @@ latency/throughput spread.)
 | **Snowman** `safety_violation` | 0 | 0 | 0 | 0 | — | — | resists (no fork surface) |
 
 **PBFT — a clean fork cliff that the protocol first *fights* with leader
-rotation.** At `f ≤ 0.33` the conflicting `PRE-PREPARE`s prevent a single quorum,
-the per-instance view-change timer fires (10 view-changes at n=10, 25 at n=25),
-and an honest primary eventually takes over → no fork, safety holds (this is the
-catalog's "equivocation converts to leader rotation", `adversary-model.md` §5). At
-`f ≥ 0.40` (`b > f_tol = ⌊(n−1)/3⌋`) the Byzantine votes manufacture two `2f+1`
+rotation.** At `0 < f ≤ 0.33` the conflicting `PRE-PREPARE`s prevent a single
+quorum, the per-instance view-change timer fires (10 view-changes at n=10, 25 at
+n=25), and an honest primary eventually takes over → no fork, safety holds (this is
+the catalog's "equivocation converts to leader rotation", `adversary-model.md` §5).
+At `f ≥ 0.40` (`b > f_tol = ⌊(n−1)/3⌋`) the Byzantine votes manufacture two `2f+1`
 commit quorums on the two parity halves → **two honest replicas decide conflicting
-digests** (`conflicting_instances` jumps to 229, `view_change_count → 0`). The
+digests** (`conflicting_instances` jumps to 229 — identical at n=10 and n=25, since
+the in-window instance count is set by the round cadence, not committee size —
+`view_change_count → 0`). The
 cliff sits exactly between `f=0.33` (b=3/10, 8/25 — safe) and `f=0.40` (b=4/10,
 10/25 — broken), i.e. at `b > f_tol`, matching PBFT theory.
 
 **Casper FFG — accountable safety, not a fork.** Every Byzantine attester is
-detected (`slashable_stake_fraction ≈ realized f`), and the fraction **crosses
-`1/3` at `f ≥ 0.33`** — the accountable-safety cliff: above one-third Byzantine
-stake a violation becomes economically possible but is always attributable to
-≥1/3 slashable stake. `safety_violation` stays 0 throughout (the model has no
+detected (`slashable_stake_fraction ≈ realized f`), and the realized fraction
+**first reaches ≥`1/3` at `f = 0.40`** (`0.40` at both n) — *not* at `f = 0.33`,
+where the floor leaves it at `0.30`/`0.32`, just below `1/3`. This is the
+accountable-safety cliff: above one-third Byzantine stake a violation becomes
+economically possible but is always attributable to ≥1/3 slashable stake.
+`safety_violation` stays 0 throughout (the model has no
 cross-node fork to exhibit — see *Fidelity boundary*), which is the faithful
 result.
 
@@ -170,8 +174,9 @@ rate stays at 0 against the `(1−α_c/K)^β` bound (≈ 0).
 Three protocols, three safety postures under equivocation: **PBFT** forks above
 `b > f_tol` but resists below via leader rotation (deterministic safety with a
 detectable liveness blip at threshold); **Casper FFG** never forks in-model but
-makes any equivocation *accountable* — slashable stake rises to ≈ f and crosses
-1/3; **Snowman** structurally resists (probabilistic safety, no fork surface). The
+makes any equivocation *accountable* — slashable stake rises to ≈ f and reaches
+≥1/3 by `f = 0.40`; **Snowman** structurally resists (probabilistic safety, no fork
+surface). The
 cliff that the catalog documents (`adversary-model.md` §5/§7.3) is reproduced: a
 deterministic fork cliff for PBFT, an accountable-safety cliff for FFG.
 
@@ -184,18 +189,26 @@ added here.
 ## Seeds, commit, re-run
 
 - **Dataset:** `results/adversary/equivocating_nodes.csv` (640 rows).
-- **commit_hash** (CSV column): `TODO(fill from dataset)`.
-- **Re-run:** `PYTHONPATH=src python3 -m adversary.equivocate_sweep --jobs 8 --heavy-jobs 4`
+- **commit_hash** (CSV column): `c18587d2` (uniform across all 640 rows).
+- **Re-run:** `PYTHONPATH=src python3 -m adversary.equivocate_sweep --jobs 8 --heavy-jobs 1`
   (resumable; checkpoints under `results/adversary/.sweep_equivocate/`).
 - **Probe:** `PYTHONPATH=src python3 -m adversary.equivocate_sweep --probe`
+- **Verification:** every per-cell finding independently reconciled against the CSV
+  (two recompute methods per protocol — numpy masking + awk distinct-value
+  extraction); 52 T53 unit tests pass (`test_equivocate`, `test_safety`,
+  `test_select`, `test_profiles`, `test_runners`, `test_equivocate_config`,
+  `test_equivocate_sweep`).
 
 ## Cost
 
 640 runs on the fast static-baseline (10 ms) network. The cost wall is the Snowman
 `n=25` heavy tier (run at `--heavy-jobs`); PBFT/FFG cells are cheap. Single-process
 (`--jobs 1`) is impractically slow for the full grid; the production run uses
-`--jobs 8 --heavy-jobs 4` in a real terminal (the Claude Code sandbox deadlocks on
-`--jobs>1`, so in-sandbox runs use `--jobs 1` or hand off).
+`--jobs 8 --heavy-jobs 1` in a real terminal (the Claude Code sandbox deadlocks on
+`--jobs>1`, so in-sandbox runs use `--jobs 1` or hand off). Keep `--heavy-jobs` at
+**1** unless the host has ≥32 GB RAM: each Snowman `n=25` cell holds a ~5 GB event
+stream, so `--heavy-jobs 2` needs ~10 GB and `4` will OOM a 16 GB Mac (cf. the T47
+Snowman `n=25` OOM at two heavy cells).
 
 ## Auggie verification
 
@@ -204,4 +217,4 @@ The Engineer role mandates `mcp__auggie__codebase-retrieval` pre/post edit.
 | phase | query | result |
 | :-- | :-- | :-- |
 | pickup-index | "src/adversary injection subsystem — inject_delay/inject_offline/_wrap_outbound, profiles, runners, sweep; per-protocol vote emission (PBFT PRE-PREPARE/PREPARE/COMMIT, FFG attestation + T70 slashing, Snowman QUERY-RESPONSE)" | located the bind-seam + the three emission paths; confirmed T53 needs FSM-level hooks (inject.py docstring anticipated it) |
-| post-edit | TODO(fill at Task 14 post-edit re-query) | — |
+| post-edit | "describe the final T53 equivocate subsystem + locate callers: equivocate.py subclasses / split_recipients / conflicting_bytes, byzantine_node_ids selection, EQUIVOCATE_RUNNERS dispatch, safety_signals consumers, equivocate_sweep wiring" | confirmed the B-hybrid final state: the three `Equivocating*` subclasses override only payload-emitting methods over untouched honest FSMs; `split_recipients` is the global even/odd parity split; `byzantine_node_ids` returns the low-id prefix (inverse of `slow_node_ids`, sparing nothing so node 0 = PBFT primary is in-set); `EQUIVOCATE_RUNNERS` dispatches the subclass-by-id with **no** `inject_*` wrap; `equivocate_sweep._run_cell` wires runner → `safety_signals` (full records) → `clip_records` → T40 reducer → row. No stale callers/broken refs. |

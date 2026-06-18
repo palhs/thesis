@@ -333,3 +333,51 @@ PBFT and Casper FFG §4 invariants held: PBFT a clean 1/3 quorum cliff (view
 changes fire only above threshold), Casper FFG graceful degradation across the
 0.10–0.33 band tracking `≈ (1−f)` then collapsing past 1/3. Evidence:
 [[experiments/2026-06-17_offline-validators]].
+
+### [2026-06-18] T53 — `equivocate-vote` realized as node-level subclasses; PBFT fork cliff measured above 1/3, FFG accountable, Snowman resists
+
+T53 implemented the §5 `equivocate-vote` capability
+([[experiments/2026-06-18_equivocating-nodes]]). Unlike T51/T52 — which attach a
+post-`build_run` bind-seam wrap to honest nodes — equivocation is a **node-level
+semantic decision** (sign two incompatible messages where the protocol expects
+one), so it is realized as three thin **adversarial node subclasses**
+(`src/adversary/equivocate.py`: `EquivocatingPBFTNode`, `EquivocatingCasperNode`,
+`EquivocatingSnowmanNode`), with selection / profile / runners / sweep / safety
+reducer shared in `src/adversary/` (the B-hybrid split). The Byzantine set is the
+**low-id** `⌊f·n⌋` prefix — inverting T51/T52's high-id rule, because equivocation
+needs the PBFT view-0 primary and the proposer slots *inside* the adversary set —
+and conflicting recipients are split by a **global node-id parity** rule (even vs
+odd). Parity is the crux: the contiguous low-id Byzantine prefix must cut *across*
+the honest high-id suffix, or a contiguous-half split puts every honest node on one
+side and no fork can form (PBFT would only stall).
+
+The sweep deliberately crosses the catalogued `f ≤ 0.33` intensity cap (to
+`f ∈ {0.40, 0.50}`) to **measure** each cliff rather than infer it. The three §5
+row classifications are confirmed:
+
+- **PBFT** — the §5 "L (safety holds; triggers view change)" classification holds
+  **only within** the catalogued `f ≤ 1/3` range: at `0 < f ≤ 0.33` the conflicting
+  `PRE-PREPARE`s force the view-change-as-detector (10 view-changes at n=10, 25 at
+  n=25) and an honest primary recovers — no fork. **Above 1/3**
+  (`b > f_tol = ⌊(n−1)/3⌋`, i.e. `f ≥ 0.40`) the Byzantine votes manufacture two
+  `2f+1` quorums on the parity halves and two honest replicas decide conflicting
+  digests (`safety_violation = 1`, `conflicting_instances = 229` at both n). The §5
+  invariant "no two-honest commit conflict at (view, seq)" is therefore
+  **range-bounded** — it holds at/below 1/3 and breaks above, exactly as BFT theory
+  predicts.
+- **Casper FFG** — the §5 "accountable-safety" row is confirmed *and* a model
+  fidelity boundary is recorded: `EpochState.links` (`src/pos/epoch.py`) aggregates
+  stake by `source_epoch` and **ignores `target_hash`**, so a forked checkpoint
+  would be a model artifact, not a representable safety break. FFG therefore uses
+  **double-vote only** and its faithful signal is `max_slashable_stake_fraction`
+  (= realized `⌊f·n⌋/n`), which first reaches ≥1/3 at `f = 0.40` (not at `f = 0.33`,
+  where the floor leaves it at 0.30 / 0.32); `safety_violation` stays 0 throughout —
+  the faithful accountable-safety outcome is *detect + slash*, not *fork*.
+- **Snowman** — the §5 "*reduces to* lying responder, L, no fork-induction surface"
+  reduction is confirmed empirically: `safety_violation = 0` and
+  `max_slashable_stake_fraction = 0` on **every** cell across the
+  `f ∈ {0, 0.10, 0.20, 0.33}` grid; the proposer-fork + lying-responder attack
+  cannot make two honest nodes accept conflicting blocks (Snowball converges). This
+  is the §5/§4 Snowman mechanical overlap (lines 144–145) realized in code.
+
+Evidence: [[experiments/2026-06-18_equivocating-nodes]].
