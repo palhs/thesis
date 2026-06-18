@@ -68,5 +68,37 @@ class TestOfflineRunners(unittest.TestCase):
                          msg="PBFT should stall above the 1/3 quorum threshold")
 
 
+from adversary.runners import EQUIVOCATE_RUNNERS, run_pbft_equiv
+from adversary.select import byzantine_node_ids
+
+
+def _record_stream(records):
+    return [(r.t, r.node_id, r.event_type, r.seq) for r in records]
+
+
+class TestEquivocateRunners(unittest.TestCase):
+    def test_dispatch_table_keys(self):
+        self.assertEqual(set(EQUIVOCATE_RUNNERS),
+                         {"pbft", "casper-ffg", "snowman"})
+
+    def test_f_zero_has_no_byzantine_node(self):
+        # Sanity: f=0 selects no Byzantine ids, so the equiv run is all-honest.
+        self.assertEqual(byzantine_node_ids(4, 0.0), ())
+
+    def test_pbft_f_zero_control_finalizes(self):
+        # Real scheduler smoke run: honest (f=0) PBFT completes with decisions.
+        records, result, meta = run_pbft_equiv(4, 0.0, 0)
+        self.assertTrue(records, msg="empty record stream")
+        self.assertTrue(_decided(records),
+                        msg="f=0 honest PBFT produced no decisions")
+        self.assertEqual(meta.protocol, "pbft")
+
+    def test_pbft_equiv_is_deterministic(self):
+        # Identical record streams across two runs of the same cell.
+        r1, _, _ = run_pbft_equiv(4, 0.0, 0)
+        r2, _, _ = run_pbft_equiv(4, 0.0, 0)
+        self.assertEqual(_record_stream(r1), _record_stream(r2))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -12,8 +12,8 @@ Design spec: docs/superpowers/specs/2026-06-14-t51-delayed-voters-design.md
 from __future__ import annotations
 
 from .inject import inject_delay, inject_offline
-from .profiles import DelayProfile, OfflineProfile
+from .profiles import DelayProfile, EquivocateProfile, OfflineProfile
 from .select import slow_node_ids
 
-__all__ = ["DelayProfile", "OfflineProfile", "inject_delay",
-           "inject_offline", "slow_node_ids"]
+__all__ = ["DelayProfile", "EquivocateProfile", "OfflineProfile",
+           "inject_delay", "inject_offline", "slow_node_ids"]

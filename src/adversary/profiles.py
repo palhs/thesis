@@ -48,3 +48,19 @@ class OfflineProfile:
     nodes: tuple[int, ...]
     intensity: float
     kind: str = "withhold-participation"
+
+
+@dataclass(frozen=True)
+class EquivocateProfile:
+    """The ``equivocate-vote`` adversary profile for one run (T53).
+
+    A Byzantine validator that signs two incompatible messages where the
+    protocol expects one, forking the payload across a deterministic half-half
+    split of its recipients. No magnitude axis (binary, like offline). The
+    behaviour lives in the adversarial node subclasses (equivocate.py); this
+    object is stored for observability/provenance (adversary-model.md §5).
+    """
+    nodes: tuple[int, ...]
+    intensity: float
+    partition_strategy: str = "half-half"
+    kind: str = "equivocate-vote"

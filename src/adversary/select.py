@@ -23,3 +23,16 @@ def slow_node_ids(n: int, f: float) -> tuple[int, ...]:
     if k <= 0:
         return ()
     return tuple(range(n - k, n))
+
+
+def byzantine_node_ids(n: int, f: float) -> tuple[int, ...]:
+    """Return the ⌊f·n⌋ LOWEST node ids, ascending. Empty when f == 0.
+
+    The inverse of slow_node_ids (which spares node 0): equivocation needs the
+    PBFT view-0 primary (node 0) and proposer slots INSIDE the Byzantine set, so
+    the adversary is the low-id prefix. (T53; adversary-model.md §5.)
+    """
+    if not (0.0 <= f <= 1.0):
+        raise ValueError(f"f must be in [0, 1], got {f}")
+    k = math.floor(f * n)
+    return tuple(range(0, k)) if k > 0 else ()
