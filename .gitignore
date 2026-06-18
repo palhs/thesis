@@ -33,6 +33,8 @@ results/**/.sweep_heavy/
 results/**/.sweep_adversary/
 # T52 offline-validators sweep checkpoint sidecars (same rationale).
 results/**/.sweep_offline/
+# T53 equivocating-nodes sweep checkpoint sidecars (same rationale).
+results/**/.sweep_equivocate/
 # Sweep stderr progress/timing logs (e.g. heavy_pass*.err) — runtime-only
 # diagnostics with wall-clock timings; the durable record is the experiment
 # page + the CSV commit_hash provenance.
