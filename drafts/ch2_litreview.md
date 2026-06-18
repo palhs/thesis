@@ -209,7 +209,8 @@ judgment: the obstacle is the reporting vocabulary itself, not any absence of
 measurement. And the one methodological precedent for a matched evaluation —
 Gervais *et al.* [17] — has been applied to Proof-of-Work only. Chapter 3
 responds with a unified discrete-event simulator, a shared metric schema
-instantiated identically for the four families, and an experiment matrix that
+instantiated identically for the four families — three implemented at this
+stage, the DAG-based family scaffolded and deferred — and an experiment matrix that
 sweeps the network-delay, Byzantine-fraction, validator-set-size, and
 adversarial-strategy axes under common assumptions
 [[wiki/concepts/research-questions]], [[wiki/concepts/experiment-matrix]].

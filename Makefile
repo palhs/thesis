@@ -15,7 +15,7 @@
 PY            = python3
 SUITES        = scheduler nodes network event_log config common pbft pos snowman output workload delay adversary integration
 SUITE_TARGETS = $(addprefix test-,$(SUITES))
-PREVIEW_FILE  = drafts/ch4_results.md
+FILE          = drafts/ch4_results.md
 
 .PHONY: test coverage preview clean $(SUITE_TARGETS)
 
@@ -45,7 +45,7 @@ coverage:
 #   make preview FILE=drafts/ch3_methodology.md
 # Requires pandoc; the figures' PNGs must already be rendered on disk.
 preview:
-	$(PY) scripts/preview_draft.py $(PREVIEW_FILE)
+	$(PY) scripts/preview_draft.py $(FILE)
 
 clean:
 	find . -type d -name __pycache__ -prune -exec rm -rf {} +

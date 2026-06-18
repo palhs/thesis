@@ -98,11 +98,13 @@ theory.
 
 Evaluation is conducted at the message-passing level inside a
 discrete-event simulator [[wiki/concepts/problem-statement#scope]]. In scope
-are configurable network delay (constant, uniform, exponential,
+are configurable network delay (constant, uniform, normal, exponential,
 heavy-tailed), configurable packet loss, three Byzantine validator
 behaviors drawn from the primary literature — silent non-participation,
 delayed voting, and equivocation [[wiki/concepts/adversary-model]] — and
-validator sets up to several hundred nodes. Out of scope are Proof-of-Work
+validator sets of n ∈ {4, 7, 10, 16, 25} nodes; extrapolation to the
+several-hundred-node production scale rests on the sensitivity sweeps rather
+than on direct measurement at that scale. Out of scope are Proof-of-Work
 as a subject of comparison (it appears only as the methodological precedent
 [17]), Layer-2 protocols, deployment on testnet or mainnet, economic and
 incentive design, and the performance of cryptographic primitives.
@@ -148,7 +150,9 @@ synthesizes it.
 - **RQ5.** Does a consistent Pareto frontier of the performance–security
   tradeoff exist across the four families, and does any family dominate
   across all operating regimes? This is the comparative synthesis and the
-  headline contribution.
+  headline contribution. With the DAG-based family deferred, the frontier
+  reported here is traced over the three implemented families, and the
+  high-throughput corner the DAG family would occupy is left pending.
 
 Each question is paired with a defined subset of the metric schema
 [[wiki/concepts/evaluation-metrics]] and a defined independent variable in
@@ -164,11 +168,15 @@ The thesis makes four contributions
    shared metric schema and a pluggable protocol interface.
 2. **Implementations.** Simplified reference implementations of one protocol
    from each of the four families within a single harness, so that
-   reproducible like-for-like comparison is possible.
+   reproducible like-for-like comparison is possible. Three of the four are
+   implemented at this stage — the PBFT-style, PoS-finality, and
+   Avalanche-style representatives; the DAG-based representative, Narwhal+Tusk,
+   is scaffolded but its implementation is deferred.
 3. **Dataset and analysis.** An experimental dataset and comparative
    analysis quantifying the performance–security tradeoff across the four
    families under matched conditions, answering RQ1–RQ4 and underwriting the
-   RQ5 synthesis.
+   RQ5 synthesis. While the DAG-based family remains deferred, this synthesis
+   is realized over the three implemented families.
 4. **Methodological framing.** The simulation-based, metrics-instrumented
    approach of Gervais *et al.* [17], extended from Proof-of-Work to the
    four BFT families on a single harness with matched assumptions.
