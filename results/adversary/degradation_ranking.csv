@@ -1,0 +1,27 @@
+family,metric,invariant,protocol,n,f_max_hold,f_max_break,f_max_count,f_max_stake,theoretical_bound,safety_broken,note
+delay,liveness,termination (success_rate>=1),pbft,10,0.3,,0.3,nan,,False,
+delay,liveness,termination (success_rate>=1),pbft,25,0.3,,0.3,nan,,False,
+delay,liveness,termination (success_rate>=1),casper-ffg,10,0.0,0.1,nan,0.0,,False,
+delay,liveness,termination (success_rate>=1),casper-ffg,25,0.0,0.1,nan,0.0,,False,
+delay,liveness,termination (success_rate>=1),snowman,10,0.3,,0.3,nan,,False,
+delay,liveness,termination (success_rate>=1),snowman,25,0.3,,0.3,nan,,False,
+offline,liveness,termination (success_rate>=1),pbft,10,0.33,0.4,0.33,nan,,False,
+offline,liveness,termination (success_rate>=1),pbft,25,0.33,0.4,0.33,nan,,False,
+offline,liveness,termination (success_rate>=1),casper-ffg,10,0.0,0.1,nan,0.0,,False,
+offline,liveness,termination (success_rate>=1),casper-ffg,25,0.0,0.1,nan,0.0,,False,
+offline,liveness,termination (success_rate>=1),snowman,10,0.1,0.2,0.1,nan,,False,
+offline,liveness,termination (success_rate>=1),snowman,25,0.2,0.33,0.2,nan,,False,
+equivocate,liveness,termination (success_rate>=1),pbft,10,0.0,0.1,0.0,nan,,True,PBFT recovers liveness above 1/3 via an UNSAFE fork (success_rate back to 1.0 at phi>=0.40); see the paired safety row
+equivocate,liveness,termination (success_rate>=1),pbft,25,0.0,0.1,0.0,nan,,True,PBFT recovers liveness above 1/3 via an UNSAFE fork (success_rate back to 1.0 at phi>=0.40); see the paired safety row
+equivocate,liveness,termination (success_rate>=1),casper-ffg,10,0.5,,nan,0.5,,False,
+equivocate,liveness,termination (success_rate>=1),casper-ffg,25,0.5,,nan,0.5,,False,
+equivocate,liveness,termination (success_rate>=1),snowman,10,0.33,,0.33,nan,,False,
+equivocate,liveness,termination (success_rate>=1),snowman,25,0.33,,0.33,nan,,False,
+equivocate,safety,"no two-honest commit conflict at same (view,seq)",pbft,10,0.33,0.4,0.33,nan,< n/3 (count),True,below 1/3: view-change rotation (safety holds); fork cliff above
+equivocate,safety,"no two-honest commit conflict at same (view,seq)",pbft,25,0.33,0.4,0.33,nan,< n/3 (count),True,below 1/3: view-change rotation (safety holds); fork cliff above
+equivocate,safety,slashable stake < 1/3 (accountable safety),casper-ffg,10,0.33,0.4,nan,0.33,< 1/3 stake,True,never forks in-model; signal is economically-possible violation crossing the 1/3 slashing threshold
+equivocate,safety,slashable stake < 1/3 (accountable safety),casper-ffg,25,0.33,0.4,nan,0.33,< 1/3 stake,True,never forks in-model; signal is economically-possible violation crossing the 1/3 slashing threshold
+equivocate,safety,empirical safety-violation rate <= (1-alpha_c/K)^beta,snowman,10,0.33,,0.33,nan,"parameter-dependent (alpha_c/K, beta)",False,no fork surface (equivocate reduces to lying-responder); see epsilon witness
+equivocate,safety,empirical safety-violation rate <= (1-alpha_c/K)^beta,snowman,25,0.33,,0.33,nan,"parameter-dependent (alpha_c/K, beta)",False,no fork surface (equivocate reduces to lying-responder); see epsilon witness
+equivocate,safety,conflicting_header_reaches_2f1,narwhal-tusk,10,nan,,nan,nan,< n/3 (count),False,"NWT unimplemented; defined in spec, measured when T38.1 lands"
+equivocate,safety,conflicting_header_reaches_2f1,narwhal-tusk,25,nan,,nan,nan,< n/3 (count),False,"NWT unimplemented; defined in spec, measured when T38.1 lands"

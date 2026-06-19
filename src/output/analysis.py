@@ -57,6 +57,25 @@ def t_critical_975(df: int) -> float:
     return 1.960  # df > 30: normal approximation is within ~1%.
 
 
+def wilson_interval(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """Two-sided Wilson score interval for a binomial proportion k/n.
+
+    Honest at the boundary: a 0-of-n or n-of-n cell yields a non-degenerate
+    interval (the normal approximation collapses to a point there). z = 1.96
+    is the two-sided 95% normal critical value. n <= 0 -> (nan, nan). Used for
+    the liveness success-rate and the Snowman empirical-epsilon upper bound
+    (ch3_methodology.md §3.5 commits Wilson for rate metrics).
+    """
+    if n <= 0:
+        return (float("nan"), float("nan"))
+    p = k / n
+    z2 = z * z
+    denom = 1.0 + z2 / n
+    center = (p + z2 / (2 * n)) / denom
+    half = (z * math.sqrt(p * (1 - p) / n + z2 / (4 * n * n))) / denom
+    return (max(0.0, center - half), min(1.0, center + half))
+
+
 @dataclass(frozen=True)
 class Agg:
     """One aggregated (protocol, n, metric) cell."""
