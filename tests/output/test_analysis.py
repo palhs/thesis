@@ -11,6 +11,7 @@ import os
 import unittest
 
 from output import analysis
+from output.analysis import wilson_interval
 
 
 def _row(protocol, run_id, n, seed, **metrics):
@@ -33,6 +34,31 @@ class TestTCritical(unittest.TestCase):
 
     def test_nonpositive_df_is_nan(self):
         self.assertTrue(math.isnan(analysis.t_critical_975(0)))
+
+
+class TestWilson(unittest.TestCase):
+    def test_zero_of_twenty_upper_bound(self):
+        lo, hi = wilson_interval(0, 20)
+        self.assertEqual(lo, 0.0)
+        self.assertAlmostEqual(hi, 0.161, places=3)   # honest boundary (~0.16)
+
+    def test_zero_of_thirty_upper_bound(self):
+        lo, hi = wilson_interval(0, 30)
+        self.assertAlmostEqual(hi, 0.114, places=3)   # matches ch3 §3.5 "≈0.11"
+
+    def test_full_success_lower_bound(self):
+        lo, hi = wilson_interval(20, 20)
+        self.assertEqual(hi, 1.0)
+        self.assertAlmostEqual(lo, 0.839, places=3)
+
+    def test_half(self):
+        lo, hi = wilson_interval(10, 20)
+        self.assertLess(lo, 0.5)
+        self.assertGreater(hi, 0.5)
+
+    def test_empty_is_nan(self):
+        lo, hi = wilson_interval(0, 0)
+        self.assertTrue(math.isnan(lo) and math.isnan(hi))
 
 
 class TestAggregate(unittest.TestCase):

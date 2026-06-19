@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 82 · In Review: 0 · In Progress: 0 · Not Started: 16 · Blocked: 2
+- Completed: 83 · In Review: 0 · In Progress: 0 · Not Started: 15 · Blocked: 2
 
 ## Legend
 
@@ -251,7 +251,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ 10–33% offline; success/failure boundary identified · _Artifact:_ experiment page
 - `[x]` **T53** `H` Engineer — Simulate equivocating nodes
   _Outcome:_ Conflicting votes across the four-protocol scope; per-protocol safety invariant measured (see T54); intensity sweep includes above-threshold f > 1/3 runs (at least PBFT and Casper FFG) to expose the safety cliff that the catalog documents (`wiki/concepts/adversary-model.md` §5, §7.1, §7.3) · _Artifact:_ experiment page
-- `[ ]` **T54** `H` Engineer — Measure liveness and safety degradation
+- `[x]` **T54** `H` Engineer — Measure liveness and safety degradation
   _Outcome:_ Liveness = % rounds reaching consensus. Safety = four per-protocol invariants from `wiki/concepts/adversary-model.md` "Invariant checked" columns — Casper FFG: slashable stake fraction (§7.3); Snowman: empirical violation rate vs. bound `(1−α_c/K)^β` (§7.1); PBFT: view-change rate, since equivocation converts to leader rotation (§5); Narwhal+Tusk: whether a conflicting header reaches `2f+1` signatures (§5). A universal fork/inconsistency count is insufficient — PBFT and Narwhal+Tusk cannot fork below the 1/3 threshold, so a fork counter reads zero and measures nothing. · _Artifact:_ metrics spec + plots
 - `[ ]` **T55** `H` Engineer — Produce adversarial comparison tables
   _Outcome:_ Summary: algorithm × adversary × metric; robustness ranking · _Artifact:_ `results/adversarial/` · _KPI checkpoint_
