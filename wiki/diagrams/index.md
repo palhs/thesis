@@ -163,9 +163,20 @@ PUPPETEER_SKIP_DOWNLOAD=true \
   -c mermaid-config.json \
   -i wiki/diagrams/<group>/<slug>.md \
   -o wiki/diagrams/<group>/<slug>.pdf \
-  -b transparent -t neutral
+  -b transparent -t neutral --pdfFit
 mv wiki/diagrams/<group>/<slug>-1.pdf wiki/diagrams/<group>/<slug>.pdf
 ```
+
+`--pdfFit` is mandatory: without it mmdc emits a fixed US-Letter page
+(`612x792`) regardless of the diagram's size, baking whitespace around the
+chart (which shows up as an oversized gap above the figure caption in
+LaTeX) and clipping or blanking diagrams larger than the page. With
+`--pdfFit` the PDF page is the chart's own bounding box, so
+`\includegraphics` scales it cleanly. Tall diagrams (e.g. the protocol
+sequence diagrams) are then bounded in the draft with
+`height=0.9\textheight,keepaspectratio` so they fit the page; landscape
+diagrams (e.g. the runtime-architecture flowchart) take a plain
+`width=\linewidth` and sit inline.
 
 `puppeteer-config.json` (repo root) points `executablePath` at the
 system Chrome to skip the bundled Chromium download.
