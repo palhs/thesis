@@ -1,0 +1,91 @@
+adversary,protocol,n,metric,value,ci_lo,ci_hi,accounting,unit,note
+delay-emission,pbft,10,liveness_f_max_hold,0.3,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+delay-emission,pbft,10,liveness_f_max_break,,nan,nan,count,fraction,first phi with any liveness loss
+delay-emission,pbft,10,worst_finality_delay_ratio,1.0,nan,nan,,ratio,max cell-mean time-to-finality vs the f=0 control
+delay-emission,pbft,10,min_success_rate,1.0,0.9630051925239981,0.9999999999999999,,rate,worst pooled liveness over phi>0
+delay-emission,pbft,25,liveness_f_max_hold,0.3,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+delay-emission,pbft,25,liveness_f_max_break,,nan,nan,count,fraction,first phi with any liveness loss
+delay-emission,pbft,25,worst_finality_delay_ratio,1.0,nan,nan,,ratio,max cell-mean time-to-finality vs the f=0 control
+delay-emission,pbft,25,min_success_rate,1.0,0.9630051925239981,0.9999999999999999,,rate,worst pooled liveness over phi>0
+delay-emission,casper-ffg,10,liveness_f_max_hold,0.0,nan,nan,stake,fraction,largest phi with full liveness (success_rate>=1)
+delay-emission,casper-ffg,10,liveness_f_max_break,0.1,nan,nan,stake,fraction,first phi with any liveness loss
+delay-emission,casper-ffg,10,worst_finality_delay_ratio,1.0,nan,nan,,ratio,max cell-mean time-to-finality vs the f=0 control
+delay-emission,casper-ffg,10,min_success_rate,0.6,0.5020007846184025,0.6906002538863971,,rate,worst pooled liveness over phi>0
+delay-emission,casper-ffg,25,liveness_f_max_hold,0.0,nan,nan,stake,fraction,largest phi with full liveness (success_rate>=1)
+delay-emission,casper-ffg,25,liveness_f_max_break,0.1,nan,nan,stake,fraction,first phi with any liveness loss
+delay-emission,casper-ffg,25,worst_finality_delay_ratio,1.0,nan,nan,,ratio,max cell-mean time-to-finality vs the f=0 control
+delay-emission,casper-ffg,25,min_success_rate,0.65,0.5525426042919797,0.7363589534652197,,rate,worst pooled liveness over phi>0
+delay-emission,snowman,10,liveness_f_max_hold,0.3,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+delay-emission,snowman,10,liveness_f_max_break,,nan,nan,count,fraction,first phi with any liveness loss
+delay-emission,snowman,10,worst_finality_delay_ratio,61.946564,nan,nan,,ratio,max cell-mean time-to-finality vs the f=0 control
+delay-emission,snowman,10,min_success_rate,1.0,0.9630051925239981,0.9999999999999999,,rate,worst pooled liveness over phi>0
+delay-emission,snowman,25,liveness_f_max_hold,0.3,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+delay-emission,snowman,25,liveness_f_max_break,,nan,nan,count,fraction,first phi with any liveness loss
+delay-emission,snowman,25,worst_finality_delay_ratio,49.1057246,nan,nan,,ratio,max cell-mean time-to-finality vs the f=0 control
+delay-emission,snowman,25,min_success_rate,1.0,0.9630051925239981,0.9999999999999999,,rate,worst pooled liveness over phi>0
+delay-emission,narwhal-tusk,10,liveness_f_max_hold,,nan,nan,count,fraction,NWT unimplemented; deferred to T38.1 (3 generic-capability pairs)
+delay-emission,narwhal-tusk,25,liveness_f_max_hold,,nan,nan,count,fraction,NWT unimplemented; deferred to T38.1 (3 generic-capability pairs)
+withhold-participation,pbft,10,liveness_f_max_hold,0.33,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+withhold-participation,pbft,10,liveness_f_max_break,0.4,nan,nan,count,fraction,first phi with any liveness loss
+withhold-participation,pbft,10,liveness_survival_phi,0.33,nan,nan,count,fraction,deepest phi still finalizing at all (success_rate>0)
+withhold-participation,pbft,10,worst_surviving_throughput_ratio,1.0,nan,nan,,ratio,lowest throughput vs control among surviving cells
+withhold-participation,pbft,25,liveness_f_max_hold,0.33,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+withhold-participation,pbft,25,liveness_f_max_break,0.4,nan,nan,count,fraction,first phi with any liveness loss
+withhold-participation,pbft,25,liveness_survival_phi,0.33,nan,nan,count,fraction,deepest phi still finalizing at all (success_rate>0)
+withhold-participation,pbft,25,worst_surviving_throughput_ratio,1.0,nan,nan,,ratio,lowest throughput vs control among surviving cells
+withhold-participation,casper-ffg,10,liveness_f_max_hold,0.0,nan,nan,stake,fraction,largest phi with full liveness (success_rate>=1)
+withhold-participation,casper-ffg,10,liveness_f_max_break,0.1,nan,nan,stake,fraction,first phi with any liveness loss
+withhold-participation,casper-ffg,10,liveness_survival_phi,0.33,nan,nan,stake,fraction,deepest phi still finalizing at all (success_rate>0)
+withhold-participation,casper-ffg,10,worst_surviving_throughput_ratio,0.49391714999999997,nan,nan,,ratio,lowest throughput vs control among surviving cells
+withhold-participation,casper-ffg,25,liveness_f_max_hold,0.0,nan,nan,stake,fraction,largest phi with full liveness (success_rate>=1)
+withhold-participation,casper-ffg,25,liveness_f_max_break,0.1,nan,nan,stake,fraction,first phi with any liveness loss
+withhold-participation,casper-ffg,25,liveness_survival_phi,0.33,nan,nan,stake,fraction,deepest phi still finalizing at all (success_rate>0)
+withhold-participation,casper-ffg,25,worst_surviving_throughput_ratio,0.46557495,nan,nan,,ratio,lowest throughput vs control among surviving cells
+withhold-participation,snowman,10,liveness_f_max_hold,0.1,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+withhold-participation,snowman,10,liveness_f_max_break,0.2,nan,nan,count,fraction,first phi with any liveness loss
+withhold-participation,snowman,10,liveness_survival_phi,0.1,nan,nan,count,fraction,deepest phi still finalizing at all (success_rate>0)
+withhold-participation,snowman,10,worst_surviving_throughput_ratio,0.815436,nan,nan,,ratio,lowest throughput vs control among surviving cells
+withhold-participation,snowman,25,liveness_f_max_hold,0.2,nan,nan,count,fraction,largest phi with full liveness (success_rate>=1)
+withhold-participation,snowman,25,liveness_f_max_break,0.33,nan,nan,count,fraction,first phi with any liveness loss
+withhold-participation,snowman,25,liveness_survival_phi,0.2,nan,nan,count,fraction,deepest phi still finalizing at all (success_rate>0)
+withhold-participation,snowman,25,worst_surviving_throughput_ratio,0.00397315,nan,nan,,ratio,lowest throughput vs control among surviving cells
+withhold-participation,narwhal-tusk,10,liveness_survival_phi,,nan,nan,count,fraction,NWT unimplemented; deferred to T38.1 (3 generic-capability pairs)
+withhold-participation,narwhal-tusk,25,liveness_survival_phi,,nan,nan,count,fraction,NWT unimplemented; deferred to T38.1 (3 generic-capability pairs)
+equivocate-vote,pbft,10,safety_f_max_hold,0.33,nan,nan,count,fraction,"no two-honest commit conflict at same (view,seq)"
+equivocate-vote,pbft,10,safety_f_max_break,0.4,nan,nan,count,fraction,first phi the safety invariant breaks
+equivocate-vote,pbft,10,liveness_f_max_hold,0.0,nan,nan,count,fraction,PBFT recovers liveness above 1/3 via an UNSAFE fork (success_rate back to 1.0 at phi>=0.40); see the paired safety row
+equivocate-vote,pbft,10,safety_broken,1.0,nan,nan,,bool,an unsafe-fork / >=1/3-slashable phi region exists
+equivocate-vote,pbft,10,conflicting_instances_max,229.0,nan,nan,,count,peak two-honest conflicting commits (PBFT fork cliff)
+equivocate-vote,pbft,10,max_slashable_stake_max,0.0,nan,nan,,fraction,peak economically-slashable stake (FFG accountable safety)
+equivocate-vote,pbft,25,safety_f_max_hold,0.33,nan,nan,count,fraction,"no two-honest commit conflict at same (view,seq)"
+equivocate-vote,pbft,25,safety_f_max_break,0.4,nan,nan,count,fraction,first phi the safety invariant breaks
+equivocate-vote,pbft,25,liveness_f_max_hold,0.0,nan,nan,count,fraction,PBFT recovers liveness above 1/3 via an UNSAFE fork (success_rate back to 1.0 at phi>=0.40); see the paired safety row
+equivocate-vote,pbft,25,safety_broken,1.0,nan,nan,,bool,an unsafe-fork / >=1/3-slashable phi region exists
+equivocate-vote,pbft,25,conflicting_instances_max,229.0,nan,nan,,count,peak two-honest conflicting commits (PBFT fork cliff)
+equivocate-vote,pbft,25,max_slashable_stake_max,0.0,nan,nan,,fraction,peak economically-slashable stake (FFG accountable safety)
+equivocate-vote,casper-ffg,10,safety_f_max_hold,0.33,nan,nan,stake,fraction,slashable stake < 1/3 (accountable safety)
+equivocate-vote,casper-ffg,10,safety_f_max_break,0.4,nan,nan,stake,fraction,first phi the safety invariant breaks
+equivocate-vote,casper-ffg,10,liveness_f_max_hold,0.5,nan,nan,stake,fraction,paired liveness (report jointly with safety)
+equivocate-vote,casper-ffg,10,safety_broken,1.0,nan,nan,,bool,an unsafe-fork / >=1/3-slashable phi region exists
+equivocate-vote,casper-ffg,10,conflicting_instances_max,0.0,nan,nan,,count,peak two-honest conflicting commits (PBFT fork cliff)
+equivocate-vote,casper-ffg,10,max_slashable_stake_max,0.5,nan,nan,,fraction,peak economically-slashable stake (FFG accountable safety)
+equivocate-vote,casper-ffg,25,safety_f_max_hold,0.33,nan,nan,stake,fraction,slashable stake < 1/3 (accountable safety)
+equivocate-vote,casper-ffg,25,safety_f_max_break,0.4,nan,nan,stake,fraction,first phi the safety invariant breaks
+equivocate-vote,casper-ffg,25,liveness_f_max_hold,0.5,nan,nan,stake,fraction,paired liveness (report jointly with safety)
+equivocate-vote,casper-ffg,25,safety_broken,1.0,nan,nan,,bool,an unsafe-fork / >=1/3-slashable phi region exists
+equivocate-vote,casper-ffg,25,conflicting_instances_max,0.0,nan,nan,,count,peak two-honest conflicting commits (PBFT fork cliff)
+equivocate-vote,casper-ffg,25,max_slashable_stake_max,0.48,nan,nan,,fraction,peak economically-slashable stake (FFG accountable safety)
+equivocate-vote,snowman,10,safety_f_max_hold,0.33,nan,nan,count,fraction,empirical safety-violation rate <= (1-alpha_c/K)^beta
+equivocate-vote,snowman,10,safety_f_max_break,,nan,nan,count,fraction,first phi the safety invariant breaks
+equivocate-vote,snowman,10,liveness_f_max_hold,0.33,nan,nan,count,fraction,paired liveness (report jointly with safety)
+equivocate-vote,snowman,10,safety_broken,0.0,nan,nan,,bool,an unsafe-fork / >=1/3-slashable phi region exists
+equivocate-vote,snowman,10,conflicting_instances_max,0.0,nan,nan,,count,peak two-honest conflicting commits (PBFT fork cliff)
+equivocate-vote,snowman,10,max_slashable_stake_max,0.0,nan,nan,,fraction,peak economically-slashable stake (FFG accountable safety)
+equivocate-vote,snowman,25,safety_f_max_hold,0.33,nan,nan,count,fraction,empirical safety-violation rate <= (1-alpha_c/K)^beta
+equivocate-vote,snowman,25,safety_f_max_break,,nan,nan,count,fraction,first phi the safety invariant breaks
+equivocate-vote,snowman,25,liveness_f_max_hold,0.33,nan,nan,count,fraction,paired liveness (report jointly with safety)
+equivocate-vote,snowman,25,safety_broken,0.0,nan,nan,,bool,an unsafe-fork / >=1/3-slashable phi region exists
+equivocate-vote,snowman,25,conflicting_instances_max,0.0,nan,nan,,count,peak two-honest conflicting commits (PBFT fork cliff)
+equivocate-vote,snowman,25,max_slashable_stake_max,0.0,nan,nan,,fraction,peak economically-slashable stake (FFG accountable safety)
+equivocate-vote,narwhal-tusk,10,safety_f_max_hold,,nan,nan,count,fraction,NWT unimplemented; deferred to T38.1 (3 generic-capability pairs)
+equivocate-vote,narwhal-tusk,25,safety_f_max_hold,,nan,nan,count,fraction,NWT unimplemented; deferred to T38.1 (3 generic-capability pairs)
