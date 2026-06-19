@@ -19,16 +19,16 @@
 ## Diagram
 
 ```mermaid
-flowchart TD
+flowchart LR
     IN["<b>INPUT — one experiment-matrix cell + seed</b><br/>protocol · n = 4 to 25 validators<br/>network conditions: delay, loss, partitions (configure the NETWORK below)<br/>adversary (behaviour + strength) · workload (transactions) · seed"]
 
     subgraph HARNESS["THE HARNESS — identical for every protocol; only the protocol logic is swapped"]
         direction TB
-        HB["<b>BUILDER</b> — assembles the system and loads the workload"]
-        SCH["<b>SCHEDULER</b> — the single run loop and virtual clock<br/><i>one turn of this loop is the event-loop figure</i>"]
-        SLOT["<b>PROTOCOL LOGIC</b> — the only swappable part<br/>a state machine for one of the four protocols"]
-        NET["<b>NETWORK</b> — delivers messages with delay, loss and partitions<br/>(models timing only — no CPU or signature cost)"]
-        LOG["<b>LOGGER</b> — records what happened: decided, halted, messages"]
+        HB["<b>BUILDER</b><br/>assembles the system<br/>and loads the workload"]
+        SCH["<b>SCHEDULER</b><br/>the single run loop<br/>and virtual clock<br/><i>one turn = the event-loop figure</i>"]
+        SLOT["<b>PROTOCOL LOGIC</b><br/>the only swappable part<br/>a state machine for one<br/>of the four protocols"]
+        NET["<b>NETWORK</b><br/>delivers messages with<br/>delay, loss and partitions<br/>(timing only — no CPU<br/>or signature cost)"]
+        LOG["<b>LOGGER</b><br/>records what happened:<br/>decided, halted, messages"]
         HB --- SCH
         SCH --- SLOT
         SLOT --- NET
@@ -126,4 +126,15 @@ T36.3.
 
 ## Revisions
 
-None.
+- **2026-06-19 — relaid-out for LaTeX (layout only, no content change).**
+  The figure was a top-down column (`flowchart TD`, harness `direction TB`)
+  with a ~1:3 aspect ratio (656×2028), which forced a dedicated full-page
+  float (`\begin{figure}[p]` bounded by `height=0.92\textheight`) and left
+  whitespace around it. Reflowed to a left-to-right macro pipeline
+  (`flowchart LR`) with the harness components as an internal top-down spine
+  (`direction TB`), giving a landscape ~2.4:1 render (PDF MediaBox 600×254).
+  It now takes a plain `width=\linewidth` and sits inline. The component
+  labels were rewrapped with `<br/>` to keep box widths bounded; node set,
+  edges, classes, and wording are otherwise unchanged. `chapter3.tex`
+  switched the float from a dedicated page (`[p]`, `height=0.92\textheight`)
+  to inline placement (`[tbp]`, plain `width=\linewidth`).
