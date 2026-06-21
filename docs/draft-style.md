@@ -5,6 +5,13 @@ prose only. The wiki keeps its own technical/synthesis register; chat follows
 `docs/chat-style.md`; code and specs follow theirs. The Writer role in
 `docs/roles.md` writes every chapter against this file.
 
+This file fixes the register *inside* a chapter. The through-line *between*
+chapters — the questions each chapter inherits, the RQ and forward-reference
+promises it must discharge, the Chapter-3 measurement conventions it must not
+break, and the evaluation rubric plus the `/humanizer` gate — is governed by
+`docs/draft-narrative.md`, which every chapter after Chapter 3 is written and
+reviewed against.
+
 ## Audience
 
 The examination committee — the thesis advisor and examiners. Assume fluency
