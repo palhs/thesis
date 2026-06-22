@@ -186,7 +186,5 @@ that motivate a unified harness. Chapter 3 describes the methodology: the
 system model, the four protocol implementations, the metric schema, and the
 experimental design. Chapter 4 presents the baseline, network-delay, and
 adversarial results that answer RQ1–RQ4. Chapter 5 presents the
-cross-family Pareto synthesis that answers RQ5 and demonstrates the
-simulator's utility through a targeted enhancement — an adaptive timeout —
-measured against the baseline. Chapter 6 concludes with the findings, their
-limitations, and directions for further work.
+cross-family Pareto synthesis that answers RQ5. Chapter 6 concludes with
+the findings, their limitations, and directions for further work.

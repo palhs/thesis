@@ -57,5 +57,9 @@ recorded as a kickoff specification in the project repository.
 `TODO(W12)` — additional directions to be consolidated at submission, including
 the completion of the Narwhal+Tusk implementation (reserved as T38.1), a
 saturation-throughput capacity model that would replace the flat-goodput
-baseline with a measured ceiling [[wiki/concepts/output-format]], and the
-adaptive-timeout enhancement evaluated in Chapter 5.
+baseline with a measured ceiling [[wiki/concepts/output-format]], and an
+adaptive-timeout enhancement (exponential backoff with jitter, calibrated
+to observed round-trip time) that the simulator is positioned to evaluate as
+a further direction; a meaningful baseline-versus-enhanced comparison would
+need a delay or post-GST recovery regime that stresses timeout calibration
+directly, rather than the steady-state sweeps of Chapter 4.

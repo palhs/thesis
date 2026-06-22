@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 86 · In Review: 0 · In Progress: 0 · Not Started: 12 · Blocked: 2
+- Completed: 86 · In Review: 0 · In Progress: 0 · Not Started: 10 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -264,12 +264,15 @@ specs); the `\include{biography}` line has been removed from the template.
 
 - `[ ]` **T57** `M` Engineer — Implement adaptive timeout (exp backoff + jitter)
   _Outcome:_ `base × 2^(failures) + jitter`, calibrated to observed RTT · _Artifact:_ `src/common/timeout.py` + wiki page
+  **DESCOPED 2026-06-22 (human decision):** not implemented; moved to Ch6 §6.3 further-work (see `drafts/ch6_conclusion.md` §6.3.2). Rationale: (i) **not load-bearing** — absent from the objectives, contributions, RQ1–RQ5, and success criteria ([[concepts/problem-statement]], [[concepts/research-questions]]); M priority; the W7 gate called T57–T58 absorbable schedule slack ([[concepts/week7-decision]]). (ii) **The hard part already exists** — the `base × 2^failures` backoff is implemented for PBFT view-change/escalation timers (`vc_delay × 2^view`, `src/pbft/node.py`), so T57 would add only the jitter term, RTT-calibration, and a shared `src/common/timeout.py`; Casper FFG has no failure-recovery timeout to tune. (iii) **High null-result risk** — every Ch4 sweep set `vc_delay` generously so view-change never fired spuriously (`view_change_count ≈ 0`); PBFT is the *most* robust protocol under delay/loss precisely because its existing timeout-recovery works; Snowman's stall is structural `α_c` starvation that backoff cannot cure (and its missing poll timeout was already given a *fixed* 15 s remedy in T52). A non-null T57/T58 would first need a **new** experiment that actually stresses timeout calibration (tight `vc_delay` + high-jitter delay; the never-run `{2,3,5,10}·E[round_latency]` sensitivity sweep in [[concepts/metric-reconciliation]]; or post-GST recovery) — a roadmap change requiring human/advisor approval before reinstatement.
 - `[ ]` **T58** `M` Engineer — Compare baseline vs enhanced
   _Outcome:_ Side-by-side latency + success rate under delay/adversary · _Artifact:_ experiment page + plots
+  **DESCOPED 2026-06-22 (human decision):** depends on T57 (descoped); moved to Ch6 §6.3 further-work alongside it.
 - `[ ]` **T59** `H` Writer — Summarize key findings across experiments
   _Outcome:_ Top 5–10 findings with evidence and RQ mapping · _Artifact:_ `wiki/concepts/key-findings.md`
 - `[ ]` **T60** `H` Writer — Write Chapter 5 (Enhancement) and Chapter 6 (Conclusion)
   _Outcome:_ Ch5 3–4 pages; Ch6 2–3 pages summary + future work · _Artifact:_ `drafts/ch5_enhancement.md`, `drafts/ch6_conclusion.md`
+  _Note (2026-06-22):_ T57/T58 descoped — Ch5 is now the **RQ5 cross-family Pareto synthesis only** (no adaptive-timeout enhancement section); the enhancement lives in Ch6 §6.3 further-work. Adjust the Ch5 scope/title (the `ch5_enhancement.md` filename is now a misnomer — rename or keep at the picker's discretion) and Ch1's roadmap already reflects this.
 
 ## Week 12 — Polish & defense
 
