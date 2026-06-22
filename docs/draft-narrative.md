@@ -60,15 +60,15 @@ the independent variable named in the question.
 | RQ | Question (as written, §1.5) | Independent variable | Answered where | Status |
 |:--|:--|:--|:--|:--|
 | RQ1 | commit-latency scaling as network-delay variance rises nominal→heavy-tailed | network timeline (Family B) | §4.3.1 | **closed** — stated as the delay/time-to-finality result |
-| RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **at risk** — evidence present but never labeled an RQ2 answer; needs an explicit closure sentence on the throughput axis |
+| RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
 | RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2.4 | **closed** — "answers RQ3" stated |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4 |
 | RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | Ch5 | **open** — owed by Ch5; foreshadowed by the no-dominance result of §4.4.4 and the latency–liveness trade of §4.3.4 |
 
 A Writer touching a results or synthesis chapter updates this table and satisfies
-every row it owns. RQ2 is the live trap: the throughput-degradation evidence
-exists but is not announced as the RQ2 answer — the next Ch4 pass must add that
-sentence, naming throughput (not success rate) as the measured quantity.
+every row it owns. RQ2 was the live trap and is now closed: the §4.4 pass added
+the explicit closure sentence, naming throughput (not success rate) as the
+measured quantity. **RQ5 is the remaining open promise, owed by Ch5.**
 
 ---
 
@@ -176,10 +176,10 @@ wiki page that authorizes the deviation.
 ## 6. Inherited style/discipline gates (from draft-style.md — the ones most missed)
 
 - **No project-internal task IDs** in prose, tables, or captions. Name the
-  *work* or the *mechanism*, never the ticket. *(Known live debt: `T38.1` and
-  `T51` leak into `ch4_results.md` and `ch6_conclusion.md` — the next Writer pass
-  on those chapters must strip them; see `draft-style.md` for the
-  ticket→mechanism rewrite pattern.)*
+  *work* or the *mechanism*, never the ticket. *(Status 2026-06-22: the
+  `T38.1`/`T51` leaks have been stripped from `ch4_results.md`; `T38.1` still
+  leaks into `ch6_conclusion.md` §6.3.2 — the next Writer pass on Ch6 must strip
+  it; see `draft-style.md` for the ticket→mechanism rewrite pattern.)*
 - Every claim cites a wiki page inline as `[[wiki/...]]`; missing external
   citations are `TODO(cite)`; no invented citations.
 - **No fabricated statistics.** Every number in prose, a table, or a caption —
@@ -315,11 +315,12 @@ writes the prose stays clean and the answer stays sharp.
 
 ## 10. Per-chapter cheat-sheet (what each remaining chapter inherits and owes)
 
-- **Ch4 — Results (in progress).** Owns RQ1 (§4.3.1 ✓), RQ3 (§4.2.4 ✓), RQ4
-  (§4.4 ✓), **and RQ2 — add the explicit closure on the throughput axis** (the
-  ≈ 1−φ decay of §4.4.2 is the evidence). Honor every §5 convention; strip the
-  `T38.1`/`T51` task-ID leaks; consider a §1.2 hook callback in the §4.4.4
-  synthesis; hand all caveats to Ch6.
+- **Ch4 — Results (narrative-layer debts discharged 2026-06-22).** Owns RQ1
+  (§4.3.1 ✓), RQ3 (§4.2.4 ✓), RQ4 (§4.4 ✓), and RQ2 (§4.4 ✓ — explicit
+  throughput-axis closure added; the ≈ 1−φ decay of §4.4.2 is the evidence). §5
+  conventions honored with declared deviations; `T38.1`/`T51` task-ID leaks
+  stripped; §1.2 hook callback present (Ethereum May-2023 finality stall). All
+  caveats handed to Ch6. Remaining cross-chapter work lives in Ch5/Ch6 below.
 - **Ch5 — Synthesis (to write).** Owns RQ5: trace the Pareto frontier over the
   three implemented families, answer "does any family dominate" (discharge the
   deferrals from §4.3.4 and §4.4.4 — the answer the data points to is *no*), and
