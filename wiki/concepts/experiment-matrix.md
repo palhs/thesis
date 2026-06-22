@@ -66,8 +66,8 @@ flood-vote-with-counter there); `n = 7` is included but margin-flagged.
 The "timeouts" axis named in the T19 task outcome is **not** re-derived
 here. [[concepts/metric-reconciliation]] § Calibration defaults already
 pins, before any baseline run, the PBFT view-change timeout
-(`3 · E[round_latency]`), Casper FFG `slots_per_epoch` (4) and
-`slot_duration` (100 ms), the Snowman `(K, α_p, α_c)` rescaling rule and
+(`3 · E[round_latency]`), Casper FFG `slots_per_epoch` (2) and
+`slot_duration` (1 s), the Snowman `(K, α_p, α_c)` rescaling rule and
 `β` (15), and the Narwhal+Tusk anchor period `r` (2). The experiment
 matrix uses these as the **baseline configuration** and consumes the
 per-RQ sensitivity sweeps from the same page's § Sensitivity-sweep
@@ -102,7 +102,7 @@ answered in Chapter 5 (T59–T60).
 | :-- | :-- | :-- | :-- | :-- |
 | RQ1 | B | network delay distribution: `constant`, `uniform`, `exponential`, `heavy_tail` | none — the axis *is* the sweep ([[concepts/metric-reconciliation]] § Sensitivity-sweep policy) | T46–T50 |
 | RQ2 | C | Byzantine fraction `0 → f_max` | inherits RQ4 | T51–T55 |
-| RQ3 | A | `n ∈ {4,7,10,16,25}` | FFG `slots_per_epoch ∈ {4,8,16,32}`; Narwhal `r ∈ {2,4,8}` | T41–T44 |
+| RQ3 | A | `n ∈ {4,7,10,16,25}` | FFG `slots_per_epoch ∈ {2,4,8,16}`; Narwhal `r ∈ {2,4,8}` | T41–T44 |
 | RQ4 | C | adversary strategy × Byzantine fraction | Snowman `β ∈ {3,5}` (RQ4-only safety regime) | T51–T56 |
 | RQ5 | — | combined (delay, adversary, `n`, workload) | inherits RQ3 sweep data | T59–T60 |
 
@@ -117,7 +117,7 @@ baseline.
 ## 5. FFG slot-duration ↔ network coherence
 
 [[concepts/metric-reconciliation]] § Coherence constraint on FFG forbids
-pairing the Casper FFG `slot_duration = 100 ms` default with a network
+pairing the Casper FFG `slot_duration = 1 s` default with a network
 phase where `E[delay]` is not `≪ slot_duration` — operationally the
 matrix requires
 
@@ -137,7 +137,8 @@ This is the direct analogue of the Snowman `K` rescaling with `n`
 both are the only legitimate way to keep a protocol *in its own regime*
 while it is placed on a shared comparative axis. Families A and C use
 the low-delay `static-baseline` network, so FFG runs there at its
-default `slot_duration = 100 ms` and all four protocols are coherent.
+default `slot_duration = 1 s` and all four protocols are coherent
+(`E[delay] ≈ 10 ms ≤ 1 s / 4`).
 Family B sweeps delay, so each delay timeline carries an FFG
 `slot_duration` chosen by the rule above; the per-timeline pairing table
 is in [[concepts/experiment-matrix-runs]] §2.
@@ -270,7 +271,7 @@ silent overwrite.
   `W = 10 s` may move if the hold window misses steady state.
 - **FFG `slot_duration` rescaling grid** (§5,
   [[concepts/experiment-matrix-runs]] §2). Extends the
-  `{50, 100, 500} ms` sweep upward; if the heaviest timeline forces an
+  `{0.5, 1, 2} s` sweep upward; if the heaviest timeline forces an
   impractical slot, that FFG row is dropped and reported as a gap.
 
 ## 10. Sources
@@ -391,3 +392,16 @@ T51 covers the `delay-emission` capability of this design; T52/T53 add
 withhold/equivocate on the same axes. Budget restated in
 [[concepts/experiment-matrix-runs]] §Revisions. Evidence:
 [[experiments/2026-06-14_delayed-voters]].
+
+### [2026-06-22] Casper FFG slot default corrected to `1 s` / `2` (L-W10 finding H2)
+
+§3 and §5 previously named the FFG baseline default as
+`slot_duration = 100 ms`, `slots_per_epoch = 4`. The implementation and
+every run used `1 s` / `2` (FFG finality ≈ 5 s, Chapter 4 §4.2.2). The §3
+default-knob list, the §5 coherence-default value, and the RQ3
+`slots_per_epoch` sweep were corrected to the as-run config. The
+`slot_duration ≥ 4·E[delay]` rescale rule and the per-timeline rescaled
+values are unchanged. Full account on
+[[concepts/metric-reconciliation#revisions]]; mirror on
+[[concepts/experiment-matrix-runs]] §Revisions. Documentation only — no
+re-run.

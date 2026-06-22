@@ -52,21 +52,21 @@ rescales per timeline (the analogue of Snowman `K`-rescaling per `n`):
 
 | `network_phase_id` | `E[delay]` | FFG `slot_duration` | Regime |
 | :-- | :-- | :-- | :-- |
-| `static-baseline` | 10 ms | **100 ms** (calibration default) | coherent at default |
+| `static-baseline` | 10 ms | **1 000 ms** (calibration default) | coherent at default |
 | `delay-uniform` | 300 ms | **1 200 ms** | rescaled |
 | `delay-exponential` | 300 ms | **1 200 ms** | rescaled |
 | `delay-heavy-tail` | ≈ 3 s | **12 000 ms** | rescaled (≈ Ethereum production slot) |
 | `delay-heavy-tail-loss` | ≈ 3 s | **12 000 ms** | rescaled |
-| `partial-sync-gst` | post-GST ≈ 150 ms | **1 000 ms** | rescaled; keyed to the post-GST regime where FFG is expected to finalise |
+| `partial-sync-gst` | post-GST ≈ 150 ms | **1 000 ms** | at default (post-GST `E[delay]` coherent at the `1 s` default); keyed to the post-GST regime where FFG is expected to finalise |
 
 For `partial-sync-gst` the rule is applied to the *post-GST* `E[delay]`:
 the pre-GST async phase is, by the partial-synchrony contract, a regime
 where FFG is not expected to finalise, so it does not constrain the slot
-choice. These `slot_duration` values extend the
-`{50, 100, 500} ms` sensitivity sweep of
-[[concepts/metric-reconciliation]] § Calibration defaults upward; the
-"(or larger)" clause of its FFG coherence constraint authorises the
-extension.
+choice. The rescaled `slot_duration` values (`1 200 ms`, `12 000 ms`)
+extend the `{0.5, 1, 2} s` sensitivity sweep of
+[[concepts/metric-reconciliation]] § Calibration defaults upward toward
+Ethereum production scale; the `slot_duration ≥ 4·E[delay]` rescale rule
+of its FFG coherence constraint authorises the extension.
 
 ## 3. Adversary run catalog
 
@@ -248,3 +248,15 @@ To obtain these results faithfully a **Snowman query timeout was added** (withou
 it, a round sampling too many non-responders never closes) — see the Snowman spec
 Revision in [[concepts/system-design-protocols#4]]. The contradiction is also
 recorded on [[concepts/adversary-model#4]].
+
+### [2026-06-22] FFG `slot_duration` pairing-table default corrected to `1 000 ms` (L-W10 finding H2)
+
+The §2 pairing table previously listed the `static-baseline` FFG
+`slot_duration` as `100 ms` (the stale calibration default). The
+implementation and every run used `1 000 ms` (= `1 s`); the row was
+corrected, and the `partial-sync-gst` row relabelled "at default" since
+`1 000 ms` is now the default rather than a rescale. The rescaled delay
+rows (`1 200 ms` at `E[delay] = 300 ms`, `12 000 ms` at ≈ 3 s) are
+unchanged — they equal `4·E[delay]` independently of the baseline
+default. Full account on [[concepts/metric-reconciliation#revisions]].
+Documentation only — no re-run.
