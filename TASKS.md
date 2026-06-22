@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 86 · In Review: 0 · In Progress: 0 · Not Started: 10 · Blocked: 2 · Descoped: 2
+- Completed: 87 · In Review: 0 · In Progress: 0 · Not Started: 9 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -268,7 +268,7 @@ specs); the `\include{biography}` line has been removed from the template.
 - `[ ]` **T58** `M` Engineer — Compare baseline vs enhanced
   _Outcome:_ Side-by-side latency + success rate under delay/adversary · _Artifact:_ experiment page + plots
   **DESCOPED 2026-06-22 (human decision):** depends on T57 (descoped); moved to Ch6 §6.3 further-work alongside it.
-- `[ ]` **T59** `H` Writer — Summarize key findings across experiments
+- `[x]` **T59** `H` Writer — Summarize key findings across experiments
   _Outcome:_ Top 5–10 findings with evidence and RQ mapping · _Artifact:_ `wiki/concepts/key-findings.md`
 - `[ ]` **T60** `H` Writer — Write Chapter 5 (Enhancement) and Chapter 6 (Conclusion)
   _Outcome:_ Ch5 3–4 pages; Ch6 2–3 pages summary + future work · _Artifact:_ `drafts/ch5_enhancement.md`, `drafts/ch6_conclusion.md`
