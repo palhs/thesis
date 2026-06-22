@@ -2,109 +2,97 @@
 
 ## 4.1 Chapter roadmap
 
-Chapter 3 fixed the simulator, the metric schema, and the experiment matrix but
-left their purpose untested: what each protocol does once the conditions those
-metrics are built to stress — network delay and Byzantine validators — are
-applied. This chapter reports that evaluation, prescribed by the experiment
-matrix [[wiki/concepts/experiment-matrix]], and answers research
-questions RQ1–RQ4 against the metric schema fixed in §3.5. It proceeds in
-three movements that mirror the three run families. Section 4.2 reports the
-baseline scaling sweep, in which validator-set size is the only independent
-variable and the network carries no injected delay or adversary. Section 4.3
-reports the network-delay sweep, in which the network timeline is varied while
-the validator set and workload are held fixed, and Section 4.4 reports the
-adversarial sweep, in which a fraction of the honest validators is replaced by
-each of the adversarial strategies of the fault model. Three protocols are
-evaluated throughout — PBFT, Casper FFG, and Snowman — with the Narwhal+Tusk
-column reserved until that implementation lands, consistent with the chapter
-scope set in §3.6.
+Chapter 3 fixed the simulator, the metric schema, and the experiment matrix
+[[wiki/concepts/experiment-matrix]] but left their purpose untested: what each
+protocol does once the conditions those metrics stress — network delay and
+Byzantine validators — are applied. This chapter reports that evaluation and
+answers research questions RQ1–RQ4 against the metric schema of §3.5, in three
+movements mirroring the three run families. Section 4.2 reports the baseline
+scaling sweep, where validator-set size is the only independent variable and the
+network is clean; §4.3 the network-delay sweep, where the timeline varies while
+the validator set and workload hold fixed; and §4.4 the adversarial sweep, where
+a fraction of the honest validators is replaced by each strategy of the fault
+model. Three protocols are evaluated throughout — PBFT, Casper FFG, and Snowman —
+with the Narwhal+Tusk column reserved until that implementation lands, consistent
+with the chapter scope set in §3.6.
 
-The baseline serves two purposes. It establishes that each implemented
-protocol is correct on the honest path at every validator count, and it
-isolates the cost that scales with the validator set from the cost that the
-later sweeps will attribute to delay and to adversarial behavior. Because the
-baseline injects no delay and no faults, it is also the cleanest setting in
-which to confront the simulator's measured numbers with each protocol's
-published asymptotic theory.
+The baseline serves two purposes: it establishes that each protocol is correct
+on the honest path at every validator count, and it isolates the cost that
+scales with the validator set from the cost the later sweeps attribute to delay
+and adversarial behavior. Injecting no delay and no faults, it is also the
+cleanest setting in which to confront the simulator's measured numbers with each
+protocol's published asymptotic theory.
 
 ## 4.2 Baseline: scaling with validator-set size
 
 The baseline dataset sweeps validator-set size `n ∈ {4, 7, 10, 16, 25}` at
-twenty seeds per configuration, driven by a common deterministic Poisson
-transaction workload (`offered_rate = 100` tx/s, `tx_bytes = 512`,
-`conflict_rate = 0`), with common random numbers across protocols so that
-seed `k` presents the same arrival stream to every protocol
-[[wiki/experiments/2026-06-03_scaling-baseline]]. The result is 300 trials —
-fifteen scenarios of twenty seeds — aggregated to per-scenario means with
-95% confidence intervals [[wiki/experiments/2026-06-08_baseline-cis]].
-Snowman is evaluated from `n = 7` upward: at `n = 4` its parameter rescaling
-collapses to the degenerate unanimity boundary `α_c = K` and is excluded from
-the comparison by the schema [[wiki/concepts/output-format]]. Confidence
-intervals use a Student-t critical value at nineteen degrees of freedom
-rather than the Gaussian value named in §3.5; for a twenty-sample mean the
-distinction is small, and for the deterministic metrics discussed in §4.2.1
-the interval is degenerate regardless of which critical value is used.
+twenty seeds per configuration under a common deterministic Poisson workload
+(`offered_rate = 100` tx/s, `tx_bytes = 512`, `conflict_rate = 0`), with common
+random numbers so that seed `k` presents the same arrival stream to every
+protocol [[wiki/experiments/2026-06-03_scaling-baseline]]. The 300 trials —
+fifteen scenarios of twenty seeds — are aggregated to per-scenario means with
+95% confidence intervals [[wiki/experiments/2026-06-08_baseline-cis]]. Snowman
+is evaluated from `n = 7` upward: at `n = 4` its parameter rescaling collapses
+to the degenerate unanimity boundary `α_c = K` and is excluded by the schema
+[[wiki/concepts/output-format]]. The intervals use a Student-t critical value at
+nineteen degrees of freedom rather than the Gaussian value named in §3.5; for a
+twenty-sample mean the difference is small, and for the deterministic metrics of
+§4.2.1 the interval is degenerate regardless.
 
 ### 4.2.1 Statistical reliability
 
-The dominant statistical fact of the baseline is that the seed has almost no
-effect. Across the twenty seeds of every scenario, commit latency, decision
-rate, message overhead, success rate, and fork rate each show a coefficient
-of variation of zero: their 95% confidence intervals are degenerate, of zero
-width. This is not an artifact of too few seeds but a property of the model.
-At the zero-delay honest baseline a protocol's round structure and message
-counts are fixed once `(protocol, n)` is fixed; the only seeded randomness is
-the workload arrival process, and it perturbs only goodput, the rate of
-committed transaction bytes. Goodput accordingly carries the sole
-non-degenerate interval, with a coefficient of variation near 2.2% and a
-confidence half-width near 1% of its mean (Figure 4.5). Twenty seeds are
-therefore more than adequate: no larger seed set would narrow a deterministic
-metric's interval, and the one stochastic metric is already estimated to
-within a percent. The confidence-interval exercise thus does double duty — it
-confirms determinism for the structural metrics and bounds workload noise for
-goodput.
+The seed has almost no effect at the baseline: every structural metric —
+commit latency, decision rate, message overhead, success rate, and fork rate —
+has a coefficient of variation of zero across the twenty seeds, so its 95%
+confidence interval is degenerate. This is a property of the model, not too
+few seeds: at zero delay a protocol's round structure and message counts are
+fixed once `(protocol, n)` is fixed, and the only seeded randomness, the
+workload arrival process, perturbs goodput alone. Goodput therefore carries
+the sole non-degenerate interval — a coefficient of variation near 2.2% and a
+half-width near 1% of its mean (Figure 4.5) — so twenty seeds are more than
+adequate: a larger set cannot narrow a degenerate interval, and goodput is
+already bounded to within a percent of its mean.
 
-**Figure 4.5 — Goodput with 95% confidence intervals (baseline).** Goodput per
-protocol across `n ∈ {4, 7, 10, 16, 25}` with Student-t confidence intervals;
-goodput carries the sole non-degenerate interval (coefficient of variation
-≈ 2.2%), every structural metric being deterministic across seeds. Source:
-`results/baseline/plots/goodput_ci_vs_n.pdf`
+**Figure 4.5 — Goodput with 95% confidence intervals (baseline).** Per-protocol
+goodput across `n ∈ {4, 7, 10, 16, 25}`; the sole non-degenerate interval
+(coefficient of variation ≈ 2.2%), every structural metric being deterministic
+across seeds. Source: `results/baseline/plots/goodput_ci_vs_n.pdf`
 [[wiki/experiments/2026-06-08_baseline-cis]].
 
 ### 4.2.2 Latency
 
-Commit latency is flat in the validator count for all three protocols
-(Figure 4.1). PBFT and Snowman commit the first unit at approximately
-1000 ms, and Casper FFG at approximately 5000 ms; none of the three changes
-measurably as `n` grows from 4 to 25. The explanation is that, absent network
-delay, latency is set by each protocol's round and timer structure rather
-than by the size of the validator set. PBFT's figure reflects one proposal
-interval ahead of its three-phase commit; Snowman's reflects one slot driving
-its repeated-poll counter; and Casper FFG's reflects the justify-then-finalize
-rule, whose finality spans roughly two epochs at the configured one-second
-slot and two-slot epoch [[wiki/algorithms/pos#communication-complexity]]. This
-last figure must be read with one qualification that the round-bounded PBFT and
-Snowman figures do not require. Casper FFG's finality interval is
-`(2·slots_per_epoch + attest_offset)·slot_duration`, which at the configured
-two-slot epoch equals five slot durations; the absolute ≈5000 ms is therefore
-set by the chosen one-second slot rather than fixed by the protocol, and the
-cross-protocol comparison of *absolute* latency is conditional on that
-calibration choice [[wiki/concepts/metric-reconciliation#calibration-defaults]].
-What the comparison establishes intrinsically is the *qualitative* ordering, and
-that ordering is robust to the slot. A slot-duration sensitivity sweep confirms
-that Casper FFG finality is exactly linear in the slot — 2500, 5000, and
-10000 ms at slots of 0.5, 1, and 2 s — and so remains above the per-block
-protocols' ≈1000 ms commit across the realistic range, crossing it only at a
-sub-realistic slot of 0.2 s or below, far shorter than any deployed cadence
-[[wiki/experiments/2026-06-22_ffg-slot-sensitivity]]. The protocol-intrinsic
-result is thus that Casper FFG finalizes at epoch granularity, roughly two
-epochs of slot timers, which is coarser than per-block or per-poll commit at any
-realistic slot — not the specific fivefold gap, which moves with the
-calibration. The
-flatness is consistent with the theory that these protocols' latency is
-round-bounded, but it must be read as a property of the zero-delay model: the
-latency cost that grows with the validator set, and that separates the
-protocols, surfaces only under the delay sweep of §4.3.
+Commit latency is flat in the validator count for all three protocols: absent
+network delay, latency is set by each protocol's round and timer structure, not
+by the size of the validator set (Figure 4.1). PBFT and Snowman commit the first
+unit at approximately 1000 ms and Casper FFG at approximately 5000 ms, and none
+changes measurably as `n` grows from 4 to 25. PBFT's figure is one proposal
+interval ahead of its three-phase commit; Snowman's is one slot driving its
+repeated-poll counter; Casper FFG's is the justify-then-finalize rule spanning
+roughly two epochs at the configured one-second slot and two-slot epoch
+[[wiki/algorithms/pos#communication-complexity]].
+
+Only the Casper FFG figure carries a calibration qualification. Its finality
+interval is a fixed multiple of the slot — `(2·slots_per_epoch +
+attest_offset)·slot_duration`, five slot durations at the configured two-slot
+epoch — so the absolute ≈5000 ms is set by the chosen one-second slot, not
+fixed by the protocol, and the cross-protocol comparison of *absolute* latency
+is conditional on that choice
+[[wiki/concepts/metric-reconciliation#calibration-defaults]]. What is intrinsic
+is the *qualitative* ordering, and it follows from the same formula: finality is
+exactly linear in the slot — 2500, 5000, and 10000 ms at 0.5, 1, and 2 s by the
+formula — so it stays above the per-block protocols' ≈1000 ms commit for every
+slot above a 0.2 s crossover (where five slot durations equal 1000 ms), far
+below the 12 s slot a deployed finality gadget such as Ethereum runs
+[[wiki/sources/2026-04-21_buterin-gasper-2020]]. A slot-duration sensitivity
+sweep confirms the prediction
+[[wiki/experiments/2026-06-22_ffg-slot-sensitivity]]. The
+protocol-intrinsic result is therefore that Casper FFG finalizes at epoch
+granularity, coarser than per-block or per-poll commit at any realistic slot —
+not the specific fivefold gap, which moves with the calibration.
+
+This flatness is a property of the zero-delay model; the latency cost that grows
+with the validator set and separates the protocols surfaces only under the delay
+sweep of §4.3.
 
 **Figure 4.1 — Commit latency versus validator-set size (baseline).** Median
 per-validator `commit_latency_ms` for each protocol across the sweep at zero
@@ -114,24 +102,21 @@ Source: `results/baseline/plots/latency_vs_n.pdf`
 
 ### 4.2.3 Throughput and goodput
 
-The schema carries two throughput columns, and the baseline shows why the
-distinction matters. The decision rate `tps` grows linearly in `n` for every
-protocol — its per-validator value is constant at 0.95 for PBFT and Snowman
-and 0.40 for Casper FFG (Figure 4.4) — because `tps` counts decision events,
-of which each committed unit produces one per validator. It is therefore a
-decision-event rate that scales with the validator set by construction, not a
-measure of system transaction throughput. The honest throughput measure is
-goodput, the rate of committed transaction bytes, which is flat in `n`:
+The schema's two throughput columns are not interchangeable. The decision rate
+`tps` grows linearly in `n` — per-validator constant at 0.95 for PBFT and Snowman
+and 0.40 for Casper FFG (Figure 4.4) — confirming that it is a decision-event rate
+scaling with the validator set, not a measure of system throughput; the
+comparable measure is goodput (§3.5), the rate of committed transaction bytes,
+flat in `n`:
 approximately 95 tx/s for the per-block protocols PBFT and Snowman and
-approximately 80 tx/s for Casper FFG (Figure 4.2). The Casper FFG shortfall is
-a finality-tail effect: its per-epoch finality leaves the measurement window's
-last unfinalized epoch uncommitted, a fixed end-of-window loss that the
-per-block protocols do not incur. The flat goodput is the expected result on a
-latency-only model with no per-transaction cost and no queue: offered load
-below the protocol's cadence is always absorbed
-[[wiki/experiments/2026-06-03_scaling-baseline]]. It must not be read as a
-measured capacity ceiling; saturation throughput requires a capacity model and
-is deferred [[wiki/concepts/output-format]].
+approximately 80 tx/s for Casper FFG (Figure 4.2). The Casper FFG shortfall is a
+finality-tail effect — its per-epoch finality leaves the window's last
+unfinalized epoch uncommitted, a fixed end-of-window loss the per-block protocols
+avoid. Flat goodput is the expected result on a latency-only model with no
+per-transaction cost and no queue, where offered load below the protocol's
+cadence is always absorbed [[wiki/experiments/2026-06-03_scaling-baseline]]; it
+is not a measured capacity ceiling, which would require a capacity model and is
+deferred [[wiki/concepts/output-format]].
 
 **Figure 4.2 — Goodput versus validator-set size (baseline).** Committed-
 transaction rate (tx/s) for each protocol across the sweep; flat in `n`
@@ -140,9 +125,8 @@ transaction rate (tx/s) for each protocol across the sweep; flat in `n`
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
 **Figure 4.4 — Decision rate (`tps`) versus validator-set size (baseline).**
-Per-protocol `tps` (decision events per window), which grows linearly in `n` by
-construction — a decision-event rate that scales with the validator set, not
-system transaction throughput (contrast Figure 4.2). Source:
+Per-protocol `tps` (decision events per window), growing linearly in `n` by
+construction — not a system-throughput measure (contrast Figure 4.2). Source:
 `results/baseline/plots/decision_rate_vs_n.pdf`
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
@@ -150,47 +134,42 @@ system transaction throughput (contrast Figure 4.2). Source:
 
 Communication overhead is the metric on which the protocols separate most
 sharply, and it answers RQ3 [[wiki/concepts/research-questions]]. Messages per
-committed unit grow with `n` for all three protocols, but the slopes differ by
-an order of magnitude (Figure 4.3, logarithmic axis). PBFT's overhead
-approaches `2n` messages per committed unit — `O(n²)` per-instance traffic
-normalized by the `n`-scaled atomic-commit-unit denominator, not a linear
-protocol cost [[wiki/concepts/metric-reconciliation]]; Casper FFG's approaches
-`1.2n`; and Snowman's tracks `2·K·β`, where `K` is the poll sample size and `β`
-the confidence threshold. Each measured trend matches the protocol's published
-asymptotic cost: Figure 4.7 overlays the measured `total_msgs_per_acu` of each
-protocol on its predicted slope, and the markers fall on the prediction across
-the sweep, with the largest departures — near six to seven percent — confined to
-`n = 4`. PBFT's normal-case cost is `O(n²)` messages per block
-[[wiki/algorithms/pbft#communication-complexity]]; the per-unit metric reads
-`O(n)` because the atomic-commit-unit denominator counts one decision per
-validator per instance, absorbing exactly one factor of `n` from the
-all-to-all prepare and commit phases. Casper FFG's attestation phase is also
-all-to-all, and therefore `O(n²)` per epoch under the individually-signed-vote
-model that the original protocol specifies and that the simulator implements
-[[wiki/algorithms/pos#communication-complexity]]; its per-unit slope sits below
-PBFT's not because of aggregation but because a single attestation phase serves
-more committed decisions per round than PBFT's two broadcast phases. The
-production BLS aggregation that would reduce this cost to `O(n)` is not part of
-the original Casper FFG specification and is not modelled here; introducing it,
-together with the corresponding threshold-signature variant of PBFT, is
-identified as future work in §6.3. Snowman's measured overhead matches `2·K·β` to within half a
-percent across the sweep — the factor of two is the query-and-response pair of
-each poll — confirming the per-validator `O(K·β)` cost that the Avalanche
-family is built around [[wiki/algorithms/avalanche#parameters-and-communication-complexity]].
+committed unit grow with `n` for all three, but the slopes differ by an order of
+magnitude (Figure 4.3, logarithmic axis): PBFT approaches `2n`, Casper FFG
+`1.2n`, and Snowman `2·K·β`, where `K` is the poll sample size and `β` the
+confidence threshold. Each trend matches the protocol's published asymptotic
+cost — Figure 4.7 overlays the measured `total_msgs_per_acu` on the prediction,
+and the markers fall on it across the sweep, the largest departures (six to seven
+percent) confined to `n = 4`. PBFT's `2n` is its `O(n²)`-per-block cost — the all-to-all PREPARE and COMMIT
+phases [[wiki/sources/2026-04-21_castro-liskov-pbft-1999]] — normalized by the
+atomic-commit-unit denominator (§3.5), which counts one decision per validator per
+instance and so absorbs one factor of `n`, leaving a per-unit cost of `O(n)`
+[[wiki/concepts/metric-reconciliation]].
+Casper FFG's attestation phase is likewise all-to-all under the
+individually-signed-vote model that the original protocol specifies
+[[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]] and the simulator
+implements — and so `O(n²)` per epoch; its
+per-unit slope sits below PBFT's not through aggregation but because one
+attestation phase serves more committed decisions than PBFT's two broadcast
+phases. The production BLS aggregation that would cut this to `O(n)` is not in
+the original specification and is not modelled; introducing it, with the
+corresponding threshold-signature PBFT variant, is identified as future work in
+§6.3. Snowman's overhead matches `2·K·β` to within half a percent across its
+`n = 7`–`25` sweep — the factor of two being the query-and-response pair of each
+poll — confirming the per-validator `O(K·β)` cost the Avalanche family is built
+around [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]].
 
-Two readings of this result must be kept apart. Per committed unit, Snowman is
-the most expensive protocol by an order of magnitude — roughly twenty-six
-messages per validator against PBFT's two — which is the price of repeated
-subsampling at thesis scale. Yet the property for which Avalanche is celebrated
-is that its per-validator cost is independent of `n`, and that is a statement
-about per-validator work, not about the network-aggregate `total_msgs_per_acu`
-plotted here. The aggregate necessarily grows with `n` because each of `n`
-validators performs the constant-per-validator work. The independence is
-further masked over this range because the thesis rescales `K = min(20, n−1)`
-to keep the protocol meaningful at small `n`, so `K` still tracks `n` until it
-saturates at the production value of 20 near `n = 21`. The comparison is
-therefore reported as a per-unit cost contrast, with the per-validator
-scalability stated separately so the figure is not misread.
+Two readings must be kept apart. Per committed unit, Snowman is the most
+expensive protocol by an order of magnitude — roughly twenty-four messages per
+validator against PBFT's two — the price of repeated subsampling at thesis scale.
+Yet the property for which Avalanche is celebrated is that its *per-validator*
+cost is independent of `n`, a statement about per-validator work, not about the
+network-aggregate `total_msgs_per_acu` plotted here, which necessarily grows with
+`n` as each of `n` validators performs that constant work. The independence is
+further masked over this range because the thesis rescales `K = min(20, n−1)` (§3.3.3), so `K` still tracks `n`
+until it saturates at the production value of 20 near `n = 21`. The result is therefore
+reported as a per-unit cost contrast, with the per-validator scalability stated
+separately so the figure is not misread.
 
 **Figure 4.3 — Communication overhead versus validator-set size (baseline).**
 `total_msgs_per_acu` for each protocol across the sweep, logarithmic vertical
@@ -199,53 +178,47 @@ axis; the order-of-magnitude separation that answers RQ3. Source:
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
 **Figure 4.7 — Measured message overhead against predicted asymptotic cost.**
-Markers are the simulator's measured `total_msgs_per_acu`; dashed lines are the
-per-protocol predictions — PBFT `2n`, Casper FFG `1.2n`, and Snowman `2·K·β`
-with `K = min(20, n−1)`. Vertical axis logarithmic. The overlay is the visual
-form of the theory-match claim made in this section; the residual gaps at
-`n = 4` are the finite-`n` corrections discussed in
-[[wiki/experiments/2026-06-08_baseline-cis]]. Source:
+Markers are the measured `total_msgs_per_acu`; dashed lines the per-protocol
+predictions — PBFT `2n`, Casper FFG `1.2n`, and Snowman `2·K·β` with
+`K = min(20, n−1)`; logarithmic vertical axis. The residual gaps at `n = 4` are
+finite-`n` corrections [[wiki/experiments/2026-06-08_baseline-cis]]. Source:
 `results/baseline/plots/theory_vs_measured.pdf`, generated by
 `src/output/explain.py` [[wiki/experiments/2026-06-09_baseline-explainers]].
 
 ### 4.2.5 Reliability
 
-Every scenario commits successfully and none forks: success rate is 1.0 and
-fork rate is 0.0 at every validator count for all three protocols
-(Figure 4.6). This confirms honest-path correctness — each protocol terminates
-and preserves agreement when no validator deviates — but carries no
-comparative information, since the three protocols are indistinguishable on
-both columns. The reliability metrics become discriminating only once the
-adversarial sweep drives validators past their fault thresholds, where the
+Every scenario commits and none forks: success rate is 1.0 and fork rate 0.0 at
+every validator count for all three protocols (Figure 4.6). This confirms
+honest-path correctness — each protocol terminates and preserves agreement when
+no validator deviates — but carries no comparative information, the three being
+indistinguishable on both columns. These metrics become discriminating only once
+the adversarial sweep drives validators past their fault thresholds, where the
 per-protocol safety invariants of §3.5 diverge; that analysis is §4.4.
 
 **Figure 4.6 — Success and fork rate versus validator-set size (baseline).**
 Per-protocol success rate across the sweep; success rate 1.0 and fork rate 0.0
-at every `n`, confirming honest-path correctness with no comparative
-information at the baseline. Source:
+at every `n`, confirming honest-path correctness. Source:
 `results/baseline/plots/success_rate_vs_n.pdf`
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
 ### 4.2.6 A note on the latency measurement point
 
 The cross-protocol latency comparison of §4.2.2 — and of the delay sweep in
-§4.3 — is built from `commit_latency_ms`, and not from `finality_latency_ms`.
-Despite its name, `commit_latency_ms` is the canonical cross-protocol
-*time-to-finality* column: the median per-validator time to each protocol's
-irreversibility milestone, its point of no return — the `2f+1` commit quorum
-for PBFT, the finalized checkpoint after the justify-then-finalize rule for
-Casper FFG, and counter-`β` acceptance for Snowman. Aligning these three
-irreversibility milestones on one axis is what makes the comparison meaningful
-[[wiki/concepts/output-format]]. The two columns
-coincide for Casper FFG and Snowman but diverge for PBFT, whose
-implementation adds a client-reply round so that its `finality_latency_ms` is
-measured one network hop past the internal commit quorum, at client-observed
-finality. Placing all three protocols' `finality_latency_ms` on one axis would
-compare PBFT's client-observed timestamp against the others' internal
-timestamps, which is not a like-for-like comparison. The comparable-column
-choice is fixed in the schema page that governs figure construction rather
-than left to this prose, so the correctness of the comparison does not depend
-on the reader noticing this paragraph [[wiki/concepts/output-format]].
+§4.3 — is built from `commit_latency_ms`, not `finality_latency_ms`. Despite its
+name, `commit_latency_ms` is the canonical cross-protocol *time-to-finality*
+column: the median per-validator time to each protocol's irreversibility
+milestone — the `2f+1` commit quorum for PBFT, the finalized checkpoint after the
+justify-then-finalize rule for Casper FFG, and counter-`β` acceptance for
+Snowman. Aligning these three milestones on one axis is what makes the comparison
+meaningful [[wiki/concepts/output-format]]. The two columns coincide for Casper
+FFG and Snowman but diverge for PBFT, whose implementation adds a client-reply
+round, so its `finality_latency_ms` sits one network hop past the internal commit
+quorum at client-observed finality; placing all three protocols'
+`finality_latency_ms` on one axis would compare PBFT's client-observed timestamp
+against the others' internal ones — not like for like. This column choice is fixed
+in the schema that governs figure construction, so the comparison's correctness
+does not depend on the reader noticing this paragraph
+[[wiki/concepts/output-format]].
 
 ### 4.2.7 Baseline summary
 
@@ -260,14 +233,13 @@ carries a 95% confidence interval. Source:
 | Casper FFG | 5000.0 | 79.64 ± 0.82 | 29.3 | 1.0 | 0.0 |
 | Snowman | 1000.0 | 94.82 ± 1.01 | 601.0 | 1.0 | 0.0 |
 
-The baseline establishes three results that the later sweeps build on. First,
-all three protocols are correct on the honest path at every validator count.
-Second, at zero delay both latency and goodput are flat in `n`, so neither
-metric separates the protocols here; the separation will come from the delay
-and adversarial axes. Third, communication overhead already separates the
-protocols by an order of magnitude in a direction that matches their published
-asymptotic costs, establishing the performance–structure contrast that RQ3
-asks about and that the delay sweep of §4.3 will stress further.
+The baseline establishes three results the later sweeps build on. First, all
+three protocols are correct on the honest path at every validator count. Second,
+at zero delay both latency and goodput are flat in `n`, so neither separates the
+protocols here — that separation comes from the delay and adversarial axes.
+Third, communication overhead already separates them by an order of magnitude in
+a direction matching their published asymptotic costs, establishing the
+performance–structure contrast RQ3 asks about and that §4.3 will stress further.
 
 ## 4.3 Network-delay sweep
 
