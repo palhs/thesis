@@ -90,6 +90,16 @@ audience, register, voice, word choice, citation discipline, and the
 `CLAUDE.md` deliberately does not `@`-import it (it is Writer-only), so
 the Writer is the one who loads it into context.
 
+**For any chapter after Chapter 3** (results, synthesis, conclusion), also
+read `docs/draft-narrative.md` on pickup. It is the cross-chapter coherence
+layer that sits on top of `draft-style.md`: the thesis spine, the RQ-closure
+and forward-reference ledgers, the inherited measurement-convention and
+style gates, the evaluation rubric (pass/fail gates + scored narrative
+dimensions), and the mandatory `/humanizer` gate that runs last before In
+Review. `draft-style.md` governs the prose inside a chapter; `draft-narrative.md`
+governs how the chapter connects to the ones around it. Also Writer-only, so
+the Writer loads it.
+
 Follow this three-phase loop. Do not invoke `superpowers:brainstorming` or
 `superpowers:writing-plans` — those are shaped for code specs, not prose.
 
