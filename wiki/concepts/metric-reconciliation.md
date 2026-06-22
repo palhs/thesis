@@ -251,37 +251,45 @@ they never feed back into default selection.
 | Protocol | Knob | Paper value | Simulator default | Sensitivity sweep |
 | :---- | :---- | :---- | :---- | :---- |
 | **PBFT** | view-change timeout | adaptive [4] | `3 · E[round_latency]` | `{2, 3, 5, 10} · E[round_latency]` |
-| **Casper FFG** | slots per epoch | 32 [8] | **4** | `{4, 8, 16, 32}` |
-| **Casper FFG** | slot duration | 12 s [8] | **100 ms** | `{50, 100, 500} ms` |
+| **Casper FFG** | slots per epoch | 32 [8] | **2** | `{2, 4, 8, 16}` |
+| **Casper FFG** | slot duration | 12 s [8] | **1 s** | `{0.5, 1, 2} s` |
 | **Snowman** | `K`, `α_p`, `α_c` | (20, 11, 16) [ava-docs] | rescaling rule per `n` — see §Snowman parameter rescaling | — |
 | **Snowman** | `β` | 15 [ava-docs] | **15** (production-parity; the cross-protocol comparison baseline) | RQ4-only safety regime: `{3, 5}` (see constraint below) |
 | **Narwhal+Tusk** | anchor period `r` | 2 [11] | **2** | `{2, 4, 8}` |
 
-Two defaults deliberately diverge from paper values, both on Casper
-FFG. `slots_per_epoch = 4` (vs Ethereum's 32 [8]) is the smallest value
-preserving FFG's epoch character — multiple slots per epoch, the
-two-epoch justify→finalise structure, the LMD-GHOST-vs-FFG-layer
-separation. `slot_duration = 100 ms` (vs Ethereum's 12 s [8]) keeps FFG
-finality at ~800 ms — the same order of magnitude as Snowman `β` rounds
-and Narwhal+Tusk `r` rounds — so cross-protocol latency plots are
-readable on a single axis. The divergence is **for comparison fairness,
-not tractability**: the four protocols must occupy comparable per-ACU
-and wall-clock scales for the Chapter 4 verdicts to be defendable. The
-`{16, 32}` and `{500 ms}` ends of the sensitivity sweep confirm whether
-the comparative ordering survives the trip to production scale.
+The simulator's two Casper FFG defaults diverge from paper values.
+`slots_per_epoch = 2` (vs Ethereum's 32 [8]) is the smallest value
+preserving FFG's epoch character — a multi-slot epoch, the two-epoch
+justify→finalise structure, the LMD-GHOST-vs-FFG-layer separation.
+`slot_duration = 1 s` (vs Ethereum's 12 s [8]) is a round, legible
+wall-clock cadence about an order of magnitude below production while
+keeping the epoch structure intact. The resulting per-epoch finality is
+`(2·slots_per_epoch + attest_offset)·slot_duration = (4 + 1)·1 s ≈ 5 s`
+(`attest_offset = slots_per_epoch // 2 = 1`) — roughly 5× the per-block
+protocols' ≈1 s commit. That gap is **not** calibrated away: it is
+reported as a genuine RQ1 finding (Chapter 4 §4.2.2) about FFG's coarser
+epoch-granularity finality, the coupling Ethereum's 12 s slot reflects in
+the extreme. The `{8, 16}`-slot and `{2 s}` ends of the sensitivity sweep
+test whether the comparative ordering survives the trip toward production
+scale (32 slots / 12 s). (The original design pinned `4`/`100 ms` for a
+~1 s FFG finality readable on a single axis with the other protocols; the
+implementation and every run instead used `2`/`1 s` — see
+[[#revisions]].)
 
-**Coherence constraint on FFG experiments.** The `slot_duration = 100
-ms` default is incoherent with a network phase where `E[delay] ≫ 100
-ms`: under such a phase, FFG attestations from distant validators
-arrive *after* the slot boundary and the protocol is perpetually in a
+**Coherence constraint on FFG experiments.** The `slot_duration = 1 s`
+default is incoherent with a network phase where `E[delay] ≫ 1 s`:
+under such a phase, FFG attestations from distant validators arrive
+*after* the slot boundary and the protocol is perpetually in a
 degraded-finality regime that is not Casper FFG. **Any T19 experiment
-matrix that pairs FFG with the `100 ms` default must use a network
-phase ([[concepts/network-model-phases]]) where `E[delay] ≪
-slot_duration`** — operationally `E[delay] ≤ slot_duration / 4`. FFG
-experiments at WAN-scale delays must use the `slot_duration = 500 ms`
-sensitivity-sweep point (or larger), not the baseline. T19 owns this
-pairing decision; the simulator runner must refuse to start an FFG run
-with an incoherent pairing rather than silently produce
+matrix that pairs FFG with the `1 s` default must use a network phase
+([[concepts/network-model-phases]]) where `E[delay] ≪ slot_duration`**
+— operationally `E[delay] ≤ slot_duration / 4`, so the `1 s` default is
+coherent up to `E[delay] ≈ 250 ms` (covering Families A and C and the
+`static-baseline` network). FFG experiments at larger delays rescale the
+slot upward by `slot_duration ≥ 4·E[delay]` (the per-timeline pairing in
+[[concepts/experiment-matrix-runs]] §2), not the baseline value. T19 owns
+this pairing decision; the simulator runner must refuse to start an FFG
+run with an incoherent pairing rather than silently produce
 degraded-finality numbers labelled as FFG.
 
 The Snowman `β ∈ {3, 5}` regime is included **only** to make empirical
@@ -636,3 +644,30 @@ fixed at the binding contract page, [[concepts/output-format]] §13 Revisions
 Documentation/label edit only — no reducer/schema/CSV change, no re-run;
 supersedes the two `TASKS.md` Backlog finality items. `[[algorithms/pos]]` and
 [[experiments/2026-06-13_delay-analysis]] are unaffected and unchanged.
+
+### [2026-06-22] Casper FFG slot calibration corrected to the as-run config (L-W10 finding H2)
+
+The §Calibration table previously pinned Casper FFG `slots_per_epoch = 4`
+and `slot_duration = 100 ms`, with the rationale that this keeps FFG
+finality at ~1 s "readable on a single axis" with the per-block
+protocols. **That was the design; it is not what ran.** The
+implementation (`src/pos/node.py` defaults `slots_per_epoch = 2`,
+`slot_duration = 1.0`) and **every** experiment — baseline (T41,
+[[experiments/2026-06-03_scaling-baseline]] `slot_duration = 1 s`,
+`slots_per_epoch = 2`), delay (T46/T47), and adversarial (T51–T55) —
+used `2`/`1 s`, giving per-epoch finality
+`(2·slots_per_epoch + attest_offset)·slot_duration = (4 + 1)·1 s ≈ 5 s`,
+the ≈5000 ms FFG figure Chapter 4 §4.2.2 reports and explains. The table,
+its rationale, and the §Coherence-constraint default were corrected to
+the as-run `2`/`1 s`; the sensitivity-sweep ranges were re-centred on the
+new defaults. The delay-rescale rule (`slot_duration ≥ 4·E[delay]`) and
+the per-timeline rescaled values (`1200 ms` at `E[delay] = 300 ms`,
+`12000 ms` at ≈3 s — see [[concepts/experiment-matrix-runs]] §2) are
+unchanged: they equal `4·E[delay]` and never depended on the baseline
+default. Mirror corrections landed on [[concepts/experiment-matrix]] §5,
+[[concepts/experiment-matrix-runs]] §2, and `drafts/ch3_methodology.md`
+§3.3.2/§3.4.3. **Documentation reconciliation only — no code, CSV, or
+re-run; the data already reflects `2`/`1 s`.** The alternative resolution
+(treat `4`/`100 ms` as the intended pin and re-run the entire dataset at
+that calibration) was rejected: it would contradict an existing Chapter 4
+finding and invalidate every committed result.

@@ -29,9 +29,11 @@ differ in how aggressively they elide explicit voting:
 | **Bullshark** | Spiegelman et al., CCS 2022 [12] | Narwhal DAG + two-round fast path in synchrony; message-free async fallback. |
 | **Mysticeti** | Babel et al., 2023 [13] | **Uncertified** DAG; implicit references replace the certification step; three-round theoretical lower bound. |
 
-For this thesis the simulator target is simplified **Narwhal + Tusk** —
-it is the clearest decomposition of the two-layer structure and the
-easiest to align with the single-layer simulators for
+For this thesis the planned simulator target is simplified
+**Narwhal + Tusk** (implementation task **T38.1**, currently Blocked —
+see §Simulator mapping) — it is the clearest decomposition of the
+two-layer structure and the easiest to align with the single-layer
+simulators for
 [[algorithms/pbft]], [[algorithms/pos]], and [[algorithms/avalanche]].
 Bullshark and Mysticeti are retained above as family context.
 
@@ -154,9 +156,10 @@ of any family in this thesis.
 
 ## Behaviour under adversarial conditions
 
-Three adversarial strategies are directly relevant and concretised as
-simulator behaviours (the operational taxonomy lives in
-[[concepts/adversary-model]], pending T18).
+Three adversarial strategies are directly relevant and would concretise
+as simulator behaviours once the protocol is built (the operational
+taxonomy lives in [[concepts/adversary-model]]; Narwhal+Tusk's adversary
+surfaces are catalogued there but deferred with T38.1).
 
 - **Withholding.** Byzantine validators skip broadcasting their own
   certificates. As long as at least `2f+1` certificates per round are
@@ -198,29 +201,47 @@ message count by an order of magnitude for large validator sets.
 
 ## Simulator mapping
 
-The implementation is a simplified **Narwhal-like mempool with a
-Tusk-style commit rule**. Bullshark and Mysticeti are retained as
-family context but not simulator targets — they change the commit rule
-without changing the DAG structure the experiments exercise.
+**Status: not yet implemented.** Narwhal + Tusk is the one protocol in
+this thesis's four-protocol scope that is *not* built. There is no
+`src/narwhal_tusk/` package; the implementation task **T38.1 is
+Blocked** (scheduled as the W10→W11 bridge — see
+[[concepts/week7-decision]]), and the dependent Chapter 3 subsection
+(T36.2) is Blocked behind it. The three implemented simulators are
+[[algorithms/pbft]] (`src/pbft/`), [[algorithms/pos]] (Casper FFG,
+`src/pos/`), and [[algorithms/avalanche]] (Snowman, `src/snowman/`).
+This section therefore describes the **planned** mapping, not running
+code; treat every claim below, and the Expected-findings hypotheses, as
+a design target until T38.1 lands.
 
-Knobs exposed to experiments:
+The planned implementation is a simplified **Narwhal-like mempool with a
+Tusk-style commit rule**. Bullshark and Mysticeti are retained as family
+context but are not planned simulator targets — they change the commit
+rule without changing the DAG structure the experiments would exercise.
+
+Knobs the implementation will expose (planned interface):
 
 - **Round duration** — drives the delay-sensitivity profile; below
   round duration, validator delay is absorbed.
 - **Certificate signature threshold** (default `2f+1`) — to probe how
   close to the threshold the DAG can operate before round formation
   stalls.
-- **Anchor period** (`r` rounds) — trades pipeline depth against
-  commit-latency variance under adversarial anchor suppression.
+- **Anchor period** (`r` rounds, default `2` per
+  [[concepts/metric-reconciliation]] §Calibration) — trades pipeline
+  depth against commit-latency variance under adversarial anchor
+  suppression.
 - **Per-validator storage ceiling** — to expose the dual tradeoff
   against PBFT's per-block message cost.
 
-These feed T37–T40 (third/fourth-algorithm implementation) and the
-baseline/delay/adversarial experiment batteries in Weeks 8–10.
+Once built, this protocol would supply the fourth column of the
+baseline/delay/adversarial comparison. The Weeks 8–10 experiment
+batteries (T41–T56) ran on the three implemented protocols only, with
+Narwhal+Tusk carried as explicit deferral rows.
 
 ## Expected findings
 
-Hypotheses to evaluate in the results chapter:
+Hypotheses to evaluate in the results chapter **once Narwhal+Tusk is
+implemented** (T38.1); the protocol does not yet appear in the Chapter 4
+results:
 
 - **Throughput is largely insensitive to delay up to the round
   duration** — degradation is graceful, not cliff-edge; the cleanest
@@ -249,8 +270,8 @@ Hypotheses to evaluate in the results chapter:
   number of protocol invariants an implementation must preserve —
   certificate formation, anchor commit, DAG pruning, per-round
   reference quotas, and rotation schedules all interact. This is why
-  the simulator implements only Narwhal + Tusk rather than Bullshark
-  or Mysticeti.
+  the planned simulator (T38.1) targets Narwhal + Tusk rather than
+  Bullshark or Mysticeti.
 
 ## Sources
 
@@ -259,3 +280,28 @@ Citations `[11]`, `[12]`, `[13]` resolve via
 [[sources/2026-04-21_danezis-narwhal-tusk-2022]],
 [[sources/2026-04-21_spiegelman-bullshark-2022]], and
 [[sources/2026-04-21_babel-mysticeti-2023]] respectively.
+
+## Revisions
+
+### [2026-06-22] Narwhal+Tusk is planned, not implemented (L-W10 finding H1)
+
+The earlier version of this page (an early design page, T5/T6) described
+Narwhal + Tusk in the present tense as a running simulator target: the
+§Simulator-mapping section read "The implementation **is** a simplified
+Narwhal-like mempool…" with experiment knobs that "feed … the
+baseline/delay/adversarial experiment batteries in Weeks 8–10," and the
+§Weaknesses close said "the simulator implements only Narwhal + Tusk." As
+of the L-W10 wiki lint (2026-06-22) this is false: there is no
+`src/narwhal_tusk/` package, the implementation task **T38.1 is Blocked**
+(W10→W11 bridge, [[concepts/week7-decision]]), and the Weeks 8–10
+experiments (T41–T56) ran on the three *implemented* protocols only
+(PBFT, Casper FFG, Snowman), carrying Narwhal+Tusk as explicit deferral
+rows. The §Simulator-mapping, §Behaviour-under-adversarial-conditions,
+§Expected-findings, and §Weaknesses sections were reframed to mark the
+mapping as **planned**, mirroring the
+[[algorithms/pos]] §Simulator-mapping "Not implemented (deferred)"
+pattern. The algorithm description (the DAG/Narwhal/Tusk/Bullshark/
+Mysticeti mechanics) is unchanged — it was, and remains, accurate
+reference material. No code or experiment is affected; this is a
+documentation-honesty correction. When T38.1 lands it should add an
+"Implemented" subsection and revise this note.

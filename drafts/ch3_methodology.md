@@ -175,7 +175,7 @@ Snowman tuple `(K, α_p, α_c, β)` is defined where it is set, in §3.3.3.
 | Decision unit (ACU) | one committed block | one finalized checkpoint (+ its ancestors) | one accepted block | — |
 | Message types | `PRE-PREPARE`, `PREPARE`, `COMMIT`, `VIEW-CHANGE`, `NEW-VIEW` | `BLOCK-PROPOSAL`, `ATTESTATION`, `SLASHING-EVIDENCE` | `BLOCK-ANNOUNCEMENT`, `QUERY`, `QUERY-RESPONSE` | — |
 | `decided` fires when | `2f+1` `COMMIT` collected for one `(view, seq)` | a checkpoint and its direct child are both justified | the confidence counter reaches `β` | — |
-| Knobs exposed | view-change timeout (`3·E[round_latency]`, `×2^view` backoff); Byzantine fraction | `slots_per_epoch` (4); `slot_duration` (100 ms); justification threshold | `(K, α_p, α_c, β)` via the rescaling rule; sampling seed | — |
+| Knobs exposed | view-change timeout (`3·E[round_latency]`, `×2^view` backoff); Byzantine fraction | `slots_per_epoch` (2); `slot_duration` (1 s); justification threshold | `(K, α_p, α_c, β)` via the rescaling rule; sampling seed | — |
 | Main simplification | classical variant only — no HotStuff/Tendermint, no signatures | no LMD-GHOST fork choice; attest once per epoch; slashing modeled as a halt | linearized Snowman only — no DAG-Avalanche; no stake-weighted sampling | — |
 
 ### 3.3.1 PBFT
@@ -222,15 +222,18 @@ justify→finalize for one epoch with the slashing branch.
 - **① Deterministic stake-weighted proposer.** Proposer assignment is a pure
   function of `(global_seed, slot)` through blake2b, verified for fairness at
   four stake distributions [[experiments/2026-05-23_pos-selection-fairness]].
-- **② `slots_per_epoch = 4`** (against Ethereum's 32), pinned in
+- **② `slots_per_epoch = 2`** (against Ethereum's 32), pinned in
   [[wiki/concepts/metric-reconciliation]] — the smallest value that still
   admits a multi-slot epoch, which preserves FFG's epoch character.
-- **③ `slot_duration = 100 ms`** (against 12 s), pinned in
-  [[wiki/concepts/metric-reconciliation]] — keeps FFG finality at the same
-  order of magnitude as the other protocols' commit latency, so cross-protocol
-  plots remain readable on one axis. *Defence:* a sensitivity sweep at
-  `{16, 32}` and `{500 ms}` tests whether the comparative ordering is preserved
-  at production scale (results in Chapter 4).
+- **③ `slot_duration = 1 s`** (against 12 s), pinned in
+  [[wiki/concepts/metric-reconciliation]] — a round, legible cadence an order
+  of magnitude below production. The resulting per-epoch finality,
+  `(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s`, is roughly 5× the
+  per-block protocols' ≈1 s commit; this gap is reported as a finding in §4.2,
+  not compressed away, and reflects FFG's coarser epoch-granularity finality.
+  *Defence:* a sensitivity sweep toward production scale (larger
+  `slots_per_epoch` and `slot_duration`) tests whether the comparative ordering
+  is preserved.
 - **④ No LMD-GHOST fork choice.** `Chain.head` is the block at the greatest
   known slot under an honest-path linear chain.
 - **⑤ Slashing modeled as a halt, detection only.** A provable double- or
@@ -423,7 +426,7 @@ metric schema (§3.5).
 
 Two coherence constraints keep each protocol in its own regime while it sits on
 the shared axes. The first governs Casper FFG slot timing. The FFG runner
-refuses any pairing of the baseline `slot_duration = 100 ms` (§3.3.2 ③) with a
+refuses any pairing of the baseline `slot_duration = 1 s` (§3.3.2 ③) with a
 network phase whose `E[delay]` is not far below the slot duration — attestations
 from distant
 validators would arrive after the slot boundary, producing a degraded regime

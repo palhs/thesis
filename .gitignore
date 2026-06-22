@@ -24,6 +24,9 @@ results/**/*.png
 # T51 Family C (delayed-voters) adversarial dataset is tracked — the T56 input.
 !results/adversary/
 !results/adversary/*.csv
+# L-W10 H2(b) FFG slot-duration sensitivity sweep is tracked — the ch4 §4.2.2 input.
+!results/sensitivity/
+!results/sensitivity/*.csv
 # T46.1 sweep checkpoint sidecars (per-cell .json) are runtime-only — never
 # tracked. Placed after the delay re-include so it wins for results/delay/.
 results/**/.sweep/
