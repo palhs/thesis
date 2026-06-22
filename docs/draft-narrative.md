@@ -32,8 +32,8 @@ chapter must visibly receive the prior segment and pass the next one on:
 > (the **gap**, §2.4–2.5). This thesis builds one simulator that does (the
 > **method**, Ch3), reports what each family does under delay and adversary (the
 > **data**, RQ1–RQ4, Ch4), synthesizes whether any family dominates (the
-> **verdict**, RQ5 + the enhancement, Ch5), and returns to the incidents and the
-> limits (the **close**, Ch6).
+> **verdict**, RQ5, Ch5), and returns to the incidents, the limits, and the
+> further-work directions (the **close**, Ch6).
 
 The narrative contract for every chapter after Chapter 3:
 
@@ -65,12 +65,13 @@ the independent variable named in the question.
 | RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
 | RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2.4 | **closed** — "answers RQ3" stated |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4 |
-| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | Ch5 | **open** — owed by Ch5; foreshadowed by the no-dominance result of §4.4.4 and the latency–liveness trade of §4.3.4 |
+| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.4 | **closed** (2026-06-23) — Ch5 §5.4 states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1 + the operator-tradeoff figure (Fig 4.13) carry the evidence |
 
 A Writer touching a results or synthesis chapter updates this table and satisfies
 every row it owns. RQ2 was the live trap and is now closed: the §4.4 pass added
 the explicit closure sentence, naming throughput (not success rate) as the
-measured quantity. **RQ5 is the remaining open promise, owed by Ch5.**
+measured quantity. **RQ5 is now closed by the Ch5 draft (§5.4, in review); all
+five research questions have explicit, located answers.**
 
 ---
 
@@ -81,28 +82,39 @@ is tracked here until discharged. Adding a new forward reference requires naming
 the chapter that owns it; closing one requires the owning chapter to actually
 deliver, or to restate the reason it is carried.
 
-**Owed by Chapter 5:**
+**Discharged by Chapter 5 (drafted 2026-06-23, in review):**
 
-- the RQ5 Pareto-frontier synthesis (deferred from §4.3.4, §4.4.4, §1.5–1.6, §3.1);
-- the explicit "does any family dominate" verdict (the answer is foreshadowed as
-  *no*; Ch5 must establish it over the three implemented families, with the
-  high-throughput corner the DAG family would occupy stated as unmeasured);
-- the adaptive-timeout enhancement, measured against the baseline (promised in
-  the §1.6 roadmap as the demonstration of the simulator's utility).
+- the RQ5 Pareto-frontier synthesis (was deferred from §4.3.4, §4.4.4, §1.5–1.6,
+  §3.1) — delivered in §5.4 over the three families evaluated;
+- the explicit "does any family dominate" verdict — delivered as *no* (§5.4,
+  Table 5.1), established over the three families evaluated.
 
-**Owed by Chapter 6:**
+**Discharged by Chapter 6 (drafted 2026-06-23, in review):**
 
-- the consolidated **Limitations** section (§3.6 threats + every per-chapter
-  caveat drawn together — the latency-only baseline, the no-capacity-model, the
-  small-n rescaling, the three-family scope, commensurability-by-convention);
-- the RQ1–RQ5 summary of findings;
-- future directions (§6.3 already seeds signature-aggregation variants and the
-  capacity/Narwhal+Tusk lines — keep, do not duplicate).
+- the consolidated **Limitations** section — delivered §6.2 (latency-only model,
+  no-capacity-model, small-n rescaling, three-family scope,
+  commensurability-by-convention, permanent-loss bound, leader-sparing coverage);
+- the RQ1–RQ5 summary of findings — delivered §6.1;
+- future directions — delivered §6.3 (6.3.1 signature-aggregation variants kept;
+  6.3.2 capacity model, adaptive-timeout enhancement, Snowman `ε` confidence
+  depth, larger-scale/real-network validation).
+
+**Descoped, restated as future work (no silent drop):**
+
+- the adaptive-timeout enhancement *measured against the baseline* — was promised
+  in the §1.6 roadmap; descoped 2026-06-22 by human decision (T57/T58 not
+  implemented). It is **not** delivered as a measured result; it is restated as a
+  further-work direction in Ch6 §6.3.2, gated on a future timeout-stressing
+  experiment. Ch1 §1.6 no longer promises it as a chapter deliverable, so no
+  upstream roadmap debt remains.
 
 **Carried (consciously deferred, owner = future implementation, not a chapter):**
 
 - the Narwhal+Tusk / DAG-based family and its data-availability-withholding
-  adversary — stated consistently as three-of-four throughout;
+  adversary. Stated as three-of-four in Ch1–Ch4; Ch5 and Ch6 use neutral
+  three-family scoping and do **not** name the deferred family (human decision
+  2026-06-22/23), so the §5 "state it once per chapter" rule is suspended for
+  those two chapters and reconciled in the later cross-chapter consistency pass;
 - the empirical/analytical Snowman `ε` columns at weakened confidence depth;
 - the saturation/capacity throughput model.
 
@@ -171,17 +183,22 @@ wiki page that authorizes the deviation.
   confirmation of it.
 - A **`deadline` stop is not a liveness failure**; only a run in which no honest
   validator commits within the window is.
-- **Three families, Narwhal+Tusk deferred** — stated consistently (see §3).
+- **Three families, Narwhal+Tusk deferred** — stated consistently in Ch1–Ch4
+  (see §3). *Exception (2026-06-23): Ch5 and Ch6 use neutral three-family scoping
+  and do not name the deferred family, per human decision. This is the one
+  authorized deviation from "state it once per chapter"; Ch1–Ch4 still name it,
+  and the asymmetry is reconciled in the later cross-chapter consistency pass.*
 
 ---
 
 ## 6. Inherited style/discipline gates (from draft-style.md — the ones most missed)
 
 - **No project-internal task IDs** in prose, tables, or captions. Name the
-  *work* or the *mechanism*, never the ticket. *(Status 2026-06-22: the
-  `T38.1`/`T51` leaks have been stripped from `ch4_results.md`; `T38.1` still
-  leaks into `ch6_conclusion.md` §6.3.2 — the next Writer pass on Ch6 must strip
-  it; see `draft-style.md` for the ticket→mechanism rewrite pattern.)*
+  *work* or the *mechanism*, never the ticket. *(Status 2026-06-23: the
+  `T38.1`/`T51` leaks were stripped from `ch4_results.md`; the `T38.1` leak in
+  `ch6_conclusion.md` §6.3.2 is now resolved — the DAG-completion clause that
+  carried it was removed in the Ch6 pass. No task-ID leaks remain in the drafted
+  chapters.)*
 - Every claim cites a wiki page inline as `[[wiki/...]]`; missing external
   citations are `TODO(cite)`; no invented citations.
 - **No fabricated statistics.** Every number in prose, a table, or a caption —
@@ -323,16 +340,19 @@ writes the prose stays clean and the answer stays sharp.
   conventions honored with declared deviations; `T38.1`/`T51` task-ID leaks
   stripped; §1.2 hook callback present (Ethereum May-2023 finality stall). All
   caveats handed to Ch6. Remaining cross-chapter work lives in Ch5/Ch6 below.
-- **Ch5 — Synthesis (to write).** Owns RQ5: trace the Pareto frontier over the
-  three implemented families, answer "does any family dominate" (discharge the
-  deferrals from §4.3.4 and §4.4.4 — the answer the data points to is *no*), and
-  deliver the adaptive-timeout enhancement measured against the baseline. The
-  strongest site for the §1.2 hook callback. Open Ch6's summary-and-limits
-  question on the way out.
-- **Ch6 — Conclusion (stub).** Consolidate Limitations from §3.6 + the
-  per-chapter caveats; summarize RQ1–RQ5; keep the §6.3 future-work directions
-  (do not duplicate the seeded ones). Close the loop to the §1.2 incidents.
-  Strip the `T38.1` leak in §6.3.2.
+- **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
+  Pareto frontier over the three families evaluated and answered "does any family
+  dominate" = *no* (§5.4, Table 5.1), discharging the §4.3.4 / §4.4.4 deferrals.
+  §1.2 hook callback present (§5.5). Hands off to Ch6. The adaptive-timeout
+  enhancement is no longer in Ch5 scope (descoped 2026-06-22; now a Ch6 §6.3.2
+  further-work direction). Neutral three-family scoping — the deferred family is
+  not named.
+- **Ch6 — Conclusion (drafted 2026-06-23, in review).** §6.1 RQ1–RQ5 summary;
+  §6.2 consolidated limitations; §6.3 further work (6.3.1 signature-aggregation
+  variants kept; 6.3.2 rewritten — capacity model, adaptive-timeout enhancement,
+  Snowman `ε` depth, larger-scale validation; the DAG-completion clause and its
+  `T38.1` leak removed); §6.4 returns to the §1.2 incidents. Neutral three-family
+  scoping.
 
 ---
 
