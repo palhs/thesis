@@ -24,9 +24,9 @@ protocols evaluated.** Source: [[wiki/concepts/research-questions]],
 
 RQ1 asked how commit latency scales as network-delay variance rises. The three
 families carry delay very differently: PBFT adds under a second under moderate
-delay, Casper FFG roughly a quarter — an increase dominated by its slot-clock
-rescaling rather than by attestation propagation — and Snowman an order of
-magnitude, the last being the only protocol sensitive to the shape of the delay
+delay, Casper FFG roughly twenty-seven percent — an increase dominated by its
+slot-clock rescaling rather than by attestation propagation — and Snowman an order
+of magnitude, the last being the only protocol sensitive to the shape of the delay
 distribution. Commit latency is otherwise flat in the validator set, so the
 network timeline, not the committee size, governs time-to-finality
 [[wiki/concepts/key-findings]]. RQ2 asked how sustained throughput degrades as
@@ -43,16 +43,21 @@ roughly fourteenfold at `n = 16` [[wiki/concepts/key-findings]].
 RQ4 asked which adversary drives which protocol to a liveness loss, a safety
 violation, or neither. No protocol is robust to every adversary; the structural
 choice that defends a family against one strategy is the same that exposes it to
-another, and the contribution is the resulting mechanism map — PBFT immune to the
-liveness adversaries but the source of the only unaccountable fork, Snowman the
-equivocation-safety leader on its analytical bound, reported rather than
-witnessed, but the most delay- and silence-exposed, Casper FFG never first against
-an adversary but holding the only accountable failure [[wiki/concepts/key-findings]].
+another, and the contribution is the resulting mechanism map. PBFT is immune to
+the liveness adversaries exercised here — those that spare the view-0 primary —
+but is the source of the only unaccountable fork. Snowman is the equivocation-safety
+leader on its analytical bound, reported rather than empirically witnessed, yet
+the most delay- and silence-exposed of the three. Casper FFG is never first against
+any single adversary but holds the only accountable failure
+[[wiki/concepts/key-findings]].
 RQ5 asked whether a consistent performance–security frontier exists and whether
 any family dominates [[wiki/concepts/research-questions]]. A consistent frontier
 exists across the three families, and no family dominates: each is the strict best
 on at least one axis, and the frontier admits no configuration that is at once
-cheap, fast, and resilient [[wiki/concepts/key-findings]].
+cheap, fast, and resilient [[wiki/concepts/key-findings]]. The verdict does not
+turn on the one axis only a slashing-based protocol can hold: even setting
+accountable safety aside, each family remains non-dominated on a measured axis
+[[wiki/concepts/key-findings]].
 
 Returning to the incidents that motivated the study (§1.2), the measured failure
 modes are the controlled analogues of the deployment ones. An attestation quorum
@@ -135,9 +140,12 @@ misstate the per-unit cost contrast that answers RQ3
 models all signature-based families at their production-optimized message
 granularity — aggregated Casper FFG against a HotStuff-style PBFT — or reports
 the as-specified and the aggregated regimes side by side, so that the level of
-optimization is held constant across the comparison. The decision between these
-two framings is a methodological one and is reserved for the supervisor. An
-implementation plan for the Casper FFG side — the aggregation topology, the
+optimization is held constant across the comparison. Of the two, side-by-side
+reporting is the more conservative: it preserves the present as-specified baseline
+as a point of comparison rather than replacing it, so the per-unit ordering
+reported here remains legible alongside the optimized one. The final choice between
+side-by-side reporting and a uniformly aggregated comparison is a methodological
+decision left to the supervisor. An implementation plan for the Casper FFG side — the aggregation topology, the
 message-counting convention, and the comparability decision described here — is
 recorded as a kickoff specification in the project repository.
 

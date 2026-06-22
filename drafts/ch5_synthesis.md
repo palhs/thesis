@@ -78,7 +78,11 @@ for first at `n = 25` [[wiki/experiments/2026-06-13_delay-comparison]]. Against
 the two liveness adversaries it is the strongest of the three — immune to delayed
 voting at unit finality cost and undegraded under silent non-participation through
 `φ = 0.33`, collapsing only at `φ = 0.40`, the first sampled fraction past its
-`2f+1` quorum bound [[wiki/experiments/2026-06-19_adversary-comparison]].
+`2f+1` quorum bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These
+liveness verdicts are established against adversaries that leave the view-0
+primary honest; the leader-disruption surface, plausibly the sharpest attack on a
+leader-based protocol, is catalogued but not measured, so PBFT's liveness standing
+is bounded to non-leader-targeting strategies [[wiki/concepts/adversary-model]].
 
 The mechanism that buys this liveness is the one that disqualifies PBFT on the
 axis it loses. Its leader-based, exact-quorum commit rule recovers from a stalled
@@ -148,8 +152,12 @@ delayed-voting adversary its finality cost reaches a factor of sixty-two
 [[wiki/experiments/2026-06-19_adversary-comparison]]. When peers fall silent
 rather than merely slow, the polls starve: Snowman cliffs earliest of the three,
 finalizing under a silent tenth of the validators but starving once the silent
-fraction reaches `φ = 0.20` at `n = 10`, far below the one-third the other two
-tolerate [[wiki/experiments/2026-06-19_adversary-comparison]]. The inversion is the
+fraction reaches `φ = 0.20` at `n = 10`, below the one-third the other two
+tolerate [[wiki/experiments/2026-06-19_adversary-comparison]]. The cliff is
+committee-size dependent: the larger `n = 25` sample absorbs more non-responders
+per poll and defers the starvation point to `φ = 0.33`, yet Snowman still fails
+one sampled step before the quorum protocols, remaining the earliest of the three
+to lose liveness under silence [[wiki/experiments/2026-06-17_offline-validators]]. The inversion is the
 sharpest single result of the campaign — the identical structural choice makes
 Snowman the most delay-tolerant family when peers are merely slow and the least
 tolerant when they go silent [[wiki/algorithms/avalanche]]
@@ -163,7 +171,12 @@ each win a row no other does: PBFT the delay, loss, and liveness axes; Casper FF
 the communication-overhead and accountability axes; Snowman the
 equivocation-safety axis. Each is therefore non-dominated, and no family
 dominates — the direct answer to RQ5 over the three protocols evaluated
-[[wiki/concepts/research-questions]] [[wiki/concepts/key-findings]].
+[[wiki/concepts/research-questions]] [[wiki/concepts/key-findings]]. This verdict
+does not rest on the one row only a slashing-based protocol can win: setting the
+accountable-safety axis aside, each family is still non-dominated on a measured
+axis — Casper FFG on communication overhead, Snowman on equivocation safety, and
+PBFT on delay, loss, and liveness — so the multi-cornered shape survives the
+removal of the definitional row [[wiki/concepts/key-findings]].
 
 **Table 5.1 — Cross-regime comparison of the three families on the
 performance–security plane (`n = 10 / 25`, 20 seeds).** Each row is one axis from
@@ -174,8 +187,12 @@ contests: the equivocation-safety row ranks Snowman first on its analytical boun
 `ε`, reported rather than empirically witnessed (§5.3.3), and the
 accountable-safety row names a capability only a slashing-based protocol can
 offer, so Casper FFG holds it uncontested by construction rather than by winning a
-comparison. Values pair the committee sizes only where they differ; full per-`n`
-figures are in the cited pages.
+comparison. The loss-resilience row reports the `n = 10` ranking, where PBFT leads
+cleanly; at `n = 25` PBFT and Snowman are a statistical tie at the top, their
+area-under-the-retention-curve confidence intervals overlapping (Snowman
+0.369 [0.366, 0.372], PBFT 0.351 [0.327, 0.376]) on a reduced Snowman seed count
+[[wiki/experiments/2026-06-13_delay-comparison]]. Values pair the committee sizes
+only where they differ; full per-`n` figures are in the cited pages.
 Source: [[wiki/concepts/key-findings]],
 [[wiki/experiments/2026-06-13_delay-comparison]],
 [[wiki/experiments/2026-06-19_adversary-comparison]].
@@ -187,7 +204,7 @@ Source: [[wiki/concepts/key-findings]],
 | Time-to-finality under delay | + ≈ 0.9 s | + ≈ 27% | × 12–13 | PBFT |
 | Loss resilience (AURC; survival depth) | first; alive at 20% loss | last | AURC tie at `n = 25`; cliffs by 10% loss | PBFT |
 | Liveness under delayed voting | immune (1.0×) | dips (success → 0.60) | survives at ×62 finality | PBFT |
-| Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | early cliff at `φ = 0.10–0.20` | PBFT ≈ FFG |
+| Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | cliff at `φ = 0.20` (`n = 10`) / `φ = 0.33` (`n = 25`) | PBFT ≈ FFG |
 | Safety under equivocation | deterministic fork at `φ = 0.40` | accountable, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵` / `3 × 10⁻¹¹` | Snowman |
 | Accountable safety | none (unattributable fork) | slashable ≥ ⅓ stake | not applicable (probabilistic) | Casper FFG |
 
@@ -195,10 +212,11 @@ Two features of the frontier carry more weight than the bare verdict. The first
 is a gap in it rather than a point on it: the operator tradeoff of Figure 4.13
 shows that the protocols which retain finalization under loss are exactly the ones
 that pay the most latency to do so — PBFT and Snowman inflating time-to-finality
-by factors of 2.16 (Snowman, `n = 10`) to 3.57 (PBFT, `n = 25`) at their survival
-limits, the ratios taken over the seeds that still finalize at each loss level,
-while Casper FFG, which refuses that trade and stays near unit latency, dies first
-[[wiki/experiments/2026-06-13_delay-comparison]]. The cheap-and-resilient corner
+by factors of 2.16 (Snowman, `n = 10`) to 3.57 (PBFT, `n = 25`), each measured at
+that protocol's own deepest surviving loss level rather than a common one and over
+the seeds that still finalize there, so the two figures are not read off a single
+point of Figure 4.13, while Casper FFG, which refuses that trade and stays near
+unit latency, dies first [[wiki/experiments/2026-06-13_delay-comparison]]. The cheap-and-resilient corner
 of the plane is empty: resilience is bought with latency, and no measured
 configuration escapes the purchase [[wiki/concepts/key-findings]]. The second is
 that the rankings invert across axes — the family first against delay and silence
