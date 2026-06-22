@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 87 · In Review: 1 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 88 · In Review: 0 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -270,7 +270,7 @@ specs); the `\include{biography}` line has been removed from the template.
   **DESCOPED 2026-06-22 (human decision):** depends on T57 (descoped); moved to Ch6 §6.3 further-work alongside it.
 - `[x]` **T59** `H` Writer — Summarize key findings across experiments
   _Outcome:_ Top 5–10 findings with evidence and RQ mapping · _Artifact:_ `wiki/concepts/key-findings.md`
-- `[?]` **T60** `H` Writer — Write Chapter 5 (Enhancement) and Chapter 6 (Conclusion)
+- `[x]` **T60** `H` Writer — Write Chapter 5 (Enhancement) and Chapter 6 (Conclusion)
   _Outcome:_ Ch5 3–4 pages; Ch6 2–3 pages summary + future work · _Artifact:_ `drafts/ch5_synthesis.md` (renamed from `ch5_enhancement.md` — Ch5 is now RQ5 synthesis only), `drafts/ch6_conclusion.md`
   _Note (2026-06-22):_ T57/T58 descoped — Ch5 is now the **RQ5 cross-family Pareto synthesis only** (no adaptive-timeout enhancement section); the enhancement lives in Ch6 §6.3 further-work. Adjust the Ch5 scope/title (the `ch5_enhancement.md` filename is now a misnomer — rename or keep at the picker's discretion) and Ch1's roadmap already reflects this.
 
