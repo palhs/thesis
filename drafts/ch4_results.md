@@ -484,40 +484,27 @@ band; the operator-best region is the upper left. Source:
 ## 4.4 Adversarial sweep
 
 The adversarial sweep holds the network at a constant baseline delay and
-replaces a fraction of the honest validators with a single adversarial
-strategy, isolating the effect of Byzantine behavior from the network effects
-of §4.3. It draws run family C from the experiment matrix
-[[wiki/concepts/experiment-matrix]]. Three strategies are exercised — the three
-generic capabilities of the adversary catalog [[wiki/concepts/adversary-model]]:
-delay-emission, in which a validator holds its messages (the delayed-voting
-case); withhold-participation, in which a validator stays silent (the
-silent-non-participation, or crash-faulty, case); and equivocate-vote, in which
-a validator signs two conflicting messages where the protocol expects one (the
-equivocation case). Each strategy is swept from an honest control through a band
-of injected adversarial fractions at validator counts `n ∈ {10, 25}`, twenty
-seeds per cell with common random numbers, and is extended past the one-third
-threshold for the protocols and strategy that admit a safety failure —
-equivocation against PBFT and Casper FFG [[wiki/concepts/experiment-matrix]].
-The two committee sizes are a deliberate pair rather than a convenience sample —
-`n = 10` is `3f+1` at `f = 3` and `n = 25` at `f = 8` — so that a result holding
-at both is size-invariant, while one that moves between them, such as Snowman's
-silence cliff, marks a committee-size dependence the section can name
-[[wiki/concepts/experiment-matrix]]. As
-in §4.2 and §4.3, the survey covers three of the four families; the Narwhal+Tusk
-family awaits its implementation, and with it the data-availability-withholding
-adversary that is its catalogued weakness is absent from this survey
-[[wiki/concepts/adversary-model]].
+replaces a fraction of the honest validators with a single Byzantine strategy,
+isolating adversarial behavior from the network effects of §4.3. It draws run
+family C from the experiment matrix [[wiki/concepts/experiment-matrix]] and
+exercises the three generic capabilities of the adversary catalog in turn —
+delayed voting, silent non-participation, and equivocation (defined in §3.4.2).
+Each is swept from an honest control through a band of injected adversarial
+fractions `φ` — the swept variable, distinct from the tolerated threshold `f`,
+and denominated in each protocol's natural unit, replicas for PBFT and Snowman
+and stake for Casper FFG (§3.4.2) — at validator counts `n ∈ {10, 25}`, twenty
+seeds per cell under common random numbers, and is extended past the one-third
+threshold where a safety failure is possible, namely equivocation against PBFT
+and Casper FFG. The
+paired committee sizes separate size-invariant results from size-dependent ones
+such as Snowman's silence cliff (§3.4.2). As in §4.2 and §4.3 the survey covers
+three of the four families; the Narwhal+Tusk family awaits its implementation,
+and with it the data-availability-withholding adversary that is its catalogued
+weakness [[wiki/concepts/adversary-model]].
 
-Two distinctions must be fixed before the results. First, `φ` denotes the
-adversarial fraction injected in this sweep — the swept independent variable —
-and is kept distinct from `f`, the fault threshold a configuration tolerates
-under `n = 3f+1`. The fraction `φ` is denominated in each protocol's natural
-fault unit: replicas for PBFT and Snowman, stake for Casper FFG, so a given `φ`
-is a replica share for the first two protocols and a stake share for the third
-[[wiki/concepts/adversary-model-runtime]]. Second, the sweep reports two outcome
-families that RQ4 separates: liveness, measured as the consensus success rate —
-the fraction of seed-runs that finalize within the measurement window — and
-safety, measured by a per-protocol invariant and reported as the
+The sweep reports the two outcome families RQ4 separates: liveness, measured as
+the consensus success rate — the fraction of seed-runs that finalize within the
+measurement window (§3.5) — and safety, reported as a per-protocol
 safety-violation rate, except for Snowman, whose probabilistic finality is
 reported through its analytical bound `ε` rather than a fork count
 [[wiki/concepts/evaluation-metrics]]. The section takes the three strategies in
@@ -528,40 +515,38 @@ closes by drawing the cross-adversary tradeoff that answers RQ4.
 
 Under delayed voting the three protocols separate by failure mode, and the
 split follows protocol structure rather than the size of the delayed set
-(Figure 4.14). PBFT is immune. Its delayed validators are backups, the honest
-remainder already meets the `2f+1` prepare and commit quorums, and the primary
-commits without rotation, so time-to-finality stays at its baseline — a ratio of
-1.0 against the honest control — and the success rate holds at 1.0 to the
-deepest injected fraction tested, `φ = 0.30`, with zero view-changes across the
-sweep [[wiki/experiments/2026-06-14_delayed-voters]]. This immunity is the
-honest-leader case: the delayed set is chosen to spare the view-0 primary, so a
-leader-targeting adversary is a separate surface, catalogued but outside the
-swept strategies [[wiki/concepts/adversary-model]]. Casper FFG keeps its
-finality latency unchanged when it finalizes, because finality is gated on a
-stake supermajority that the honest validators still form, but its liveness
-degrades: the per-slot proposer rotates, a delayed validator is periodically the
-proposer, and the block it should propose stalls for that slot, so a fraction of
-runs fail to finalize within the window — the success rate falls to a worst
-pooled value of 0.60 at `n = 10` and 0.65 at `n = 25`
+(Figure 4.14). PBFT is immune: its delayed validators are backups, the honest
+remainder already meets the `2f+1` prepare and commit quorums, and the view-0
+primary commits without rotation, so time-to-finality holds at its baseline — a
+ratio of 1.0 against the honest control — and the success rate stays at 1.0 to
+the deepest fraction tested, `φ = 0.30`, with zero view-changes
+[[wiki/experiments/2026-06-14_delayed-voters]]. This is the honest-leader case:
+the delayed set spares the view-0 primary, so a leader-targeting adversary is a
+separate surface, returned to in §4.4.4. Casper FFG keeps its finality latency
+unchanged when it finalizes, because finality is gated on a stake supermajority
+the honest validators still form, but its liveness degrades: the per-slot
+proposer rotates, a delayed validator is periodically the proposer, and the
+block it owes stalls for that slot, dropping the success rate to a worst pooled
+0.60 at `n = 10` and 0.65 at `n = 25`
 [[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman is the costliest
-case. It neither forks nor stalls, so the success rate holds, but its
+case: it neither forks nor stalls, so the success rate holds, but its
 time-to-finality explodes by a factor of roughly 62 at `n = 10` and 49 at
 `n = 25` against the honest control, because each of its `β` sequential poll
 rounds waits on the slowest sampled peer and a delayed peer inflates every round
-into which it is sampled; the blow-up becomes severe near `φ = 0.20`
+it is sampled into; the blow-up becomes severe near `φ = 0.20`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
-The three outcomes are the performance–security tradeoff in miniature. The two
+These three outcomes are the performance–security tradeoff in miniature. The two
 protocols that finalize without liveness loss do so for opposite reasons and at
-opposite costs: PBFT because its fixed quorum tolerates slow backups for free,
-Snowman because its sampled supermajority also tolerates them but only by
-waiting, paying an order-of-magnitude latency penalty for the same survival.
-Casper FFG pays no latency penalty but loses liveness instead, because its single
-rotating proposer has no redundancy when the proposer is the slow node. Ranked
-by the liveness held against the adversary, PBFT and Snowman are tied and ahead
-of Casper FFG, with PBFT first on the finality-cost tiebreak
-[[wiki/experiments/2026-06-19_adversary-comparison]]. None of the three suffers a
-safety violation: delayed voting threatens liveness and latency, never agreement
+opposite costs: PBFT's fixed quorum tolerates slow backups for free, while
+Snowman's sampled supermajority tolerates them only by waiting, paying the
+latency penalty quantified above for the same survival. Casper FFG pays no
+latency penalty but loses liveness instead, its single rotating proposer having
+no redundancy when the proposer is the slow node. Ranked by the liveness held
+against the adversary, PBFT and Snowman tie ahead of Casper FFG, with PBFT first
+on the finality-cost tiebreak
+[[wiki/experiments/2026-06-19_adversary-comparison]]. None of the three forks:
+delayed voting threatens liveness and latency, never agreement
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 **Figure 4.14 — Liveness under delayed voting.** Finalization success rate
@@ -573,36 +558,36 @@ validator count. Source: `results/adversary/plots/liveness_vs_phi_delay.pdf`
 
 When the adversarial validators go silent rather than slow, the question becomes
 how deep a fraction each protocol can lose and still finalize (Figure 4.15). The
-protocols are ranked here by survival depth — the deepest `φ` at which a protocol
+protocols are ranked by survival depth — the deepest `φ` at which a protocol
 still finalizes anything — rather than by the onset of degradation, because the
-two keys give opposite orderings for Casper FFG and Snowman, and survival is the
-faithful measure of where liveness fails
+two keys order Casper FFG and Snowman oppositely, and survival is the faithful
+measure of where liveness fails
 [[wiki/experiments/2026-06-19_adversary-comparison]]. PBFT exhibits a clean
-quorum cliff: it finalizes without any throughput loss up to `φ = 0.33` and dies
-at `φ = 0.40`, the point at which the silent set drops the honest remainder below
+quorum cliff: it finalizes with no throughput loss up to `φ = 0.33` and dies at
+`φ = 0.40`, the point at which the silent set drops the honest remainder below
 the `2f+1` quorum [[wiki/experiments/2026-06-17_offline-validators]]. Casper FFG
 degrades gracefully over the same range, still finalizing at `φ = 0.33`; its
 throughput — the rate of committed units, a separate magnitude from the success
-rate that Figure 4.15 plots — decays in proportion to the participating stake,
-approximately `1 − φ` (Figure 4.20), to a worst surviving ratio near 0.49 at `n = 10` and 0.47
-at `n = 25` [[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman cliffs earliest, and
-its cliff is committee-size-dependent: it survives only to `φ = 0.10` at `n = 10`
-and `φ = 0.20` at `n = 25`, because a poll round closes only once `α_c` sampled
-peers respond, and when too many peers are silent the round never completes and
-the protocol stalls [[wiki/experiments/2026-06-17_offline-validators]]. At
-`n = 25` the `φ = 0.20` cell is technically alive but starved, finalizing at
-roughly half a percent of its control throughput
-[[wiki/experiments/2026-06-19_adversary-comparison]].
+rate Figure 4.15 plots — decays in proportion to the participating stake,
+approximately `1 − φ` (Figure 4.20), to a worst surviving ratio near 0.49 at
+`n = 10` and 0.47 at `n = 25`
+[[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman cliffs earliest,
+and its cliff is committee-size-dependent: it survives only to `φ = 0.10` at
+`n = 10` and `φ = 0.20` at `n = 25`, because a poll round closes only once `α_c`
+sampled peers respond and never completes when too many are silent
+[[wiki/experiments/2026-06-17_offline-validators]]. At `n = 25` the `φ = 0.20`
+cell is technically alive but starved, finalizing at roughly half a percent of
+its control throughput [[wiki/experiments/2026-06-19_adversary-comparison]].
 
 The ordering is therefore PBFT and Casper FFG ahead of Snowman, the two leaders
 tied on survival depth and separated only by PBFT's undegraded throughput below
 its cliff [[wiki/experiments/2026-06-19_adversary-comparison]]. As under delayed
 voting, no protocol forks: silence erodes liveness, not safety
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. The result inverts the
-delayed-voting verdict for Snowman in particular: the protocol that best
-tolerated slow validators, albeit at a latency cost, is the least tolerant of
-silent ones, because a sampled supermajority can wait out a slow peer but cannot
-complete a poll around an absent one.
+delayed-voting verdict for Snowman: the protocol that best tolerated slow
+validators, albeit at a latency cost, is the least tolerant of silent ones,
+because a sampled supermajority can wait out a slow peer but cannot complete a
+poll around an absent one.
 
 **Figure 4.15 — Liveness under silent non-participation.** Finalization success
 rate against the injected adversarial fraction `φ`, one curve per protocol,
@@ -615,7 +600,7 @@ faceted by validator count. Source:
 Equivocation is the only one of the three strategies that can break safety, and
 it is the axis on which PBFT and Casper FFG are driven past the one-third
 threshold to expose the breaking point. Below the threshold all three protocols
-preserve agreement, and, with one exception, liveness (Figure 4.16): Casper FFG's
+preserve agreement and, with one exception, liveness (Figure 4.16): Casper FFG's
 success rate holds across the full swept range to `φ = 0.50`, Snowman's to the
 top of its grid at `φ = 0.33`, while PBFT's dips through a view-change window
 before an apparent recovery above the threshold — a recovery that is the safety
@@ -627,9 +612,9 @@ and the difference is the kind of failure, not its onset
 
 PBFT fails catastrophically and without accountability. Below the threshold its
 view-change mechanism absorbs the equivocation — an equivocating primary is
-detected and the replicas rotate to a new leader — and the view-changes
-multiply with the equivocator fraction (Figure 4.17), reaching 10 rotations at
-`n = 10` and 25 at `n = 25` at the last safe fraction
+detected and the replicas rotate to a new leader — and the view-changes multiply
+with the equivocator fraction (Figure 4.17), reaching 10 rotations at `n = 10`
+and 25 at `n = 25` at the last safe fraction
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. At `φ = 0.40` the
 equivocating set exceeds what rotation can contain, and two honest replicas
 commit conflicting values at the same height: the safety-violation rate steps
@@ -647,80 +632,75 @@ caused it [[wiki/experiments/2026-06-19_adversarial-degradation]].
 Casper FFG never forks in the model, and when it fails it fails accountably. Its
 finality rule admits no two conflicting finalized checkpoints below the
 threshold, and above it the failure surfaces not as a fork but as slashable
-stake: the stake an adversary would have to expose to slashing in order to force
-a conflicting checkpoint rises with the equivocator fraction and crosses the
-one-third accountability line at `φ = 0.40`, peaking at 0.50 of stake at `n = 10`
-and 0.48 at `n = 25` (Figure 4.19)
-[[wiki/experiments/2026-06-19_adversary-comparison]]. This is the
+stake: the stake an adversary must expose to force a conflicting checkpoint rises
+with the equivocator fraction and crosses the one-third accountability line at
+`φ = 0.40`, peaking at 0.50 of stake at `n = 10` and 0.48 at `n = 25`
+(Figure 4.19) [[wiki/experiments/2026-06-19_adversary-comparison]]. This is the
 accountable-safety property of the finality gadget: a safety violation is
 possible only at the cost of at least one-third of the stake being provably
-slashable [[wiki/algorithms/pos]]. Casper FFG is also the most liveness-robust of
-the three to equivocation, its success rate holding across the full swept range
-to `φ = 0.50` [[wiki/experiments/2026-06-19_adversarial-degradation]].
+slashable [[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]]. Casper
+FFG is also the most liveness-robust of the three to equivocation, its success
+rate holding across the full swept range to `φ = 0.50`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 Snowman presents no fork surface at all. Equivocation against a subsampling
-protocol reduces to a lying responder — a validator that answers different
-queries inconsistently — which has no more effect than withholding a response,
-so the strategy is not swept above the threshold for Snowman
-[[wiki/concepts/adversary-model]]. The empirical safety-violation rate is zero on
-every cell of the grid [[wiki/experiments/2026-06-19_adversarial-degradation]].
-Snowman's safety is probabilistic rather than categorical and is reported through
-its analytical bound `ε ≤ (1 − α_c/K)^β`, approximately `5 × 10⁻¹⁵` at `n = 10`
-and a looser `3 × 10⁻¹¹` at `n = 25`, the bound loosening at the larger committee
-because the rounding in `α_c = ⌈0.8K⌉` lifts the ratio `α_c/K` above 0.8 only at
-small `K` [[wiki/concepts/metric-reconciliation]]. An empirical zero cannot
-confirm a bound this small: with eighty observations per cell the data bounds the
-violation rate only below a few percent, many orders of magnitude above the
-analytical `ε`, so the measured zero records that no violation occurred at the
-baseline confidence depth `β = 15`, not that the bound has been observed.
-Witnessing `ε` directly would require a separate sweep at a deliberately weakened
-confidence depth [[wiki/experiments/2026-06-19_adversarial-degradation]].
+protocol reduces to a lying responder, with no more effect than withholding a
+response (§3.4.2), so the strategy is not swept above the threshold for Snowman
+and the empirical safety-violation rate is zero on every cell of the grid
+[[wiki/experiments/2026-06-19_adversarial-degradation]]. Snowman's safety is
+probabilistic rather than categorical and is reported through its analytical
+bound `ε ≤ (1 − α_c/K)^β`, approximately `5 × 10⁻¹⁵` at `n = 10` and a looser
+`3 × 10⁻¹¹` at `n = 25` — the bound loosening at the larger committee because the
+rounding in `α_c = ⌈0.8K⌉` lifts the ratio `α_c/K` above 0.8 only at small `K`
+(§3.3.3). An empirical zero cannot confirm a bound this small: with eighty
+observations per cell the data bounds the violation rate only below a few
+percent, many orders of magnitude above the analytical `ε`, so the measured zero
+records that no violation occurred at the baseline confidence depth `β = 15`, not
+that the bound has been observed. Witnessing `ε` directly would require a
+separate sweep at a deliberately weakened confidence depth
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
 
-Ranked by safety, then, the order is Snowman, Casper FFG, PBFT — not because the
+Ranked by safety, the order is Snowman, Casper FFG, PBFT — not because the
 protocols tolerate different fractions, since all three hold to `φ = 0.33`, but
 because their failures above it differ in kind: Snowman has no fork to suffer,
 Casper FFG forks only at a provable cost of one-third of the stake, and PBFT
 forks deterministically and silently
-[[wiki/experiments/2026-06-19_adversary-comparison]]. Two cautions attach to this
-ordering. The three failures are measured on incommensurable scales — a
-conflicting-commit rate for PBFT, a slashable-stake fraction for Casper FFG, and
-an analytical bound for Snowman — so the ranking compares kinds of failure, not
-magnitudes on a single axis. And Snowman's first place is in part structural:
-equivocation presents no fork-inducing surface to a subsampling protocol to begin
-with, which is why the strategy is swept only to `φ = 0.33` for Snowman rather
-than past it. Snowman is therefore ranked first for having no safety failure mode
-to expose, not for surviving a fraction at which the others break
-[[wiki/concepts/adversary-model]].
+[[wiki/experiments/2026-06-19_adversary-comparison]]. Two cautions attach. The
+three failures sit on incommensurable scales — a conflicting-commit rate for
+PBFT, a slashable-stake fraction for Casper FFG, and an analytical bound for
+Snowman — so the ranking compares kinds of failure, not magnitudes on a single
+axis. And Snowman's first place is in part structural: a subsampling protocol
+presents no fork-inducing surface to begin with, which is why the strategy is
+swept only to `φ = 0.33` for Snowman; it is ranked first for having no safety
+failure mode to expose, not for surviving a fraction at which the others break
+(§3.4.2).
 
 **Figure 4.16 — Liveness under equivocation.** Finalization success rate against
-the equivocator fraction `φ`, one curve per protocol, faceted by validator count;
-PBFT's curve is non-monotone, its apparent recovery above `φ = 0.33` coinciding
-with the safety failure of Figure 4.18. Source:
+the equivocator fraction `φ`, one curve per protocol, faceted by validator
+count; PBFT's curve is non-monotone, its apparent recovery above `φ = 0.33`
+being the safety failure of Figure 4.18, not restored liveness. Source:
 `results/adversary/plots/liveness_vs_phi_equivocate.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 **Figure 4.17 — PBFT view-change activity under equivocation.** View-change
 events per second against the equivocator fraction `φ`, faceted by validator
-count; the rate is a monotone indicator of the leader-rotation mechanism that
-absorbs equivocation below the one-third threshold, while the absolute
-view-change counts at the last safe fraction are the ones reported in the text.
-Source: `results/adversary/plots/pbft_viewchange_rate_vs_phi.pdf`
+count; the plotted rate indexes the leader-rotation mechanism, while the absolute
+counts at the last safe fraction are the ones reported in the text. Source:
+`results/adversary/plots/pbft_viewchange_rate_vs_phi.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 **Figure 4.18 — Cross-protocol safety-violation rate under equivocation.**
 Safety-violation rate against the equivocator fraction `φ`, one curve per
-protocol, faceted by validator count; only PBFT leaves zero, stepping to a
-deterministic fork at `φ = 0.40`, while Casper FFG and Snowman remain at zero —
-their failures, where they exist, are reported on the stake axis of Figure 4.19
-and through `ε` respectively. Source:
-`results/adversary/plots/safety_cliff_vs_phi.pdf`
+protocol, faceted by validator count; only PBFT departs from zero, stepping to a
+deterministic fork at `φ = 0.40`. Casper FFG and Snowman stay at zero — their
+failure modes appear on the stake axis of Figure 4.19 and through `ε`
+respectively. Source: `results/adversary/plots/safety_cliff_vs_phi.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 **Figure 4.19 — Casper FFG slashable stake under equivocation.** Maximum
 slashable stake fraction against the equivocator fraction `φ`, faceted by
-validator count, with the one-third accountability line marked; the
-accountable-safety signal that replaces a fork count for the finality gadget.
-Source: `results/adversary/plots/ffg_slashable_vs_phi.pdf`
+validator count, with the one-third accountability line marked. Source:
+`results/adversary/plots/ffg_slashable_vs_phi.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 ### 4.4.4 The performance–security tradeoff
@@ -736,7 +716,7 @@ protocol whose safety failure is both deterministic and unattributable. Snowman'
 subsampling inverts this profile: it is the strongest against equivocation,
 presenting no fork surface and a vanishing probabilistic bound, but it is the
 most fragile to silence, its polls starving earliest, and the costliest under
-delay, paying an order-of-magnitude latency blow-up. Casper FFG wins no single
+delay, its time-to-finality blowing up by factors of 62 and 49. Casper FFG wins no single
 adversary outright, yet it is the only protocol with an accountable safety
 failure and the most liveness-robust to equivocation, while paying for its single
 rotating proposer with the earliest liveness loss under delay and a graceful but
@@ -771,34 +751,33 @@ on the safety invariant for equivocation. Source:
 | Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (throughput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
-Two qualifications bound this verdict. First, the survey covers three families.
+Two qualifications bound this verdict. First, the survey covers three families:
 Narwhal+Tusk is unimplemented, so its catalogued weakness — data-availability
 withholding, in which a validator certifies a header yet refuses to serve its
 contents — is absent, and the adversarial verdict is scoped to the three families
-measured [[wiki/concepts/adversary-model]]. The swept strategies are also the
-three generic capabilities of the catalog; the leader-disruption surface,
-plausibly the sharpest attack on the leader-based protocols, is catalogued but
-not exercised. Because the delayed and silent sets are moreover chosen to spare
-the view-0 primary, PBFT's standing as the strongest protocol against the two
-liveness adversaries is established only against adversaries that leave its leader
-honest — a leader-targeting adversary is precisely the case this sweep does not
-measure [[wiki/concepts/experiment-matrix]]. Second, several measurement
-boundaries
-qualify how the numbers should be read. Safety results are seed-invariant, since
-the equivocating set is fixed rather than sampled, so the safety columns carry no
+measured [[wiki/concepts/adversary-model]]. The swept strategies are the three
+generic capabilities of the catalog; the leader-disruption surface, plausibly the
+sharpest attack on the leader-based protocols, is catalogued but not exercised,
+and because the delayed and silent sets are chosen to spare the view-0 primary,
+PBFT's standing as the strongest protocol against the two liveness adversaries
+holds only against adversaries that leave its leader honest — a leader-targeting
+adversary is precisely the case this sweep does not measure
+[[wiki/concepts/experiment-matrix]]. Second, several measurement boundaries
+qualify how the numbers read. Safety results are seed-invariant, since the
+equivocating set is fixed rather than sampled, so the safety columns carry no
 seed variance while the success-rate columns carry all of it
 [[wiki/experiments/2026-06-19_adversarial-degradation]]; Snowman's analytical `ε`
 is not empirically witnessed at the baseline confidence depth, as noted in
 §4.4.3; a run truncated at the measurement deadline is not scored a liveness
 failure, only a run in which no honest validator commits within the window
-[[wiki/concepts/output-format]]; and the latency-only network charges no
+(§3.4.1); and the latency-only network charges no
 signature-verification or other compute cost, so the work of detecting and
 recovering from equivocation — view-change rounds for PBFT, slashing-evidence
 processing for Casper FFG — is counted in messages but not in computation. This
 omission understates the cost borne by precisely PBFT and Casper FFG, whose
-equivocation handling is compute-bound, and so flatters those two protocols on
-any cost comparison; it does not bear on the message-count, liveness, or safety
-verdicts that this section actually draws [[wiki/concepts/network-model]].
+equivocation handling is compute-bound, and so flatters those two on any cost
+comparison; it does not bear on the message-count, liveness, or safety verdicts
+this section draws (§3.2).
 
 Read on the throughput axis rather than the liveness one, the same sweep answers
 RQ2: as the injected Byzantine fraction `φ` rises toward the fault threshold,
