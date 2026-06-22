@@ -64,6 +64,13 @@ within a percent. The confidence-interval exercise thus does double duty — it
 confirms determinism for the structural metrics and bounds workload noise for
 goodput.
 
+**Figure 4.5 — Goodput with 95% confidence intervals (baseline).** Goodput per
+protocol across `n ∈ {4, 7, 10, 16, 25}` with Student-t confidence intervals;
+goodput carries the sole non-degenerate interval (coefficient of variation
+≈ 2.2%), every structural metric being deterministic across seeds. Source:
+`results/baseline/plots/goodput_ci_vs_n.pdf`
+[[wiki/experiments/2026-06-08_baseline-cis]].
+
 ### 4.2.2 Latency
 
 Commit latency is flat in the validator count for all three protocols
@@ -99,6 +106,12 @@ round-bounded, but it must be read as a property of the zero-delay model: the
 latency cost that grows with the validator set, and that separates the
 protocols, surfaces only under the delay sweep of §4.3.
 
+**Figure 4.1 — Commit latency versus validator-set size (baseline).** Median
+per-validator `commit_latency_ms` for each protocol across the sweep at zero
+injected delay; flat in `n` (PBFT and Snowman ≈ 1000 ms, Casper FFG ≈ 5000 ms).
+Source: `results/baseline/plots/latency_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
 ### 4.2.3 Throughput and goodput
 
 The schema carries two throughput columns, and the baseline shows why the
@@ -119,6 +132,19 @@ below the protocol's cadence is always absorbed
 [[wiki/experiments/2026-06-03_scaling-baseline]]. It must not be read as a
 measured capacity ceiling; saturation throughput requires a capacity model and
 is deferred [[wiki/concepts/output-format]].
+
+**Figure 4.2 — Goodput versus validator-set size (baseline).** Committed-
+transaction rate (tx/s) for each protocol across the sweep; flat in `n`
+(≈ 95 tx/s for PBFT and Snowman, ≈ 80 tx/s for Casper FFG). Source:
+`results/baseline/plots/throughput_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
+**Figure 4.4 — Decision rate (`tps`) versus validator-set size (baseline).**
+Per-protocol `tps` (decision events per window), which grows linearly in `n` by
+construction — a decision-event rate that scales with the validator set, not
+system transaction throughput (contrast Figure 4.2). Source:
+`results/baseline/plots/decision_rate_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
 
 ### 4.2.4 Communication overhead
 
@@ -166,6 +192,12 @@ saturates at the production value of 20 near `n = 21`. The comparison is
 therefore reported as a per-unit cost contrast, with the per-validator
 scalability stated separately so the figure is not misread.
 
+**Figure 4.3 — Communication overhead versus validator-set size (baseline).**
+`total_msgs_per_acu` for each protocol across the sweep, logarithmic vertical
+axis; the order-of-magnitude separation that answers RQ3. Source:
+`results/baseline/plots/msgs_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
 **Figure 4.7 — Measured message overhead against predicted asymptotic cost.**
 Markers are the simulator's measured `total_msgs_per_acu`; dashed lines are the
 per-protocol predictions — PBFT `2n`, Casper FFG `1.2n`, and Snowman `2·K·β`
@@ -186,6 +218,13 @@ comparative information, since the three protocols are indistinguishable on
 both columns. The reliability metrics become discriminating only once the
 adversarial sweep drives validators past their fault thresholds, where the
 per-protocol safety invariants of §3.5 diverge; that analysis is §4.4.
+
+**Figure 4.6 — Success and fork rate versus validator-set size (baseline).**
+Per-protocol success rate across the sweep; success rate 1.0 and fork rate 0.0
+at every `n`, confirming honest-path correctness with no comparative
+information at the baseline. Source:
+`results/baseline/plots/success_rate_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
 
 ### 4.2.6 A note on the latency measurement point
 
@@ -379,7 +418,8 @@ count, with 95% confidence intervals. Source:
 **Figure 4.10 — Loss-resilience ranking.** Area under the finalization-rate
 curve (AURC) with 95% confidence intervals, annotated with each cell's survival
 depth `p*`, faceted by validator count; protocols whose intervals overlap share
-a rank. Source: `results/delay/plots/resilience_ranking.pdf`
+a rank, bracketed in the figure (the `n = 25` PBFT–Snowman tie). Source:
+`results/delay/plots/resilience_ranking.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
 ### 4.3.3 Mechanisms of degradation
@@ -602,7 +642,7 @@ the `2f+1` quorum [[wiki/experiments/2026-06-17_offline-validators]]. Casper FFG
 degrades gracefully over the same range, still finalizing at `φ = 0.33`; its
 throughput — the rate of committed units, a separate magnitude from the success
 rate that Figure 4.15 plots — decays in proportion to the participating stake,
-approximately `1 − φ`, to a worst surviving ratio near 0.49 at `n = 10` and 0.47
+approximately `1 − φ` (Figure 4.20), to a worst surviving ratio near 0.49 at `n = 10` and 0.47
 at `n = 25` [[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman cliffs earliest, and
 its cliff is committee-size-dependent: it survives only to `φ = 0.10` at `n = 10`
 and `φ = 0.20` at `n = 25`, because a poll round closes only once `α_c` sampled
@@ -824,8 +864,18 @@ sustained throughput degrades in three distinct modes — PBFT holds undegraded
 until its quorum cliff, Casper FFG decays gracefully in proportion to the
 participating stake (≈ `1 − φ`), and Snowman starves earliest as its polls fail
 to close — so the rate at which throughput falls is governed by each family's
-quorum structure rather than by `φ` alone
+quorum structure rather than by `φ` alone (Figure 4.20)
 [[wiki/experiments/2026-06-19_adversary-comparison]].
+
+**Figure 4.20 — Throughput degradation versus adversarial fraction (silent
+non-participation).** Committed-unit throughput against the injected silent
+fraction `φ` for each protocol, one panel per committee size (`n = 10`,
+`n = 25`); the three RQ2 degradation modes read off the curves directly — PBFT
+undegraded to its quorum cliff, Casper FFG decaying in proportion to the
+participating stake (≈ `1 − φ`), and Snowman starving earliest. Source:
+`results/adversary/plots/throughput_vs_f_n10.pdf` and
+`results/adversary/plots/throughput_vs_f_n25.pdf`
+[[wiki/experiments/2026-06-17_offline-validators]].
 
 The question of whether any one family occupies a dominant position once the
 baseline, delay, and adversarial regimes are considered jointly — the
