@@ -47,6 +47,15 @@ One logical change per commit.
 
 - One task per session.
 - Do not edit files outside the task's scope.
+- **Scope changes carry a ledger debt.** If your task changes thesis scope —
+  descoping or rescoping a task, rewording or retiring a research question, or
+  adding/discharging/re-owning a forward reference ("deferred to Chapter X",
+  "left to future work") — reconciling the cross-chapter ledgers in
+  `docs/draft-narrative.md` (§1 spine, §2 RQ-closure, §3 forward-reference, §10
+  cheat-sheet) is part of that task, regardless of role. This is in-scope, not an
+  opportunistic edit. The obligation applies to `meta:` commits and to
+  Engineer/Researcher tasks, not only Writer tasks — see `docs/draft-narrative.md`
+  §11. The lint pass cross-checks these ledgers (`docs/lint-protocol.md` check 9).
 - Notice an unrelated issue? Append to `## Backlog` in `TASKS.md`; do not fix.
 - If a task is ambiguous, stop and ask. Do not guess.
 

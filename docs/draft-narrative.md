@@ -7,8 +7,10 @@ chapters* — the questions each chapter inherits, the promises it must discharg
 and the conventions it must not silently break. Every chapter after Chapter 3
 (results, synthesis, conclusion) is written and reviewed against this file.
 
-`CLAUDE.md` does not `@`-import it (it is Writer-only, like `draft-style.md`), so
-the Writer loads it on pickup. It is also the second rubric the
+`CLAUDE.md` does not `@`-import it (it is Writer-only for *loading*, like
+`draft-style.md`), so the Writer loads it on pickup — but its ledgers (§2, §3,
+§10) are a synchronized artifact maintained by *any* task that changes scope, not
+only Writer tasks (see §11). It is also the second rubric the
 `prj-review-panel` slice review and any draft self-check run against: the panel
 scores a slice in isolation; this layer scores whether the slice *connects*.
 
@@ -331,5 +333,40 @@ writes the prose stays clean and the answer stays sharp.
   per-chapter caveats; summarize RQ1–RQ5; keep the §6.3 future-work directions
   (do not duplicate the seeded ones). Close the loop to the §1.2 incidents.
   Strip the `T38.1` leak in §6.3.2.
+
+---
+
+## 11. Maintenance contract — this file is a synchronized ledger
+
+The §2 RQ-closure ledger, the §3 forward-reference ledger, the §10 per-chapter
+cheat-sheet, and the §1 spine sentence are **derived state**: they restate, in
+cross-chapter form, scope decisions whose authoritative record lives in
+`TASKS.md` (and, for RQ wording, `wiki/concepts/research-questions.md`). Derived
+state drifts unless something forces it to move with its source — which is exactly
+how a descoped deliverable can sit in the ledger as still "owed by Chapter X"
+until a downstream Writer discovers the contradiction by chance.
+
+The rule, modelled on the `wiki/index.md` update obligation (every task that
+creates a page updates the index):
+
+> **Any task that changes thesis scope updates §1, §2, §3, and §10 in the same
+> change — regardless of role.** A scope change is: descoping or rescoping a task;
+> rewording, adding, or retiring a research question; adding, discharging, or
+> re-owning a forward reference ("deferred to Chapter X", "left to future work");
+> or changing what a chapter owns or hands off.
+
+This obligation is **not Writer-only.** Most scope changes are recorded by `meta:`
+commits or by Engineer/Researcher tasks whose authors never open a draft; they
+must still reconcile these ledgers, or the next Writer inherits a contradiction.
+The reciprocal Writer obligation already stands: a Writer touching a results or
+synthesis chapter updates §2 and satisfies every row it owns (§2; gate §7a-G2).
+
+When a row cannot be fully reconciled in the moment, do not leave it silently
+wrong: restate it as consciously carried, with the date and the pending decision,
+per the no-silent-drops rule (§1, item 4). The lint pass cross-checks these
+ledgers against `TASKS.md` (`docs/lint-protocol.md` check 9 — narrative-ledger
+drift) and the pickup flow loads this file for post-Chapter-3 Writer tasks so a
+residual divergence surfaces at pickup, not mid-draft. A divergence is a finding,
+not a convention.
 </content>
 </invoke>

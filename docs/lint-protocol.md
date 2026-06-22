@@ -37,6 +37,23 @@ the report.
      CSV it was rendered from (the CSV is the provenance anchor); flag,
      but treat a CSV-newer-than-PDF as Low unless the CSV's data
      actually changed.
+9. **Narrative-ledger drift** — the cross-chapter ledgers in
+   `docs/draft-narrative.md` (§1 spine sentence, §2 RQ-closure ledger, §3
+   forward-reference ledger, §10 per-chapter cheat-sheet) are derived from scope
+   decisions recorded in `TASKS.md` and the RQ wording in
+   `wiki/concepts/research-questions.md`. Cross-check each row against its source
+   and flag:
+   - an RQ whose `TASKS.md`/on-disk-draft status disagrees with its §2 ledger row
+     (a chapter present on disk but the RQ still "open", or vice versa);
+   - a §3 forward reference whose owning task has been descoped, retired, or
+     completed without the ledger discharging or explicitly re-carrying it (e.g.
+     an enhancement "owed by Chapter X" whose task carries a `DESCOPED` note in
+     `TASKS.md`);
+   - a §10 cheat-sheet entry naming a deliverable that a `TASKS.md` scope note has
+     moved, dropped, or reassigned.
+   Report each divergence with both the ledger line and the conflicting
+   `TASKS.md` line. This guards the `docs/draft-narrative.md` §11 maintenance
+   contract.
 
 ## Output
 
