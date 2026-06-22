@@ -155,9 +155,9 @@ def fig_throughput_vs_f(rows, plot_dir: str) -> list[str]:
         if all_f:
             ax.plot(all_f, [1.0 - f for f in all_f], color="grey",
                     linewidth=1.0, linestyle="--", zorder=1,
-                    label="$y = 1 - f$ invariant")
-        ax.set_xlabel("offline-validator fraction $f$")
-        ax.set_ylabel("throughput ratio (vs f=0 control)")
+                    label="$y = 1 - \\varphi$ invariant")
+        ax.set_xlabel("adversarial fraction $\\varphi$")
+        ax.set_ylabel("throughput ratio (vs $\\varphi$=0 control)")
         ax.set_ylim(-0.05, 1.08)
         ax.set_title(f"Throughput retention vs offline fraction "
                      f"($n = {n}$, mean ± 95% CI)")

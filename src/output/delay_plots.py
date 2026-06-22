@@ -253,6 +253,17 @@ def fig_resilience_ranking(heavy, moderate) -> str:
                         (x, r.aurc_ci_hi), textcoords="offset points",
                         xytext=(0, 4), ha="center", fontsize=7,
                         color=STYLE[proto]["color"])
+        # Bracket any statistically tied pair (overlapping CIs share a rank), so
+        # the n=25 PBFT-Snowman tie is visible in the figure, not only in prose.
+        for i in range(len(PROTO_ORDER)):
+            for j in range(i + 1, len(PROTO_ORDER)):
+                ri, rj = ranked[PROTO_ORDER[i]], ranked[PROTO_ORDER[j]]
+                if ri.aurc_ci_lo <= rj.aurc_ci_hi and rj.aurc_ci_lo <= ri.aurc_ci_hi:
+                    y = max(ri.aurc_ci_hi, rj.aurc_ci_hi) + 0.035
+                    ax.plot([i, i, j, j], [y - 0.012, y, y, y - 0.012],
+                            color="0.35", linewidth=1.0)
+                    ax.text((i + j) / 2.0, y + 0.004, "tie", ha="center",
+                            va="bottom", fontsize=7, color="0.35")
         ax.set_title(f"$n = {n}$")
         ax.set_xticks(list(xs))
         ax.set_xticklabels([STYLE[p]["label"] for p in PROTO_ORDER])
