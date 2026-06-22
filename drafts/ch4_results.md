@@ -243,79 +243,66 @@ performance–structure contrast RQ3 asks about and that §4.3 will stress furth
 
 ## 4.3 Network-delay sweep
 
-The delay sweep holds the validator set and the workload fixed and varies the
-network timeline, isolating the latency and message loss that the baseline of
-§4.2 deliberately excluded. It draws two regimes from run family B of the
-experiment matrix [[wiki/concepts/experiment-matrix]]. The moderate regime
-applies two loss-free timelines of equal mean delay but different tail shape —
-`delay-uniform`, uniform on [100, 500] ms, and `delay-exponential`,
-exponential with the same 300 ms mean
-[[wiki/experiments/2026-06-10_delay-moderate]]. The heavy regime applies a
-heavy-tailed Pareto delay of roughly three-second mean, first without loss as a
-control and then under per-message drop probabilities of 5%, 10%, and 20%
-[[wiki/experiments/2026-06-12_delay-heavy]]. Each cell is run at validator
-counts `n ∈ {10, 25}` over twenty seeds with common random numbers across
-protocols, except the most expensive cell — Snowman at `n = 25` under heavy
-delay — which is run over eight. As in §4.2, the evaluation covers three of the
-four families; Narwhal+Tusk awaits its implementation.
+The delay sweep holds the validator set and workload fixed and varies the
+network timeline, isolating the latency and loss the baseline of §4.2 excluded.
+It draws two regimes from run family B [[wiki/concepts/experiment-matrix]]. The
+moderate regime applies two loss-free timelines of equal mean but different tail
+shape — `delay-uniform` on [100, 500] ms and `delay-exponential` of the same
+300 ms mean [[wiki/experiments/2026-06-10_delay-moderate]]. The heavy regime
+applies a heavy-tailed Pareto delay of roughly three-second mean, first without
+loss as a control and then under per-message drop probabilities of 5%, 10%, and
+20% [[wiki/experiments/2026-06-12_delay-heavy]]. Each cell runs at `n ∈ {10, 25}`
+over twenty seeds with common random numbers, except the most expensive —
+Snowman at `n = 25` under heavy delay — over eight. As in §4.2, three of the four
+families are covered; Narwhal+Tusk awaits its implementation.
 
-Two properties of the measurement must be stated before the results. First, all
-cross-protocol latency figures are read from `commit_latency_ms`, the canonical
-time-to-finality column established in §4.2.6, so that each protocol's
-irreversibility milestone is compared like for like
-[[wiki/concepts/output-format]]. Second, delay and loss attack different
-properties and are reported apart: delay inflates time-to-finality and bears on
-RQ1, whereas loss erodes liveness and bears on RQ4
-[[wiki/concepts/research-questions]]. The section follows that division —
-latency first, then the loss-resilience ranking, then the mechanisms behind it,
-and finally the tradeoff that ties the two axes together.
+Two measurement properties frame the results. All cross-protocol latency is read
+from `commit_latency_ms`, the canonical time-to-finality column of §4.2.6, so
+each protocol's irreversibility milestone is compared like for like
+[[wiki/concepts/output-format]]. And delay and loss attack different properties,
+reported apart: delay inflates time-to-finality (RQ1), loss erodes liveness
+(RQ4) [[wiki/concepts/research-questions]]. The section follows that order —
+latency, then the loss-resilience ranking, then its mechanisms, then the tradeoff
+tying the two together.
 
 ### 4.3.1 Delay and time-to-finality
 
-Under moderate delay the three protocols separate by more than an order of
-magnitude, and the separation is governed by each protocol's round structure
-rather than by the network (Figure 4.8). PBFT rises from its zero-delay
-baseline of approximately 1000 ms [[wiki/experiments/2026-06-03_scaling-baseline]]
-to approximately 1.95 s, an increase of about 0.9 s that corresponds to one
-network round-trip absorbed into each of its three communication phases; the
-figure is near-flat in `n` because those phases overlap across the validator
-set [[wiki/experiments/2026-06-10_delay-moderate]]. Casper FFG rises from
-approximately 5.0 s to approximately 6.3 s, an increase of about 27%. This rise
-is slot-dominated rather than network-dominated: the experiment matrix couples
-the finality-gadget slot to the delay regime through the coherence rule
-`slot ≥ 4·E[delay]`, rescaling the slot from one second to 1.2 s; the same 20%
-scales the slot-bound finality interval, lengthening FFG's roughly five-second
-finality to about six seconds and leaving only some 0.3 s to attestation
-propagation [[wiki/concepts/experiment-matrix]]. Casper FFG's sensitivity to delay is
-therefore indirect, mediated by its slot clock.
+Under moderate delay the three protocols separate by nearly an order of
+magnitude, governed by each protocol's round structure rather than the network
+(Figure 4.8). PBFT rises from its ≈1000 ms zero-delay baseline to approximately
+1.95 s — about 0.9 s, one network round-trip absorbed into each of its three
+phases — and is near-flat in `n` because those phases overlap across the
+validator set [[wiki/experiments/2026-06-10_delay-moderate]]. Casper FFG rises
+from approximately 5.0 to 6.3 s, about 27%, but this is slot-dominated, not
+network-dominated: the coherence rule `slot ≥ 4·E[delay]` (§3.4.3) rescales the
+finality-gadget slot from one second to 1.2 s, and the same 20% scales the
+slot-bound finality interval, lengthening FFG's roughly five-second finality to
+about six and leaving only some 0.3 s to attestation propagation
+[[wiki/concepts/experiment-matrix]]. Casper FFG's delay sensitivity is therefore
+indirect, mediated by its slot clock.
 
-Snowman is by far the most delay-exposed protocol, rising from approximately
-1000 ms to between 12 and 15 s, a factor of twelve to fifteen
+Snowman is by far the most delay-exposed, rising from approximately 1000 ms to
+between 12 and 15 s, a factor of twelve to fifteen
 [[wiki/experiments/2026-06-10_delay-moderate]]. Its confidence counter requires
-`β = 15` successful poll rounds in sequence, and each round is a
-query-and-response exchange that costs about two network delays, so the fifteen
-rounds accumulate roughly twelve seconds [[wiki/algorithms/avalanche]]. Like
-the other two protocols its latency is near-flat — indeed slightly lower — in
-`n`, because the poll sample size `K` rescales with the committee rather than
-the first block's finality time growing with it
-[[wiki/concepts/metric-reconciliation]].
+`β = 15` poll rounds in sequence (§3.3.3), each a query-and-response exchange
+costing about two network delays, so the fifteen rounds accumulate roughly twelve
+seconds. Its latency too is near-flat — indeed slightly lower — in `n`, because
+the poll sample size `K` rescales with the committee rather than the first
+block's finality time growing with it (§3.3.3).
 
-The two moderate timelines share a mean but differ in tail shape, and this
-distinguishes the protocols a second way. PBFT and Casper FFG are nearly
-insensitive to the tail, differing by at most three percent between the uniform
-and exponential timelines, because a fixed count of rounds or slots averages
-the per-message delay and washes out its distribution
-[[wiki/experiments/2026-06-10_delay-moderate]]. Snowman is the exception: its
-exponential-timeline latency exceeds its uniform-timeline latency at both
+The two timelines share a mean but differ in tail shape, separating the
+protocols a second way. PBFT and Casper FFG are nearly tail-insensitive,
+differing by at most three percent between the uniform and exponential
+timelines, because a fixed count of rounds or slots averages out the per-message
+delay [[wiki/experiments/2026-06-10_delay-moderate]]. Snowman is the exception:
+its exponential-timeline latency exceeds its uniform-timeline latency at both
 committee sizes — approximately 15.3 against 12.6 s at `n = 10` — because each
-poll round waits on the slowest of its `K` sampled peers, and the memoryless
-tail inflates that slowest response and compounds the penalty across the
-fifteen sequential rounds. Communication overhead, by contrast, does not move
-with delay at all: PBFT's messages per committed unit land on the same `2n`
-value measured at zero delay and Snowman's within about two percent, confirming
-that message count is fixed by protocol structure and not by network timing,
-consistent with the overhead analysis of §4.2.4
-[[wiki/experiments/2026-06-10_delay-moderate]].
+poll round waits on the slowest of its `K` sampled peers, and the memoryless tail
+inflates that slowest response across the fifteen sequential rounds. Communication
+overhead, by contrast, does not move with delay: PBFT's messages per committed
+unit hold the same `2n` measured at zero delay and Snowman's stay within about
+two percent, confirming that message count is fixed by protocol structure, not
+network timing (§4.2.4).
 
 These results answer RQ1: as the network-delay distribution widens from the
 nominal baseline toward heavier tails, commit latency scales by a factor fixed by
@@ -334,52 +321,44 @@ validator count; logarithmic vertical axis. Source:
 ### 4.3.2 Packet loss and the resilience ranking
 
 Under packet loss the question shifts from how long finalization takes to
-whether it happens at all. The measure is the finalization rate: the number of
-instances a protocol finalizes under loss as a fraction of the number it
-finalizes on the matched loss-free control
-[[wiki/experiments/2026-06-12_delay-heavy]]. Figure 4.9 plots this rate against
-the drop probability for each protocol and committee size, and three distinct
-degradation shapes are visible: PBFT declines along a shallow tail that stays
-above zero to the deepest tested loss, Snowman holds a high plateau and then
-falls to near-zero within a single loss step, and Casper FFG collapses at the
-first loss step. A fixed 95%-finalization breakpoint was considered as a resilience
-score and rejected, because every protocol is already below that threshold at
-the lightest tested loss, so the threshold collapses the field to an
-uninformative tie [[wiki/experiments/2026-06-13_delay-comparison]].
+whether it happens at all. The measure is the finalization rate: instances
+finalized under loss as a fraction of those finalized on the matched loss-free
+control [[wiki/experiments/2026-06-12_delay-heavy]]. Figure 4.9 plots it against
+drop probability per protocol and committee size, showing three degradation
+shapes: PBFT declines along a shallow tail that stays above zero to the deepest
+tested loss, Snowman holds a high plateau then falls to near-zero within a single
+step, and Casper FFG collapses at the first loss step. A fixed 95%-finalization
+breakpoint was rejected as a resilience score: every protocol is already below it
+at the lightest tested loss, collapsing the field to an uninformative tie
+[[wiki/experiments/2026-06-13_delay-comparison]].
 
-The protocols are therefore ranked by the area under the finalization-rate
-curve (AURC), with survival depth — the deepest loss at which a protocol still
-finalizes anything — as the tiebreak, and the two committee sizes reported
-separately [[wiki/experiments/2026-06-13_delay-comparison]]. Figure 4.10 shows
-the ranking directly. At `n = 10` the order is strict: PBFT leads with an AURC
-of 0.253 and survives to 20% loss, Snowman follows at 0.174, and Casper FFG
-trails at 0.149. At `n = 25` PBFT and Snowman are a statistical tie at the top:
-Snowman's higher point estimate of 0.369 and PBFT's of 0.351 carry confidence
-intervals that overlap — [0.366, 0.372] against [0.327, 0.376] — so neither can
-be ranked above the other, while Casper FFG remains last at 0.140. Unlike the
-baseline of §4.2.1, where every structural metric was deterministic across
-seeds and its interval degenerate, the finalization rate genuinely varies with
-the seed, because which messages are dropped depends on it; the intervals in
-Figures 4.9 and 4.10 are accordingly non-degenerate and carry information. The
-finalization-rate intervals are Wilson-score intervals, the form the schema fixes
-for rate metrics, with Student-t reserved for continuous metrics (§3.5). The
-interval for Snowman at `n = 25` is the widest, as that cell is estimated from
-eight seeds rather than twenty [[wiki/experiments/2026-06-12_delay-heavy]].
+The protocols are therefore ranked by the area under the finalization-rate curve
+(AURC), with survival depth — the deepest loss at which a protocol still
+finalizes anything — as the tiebreak, the two committee sizes reported separately
+[[wiki/experiments/2026-06-13_delay-comparison]]. At `n = 10` the order is strict
+(Figure 4.10): PBFT leads with an AURC of 0.253 and survives to 20% loss, Snowman
+follows at 0.174, Casper FFG trails at 0.149. At `n = 25` PBFT and Snowman tie at
+the top — Snowman's point estimate of 0.369 and PBFT's of 0.351 carry overlapping
+intervals, [0.366, 0.372] against [0.327, 0.376], so neither outranks the other —
+while Casper FFG remains last at 0.140. Unlike the deterministic baseline of
+§4.2.1, the finalization rate genuinely varies with the seed, since which
+messages drop depends on it; the intervals in Figures 4.9 and 4.10 are
+accordingly non-degenerate. They are Wilson-score intervals, the schema's form
+for rate metrics (§3.5); Snowman's at `n = 25` is widest, that cell being
+estimated from eight seeds rather than twenty
+[[wiki/experiments/2026-06-12_delay-heavy]].
 
-Two findings stand out from the ranking. The first is that PBFT is the only
-protocol still finalizing at 20% loss, at both committee sizes — 10% of its
-control rate at `n = 10` and 6% at `n = 25` — whereas neither other protocol
-survives past 10% loss, each having fallen to zero by the 20% step
-[[wiki/experiments/2026-06-13_delay-comparison]]. The
-second is that committee size is a sharp resilience lever for Snowman: its
-finalization rate at 5% loss rises from 0.195 at `n = 10` to 0.904 at
-`n = 25`, so that at light loss the larger committee makes Snowman the
-strongest of the three, even as it still cliffs to near-zero by 10%
-[[wiki/experiments/2026-06-12_delay-heavy]]. The same enlargement is a mild
-liability for Casper FFG, whose rate at 5% loss falls slightly, from 0.070 to
-0.051. Throughout the loss sweep no protocol ever forks: the fork rate is zero
-on every row, so what loss degrades is liveness — the ability to finalize — and
-not safety [[wiki/experiments/2026-06-12_delay-heavy]].
+Two findings stand out. First, PBFT is the only protocol still finalizing at 20%
+loss, at both committee sizes — 10% of its control rate at `n = 10`, 6% at
+`n = 25` — whereas neither other survives past 10% loss, each fallen to zero by
+the 20% step [[wiki/experiments/2026-06-13_delay-comparison]]. Second, committee
+size is a sharp resilience lever for Snowman: its finalization rate at 5% loss
+rises from 0.195 at `n = 10` to 0.904 at `n = 25`, so at light loss the larger
+committee makes Snowman the strongest of the three, even as it still cliffs to
+near-zero by 10% [[wiki/experiments/2026-06-12_delay-heavy]]. The same enlargement
+is a mild liability for Casper FFG, whose 5%-loss rate falls slightly, 0.070 to
+0.051. Throughout the loss sweep no protocol forks: loss degrades liveness, not
+safety [[wiki/experiments/2026-06-12_delay-heavy]].
 
 **Figure 4.9 — Finalization rate under packet loss.** Finalization rate against
 per-message drop probability, one curve per protocol, faceted by validator
@@ -389,55 +368,51 @@ count, with 95% confidence intervals. Source:
 
 **Figure 4.10 — Loss-resilience ranking.** Area under the finalization-rate
 curve (AURC) with 95% confidence intervals, annotated with each cell's survival
-depth `p*`, faceted by validator count; protocols whose intervals overlap share
-a rank, bracketed in the figure (the `n = 25` PBFT–Snowman tie). Source:
+depth `p*`, faceted by validator count; overlapping intervals share a rank (the
+`n = 25` PBFT–Snowman tie). Source:
 `results/delay/plots/resilience_ranking.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
 ### 4.3.3 Mechanisms of degradation
 
-The ranking is explained by what each protocol can do when messages are lost
+The ranking follows from what each protocol can do when messages are lost
 (Figures 4.11 and 4.12) [[wiki/experiments/2026-06-13_delay-analysis]]. PBFT is
-the most robust because it has a genuine recovery path. When dropped prepare or
+the most robust because it has a genuine recovery path: when dropped prepare or
 commit messages stall an instance below its quorum, a per-instance timer fires,
 the replicas rotate the leader through a view-change, and the instance is
-reissued under the new leader [[wiki/algorithms/pbft]]. This is a retry rather
-than a retransmission — a fresh round with fresh messages, and so a fresh
-opportunity to assemble the quorum — and enough retries eventually succeed even
-under heavy loss. The recovery work is visible in the view-change count, which
-climbs with the loss level from zero to sixteen and then thirty at `n = 10`,
-and from zero through twenty-eight and sixty-three to seventy-five at `n = 25`
-(Figure 4.12) [[wiki/experiments/2026-06-13_delay-analysis]].
+reissued under the new leader. This is a retry, not a retransmission — a fresh
+round with fresh messages, and so a fresh chance to assemble the quorum — and
+enough retries eventually succeed even under heavy loss. The recovery is visible
+in the view-change count, climbing with loss from zero to sixteen and then thirty
+at `n = 10`, and from zero through twenty-eight and sixty-three to seventy-five at
+`n = 25` (Figure 4.12).
 
 Snowman's robustness is of a different kind: redundancy within a single poll
-round rather than recovery across rounds. A round closes once `α_c` agreeing
-responses arrive, so it tolerates the loss of peers beyond that threshold, but
-there is no poll timeout and no retransmission, and a round that never collects
-`α_c` responses simply stalls [[wiki/experiments/2026-06-13_delay-analysis]].
-Because a response survives only if both its query and its reply survive, the
-expected number of usable responses per round is `K·(1−p)²`, and the round
-closes only while this exceeds `α_c`. The slack `K − α_c` is one at `n = 10`
-but four at `n = 25`, which is why the larger committee tolerates so much more
-loss [[wiki/concepts/metric-reconciliation]]. Once the per-round margin is
-exhausted, however, the `β = 15` rounds compound: the probability of completing
-all fifteen falls away sharply, turning the degradation into a cliff rather
-than a slope. This compounding argument predicts the location of the cliff and
-the committee-size ordering but not the exact rate, and is used qualitatively
+round, not recovery across rounds. A round closes once `α_c` agreeing responses
+arrive, tolerating the loss of peers beyond that threshold, but there is no poll
+timeout and no retransmission — a round that never collects `α_c` responses
+simply stalls. Because a response survives only if both its query and reply
+survive, the expected usable responses per round is `K·(1−p)²`, and the round
+closes only while this exceeds `α_c`; the slack `K − α_c` is one at `n = 10` but
+four at `n = 25`, which is why the larger committee tolerates so much more loss
+(§3.3.3). Once that margin is exhausted the `β = 15` rounds compound, the
+probability of completing all fifteen falling away sharply and turning the
+degradation into a cliff rather than a slope — an argument that predicts the
+cliff's location and the committee-size ordering, used qualitatively
 [[wiki/experiments/2026-06-13_delay-analysis]].
 
-Casper FFG is the most fragile because it has neither recovery nor in-round
-redundancy. Finalization requires a supermajority of at least two-thirds of
-stake to attest the same checkpoint, and then two such justifications in
-consecutive epochs; attestations are broadcast once per epoch, so when enough
-are lost the epoch never justifies, and there is no leader to rotate and no
-resampling to fall back on [[wiki/experiments/2026-06-13_delay-analysis]]. A 5%
-drop already collapses it, and a larger committee is a slight liability because
-it adds attestation links that can be lost without adding redundancy
-[[wiki/experiments/2026-06-12_delay-heavy]]. Under heavy delay a node may
-justify an epoch before its checkpoint block arrives locally; a guard added
-during the heavy-delay experiments converts what would have been a crash into
-an honest stall, in which the node skips the attestation and retries at a later
-slot [[wiki/algorithms/pos]].
+Casper FFG is the most fragile, having neither recovery nor in-round redundancy.
+Finalization requires a two-thirds-stake supermajority to attest the same
+checkpoint and then two such justifications in consecutive epochs; attestations
+are broadcast once per epoch, so when enough are lost the epoch never justifies,
+with no leader to rotate and no resampling to fall back on. A 5% drop already
+collapses it, and a larger committee is a slight liability, adding attestation
+links that can be lost without adding redundancy
+[[wiki/experiments/2026-06-12_delay-heavy]]. Under heavy delay a node may justify
+an epoch before its checkpoint block arrives locally; a guard added during the
+heavy-delay experiments converts what would have been a crash into an honest
+stall, the node skipping the attestation and retrying at a later slot
+[[wiki/experiments/2026-06-12_delay-heavy]].
 
 **Figure 4.11 — Commit-latency growth under loss.** `commit_latency_ms` against
 drop probability on a logarithmic axis; a solid line marks the levels at which
@@ -452,62 +427,57 @@ annotated. Source: `results/delay/plots/cost_of_survival.pdf`
 
 ### 4.3.4 The latency–liveness tradeoff
 
-The two stress axes meet in a single conclusion: the protocols that survive
-loss are the ones that pay the most latency to do so (Figure 4.13). PBFT and
-Snowman both inflate their time-to-finality by factors of roughly two to
-three-and-a-half at the worst loss they survive, and they convert that cost
-into survival — PBFT into a long tail to 20% loss, Snowman into a high but
-brittle plateau [[wiki/experiments/2026-06-13_delay-analysis]]. Casper FFG
-does not make this trade: it inflates latency by only about three to ten
-percent, but that near-constant cost is measured over the few seeds that still
-finalize at all, and it buys almost nothing, since the protocol no longer
-finalizes by 10% loss. No configuration in the dataset is both cheap and resilient; the
-operator-facing reading is that protecting liveness against a lossy network is a
-choice of how much latency to spend, not whether to spend it.
+The two stress axes meet in one conclusion: the protocols that survive loss are
+the ones that pay the most latency to do so (Figure 4.13). PBFT and Snowman both
+inflate their time-to-finality by factors of roughly two to three-and-a-half at
+the worst loss they survive, converting that cost into survival — PBFT a long
+tail to 20% loss, Snowman a high but brittle plateau
+[[wiki/experiments/2026-06-13_delay-analysis]]. Casper FFG does not make the
+trade: it inflates latency by only about three to ten percent, but that
+near-constant cost is measured over the few seeds that still finalize and buys
+almost nothing, since it no longer finalizes by 10% loss. No configuration in the dataset is
+both cheap and resilient; for an operator, protecting liveness against a lossy
+network is a choice of how much latency to spend, not whether to spend it.
 
-The verdict for the delay family follows. PBFT degrades most gracefully,
-declining smoothly and remaining alive at the deepest tested loss at both
-committee sizes; Snowman is strong but brittle, best in class at light loss when
-the committee is large but prone to sudden collapse; and Casper FFG is fragile,
-never establishing a resilient plateau. The `n = 25` tie between PBFT and
-Snowman is a genuine crossover rather than measurement noise: the two protocols
-win on different virtues — Snowman on the area under the curve, having retained
-0.90 finality at 5% loss, and PBFT on survival depth, being alone alive at 20% —
-so neither ranks first outright [[wiki/experiments/2026-06-13_delay-comparison]].
-Casper FFG's fragility is, in mechanism, the same class of failure that motivated
-this study (§1.2): attestations that fail to reach a quorum — dropped by a lossy
-network here, delayed under attestation-processing pressure in Ethereum's
-multi-epoch finality stall of May 2023 there — leave the epoch unjustified and
-finality stalled [[wiki/algorithms/pos]].
-The cross-regime question of whether any one family dominates across baseline,
-delay, and adversarial conditions is deferred to the synthesis of Chapter 5
-(RQ5) [[wiki/concepts/research-questions]].
+The delay-family verdict follows. PBFT degrades most gracefully, alive at the
+deepest tested loss at both committee sizes; Snowman is strong but brittle, best
+in class at light loss with a large committee but prone to sudden collapse;
+Casper FFG is fragile, never establishing a resilient plateau. The `n = 25`
+PBFT–Snowman tie is a genuine crossover, not noise: the two win on different
+virtues — Snowman on area under the curve, retaining 0.90 finality at 5% loss,
+PBFT on survival depth, alone alive at 20% — so neither ranks first outright
+[[wiki/experiments/2026-06-13_delay-comparison]]. Casper FFG's fragility is, in
+mechanism, the same class of failure that motivated this study (§1.2):
+attestations that fail to reach a quorum — dropped by a lossy network here,
+delayed under attestation-processing pressure in Ethereum's multi-epoch finality
+stall of May 2023 there — leave the epoch unjustified and finality stalled
+[[wiki/algorithms/pos]]. Whether any one family dominates across the baseline,
+delay, and adversarial regimes jointly — RQ5 — is taken up in the synthesis of
+Chapter 5 [[wiki/concepts/research-questions]].
 
-Two caveats qualify these results. The first concerns the nature of the
-finality being timed. The aligned milestones of §4.2.6 differ in kind: PBFT and
-Casper FFG offer deterministic finality, and Casper FFG's is additionally
-accountable, in that reverting a finalized checkpoint requires at least
-one-third of the stake to be slashed [[wiki/algorithms/pos]]; Snowman's finality
-is probabilistic, with a residual reversion probability bounded by
-`(1 − α_c/K)^β` — approximately `5 × 10⁻¹⁵` at `n = 10` and a looser
-`3 × 10⁻¹¹` at `n = 25`, the bound loosening at the larger committee because the
-rounding in `α_c = ⌈0.8K⌉` raises the ratio above 0.8 only at small `K`
-[[wiki/concepts/metric-reconciliation]]. The empirical and analytical `ε`
-columns that would record this residual per run are deferred to a separate
+Two caveats qualify these results. First, the aligned milestones of §4.2.6 differ
+in kind: PBFT and Casper FFG offer deterministic finality, Casper FFG's
+additionally accountable — reverting a finalized checkpoint requires at least
+one-third of the stake to be slashed
+[[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]] — whereas Snowman's
+is probabilistic, a residual reversion probability bounded by `(1 − α_c/K)^β`,
+approximately `5 × 10⁻¹⁵` at `n = 10` and a looser `3 × 10⁻¹¹` at `n = 25` (the
+bound loosens at the larger committee because the rounding in `α_c = ⌈0.8K⌉`
+raises the ratio above 0.8 only at small `K`) (§3.3.3). The empirical and
+analytical `ε` columns recording this residual per run are deferred to a separate
 sweep at a deliberately weakened confidence depth, as §4.4.3 details
-[[wiki/concepts/output-format]]. The second caveat is the
-more important for interpreting the loss results: loss is modeled as permanent
-per-message drop with no transport-layer retransmission, so the
-finalization-rate curves are an upper bound on fragility
-[[wiki/experiments/2026-06-13_delay-analysis]]. The ordering — PBFT most
-robust, Casper FFG most fragile — is a property of the protocols' recovery
-mechanisms and would survive a retransmitting transport, but the absolute
-collapse levels of 5% to 20% would shift higher beneath one.
+[[wiki/concepts/output-format]]. Second, and more important for the loss results:
+loss is modeled as permanent per-message drop with no transport-layer
+retransmission, so the finalization-rate curves are an upper bound on fragility
+[[wiki/experiments/2026-06-13_delay-analysis]]. The ordering — PBFT most robust,
+Casper FFG most fragile — is a property of the protocols' recovery mechanisms and
+would survive a retransmitting transport, but the absolute collapse levels of 5%
+to 20% would shift higher beneath one.
 
 **Figure 4.13 — The operator tradeoff.** Finalization rate retained against the
-added-latency ratio (loss latency divided by control latency, logarithmic),
-faceted by validator count; cells that no longer finalize are pinned on a "no
-finality" band, and the operator-best region is the upper left. Source:
+added-latency ratio (loss latency over control latency, logarithmic), faceted by
+validator count; cells that no longer finalize are pinned on a "no finality"
+band; the operator-best region is the upper left. Source:
 `results/delay/plots/operator_pareto.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
