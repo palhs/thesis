@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 79 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 90 · In Review: 1 · In Progress: 0 · Not Started: 6 · Blocked: 2 · Descoped: 2
+- Completed: 91 · In Review: 0 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -80,7 +80,7 @@ specs); the `\include{biography}` line has been removed from the template.
   fields for its entry type; the mapping page resolves every
   `wiki/sources/*.md` page to exactly one bibkey
 
-- `[?]` **T72** `H` Writer — Port Ch4 §4.4 + Ch5 + Ch6 into the LaTeX build
+- `[x]` **T72** `H` Writer — Port Ch4 §4.4 + Ch5 + Ch6 into the LaTeX build
   _Outcome:_ Bring the compiled thesis level with the markdown drafts (the
   H-priority Backlog item below). Port §4.4 (Adversarial sweep) prose + its eight
   figure environments — Figs 4.14–4.21, with the two throughput panels (`n10` /
