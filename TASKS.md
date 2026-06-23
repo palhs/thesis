@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 88 · In Review: 1 · In Progress: 0 · Not Started: 7 · Blocked: 2 · Descoped: 2
+- Completed: 88 · In Review: 2 · In Progress: 0 · Not Started: 6 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -278,8 +278,9 @@ specs); the `\include{biography}` line has been removed from the template.
 
 - `[?]` **T61** `H` Writer — Revise all chapters for consistency
   _Outcome:_ Terminology consistent, no contradictions, references complete · _Artifact:_ `drafts/`
-- `[ ]` **T62** `H` Writer — Improve all figures, tables, captions
+- `[?]` **T62** `H` Writer — Improve all figures, tables, captions
   _Outcome:_ Publication-quality: labeled axes, legends, consistent colors · _Artifact:_ `results/` + `drafts/`
+  _In review (2026-06-24) — SLICE 1 of 3 only:_ the **§4.4 adversarial-figures** slice landed (branch `task/T62-adversarial-figures`): the "regenerate §4.4 figures for impact + fix the rate/count seam" Backlog item — Fig 4.14 liveness+latency 2×2, Fig 4.15 step cliffs + φ*, Fig 4.17 rate→count (resolves L-W10 lint M2), Fig 4.18 fork-magnitude annotation, new Fig 4.21 tradeoff matrix, shared φ axes, de-editorialized titles. Render-layer + captions only; no data change (byte-identical `results/adversary/*.csv`); `make test` green. **T62 is NOT complete — two slices remain:** (a) the Ch4↔LaTeX figure-renumbering reconciliation; (b) the Ch5 Pareto-frontier synthesis figure. Do not mark T62 Completed on merging this slice — keep it open (or re-file the two remaining slices as their own tasks).
 - `[ ]` **T63** `H` Writer — Verify objectives ↔ experiments ↔ conclusions alignment
   _Outcome:_ Traceability matrix: RQ → experiment → conclusion · _Artifact:_ `wiki/concepts/traceability-matrix.md`
 - `[ ]` **T64** `H` Writer — Prepare presentation slides

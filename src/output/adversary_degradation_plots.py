@@ -1,12 +1,23 @@
 """T54 — adversarial liveness & safety degradation figures.
 
-Renders the Chapter-4 adversarial figures from the three Family-C CSVs (via
+Renders the Chapter-4 §4.4 adversarial figures from the three Family-C CSVs (via
 output.adversary_analysis) to results/adversary/plots/ as PNG (screen) + PDF
-(vector, thesis import). Liveness (mean success_rate + Wilson band) is shown per
-adversary family; the four per-protocol safety invariants come from the
-equivocate family. Sibling of output.adversary_plots (T51) / output.offline_plots
-(T52); reuses output.plots STYLE + PROTO_ORDER (3 protocols, no Narwhal+Tusk).
-Render layer only (smoke-tested, not unit-tested, per project convention).
+(vector, thesis import). Render layer only (smoke-tested, not unit-tested, per
+project convention); reuses output.plots STYLE + PROTO_ORDER (3 protocols, no
+Narwhal+Tusk). No data is read or written here beyond the committed CSVs — the
+byte-identical-CSV gate covers it.
+
+Figures (draft numbers in parentheses):
+  - liveness_vs_phi_delay        (Fig 4.14) liveness + finality blow-up, delay
+  - liveness_vs_phi_offline      (Fig 4.15) liveness cliffs (steps + phi*), offline
+  - liveness_vs_phi_equivocate   (Fig 4.16) liveness, equivocate
+  - pbft_viewchange_count_vs_phi (Fig 4.17) PBFT view-change COUNT, equivocate
+  - safety_cliff_vs_phi          (Fig 4.18) safety-violation rate + 229 annotation
+  - ffg_slashable_vs_phi         (Fig 4.19) Casper FFG slashable stake
+  - adversary_tradeoff_matrix    (Fig 4.21) 3x3 protocol x adversary outcome map
+
+In-image titles are descriptive only; interpretation lives in the chapter
+captions (draft-style.md, no editorializing in figure titles).
 
 Re-run:
     PYTHONPATH=src python3 -m output.adversary_degradation_plots
@@ -18,6 +29,7 @@ import os
 import matplotlib
 matplotlib.use("Agg")  # headless / deterministic.
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch, Rectangle
 
 from output import adversary_analysis as aa
 from output.plots import STYLE, PROTO_ORDER
@@ -25,8 +37,8 @@ from output.plots import STYLE, PROTO_ORDER
 PLOT_DIR = "results/adversary/plots"
 NS = (10, 25)
 THIRD = 1.0 / 3.0
-FAMILY_LABEL = {"delay": "delayed voters", "offline": "offline validators",
-                "equivocate": "equivocating nodes"}
+XLIM = (-0.01, 0.51)            # shared phi axis across the liveness figures
+YLIM = (-0.05, 1.08)           # shared rate axis (0..1 metrics)
 
 
 def _save(fig, plot_dir, fname):
@@ -43,75 +55,199 @@ def _grid(ax):
     ax.grid(True, which="both", linestyle=":", linewidth=0.6, alpha=0.7)
 
 
-def fig_liveness_vs_phi(rows, family, plot_dir):
-    """mean(success_rate) + Wilson band vs phi, faceted 1x2 by n, per protocol."""
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
-    for ax, n in zip(axes, NS):
+def _third_line(ax):
+    """Faint 1/3 reference where a safety failure first becomes possible."""
+    ax.axvline(THIRD, color="grey", linewidth=0.9, linestyle=":", alpha=0.8,
+               zorder=1)
+
+
+def _liveness_axis(ax, rows, family, n, *, steps=False):
+    """Draw per-protocol success-rate curves on ax over the shared phi axis.
+
+    Returns {protocol: phi*} where phi* is the survival depth (deepest swept phi
+    whose mean success rate is still > 0). Marks each protocol's swept endpoint
+    with a caret on the axis so the sweep-range asymmetry (e.g. Snowman swept
+    only to phi=0.33 on the equivocate family) is visible, not hidden.
+    """
+    survival: dict[str, float] = {}
+    for proto in PROTO_ORDER:
+        cells = aa.liveness_rate(rows, family, proto, n)
+        grid = sorted(cells)
+        if not grid:
+            continue
+        ys = [cells[p].mean for p in grid]
+        lo = [max(0.0, cells[p].mean - cells[p].lo) for p in grid]
+        hi = [max(0.0, cells[p].hi - cells[p].mean) for p in grid]
+        kw = dict(capsize=3, linewidth=1.6, markersize=6, **STYLE[proto])
+        if steps:
+            kw["drawstyle"] = "steps-post"
+        ax.errorbar(grid, ys, yerr=[lo, hi], **kw)
+        # caret on the bottom axis marking this protocol's swept endpoint.
+        ax.plot([grid[-1]], [YLIM[0]], marker=6, markersize=8, clip_on=False,
+                color=STYLE[proto]["color"], zorder=6)
+        alive = [p for p in grid if cells[p].mean > 0]
+        survival[proto] = max(alive) if alive else grid[0]
+    _third_line(ax)
+    ax.set_xlim(*XLIM)
+    ax.set_ylim(*YLIM)
+    _grid(ax)
+    return survival
+
+
+# --------------------------------------------------------------------------- #
+# Fig 4.14 — delayed voting: liveness held vs latency paid
+# --------------------------------------------------------------------------- #
+
+def fig_delay_liveness_and_latency(rows, plot_dir):
+    """Delay family, faceted by n: success rate (top) and the finality blow-up
+    (bottom, log scale). The two protocols that hold success at 1.0 in the top
+    row — PBFT and Snowman — separate in the bottom row, where only Snowman pays
+    the latency, so the figure no longer renders them as identically immune."""
+    fig, axes = plt.subplots(2, 2, figsize=(10.5, 7.6), sharex=True)
+    for col, n in enumerate(NS):
+        ax_live = axes[0][col]
+        _liveness_axis(ax_live, rows, "delay", n)
+        ax_live.set_title(f"$n = {n}$")
+
+        ax_lat = axes[1][col]
         for proto in PROTO_ORDER:
-            cells = aa.liveness_rate(rows, family, proto, n)
-            grid = sorted(cells)
+            curve = aa.delay_finality_ratio_by_phi(rows, proto, n)
+            grid = sorted(curve)
             if not grid:
                 continue
-            ys = [cells[p].mean for p in grid]
-            # Wilson arms; clamp at 0 — a saturated cell (mean==1.0, k==n) has
-            # hi==1.0 so the upper arm is exactly 0 but floats to -0.0/tiny-neg,
-            # which matplotlib.errorbar rejects as a "negative" yerr.
-            lo = [max(0.0, cells[p].mean - cells[p].lo) for p in grid]
-            hi = [max(0.0, cells[p].hi - cells[p].mean) for p in grid]
-            ax.errorbar(grid, ys, yerr=[lo, hi], capsize=3, linewidth=1.6,
+            ax_lat.plot(grid, [curve[p] for p in grid], linewidth=1.6,
                         markersize=6, **STYLE[proto])
-        ax.set_xlabel("adversarial fraction $\\varphi$")
+        sm = aa.delay_finality_ratio_by_phi(rows, "snowman", n)
+        if sm:
+            pk_phi = max(sm, key=sm.get)
+            pk = sm[pk_phi]
+            ax_lat.annotate(f"$\\times{pk:.0f}$", (pk_phi, pk),
+                            textcoords="offset points", xytext=(-6, -2),
+                            ha="right", va="top", fontsize=11,
+                            color=STYLE["snowman"]["color"])
+        ax_lat.axhline(1.0, color="grey", linewidth=0.8, linestyle="--", zorder=1)
+        ax_lat.set_yscale("log")
+        ax_lat.set_xlim(*XLIM)
+        ax_lat.set_xlabel("adversarial fraction $\\varphi$")
+        _grid(ax_lat)
+    axes[0][0].set_ylabel("finalization success rate")
+    axes[1][0].set_ylabel("time-to-finality ratio (vs $\\varphi = 0$)")
+    axes[0][1].legend(frameon=False)
+    fig.suptitle("Liveness and time-to-finality under delayed voting "
+                 "(mean $\\pm$ 95% Wilson; latency on log scale)")
+    return _save(fig, plot_dir, "liveness_vs_phi_delay")
+
+
+# --------------------------------------------------------------------------- #
+# Fig 4.15 — silent non-participation: liveness cliffs as steps, with phi*
+# --------------------------------------------------------------------------- #
+
+def fig_offline_liveness(rows, plot_dir):
+    """Offline family, faceted by n: success rate as step cliffs, with each
+    protocol's survival depth phi* boxed and the 'alive but starved' Snowman
+    cell labelled with its surviving throughput fraction."""
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), sharey=True)
+    for ax, n in zip(axes, NS):
+        survival = _liveness_axis(ax, rows, "offline", n, steps=True)
         ax.set_title(f"$n = {n}$")
-        ax.set_ylim(-0.05, 1.08)
-        _grid(ax)
+        ax.set_xlabel("silent fraction $\\varphi$")
+        parts = [f"{STYLE[p]['label']} {survival[p]:.2f}"
+                 for p in PROTO_ORDER if p in survival]
+        ax.text(0.03, 0.30, "$\\varphi^*$ survival depth\n" + "\n".join(parts),
+                transform=ax.transAxes, fontsize=8, va="top",
+                bbox=dict(boxstyle="round", fc="white", ec="grey", alpha=0.9))
+        # 'alive but starved': annotate a surviving Snowman cell whose throughput
+        # has collapsed (success > 0 but the committed-unit rate is a few %).
+        tr = aa.offline_throughput_ratio(rows, "snowman", n)
+        live = aa.liveness_rate(rows, "offline", "snowman", n)
+        starved = [p for p in sorted(tr)
+                   if 0 < tr[p].mean < 0.10 and live.get(p) and live[p].mean > 0]
+        if starved:
+            p0 = starved[-1]
+            # anchor at the plateau: success holds at 1.0 while throughput has
+            # collapsed — that gap is the point of the label.
+            ax.annotate(f"alive but starved\n($\\approx{tr[p0].mean*100:.1f}$% throughput)",
+                        (p0, live[p0].mean), textcoords="offset points",
+                        xytext=(8, -46), ha="left", va="top", fontsize=8,
+                        color=STYLE["snowman"]["color"],
+                        arrowprops=dict(arrowstyle="->", lw=0.8,
+                                        color=STYLE["snowman"]["color"]))
+    axes[0].set_ylabel("finalization success rate")
+    axes[1].legend(frameon=False, loc="upper right")
+    fig.suptitle("Liveness under silent non-participation "
+                 "(step cliffs; mean $\\pm$ 95% Wilson)")
+    return _save(fig, plot_dir, "liveness_vs_phi_offline")
+
+
+# --------------------------------------------------------------------------- #
+# Fig 4.16 — equivocation: liveness
+# --------------------------------------------------------------------------- #
+
+def fig_equivocate_liveness(rows, plot_dir):
+    """Equivocate family, faceted by n: success rate per protocol. PBFT's
+    non-monotone curve and its 'recovery' above 1/3 are read through the chapter
+    caption (the recovery is the safety failure of Fig 4.18, not live finality)."""
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4), sharey=True)
+    for ax, n in zip(axes, NS):
+        _liveness_axis(ax, rows, "equivocate", n)
+        ax.set_title(f"$n = {n}$")
+        ax.set_xlabel("equivocator fraction $\\varphi$")
     axes[0].set_ylabel("finalization success rate")
     axes[1].legend(frameon=False)
-    note = ("  (PBFT recovers via an UNSAFE fork above 1/3)"
-            if family == "equivocate" else "")
-    fig.suptitle(f"Liveness vs adversarial fraction — {FAMILY_LABEL[family]} "
-                 f"(mean ± 95% Wilson){note}")
-    return _save(fig, plot_dir, f"liveness_vs_phi_{family}")
+    fig.suptitle("Liveness under equivocation (mean $\\pm$ 95% Wilson)")
+    return _save(fig, plot_dir, "liveness_vs_phi_equivocate")
 
 
-def fig_pbft_viewchange_rate_vs_phi(rows, plot_dir):
-    """PBFT view-change rate vs phi (equivocate), faceted by n."""
+# --------------------------------------------------------------------------- #
+# Fig 4.17 — equivocation: PBFT view-change COUNT (not rate)
+# --------------------------------------------------------------------------- #
+
+def fig_pbft_viewchange_count(rows, plot_dir):
+    """PBFT view-change COUNT vs phi (equivocate), shared y across n so the
+    committee-size effect (10 at n=10, 25 at n=25) is visible; the count
+    collapses to 0 at phi=0.40 where the deterministic fork replaces rotation."""
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
+    top = 0.0
     for ax, n in zip(axes, NS):
-        rate = aa.pbft_view_change_rate(rows, n)
-        grid = sorted(rate)
-        ax.plot(grid, [rate[p].mean for p in grid], linewidth=1.6,
-                markersize=6, **STYLE["pbft"])
-        ax.set_xlabel("adversarial fraction $\\varphi$")
+        cnt = aa.pbft_view_change_count(rows, n)
+        grid = sorted(cnt)
+        ys = [cnt[p].mean for p in grid]
+        top = max(top, max(ys, default=0.0))
+        ax.plot(grid, ys, linewidth=1.6, markersize=6, **STYLE["pbft"])
+        # label the last-safe plateau and the collapse to zero.
+        safe = [(p, y) for p, y in zip(grid, ys) if y > 0]
+        if safe:
+            p_last, y_last = safe[-1]
+            ax.annotate(f"{int(round(y_last))}", (p_last, y_last),
+                        textcoords="offset points", xytext=(-6, 7), ha="right",
+                        fontsize=10, color=STYLE["pbft"]["color"])
+        zero = [(p, y) for p, y in zip(grid, ys) if p > THIRD and y == 0]
+        if zero:
+            p0, _ = zero[0]
+            ax.annotate("rotation $\\to$ fork\n(count $\\to 0$)", (p0, 0),
+                        textcoords="offset points", xytext=(6, 22), ha="left",
+                        va="bottom", fontsize=8, color="grey",
+                        arrowprops=dict(arrowstyle="->", lw=0.8, color="grey"))
+        _third_line(ax)
+        ax.set_xlim(*XLIM)
+        ax.set_xlabel("equivocator fraction $\\varphi$")
         ax.set_title(f"$n = {n}$")
         _grid(ax)
-    axes[0].set_ylabel("view-change rate (events / s)")
-    fig.suptitle("PBFT view-change rate vs equivocator fraction "
-                 "(rises to 1/3, collapses to 0 at the fork)")
-    return _save(fig, plot_dir, "pbft_viewchange_rate_vs_phi")
+    # shared y across the n panels so the committee-size effect (10 vs 25) shows.
+    axes[0].set_ylim(-1.5, top * 1.15 + 1)
+    axes[0].set_ylabel("view-change count")
+    fig.suptitle("PBFT view-change count under equivocation")
+    return _save(fig, plot_dir, "pbft_viewchange_count_vs_phi")
 
 
-def fig_ffg_slashable_vs_phi(rows, plot_dir):
-    """Casper FFG max slashable stake vs phi (equivocate) with the 1/3 line."""
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
-    for ax, n in zip(axes, NS):
-        slash = aa.ffg_slashable(rows, n)
-        grid = sorted(slash)
-        ax.plot(grid, [slash[p].mean for p in grid], linewidth=1.6,
-                markersize=6, **STYLE["casper-ffg"])
-        ax.axhline(THIRD, color="grey", linewidth=1.0, linestyle="--", zorder=1,
-                   label="$1/3$ accountable-safety threshold")
-        ax.set_xlabel("adversarial fraction $\\varphi$")
-        ax.set_title(f"$n = {n}$")
-        _grid(ax)
-    axes[0].set_ylabel("max slashable stake fraction")
-    axes[1].legend(frameon=False)
-    fig.suptitle("Casper FFG slashable stake vs equivocator fraction "
-                 "(crosses 1/3 at $\\varphi = 0.40$)")
-    return _save(fig, plot_dir, "ffg_slashable_vs_phi")
+# --------------------------------------------------------------------------- #
+# Fig 4.18 — equivocation: cross-protocol safety-violation rate + 229 annotation
+# --------------------------------------------------------------------------- #
 
-
-def fig_safety_cliff_vs_phi(rows, plot_dir):
-    """Cross-protocol safety-violation rate vs phi (equivocate), faceted by n."""
+def fig_safety_cliff(rows, plot_dir):
+    """Cross-protocol safety-violation rate vs phi (equivocate), faceted by n.
+    Only PBFT departs from zero, stepping to a deterministic fork at phi=0.40;
+    the fork's magnitude (conflicting (view,seq) instances) is annotated."""
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
     for ax, n in zip(axes, NS):
         for proto in PROTO_ORDER:
@@ -120,28 +256,135 @@ def fig_safety_cliff_vs_phi(rows, plot_dir):
             if not grid:
                 continue
             ax.plot(grid, [rate[p].mean for p in grid], linewidth=1.6,
-                    markersize=6, **STYLE[proto])
-        ax.set_xlabel("adversarial fraction $\\varphi$")
+                    markersize=6, drawstyle="steps-post", **STYLE[proto])
+        ci = aa.pbft_conflicting_instances(rows, n)
+        brk = [p for p in sorted(ci) if ci[p].mean > 0]
+        if brk:
+            p0 = brk[0]
+            ax.annotate(f"{int(round(ci[p0].mean))} conflicting\ninstances",
+                        (p0, 1.0), textcoords="offset points", xytext=(8, -4),
+                        ha="left", va="top", fontsize=9,
+                        color=STYLE["pbft"]["color"])
+        _third_line(ax)
+        ax.set_xlim(*XLIM)
+        ax.set_ylim(*YLIM)
+        ax.set_xlabel("equivocator fraction $\\varphi$")
         ax.set_title(f"$n = {n}$")
-        ax.set_ylim(-0.05, 1.08)
         _grid(ax)
     axes[0].set_ylabel("safety-violation rate")
     axes[1].legend(frameon=False)
-    fig.suptitle("Cross-protocol safety-violation rate vs equivocator fraction "
-                 "(PBFT fork cliff in $[0.33, 0.40]$)")
+    fig.suptitle("Cross-protocol safety-violation rate under equivocation")
     return _save(fig, plot_dir, "safety_cliff_vs_phi")
+
+
+# --------------------------------------------------------------------------- #
+# Fig 4.19 — equivocation: Casper FFG slashable stake
+# --------------------------------------------------------------------------- #
+
+def fig_ffg_slashable(rows, plot_dir):
+    """Casper FFG max slashable stake vs phi (equivocate) with the 1/3
+    accountable-safety threshold marked, faceted by n."""
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
+    for ax, n in zip(axes, NS):
+        slash = aa.ffg_slashable(rows, n)
+        grid = sorted(slash)
+        ax.plot(grid, [slash[p].mean for p in grid], linewidth=1.6,
+                markersize=6, **STYLE["casper-ffg"])
+        ax.axhline(THIRD, color="grey", linewidth=1.0, linestyle="--", zorder=1,
+                   label="$1/3$ accountable-safety threshold")
+        ax.set_xlim(*XLIM)
+        ax.set_xlabel("equivocator fraction $\\varphi$")
+        ax.set_title(f"$n = {n}$")
+        _grid(ax)
+    axes[0].set_ylabel("max slashable stake fraction")
+    axes[1].legend(frameon=False)
+    fig.suptitle("Casper FFG maximum slashable stake under equivocation")
+    return _save(fig, plot_dir, "ffg_slashable_vs_phi")
+
+
+# --------------------------------------------------------------------------- #
+# Fig 4.21 — the cross-adversary outcome matrix (Table 4.2, visualized)
+# --------------------------------------------------------------------------- #
+
+# Outcome class -> fill colour. Each cell's class encodes the *kind* of outcome;
+# the label carries the magnitude. The five classes make the no-dominance
+# inversion legible: each protocol's row spans several classes, none all-green.
+_CLASS_COLOR = {
+    "robust":      "#a6dba0",  # liveness held, safe
+    "costly":      "#fde08a",  # survives, but pays latency/throughput
+    "liveness":    "#fdb87d",  # liveness degrades or fails
+    "accountable": "#9ecae1",  # safety failure, but provably attributable
+    "break":       "#f4a3a3",  # safety break, unaccountable
+}
+_CLASS_LABEL = {
+    "robust": "robust (liveness held)",
+    "costly": "survives at a latency cost",
+    "liveness": "liveness loss",
+    "accountable": "safety failure, accountable",
+    "break": "safety break, unaccountable",
+}
+_ADVERSARY_COLS = (("delay", "Delayed\nvoting"),
+                   ("offline", "Silent non-\nparticipation"),
+                   ("equivocate", "Equivocation"))
+# (class, magnitude label) per (protocol, adversary), traceable to Table 4.2.
+_CELL = {
+    ("pbft", "delay"):            ("robust", "immune\n$1.0\\times$, 0 VC"),
+    ("pbft", "offline"):          ("robust", "clean cliff\n$\\varphi=0.40$"),
+    ("pbft", "equivocate"):       ("break", "fork: 229\nunaccountable"),
+    ("casper-ffg", "delay"):      ("liveness", "liveness dip\n$0.60/0.65$"),
+    ("casper-ffg", "offline"):    ("liveness", "graceful decay\n$\\approx 1-\\varphi$"),
+    ("casper-ffg", "equivocate"): ("accountable", "$\\geq\\!1/3$ slashable"),
+    ("snowman", "delay"):         ("costly", "survives\n$\\times62 / \\times49$"),
+    ("snowman", "offline"):       ("liveness", "early cliff\n$\\varphi=0.10/0.20$"),
+    ("snowman", "equivocate"):    ("robust", "no fork surface\n$\\varepsilon\\!\\approx\\!5\\times10^{-15}$"),
+}
+
+
+def fig_tradeoff_matrix(rows, plot_dir):
+    """3x3 protocol x adversary outcome matrix rendering Table 4.2 visually:
+    cell colour = outcome class, cell label = the headline magnitude. No data is
+    read from `rows` (the matrix is the synthesized verdict); the argument is
+    kept for a uniform render_all signature."""
+    nrow, ncol = len(PROTO_ORDER), len(_ADVERSARY_COLS)
+    fig, ax = plt.subplots(figsize=(9.2, 4.8))
+    for i, proto in enumerate(PROTO_ORDER):
+        y = nrow - 1 - i
+        for j, (adv, _label) in enumerate(_ADVERSARY_COLS):
+            cls, text = _CELL[(proto, adv)]
+            ax.add_patch(Rectangle((j, y), 1, 1, facecolor=_CLASS_COLOR[cls],
+                                   edgecolor="white", linewidth=2))
+            ax.text(j + 0.5, y + 0.5, text, ha="center", va="center",
+                    fontsize=9.5)
+    ax.set_xlim(0, ncol)
+    ax.set_ylim(0, nrow)
+    ax.set_xticks([j + 0.5 for j in range(ncol)])
+    ax.set_xticklabels([lbl for _a, lbl in _ADVERSARY_COLS])
+    ax.set_yticks([nrow - 1 - i + 0.5 for i in range(nrow)])
+    ax.set_yticklabels([STYLE[p]["label"] for p in PROTO_ORDER])
+    ax.tick_params(length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_title("Adversarial outcomes by protocol and strategy")
+    handles = [Patch(facecolor=_CLASS_COLOR[c], edgecolor="white",
+                     label=_CLASS_LABEL[c]) for c in _CLASS_COLOR]
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.08),
+              ncol=3, frameon=False, fontsize=8)
+    return _save(fig, plot_dir, "adversary_tradeoff_matrix")
 
 
 def render_all(adversary_dir: str = aa.ADVERSARY_DIR, plot_dir: str = PLOT_DIR):
     rows = aa.load_adversary_rows(adversary_dir)
     names = []
-    for family in ("delay", "offline", "equivocate"):
-        if any(r["family"] == family for r in rows):
-            names.append(fig_liveness_vs_phi(rows, family, plot_dir))
+    if any(r["family"] == "delay" for r in rows):
+        names.append(fig_delay_liveness_and_latency(rows, plot_dir))
+    if any(r["family"] == "offline" for r in rows):
+        names.append(fig_offline_liveness(rows, plot_dir))
     if any(r["family"] == "equivocate" for r in rows):
-        names.append(fig_pbft_viewchange_rate_vs_phi(rows, plot_dir))
-        names.append(fig_ffg_slashable_vs_phi(rows, plot_dir))
-        names.append(fig_safety_cliff_vs_phi(rows, plot_dir))
+        names.append(fig_equivocate_liveness(rows, plot_dir))
+        names.append(fig_pbft_viewchange_count(rows, plot_dir))
+        names.append(fig_safety_cliff(rows, plot_dir))
+        names.append(fig_ffg_slashable(rows, plot_dir))
+    names.append(fig_tradeoff_matrix(rows, plot_dir))
     return names
 
 
