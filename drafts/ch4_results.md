@@ -159,8 +159,9 @@ poll — confirming the per-validator `O(K·β)` cost the Avalanche family is bu
 around [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]].
 
 Two readings must be kept apart. Per committed unit, Snowman is the most
-expensive protocol by an order of magnitude — roughly twenty-four messages per
-validator against PBFT's two — the price of repeated subsampling at thesis scale.
+expensive protocol by an order of magnitude. It pays roughly twenty-four messages
+per validator against PBFT's two, the price of repeated subsampling at thesis
+scale.
 Yet the property for which Avalanche is known is that its *per-validator*
 cost is independent of `n`, a statement about per-validator work, not about the
 network-aggregate `total_msgs_per_acu` plotted here, which necessarily grows with
@@ -252,8 +253,7 @@ applies a heavy-tailed Pareto delay of roughly three-second mean, first without
 loss as a control and then under per-message drop probabilities of 5%, 10%, and
 20% [[wiki/experiments/2026-06-12_delay-heavy]]. Each cell runs at `n ∈ {10, 25}`
 over twenty seeds with common random numbers, except the most expensive —
-Snowman at `n = 25` under heavy delay — over eight. As in §4.2, three of the four
-families are covered; Narwhal+Tusk awaits its implementation.
+Snowman at `n = 25` under heavy delay — over eight. As in §4.2, three protocols are covered.
 
 Two measurement properties frame the results. All cross-protocol latency is read
 from `commit_latency_ms`, the canonical time-to-finality column of §4.2.6, so
@@ -496,10 +496,8 @@ seeds per cell under common random numbers, and is extended past the one-third
 threshold where a safety failure is possible, namely equivocation against PBFT
 and Casper FFG. The
 paired committee sizes separate size-invariant results from size-dependent ones
-such as Snowman's silence cliff (§3.4.2). As in §4.2 and §4.3 the survey covers
-three of the four families; the Narwhal+Tusk family awaits its implementation,
-and with it the data-availability-withholding adversary that is its catalogued
-weakness [[wiki/concepts/adversary-model]].
+such as Snowman's silence cliff (§3.3.3). As in §4.2 and §4.3, the survey covers
+the three implemented protocols.
 
 The sweep reports the two outcome families RQ4 separates: liveness, measured as
 the consensus success rate — the fraction of seed-runs that finalize within the
@@ -659,9 +657,9 @@ that the bound has been observed. Witnessing `ε` directly would require a
 separate sweep at a deliberately weakened confidence depth
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
-Ranked by safety, the order is Snowman, Casper FFG, PBFT — not because the
-protocols tolerate different fractions, since all three hold to `φ = 0.33`, but
-because their failures above it differ in kind: Snowman has no fork to suffer,
+Ranked by safety, the order is Snowman, Casper FFG, PBFT. All three hold to
+`φ = 0.33`; the ordering is not about which fraction each tolerates but about what
+failure occurs above it: Snowman has no fork to suffer,
 Casper FFG forks only at a provable cost of one-third of the stake, and PBFT
 forks deterministically and silently
 [[wiki/experiments/2026-06-19_adversary-comparison]]. Two cautions attach. The
@@ -704,10 +702,9 @@ validator count, with the one-third accountability line marked. Source:
 
 ### 4.4.4 The performance–security tradeoff
 
-The three strategies together answer RQ4, and their headline is that no protocol
-is robust to every adversary, because the structural choice that defends a
-protocol against one strategy is the same choice that exposes it to another
-(Table 4.2). PBFT's exact quorum and view-change recovery make it the strongest
+The three strategies together answer RQ4. No protocol is robust to every
+adversary: the structural choice that defends a protocol against one strategy is
+the same choice that exposes it to another (Table 4.2). PBFT's exact quorum and view-change recovery make it the strongest
 protocol against the two liveness adversaries — immune to delayed voting and
 undegraded under silence up to its quorum cliff — but the same leader-based,
 non-accountable commit rule makes it the worst under equivocation, the only

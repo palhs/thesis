@@ -17,20 +17,20 @@ becomes solvable for `f < n/3` [3] [[wiki/concepts/synchrony-models]]. Every
 deployed L1 protocol sits at some point in the design space these results
 define.
 
-The four families evaluated in this thesis occupy four distinct points in
+Four families occupy four distinct points in
 that space [[wiki/concepts/consensus-families]], each trading a different
 cost for its guarantees:
 
-- **PBFT-style** [[wiki/algorithms/pbft]] — leader-driven multi-phase
+- **PBFT-style** [4] [[wiki/algorithms/pbft]] — leader-driven multi-phase
   voting; deterministic finality at commit; cost: `O(n²)` messages, which
   bounds the validator-set size.
-- **PoS-finality** [[wiki/algorithms/pos]] — a stake-weighted finality
+- **PoS-finality** [7], [8] [[wiki/algorithms/pos]] — a stake-weighted finality
   gadget over epoch checkpoints; deterministic finality; cost: finality
   latency on the order of minutes.
-- **Avalanche-style** [[wiki/algorithms/avalanche]] — repeated random
+- **Avalanche-style** [9] [[wiki/algorithms/avalanche]] — repeated random
   subsampling; probabilistic finality with tunable confidence; cost: no
   deterministic safety.
-- **DAG-based** [[wiki/algorithms/dag-based]] — dissemination decoupled
+- **DAG-based** [11] [[wiki/algorithms/dag-based]] — dissemination decoupled
   from ordering via a directed acyclic graph; high throughput; cost:
   ordering-layer complexity and higher per-validator memory.
 
@@ -54,8 +54,8 @@ halt in November 2024 [23]. The Avalanche mainnet runs the protocol from
 which its family takes its name [9].
 
 These incidents do not invalidate the protocols' theoretical guarantees.
-They demonstrate that the conditions under which those guarantees hold —
-bounded delay, a sufficiently honest validator set — are routinely exited
+They demonstrate that the conditions under which those guarantees hold
+(bounded delay, a sufficiently honest validator set) are routinely exited
 in deployment, and that isolating which condition triggers which failure
 requires controlled measurement that live networks do not afford. The
 primary literature does not supply it: each study fixes its own network
@@ -67,11 +67,11 @@ adversarial.
 
 Under those combined conditions, performance and security cease to be
 independent. A protocol that only *slows* under load may also miss
-finality, fork, or admit conflicting commits across honest validators — a
+finality, fork, or admit conflicting commits across honest validators, a
 coupling invisible to the benign-condition benchmarks each family publishes
-[[wiki/concepts/problem-statement#the-gap]]. This thesis is motivated by
+[14], [16] [[wiki/concepts/problem-statement#the-gap]]. This thesis is motivated by
 that coupling and by the absence of a unified harness in which it can be
-measured across the four families on matched assumptions.
+measured across the three families on matched assumptions.
 
 ## 1.3 Problem statement
 
@@ -82,12 +82,12 @@ PoS-finality [[wiki/algorithms/pos]], Avalanche-style
 — under controlled network delay and adversarial conditions, using a single
 discrete-event simulator. The contribution is not a benchmark of production
 systems but a reproducible cross-family evaluation framework in which the
-four are measured under matched assumptions. Performance is measured as
+three are measured under matched assumptions. Performance is measured as
 commit latency, sustained throughput, and communication overhead; security
 as safety and liveness under adversarial pressure; the unified metric
 schema is defined in Chapter 3 [[wiki/concepts/evaluation-metrics]]. The
 approach extends the simulation-based, metrics-instrumented methodology of
-Gervais *et al.* [17], originally applied to Proof-of-Work, to the four BFT
+Gervais *et al.* [17], originally applied to Proof-of-Work, to the three implemented BFT
 families [[wiki/concepts/problem-statement#intended-contributions]]. The
 comparison is organized around the Pareto frontier each family traces under
 matched conditions, so that the question of whether any family dominates
@@ -111,7 +111,7 @@ incentive design, and the performance of cryptographic primitives.
 
 Simulation is chosen over testnet or live-network measurement for three
 reasons: reproducibility of seeded runs, controlled isolation of one
-independent variable at a time, and a matched harness across all four
+independent variable at a time, and a matched harness across the three implemented
 families. The choice carries four framing assumptions
 [[wiki/concepts/problem-statement#assumptions-and-limitations]]. First, each
 family is represented by a deliberately simplified implementation, since the
@@ -173,17 +173,16 @@ The thesis makes four contributions
    Avalanche-style representatives; the DAG-based representative, Narwhal+Tusk,
    is scaffolded but its implementation is deferred.
 3. **Dataset and analysis.** An experimental dataset and comparative
-   analysis quantifying the performance–security tradeoff across the four
-   families under matched conditions, answering RQ1–RQ4 and underwriting the
-   RQ5 synthesis. While the DAG-based family remains deferred, this synthesis
-   is realized over the three implemented families.
+   analysis quantifying the performance–security tradeoff across the three
+   implemented families under matched conditions, answering RQ1–RQ4 and
+   underwriting the RQ5 synthesis over those three.
 4. **Methodological framing.** The simulation-based, metrics-instrumented
    approach of Gervais *et al.* [17], extended from Proof-of-Work to the
-   four BFT families on a single harness with matched assumptions.
+   three implemented BFT families on a single harness with matched assumptions.
 
 Chapter 2 reviews the four families and the prior comparative evaluations
 that motivate a unified harness. Chapter 3 describes the methodology: the
-system model, the four protocol implementations, the metric schema, and the
+system model, the three protocol implementations, the metric schema, and the
 experimental design. Chapter 4 presents the baseline, network-delay, and
 adversarial results that answer RQ1–RQ4. Chapter 5 presents the
 cross-family Pareto synthesis that answers RQ5. Chapter 6 concludes with

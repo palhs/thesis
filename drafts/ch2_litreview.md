@@ -63,7 +63,7 @@ random sample, repeated `β` times, giving a small positive `ε`).
 
 **Table 2.1 — How one block becomes irreversible.** Protocol-native terms
 are in parentheses. Notation is defined below the table; per-family
-citations appear in §2.3.1–§2.3.4.
+citations appear in §2.3.
 
 | | PBFT-style | PoS-finality | Avalanche-style | DAG-based |
 |:--|:--|:--|:--|:--|
@@ -169,7 +169,7 @@ from the cited primary sources. The columns are not directly comparable.
 | HotStuff | Linear in `n` after optimizations | 3-round commit | `< n/3` | [5] |
 | PoS-finality (Casper FFG / Gasper) | Block-proposal rate of underlying chain | Two-epoch finality (≤12.8 min on Ethereum) | `< 1/3` of stake | [7], [8] |
 | Avalanche | ~3.4 ktps (testnet) | ~1.35 s | Parameter-dependent (no fixed fraction) | [9], [10] |
-| Narwhal + Tusk | ~140 ktps (WAN) | ~2–3 s | `< n/3` | [11] |
+| Narwhal+Tusk | ~140 ktps (WAN) | ~2–3 s | `< n/3` | [11] |
 | Bullshark | ~125 ktps | 2-round fast path under synchrony | `< n/3` | [12] |
 | Mysticeti | >200 ktps | ~0.5 s commit (WAN) | `< n/3` | [13] |
 

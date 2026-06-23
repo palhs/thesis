@@ -17,8 +17,7 @@ across all operating regimes [[wiki/concepts/research-questions]]. The frontier
 reported here is traced over the three protocols evaluated throughout this study:
 PBFT, Casper FFG, and Snowman. This chapter introduces no new measurements; it
 collates the per-axis results of Chapter 4 into a single comparison and reads the
-shape of the tradeoff off them, drawing on the consolidated findings of
-[[wiki/concepts/key-findings]].
+shape of the tradeoff off them.
 
 The answer is that no family dominates. Each of the three protocols is the strict
 best on at least one axis that no other matches, so each is a non-dominated point
@@ -94,8 +93,8 @@ instances at `φ = 0.40` — with no slashable evidence identifying the equivoca
 makes the double edge visible: the mechanism fires for successful recovery at
 fractions up to one-third and degenerates into thrashing above it
 [[wiki/concepts/key-findings]]. PBFT is thus the performance and liveness leader
-of the three and at the same time the only family whose safety failure is both
-certain above the threshold and unattributable [[wiki/algorithms/pbft]].
+of the three. It is also the only family whose safety failure is both certain
+above the threshold and unattributable [4] [[wiki/algorithms/pbft]].
 
 ### 5.3.2 Casper FFG: never fastest, but the only accountable failure
 
@@ -118,12 +117,12 @@ without attribution, Casper FFG's slashing conditions convert an equivocation
 into accountable evidence: at `φ = 0.40` the protocol holds with no in-model fork
 while exposing a slashable stake fraction at or above one-third
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. No other family in the
-study offers an accountable safety failure, and that is the corner of the
-frontier Casper FFG occupies alone [[wiki/algorithms/pos]]. The cost it pays is
+study offers an accountable safety failure. Casper FFG occupies that corner of the
+frontier alone [7] [[wiki/algorithms/pos]]. The cost it pays is
 concentrated on liveness under loss, and that cost is the measured analogue of
 the failure that motivated this study: an epoch whose attestations fail to reach
 a quorum — dropped by a lossy network here, delayed under attestation-processing
-pressure in Ethereum's multi-epoch finality stall of May 2023 there — leaves
+pressure in Ethereum's multi-epoch finality stall of May 2023 [21] there — leaves
 finality stalled, the same class of failure observed in deployment
 [[wiki/algorithms/pos]].
 
@@ -146,7 +145,7 @@ The same subsampling makes it the costliest protocol under delay and the most
 fragile under silence. Because acceptance requires `β` sequential polling rounds
 and each round waits on the slowest of `K` sampled peers, delay compounds: under
 moderate uniform delay Snowman's time-to-finality grows roughly twelve- to
-thirteenfold, against a fraction of that for the other two, and under a
+fifteenfold, against a fraction of that for the other two, and under a
 delayed-voting adversary its finality cost reaches a factor of sixty-two
 [[wiki/experiments/2026-06-13_delay-analysis]]
 [[wiki/experiments/2026-06-19_adversary-comparison]]. When peers fall silent
@@ -160,7 +159,7 @@ one sampled step before the quorum protocols, remaining the earliest of the thre
 to lose liveness under silence [[wiki/experiments/2026-06-17_offline-validators]]. The inversion is the
 sharpest single result of the campaign — the identical structural choice makes
 Snowman the most delay-tolerant family when peers are merely slow and the least
-tolerant when they go silent [[wiki/algorithms/avalanche]]
+tolerant when they go silent [9] [[wiki/algorithms/avalanche]]
 [[wiki/concepts/key-findings]].
 
 ## 5.4 The frontier and the no-dominance verdict
@@ -179,7 +178,7 @@ PBFT on delay, loss, and liveness — so the multi-cornered shape survives the
 removal of the definitional row [[wiki/concepts/key-findings]].
 
 **Table 5.1 — Cross-regime comparison of the three families on the
-performance–security plane (`n = 10 / 25`, 20 seeds).** Each row is one axis from
+performance–security plane (`n = 10 / 25`, 20 seeds; 8 for the Snowman `n = 25` delay cell).** Each row is one axis from
 the Chapter 4 sweeps; the final column names the family or families that are
 strict best on that axis. No family wins every row, and each of the three wins at
 least one row no other does, so each is non-dominated. Two rows are not symmetric
@@ -209,7 +208,7 @@ Source: [[wiki/concepts/key-findings]],
 | Accountable safety | none (unattributable fork) | slashable ≥ ⅓ stake | not applicable (probabilistic) | Casper FFG |
 
 Two features of the frontier carry more weight than the bare verdict. The first
-is a gap in it rather than a point on it: the operator tradeoff of Figure 4.13
+is a gap in it rather than a point on it. The operator tradeoff of Figure 4.13
 shows that the protocols which retain finalization under loss are exactly the ones
 that pay the most latency to do so — PBFT and Snowman inflating time-to-finality
 by factors of 2.16 (Snowman, `n = 10`) to 3.57 (PBFT, `n = 25`), each measured at

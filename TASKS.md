@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 78 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 88 · In Review: 0 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 88 · In Review: 1 · In Progress: 0 · Not Started: 7 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -276,7 +276,7 @@ specs); the `\include{biography}` line has been removed from the template.
 
 ## Week 12 — Polish & defense
 
-- `[ ]` **T61** `H` Writer — Revise all chapters for consistency
+- `[?]` **T61** `H` Writer — Revise all chapters for consistency
   _Outcome:_ Terminology consistent, no contradictions, references complete · _Artifact:_ `drafts/`
 - `[ ]` **T62** `H` Writer — Improve all figures, tables, captions
   _Outcome:_ Publication-quality: labeled axes, legends, consistent colors · _Artifact:_ `results/` + `drafts/`
