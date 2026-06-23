@@ -34,10 +34,9 @@ fifteen scenarios of twenty seeds — are aggregated to per-scenario means with
 95% confidence intervals [[wiki/experiments/2026-06-08_baseline-cis]]. Snowman
 is evaluated from `n = 7` upward: at `n = 4` its parameter rescaling collapses
 to the degenerate unanimity boundary `α_c = K` and is excluded by the schema
-[[wiki/concepts/output-format]]. The intervals use a Student-t critical value at
-nineteen degrees of freedom rather than the Gaussian value named in §3.5; for a
-twenty-sample mean the difference is small, and for the deterministic metrics of
-§4.2.1 the interval is degenerate regardless.
+[[wiki/concepts/output-format]]. The intervals follow the §3.5 schema convention — a Student-t critical value,
+here at nineteen degrees of freedom for the twenty-seed cells — and for the
+deterministic metrics of §4.2.1 the interval is degenerate regardless.
 
 ### 4.2.1 Statistical reliability
 
