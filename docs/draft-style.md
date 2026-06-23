@@ -47,6 +47,10 @@ Formal academic. The canonical example, same content in the chosen register:
 
 - Periodic sentences and nominalization are acceptable where they buy
   precision; do not sacrifice exactness for brevity.
+- Vary sentence length deliberately; an occasional short declarative sentence
+  is permitted for emphasis ("No family dominates.") provided it stays
+  impersonal and precise. Rhythm variation is not a license for hype or
+  informality.
 - Measured and impersonal. No hype, no marketing adjectives, no rhetorical
   questions.
 - Each paragraph advances one point; claims are stated, then supported.
