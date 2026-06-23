@@ -221,7 +221,9 @@ justify→finalize for one epoch with the slashing branch.
 
 - **① Deterministic stake-weighted proposer.** Proposer assignment is a pure
   function of `(global_seed, slot)` through blake2b, verified for fairness at
-  four stake distributions [[experiments/2026-05-23_pos-selection-fairness]].
+  four stake distributions (each validator's selection frequency within 0.10
+  of its stake share over 100 slots under a fixed seed)
+  [[experiments/2026-05-23_pos-selection-fairness]].
 - **② `slots_per_epoch = 2`** (against Ethereum's 32), pinned in
   [[wiki/concepts/metric-reconciliation]] — the smallest value that still
   admits a multi-slot epoch, which preserves FFG's epoch character.
@@ -266,8 +268,7 @@ poll loop for one block, accepting at counter `≥ β`.
 - **③ Confidence threshold rescaled, shape held.** `α_c = ⌈0.8·K⌉`. Snowman's
   safety bound is `ε ≤ (1 − α_c/K)^β` — the analytical ceiling on the
   probability `ε` that two honest validators accept conflicting blocks,
-  exponentially small in the confirmation depth `β`
-  [[wiki/algorithms/avalanche]]. Holding the ratio `α_c/K ≈ 0.8` across the
+  exponentially small in the confirmation depth `β` [9]. Holding the ratio `α_c/K ≈ 0.8` across the
   sweep preserves the *shape* of that bound rather than its numerical value: the
   exponential form is what carries the probabilistic-finality semantics, and
   because the ceiling rounds `α_c` up, the realized ratio never falls below
@@ -392,7 +393,7 @@ sub-threshold band `φ ∈ {0.10, 0.20, 0.30}` against a `φ = 0` honest control
 - **`equivocate-vote`** (equivocation) — sign two conflicting messages where the
   protocol expects one. This safety-relevant sweep additionally drives PBFT and
   Casper FFG above the `1/3` bound (`φ ∈ {0.40, 0.50}`) to expose the safety
-  cliff; Snowman and Narwhal+Tusk cannot fork below threshold and are not swept
+  cliff; Snowman cannot fork below threshold and is not swept
   above it [[wiki/concepts/experiment-matrix-runs]]. For Snowman the capability
   has no distinct realization and reduces to a "lying responder" that coincides
   in effect with `withhold-participation`
@@ -414,8 +415,8 @@ first adds a capacity or cost model rather than reported as a configuration
 artifact [[wiki/concepts/experiment-matrix]]
 [[experiments/2026-06-03_scaling-baseline]].
 
-The four protocols share the same seed set at every configuration point, and
-because randomness is keyed by stream identity (§3.2), all four draw from the
+The three protocols share the same seed set at every configuration point, and
+because randomness is keyed by stream identity (§3.2), all three draw from the
 same network and arrival randomness — so the cross-protocol comparison is
 paired under common random numbers, a variance-reduction technique on the
 paired differences [[wiki/concepts/experiment-matrix]]. The seed count this
@@ -614,7 +615,7 @@ Snowman is the exception to the zero-by-construction safety-violation rate: its
 finality is probabilistic rather than categorical, so the rate is reported
 instead as both the analytical bound `(1 − α_c/K)^β` (§3.3.3) and the empirical
 conflicting-decision rate across seeds [[wiki/concepts/evaluation-metrics]]. At
-the comparison baseline `β = 15` that analytical bound is ~10⁻¹⁵ at these `n`, so
+the comparison baseline `β = 15` that analytical bound ranges from ~10⁻¹⁵ at `n = 10` to ~10⁻¹¹ at `n = 25`, so
 the empirical rate is unobservable in feasible seed counts; the empirical side is
 therefore collected only in a separate RQ4 safety regime at `β ∈ {3, 5}`,
 reported on its own and never placed on a cross-protocol throughput axis —

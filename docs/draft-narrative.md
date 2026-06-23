@@ -114,7 +114,10 @@ deliver, or to restate the reason it is carried.
   adversary. Stated as three-of-four in Ch1–Ch4; Ch5 and Ch6 use neutral
   three-family scoping and do **not** name the deferred family (human decision
   2026-06-22/23), so the §5 "state it once per chapter" rule is suspended for
-  those two chapters and reconciled in the later cross-chapter consistency pass;
+  those two chapters and reconciled by the T61 cross-chapter consistency pass
+  (2026-06-24): Ch1–Ch4 name it consistently (the "four evaluated/measured/
+  implemented" overclaims were corrected to three, and Ch4's per-section deferral
+  echoes trimmed to §4.1 + §4.4.4); Ch5–Ch6 confirmed neutral;
 - the empirical/analytical Snowman `ε` columns at weakened confidence depth;
 - the saturation/capacity throughput model.
 
@@ -187,7 +190,8 @@ wiki page that authorizes the deviation.
   (see §3). *Exception (2026-06-23): Ch5 and Ch6 use neutral three-family scoping
   and do not name the deferred family, per human decision. This is the one
   authorized deviation from "state it once per chapter"; Ch1–Ch4 still name it,
-  and the asymmetry is reconciled in the later cross-chapter consistency pass.*
+  and the asymmetry was reconciled by the T61 cross-chapter consistency pass
+(2026-06-24).*
 
 ---
 
