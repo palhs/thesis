@@ -69,6 +69,53 @@ class TestSafetyReducers(unittest.TestCase):
         self.assertEqual(aa.nwt_invariant()["status"], "deferred")
 
 
+class TestMagnitudeReducers(unittest.TestCase):
+    """The §4.4 figure-overlay reducers added for the T62 figure pass."""
+
+    def _delay(self, proto, n, phi, m, ratio):
+        return {"family": "delay", "protocol": proto, "n": n, "seed": 0,
+                "byzantine_fraction": phi, "delay_mult": m,
+                "finality_delay_ratio": ratio}
+
+    def test_delay_finality_ratio_worst_over_magnitude(self):
+        # at phi=0.20: m=2 cell mean = 15, m=10 cell mean = 60 -> keep the worst
+        # (max over magnitude), NOT the pooled mean of 30.
+        rows = [self._delay("snowman", 10, 0.20, 2.0, 10.0),
+                self._delay("snowman", 10, 0.20, 2.0, 20.0),
+                self._delay("snowman", 10, 0.20, 10.0, 60.0),
+                self._delay("snowman", 10, 0.10, 10.0, 1.0)]
+        curve = aa.delay_finality_ratio_by_phi(rows, "snowman", 10)
+        self.assertAlmostEqual(curve[0.20], 60.0)
+        self.assertAlmostEqual(curve[0.10], 1.0)
+
+    def test_delay_finality_ratio_nan_skip(self):
+        # a failed run carries NaN finality_delay_ratio (a liveness loss, not a
+        # blow-up); it must be dropped, not pooled into a NaN cell.
+        rows = [self._delay("casper-ffg", 10, 0.20, 10.0, float("nan")),
+                self._delay("casper-ffg", 10, 0.20, 10.0, 1.0)]
+        curve = aa.delay_finality_ratio_by_phi(rows, "casper-ffg", 10)
+        self.assertAlmostEqual(curve[0.20], 1.0)
+
+    def test_pbft_view_change_count(self):
+        rows = [{"family": "equivocate", "protocol": "pbft", "n": 25, "seed": 0,
+                 "byzantine_fraction": 0.33, "view_change_count": 25}]
+        self.assertAlmostEqual(aa.pbft_view_change_count(rows, 25)[0.33].mean, 25.0)
+
+    def test_pbft_conflicting_instances(self):
+        rows = [{"family": "equivocate", "protocol": "pbft", "n": 10, "seed": 0,
+                 "byzantine_fraction": 0.40, "conflicting_instances": 229}]
+        self.assertAlmostEqual(
+            aa.pbft_conflicting_instances(rows, 10)[0.40].mean, 229.0)
+
+    def test_offline_throughput_ratio_nan_skip(self):
+        rows = [{"family": "offline", "protocol": "snowman", "n": 25, "seed": 0,
+                 "byzantine_fraction": 0.20, "throughput_ratio": 0.004},
+                {"family": "offline", "protocol": "snowman", "n": 25, "seed": 1,
+                 "byzantine_fraction": 0.20, "throughput_ratio": float("nan")}]
+        self.assertAlmostEqual(
+            aa.offline_throughput_ratio(rows, "snowman", 25)[0.20].mean, 0.004)
+
+
 class TestBracket(unittest.TestCase):
     def test_holds_then_breaks(self):
         holds = {0.0: True, 0.10: True, 0.20: True, 0.33: True, 0.40: False, 0.50: False}

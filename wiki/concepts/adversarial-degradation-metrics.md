@@ -140,9 +140,13 @@ deepest φ at which the invariant is still intact).
   theoretical bound, and `safety_broken`. **Consumed by T55** (join
   `safety_broken` from the safety row, not the liveness row).
 - `results/adversary/snowman_epsilon_witness.csv` — the ε witness (2 rows).
-- `results/adversary/plots/*.{pdf,png}` — liveness-vs-φ per family, the PBFT
-  view-change rate, the FFG slashable-stake curve (with the 1/3 line), and the
-  cross-protocol safety cliff.
+- `results/adversary/plots/*.{pdf,png}` — liveness-vs-φ per family (the delay
+  family paired with its finality blow-up; the offline family as step cliffs),
+  the PBFT view-change count, the FFG slashable-stake curve (with the 1/3 line),
+  the cross-protocol safety cliff, and the protocol×adversary outcome matrix.
+  (Figures refreshed for impact in the 2026-06-24 §4.4 figure pass — see the
+  experiment-page Revisions; the view-change *rate* remains the §5 invariant
+  metric, the figure now renders the count.)
 
 See [[experiments/2026-06-19_adversarial-degradation]] for the run record,
 config, seeds, and commands.

@@ -86,3 +86,36 @@ is a discrete cliff, not a smooth retention curve.
 | pickup-index | structural map of `src/adversary/`, the per-protocol `summarise.py` safety/liveness columns, the T48/T49 `delay_analysis`/`delay_plots` template, the sweep harness, and where adversarial CSVs are written | located the T51/T52/T53 sweep orchestrators + `src/adversary/safety.py` (safety triple), the reducers, the T48 analysis/plot pair to mirror, and `results/adversary/` as the output dir |
 | understand (sub-agents) | the 10-agent understand workflow's code-location readers queried auggie for the safety/liveness producers and the analysis template | confirmed `safety_violation`/`max_slashable_stake_fraction`/`view_change_count` producers + the `mean_ci`/`t_critical_975` CI primitives |
 | post-edit re-query | describe the new `adversary_analysis.py` / `adversary_degradation_plots.py` behavior; locate every importer/caller of them + `wilson_interval`; confirm no existing output module changed | the two modules are self-contained additions — only the two new test files import them, `wilson_interval` is called only by `adversary_analysis` + its test, and `analysis.py`/`delay_analysis.py`/`plots.py`/`offline_plots.py`/`adversary_plots.py` behavior is unchanged (no broken references, no stale callsites) |
+
+## Revisions
+
+### [2026-06-24] — §4.4 figure-impact pass (T62 figure slice)
+
+A presentation-only pass over the §4.4 adversarial figures (the "regenerate §4.4
+figures for impact + fix the rate/count seam" backlog item, folded into T62).
+**No data change** — the three Family-C CSVs and every derived CSV
+(`degradation_ranking`, `snowman_epsilon_witness`, `adversary_comparison`,
+`robustness_ranking`) are byte-identical (writers re-run, `git diff` clean). The
+figure set is now **7** (was 6); the "6 figures" lines under `## Code +
+artifacts` and `## Commands to re-derive` predate this pass.
+
+- `adversary_degradation_plots.py` rewritten (render layer): **Fig 4.14** is now a
+  2×2 — success rate on top, log-scale time-to-finality ratio below with the
+  Snowman ×62 / ×49 blow-up annotated — so PBFT and Snowman no longer read as
+  identically immune; **Fig 4.15** (offline) drawn as step cliffs with each
+  protocol's survival depth `φ*` boxed and the `n=25` Snowman "alive but
+  starved" cell labelled by its surviving throughput; **Fig 4.17** re-expressed
+  from view-change *rate* to *count* (shared y-axis across `n`, the `φ=0.40`
+  collapse marked) — file renamed `pbft_viewchange_rate_vs_phi` →
+  `pbft_viewchange_count_vs_phi`, resolving the L-W10 lint M2 rate/count seam;
+  **Fig 4.18** annotates the 229-conflict fork magnitude on PBFT's step; liveness
+  panels (4.14–4.16) share a 0–0.50 `φ` axis with a `1/3` reference line; the
+  editorializing in-image titles were neutralised (interpretation lives in the
+  chapter captions). New **Fig 4.21** `adversary_tradeoff_matrix` renders Table
+  4.2 as a 3×3 protocol×adversary outcome map (colour = outcome class, label =
+  magnitude).
+- `adversary_analysis.py` gained four pure read-only reducers feeding the overlays
+  (`delay_finality_ratio_by_phi`, `offline_throughput_ratio`,
+  `pbft_view_change_count`, `pbft_conflicting_instances`); no CSV-writer or
+  existing reducer changed. Unit tests added (`TestMagnitudeReducers`); the render
+  smoke-test fixture was extended to the real column schema. `make test` green.

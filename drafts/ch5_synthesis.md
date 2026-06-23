@@ -164,7 +164,8 @@ tolerant when they go silent [9] [[wiki/algorithms/avalanche]]
 
 ## 5.4 The frontier and the no-dominance verdict
 
-Collecting the per-family positions gives the frontier its shape (Table 5.1). No
+Collecting the per-family positions gives the frontier its shape (Table 5.1,
+visualized as the overlaid radar of Figure 5.1). No
 row of the table is won by a single family across the board, and three families
 each win a row no other does: PBFT the delay, loss, and liveness axes; Casper FFG
 the communication-overhead and accountability axes; Snowman the
@@ -206,6 +207,27 @@ Source: [[wiki/concepts/key-findings]],
 | Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | cliff at `φ = 0.20` (`n = 10`) / `φ = 0.33` (`n = 25`) | PBFT ≈ FFG |
 | Safety under equivocation | deterministic fork at `φ = 0.40` | accountable, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵` / `3 × 10⁻¹¹` | Snowman |
 | Accountable safety | none (unattributable fork) | slashable ≥ ⅓ stake | not applicable (probabilistic) | Casper FFG |
+
+**Figure 5.1 — Cross-family performance–security frontier.** The three families
+evaluated, scored on the eight cross-regime axes of Table 5.1 and normalized by
+ordinal rank per axis: the outer ring marks the strict best on an axis and the
+center the worst, with ties shared. The polygons overlap and none encloses
+another. Each family reaches the outer ring on at least one axis no other
+matches — PBFT on the delay, loss, and liveness axes, Casper FFG on communication
+overhead and accountable safety, Snowman on equivocation safety — so each is
+non-dominated and no family dominates, the verdict of Table 5.1 read directly off
+one image. The rank scale sets aside the magnitudes that drive it,
+which are the Chapter 4 headlines: Snowman's time-to-finality grows roughly
+sixty-twofold under delayed voting and its polling overhead reaches about
+fourteen times PBFT's, PBFT forks into 229 conflicting committed instances past
+its threshold, and Snowman's analytical safety bound is near `5 × 10⁻¹⁵` while
+Casper FFG exposes at least one-third of stake as slashable. Two axes are not
+symmetric contests, as in Table 5.1: equivocation safety ranks Snowman first on
+its reported analytical bound rather than an empirical witness, and accountable
+safety names a capability only a slashing-based protocol offers. Source:
+[[wiki/concepts/key-findings]], [[wiki/experiments/2026-06-13_delay-comparison]],
+[[wiki/experiments/2026-06-19_adversary-comparison]],
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 Two features of the frontier carry more weight than the bare verdict. The first
 is a gap in it rather than a point on it. The operator tradeoff of Figure 4.13

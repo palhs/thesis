@@ -108,6 +108,50 @@ def liveness_rate(rows, family, protocol, n) -> dict[float, LivenessCell]:
 
 
 # --------------------------------------------------------------------------- #
+# Per-adversary magnitude curves (Chapter-4 figure overlays; read-only, no CSV)
+# --------------------------------------------------------------------------- #
+
+def delay_finality_ratio_by_phi(rows, protocol, n) -> dict[float, float]:
+    """{phi: worst-over-magnitude mean finality_delay_ratio} for the delay family.
+
+    At each phi the cell mean is taken per delay magnitude (delay_mult) and the
+    worst (max) magnitude cell is kept, so max(values()) equals the headline
+    blow-up reported by adversary_comparison.delay_finality_blowup (PBFT 1.0x,
+    Snowman tens-of-x). NaN-skip per cell: Casper FFG carries NaN on failed runs
+    (a liveness loss, not a finality blow-up), so it must not pollute the curve.
+    """
+    cells: dict[tuple, list[float]] = defaultdict(list)
+    for r in rows:
+        if (r["family"] != "delay" or r["protocol"] != protocol
+                or int(r["n"]) != n):
+            continue
+        v = _fnum(r["finality_delay_ratio"])
+        if math.isnan(v):
+            continue
+        key = (round(_fnum(r[PHI]), 4), round(_fnum(r.get("delay_mult", "nan")), 4))
+        cells[key].append(v)
+    by_phi: dict[float, list[float]] = defaultdict(list)
+    for (phi, _m), vals in cells.items():
+        by_phi[phi].append(sum(vals) / len(vals))
+    return {phi: max(means) for phi, means in by_phi.items() if means}
+
+
+def offline_throughput_ratio(rows, protocol, n) -> dict[float, MeanCI]:
+    """{phi: MeanCI of throughput_ratio} for the withhold-participation family —
+    the surviving-throughput magnitude (separate from the success-rate curve);
+    used to label the 'alive but starved' Snowman cell. NaN-skip on dead cells."""
+    buckets: dict[float, list[float]] = defaultdict(list)
+    for r in rows:
+        if (r["family"] != "offline" or r["protocol"] != protocol
+                or int(r["n"]) != n):
+            continue
+        v = _fnum(r["throughput_ratio"])
+        if not math.isnan(v):
+            buckets[round(_fnum(r[PHI]), 4)].append(v)
+    return {phi: mean_ci(v) for phi, v in buckets.items()}
+
+
+# --------------------------------------------------------------------------- #
 # Safety invariants (equivocate family only)
 # --------------------------------------------------------------------------- #
 
@@ -137,6 +181,15 @@ def pbft_view_change_rate(rows, n) -> dict[float, MeanCI]:
     return {phi: mean_ci(v) for phi, v in buckets.items()}
 
 
+def pbft_view_change_count(rows, n) -> dict[float, MeanCI]:
+    """{phi: MeanCI of view_change_count} for PBFT on the equivocate family —
+    the absolute count the §4.4.3 prose reports (10 at n=10, 25 at n=25 at the
+    last safe fraction), as opposed to the per-second rate. Seed-invariant
+    (fixed equivocating set), so the CI is zero-width and the mean is exact;
+    collapses to 0 at phi=0.40 where the deterministic fork replaces rotation."""
+    return _equiv_cell(rows, "pbft", n, "view_change_count")
+
+
 def ffg_slashable(rows, n) -> dict[float, MeanCI]:
     """Casper FFG §7.3 accountable-safety invariant: max_slashable_stake_fraction
     vs the 1/3 threshold. {phi: MeanCI}."""
@@ -148,6 +201,13 @@ def safety_violation_rate(rows, protocol, n) -> dict[float, MeanCI]:
     for `protocol` on the equivocate family. {phi: MeanCI}; used by the f_max
     bracket and the cross-protocol cliff figure."""
     return _equiv_cell(rows, protocol, n, "safety_violation")
+
+
+def pbft_conflicting_instances(rows, n) -> dict[float, MeanCI]:
+    """{phi: MeanCI of conflicting_instances} for PBFT on the equivocate family —
+    the magnitude of the fork (229 at phi=0.40, both committee sizes), annotated
+    on the safety-cliff figure where the rate steps from 0 to 1."""
+    return _equiv_cell(rows, "pbft", n, "conflicting_instances")
 
 
 @dataclass(frozen=True)

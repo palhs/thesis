@@ -65,7 +65,7 @@ the independent variable named in the question.
 | RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
 | RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2.4 | **closed** — "answers RQ3" stated |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4 |
-| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.4 | **closed** (2026-06-23) — Ch5 §5.4 states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1 + the operator-tradeoff figure (Fig 4.13) carry the evidence |
+| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.4 | **closed** (2026-06-23) — Ch5 §5.4 states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1, the native cross-family frontier radar (Fig 5.1, added in the W12 figure pass 2026-06-24), and the operator-tradeoff figure (Fig 4.13) carry the evidence |
 
 A Writer touching a results or synthesis chapter updates this table and satisfies
 every row it owns. RQ2 was the live trap and is now closed: the §4.4 pass added
@@ -85,7 +85,9 @@ deliver, or to restate the reason it is carried.
 **Discharged by Chapter 5 (drafted 2026-06-23, in review):**
 
 - the RQ5 Pareto-frontier synthesis (was deferred from §4.3.4, §4.4.4, §1.5–1.6,
-  §3.1) — delivered in §5.4 over the three families evaluated;
+  §3.1) — delivered in §5.4 over the three families evaluated, and given its own
+  native figure in the W12 figure pass (the cross-family frontier radar,
+  Figure 5.1, 2026-06-24);
 - the explicit "does any family dominate" verdict — delivered as *no* (§5.4,
   Table 5.1), established over the three families evaluated.
 
@@ -346,7 +348,9 @@ writes the prose stays clean and the answer stays sharp.
   caveats handed to Ch6. Remaining cross-chapter work lives in Ch5/Ch6 below.
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
-  dominate" = *no* (§5.4, Table 5.1), discharging the §4.3.4 / §4.4.4 deferrals.
+  dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar
+  Figure 5.1 added in the W12 figure pass 2026-06-24), discharging the
+  §4.3.4 / §4.4.4 deferrals.
   §1.2 hook callback present (§5.5). Hands off to Ch6. The adaptive-timeout
   enhancement is no longer in Ch5 scope (descoped 2026-06-22; now a Ch6 §6.3.2
   further-work direction). Neutral three-family scoping — the deferred family is
