@@ -19,7 +19,7 @@ with the chapter scope set in §3.6.
 The baseline serves two purposes: it establishes that each protocol is correct
 on the honest path at every validator count, and it isolates the cost that
 scales with the validator set from the cost the later sweeps attribute to delay
-and adversarial behavior. Injecting no delay and no faults, it is also the
+and adversarial behavior. With no delay or faults injected, it is also the
 cleanest setting in which to confront the simulator's measured numbers with each
 protocol's published asymptotic theory.
 
@@ -162,7 +162,7 @@ around [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]].
 Two readings must be kept apart. Per committed unit, Snowman is the most
 expensive protocol by an order of magnitude — roughly twenty-four messages per
 validator against PBFT's two — the price of repeated subsampling at thesis scale.
-Yet the property for which Avalanche is celebrated is that its *per-validator*
+Yet the property for which Avalanche is known is that its *per-validator*
 cost is independent of `n`, a statement about per-validator work, not about the
 network-aggregate `total_msgs_per_acu` plotted here, which necessarily grows with
 `n` as each of `n` validators performs that constant work. The independence is
