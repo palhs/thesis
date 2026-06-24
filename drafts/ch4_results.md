@@ -236,7 +236,7 @@ over twenty seeds with common random numbers, except the most expensive —
 Snowman at `n = 25` under heavy delay — over eight. As in §4.2, three protocols are covered.
 
 Two measurement properties frame the results. All cross-protocol latency is read
-from `commit_latency_ms`, the canonical time-to-finality column of §4.2.6, so
+from `commit_latency_ms`, the canonical time-to-finality column of §3.5, so
 each protocol's irreversibility milestone is compared like for like
 [[wiki/concepts/output-format]]. And delay and loss attack different properties,
 reported apart: delay inflates time-to-finality (RQ1), loss erodes liveness
@@ -434,7 +434,7 @@ stall of May 2023 there — leave the epoch unjustified and finality stalled
 delay, and adversarial regimes jointly — RQ5 — is taken up in the synthesis of
 Chapter 5 [[wiki/concepts/research-questions]].
 
-Two caveats qualify these results. First, the aligned milestones of §4.2.6 differ
+Two caveats qualify these results. First, the aligned milestones of §3.5 differ
 in kind: PBFT and Casper FFG offer deterministic finality, Casper FFG's
 additionally accountable — reverting a finalized checkpoint requires at least
 one-third of the stake to be slashed
