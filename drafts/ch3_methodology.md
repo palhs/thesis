@@ -5,32 +5,28 @@
 This chapter describes the simulator that closes the gap of Chapter 2 and
 operationalizes the four data-generating research questions, RQ1–RQ4
 [[wiki/concepts/research-questions]]: a single discrete-event system in which
-the four families run under one system model (§3.2), one metric schema
+the three families run under one system model (§3.2), one metric schema
 (§3.5), and one experiment matrix (§3.4) that varies each research question's
 independent variable in isolation. The fifth question, RQ5 — whether a
 consistent performance–security Pareto frontier emerges across the families —
 is a synthesis over the RQ1–RQ4 data rather than a sweep this matrix
 prescribes, and is answered in Chapter 5. The approach extends the
 instrumented-harness methodology of Gervais *et al.* [17] from Proof-of-Work
-to the four BFT families (three implemented here, the fourth scaffolded —
-§3.3.4).
+to the three BFT families.
 
-Three protocols are implemented at this stage: PBFT, Casper FFG, and
-Snowman. The fourth, Narwhal+Tusk (§3.3.4), is a deferred placeholder,
-filled in a later revision once its implementation exists in `src/`. The system model
-(§3.2), the simulation setup (§3.4), and the family-agnostic metric schema
-(§3.5) are written so that they need no revision when that subsection is
-filled.
+Three protocols are implemented: PBFT, Casper FFG, and Snowman. One system
+model (§3.2), one simulation setup (§3.4), and one metric schema (§3.5) apply
+uniformly across them.
 
 ## 3.2 System model
 
-The four consensus families decide in genuinely different ways, and that
+The three consensus families decide in genuinely different ways, and that
 diversity is the comparison problem this chapter must solve. They are not one
 protocol run with different constants — they differ in leadership, in what one
 decision commits, and in layering (established in §2.3, catalogued per protocol
-in §3.3, Table 3.2). Because the four do not even produce the same *kind* of
+in §3.3, Table 3.2). Because the three do not even produce the same *kind* of
 decision, a fair comparison cannot be read off raw numbers: it needs both a
-single fixed engine that runs all four identically and a downstream step that
+single fixed engine that runs all three identically and a downstream step that
 reconciles their differing output onto one scale.
 
 The spine of that engine is short (Figure 3.1). One seed and one configuration
@@ -46,24 +42,9 @@ fixed harness in which only the protocol-logic slot is swapped, turning one
 experiment-matrix cell and seed into one comparable per-trial row.
 
 A run is fully described by the configuration that enters it. The configuration
-loader requires seven top-level keys, shown here as the input contract:
-
-```yaml
-n: 10                      # validator-set size
-t_max: 20.0                # virtual-time deadline
-seeds:
-  n_runs: 20               # the harness enumerates seeds 0 … n_runs-1
-network:
-  phases:                  # a TIME-STAMPED sequence of phases, not a static setting
-    - t_start: 0.0
-      t_end:   20.0
-      delay: { kind: "...", params: { ... } }
-      p_drop: 0.0          # optional — per-phase message-loss probability
-      partitions: []       # optional — disjoint validator groups
-adversary:      { ... }    # opaque block — interpreted per protocol/adversary
-protocol_knobs: { ... }    # opaque block
-workload:       { ... }    # opaque block
-```
+loader requires seven top-level keys — `n`, `t_max`, `seeds`, `network`,
+`adversary`, `protocol_knobs`, and `workload` — reproduced in full as the input
+contract in Appendix A.
 
 Two features of this contract carry weight later. First, `network` is not a
 static setting but a time-stamped sequence of phases, each fixing a delay regime
@@ -73,26 +54,20 @@ Global Stabilization Time without mid-run intervention
 [[wiki/concepts/network-model-phases]]. Second, the `adversary`,
 `protocol_knobs`, and `workload` blocks are deliberately opaque — the loader
 admits each whole and leaves interpretation to the protocol or adversary that
-consumes it — which is how one harness admits four protocols that need not share
+consumes it — which is how one harness admits three protocols that need not share
 a knob schema [[wiki/concepts/system-design]].
 
 When wired, each validator is granted exactly three capabilities — the only ways
-it affects anything outside itself — each owned by a different component:
-
-| Capability granted to a validator | Owned by | Purpose |
-|:--|:--|:--|
-| set / cancel a timer | scheduler | a validator schedules its own future wake-ups |
-| send / broadcast a message | network | a validator communicates with other validators |
-| emit an event (`decided`, `halted`, …) | logger | a validator records what happened |
-
-This three-capability contract is the split-ownership invariant: the scheduler
-owns time and event delivery, the network owns transport, the logger owns the
-record. Because the builder, scheduler, network, and logger are identical across
-protocols, any difference between two rows is attributable to the protocol logic
-alone [[wiki/concepts/system-design]]. The network models timing only — it
-delivers each message at most once, unordered, under per-phase delay, loss, and
-partition — and every protocol's messages travel in one uniform envelope
-distinguished only by a per-protocol type (Table 3.2).
+it affects anything outside itself — each owned by a different component (the
+full capability contract is tabulated in Appendix A). This three-capability
+contract is the split-ownership invariant: the scheduler owns time and event
+delivery, the network owns transport, the logger owns the record. Because the
+builder, scheduler, network, and logger are identical across protocols, any
+difference between two rows is attributable to the protocol logic alone
+[[wiki/concepts/system-design]]. The network models timing only — it delivers
+each message at most once, unordered, under per-phase delay, loss, and partition
+— and every protocol's messages travel in one uniform envelope distinguished
+only by a per-protocol type (Table 3.2).
 
 The engine's mechanism is one run loop (Figure 3.2) — the scheduler box of
 Figure 3.1 seen up close. One turn proceeds as follows. If the virtual clock
@@ -105,7 +80,7 @@ reacts and may schedule new events; the loop then checks the caller's stop
 predicate before taking the next turn. A run therefore ends on one of three
 termination paths — `quiescence` (the heap is empty), `deadline` (the clock
 reached `t_max`), or `predicate` (a caller-supplied condition became true). The
-loop is identical for all four protocols; only the state machine inside the
+loop is identical for all three protocols; only the state machine inside the
 validator differs.
 
 **Figure 3.2 ([[diagrams/runtime/event-loop]]).** One turn of the scheduler's
@@ -122,24 +97,23 @@ Second, network phases are scheduled in advance, so a single seeded run can cros
 a partial-synchronous Global Stabilization Time without intervention
 [[wiki/concepts/network-model-phases]].
 
-Isolation is not commensurability. Running four kinds of decision through one
+Isolation is not commensurability. Running three kinds of decision through one
 identical engine secures only that the engine adds no difference of its own;
 making them comparable is a separate downstream step — the reconcile the metric
 schema performs under stated conventions when the per-trial rows are read back
 (§3.5). Finally, an adversary is not a new component but a per-node interceptor
-that alters a single validator's outgoing messages; the four Byzantine
-strategies a profile can apply are catalogued in
-[[wiki/concepts/adversary-model]], and §3.4 names the three the RQ4 sweep
-exercises.
+that alters a single validator's outgoing messages; the Byzantine strategies a
+profile can apply are catalogued in [[wiki/concepts/adversary-model]], and §3.4
+names the three the RQ4 sweep exercises.
 
 ## 3.3 Algorithms
 
 Each family surveyed in Chapter 2 (§2.3) is represented in the simulator by a
 single protocol [[wiki/algorithms/pbft]], [[wiki/algorithms/pos]],
-[[wiki/algorithms/avalanche]], [[wiki/algorithms/dag-based]]; Table 3.1 fixes
-that correspondence, and its rightmost column states why each protocol is a
-faithful representative of its family. The family labels are those of
-Chapter 2; the protocol names are used from here onward.
+[[wiki/algorithms/avalanche]]; Table 3.1 fixes that correspondence, and its
+rightmost column states why each protocol is a faithful representative of its
+family. The family labels are those of Chapter 2; the protocol names are used
+from here onward.
 
 **Table 3.1 — Family-to-protocol mapping.**
 
@@ -148,20 +122,18 @@ Chapter 2; the protocol names are used from here onward.
 | PBFT-style | PBFT | The canonical leader-driven, multi-phase BFT protocol the family is named for; its `3f+1` quorum and view-change are the mechanism every later variant refines. |
 | PoS-finality | Casper FFG | The finality gadget Ethereum deploys; it carries the family's defining stake-weighted, two-checkpoint justification rule. |
 | Avalanche-style | Snowman | The production linear-chain form of the Avalanche family; it exercises the family's defining repeated random-subsample voting. |
-| DAG-based | Narwhal+Tusk — deferred (§3.3.4) | The mempool-versus-consensus split that defines the family; scaffolded as a reserved column and filled once its implementation lands. |
 
 Chapter 2 (§2.3, Table 2.1) establishes the *mechanism* of each protocol
 family; this section does not revisit it. It audits where the simulator's
 implementation *departs* from the textbook family, and why each departure
-leaves the comparative results valid. Table 3.2 summarizes the four protocols
+leaves the comparative results valid. Table 3.2 summarizes the three protocols
 at a glance — whether each elects a leader, what one decision commits (its
 *atomic commit unit*, or ACU; defined in §3.5), the message types each carries,
 the event that signals a commit, the knobs exposed to experiments, and the main
 simplification each makes. Each subsection then pairs the protocol's decide-path figure — the
 honest path from first message to `decided` — with a *deviation ledger* whose
 numbered entries name every point at which the implementation departs from the
-family and the validity boundary each departure introduces. The Narwhal+Tusk
-column and subsection are deferred until its implementation exists (§3.3.4).
+family and the validity boundary each departure introduces.
 
 In this table and the subsections that follow, `n` is the validator-set size and
 `f` the Byzantine-fault threshold it tolerates (`n = 3f + 1`, §3.4.2); the
@@ -169,14 +141,14 @@ Snowman tuple `(K, α_p, α_c, β)` is defined where it is set, in §3.3.3.
 
 **Table 3.2 — The implemented protocols in the simulator.**
 
-| | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
-|:--|:--|:--|:--|:--|
-| Leader? | Yes — single rotating primary | Yes — slot proposer | No — leaderless | — |
-| Decision unit (ACU) | one committed block | one finalized checkpoint (+ its ancestors) | one accepted block | — |
-| Message types | `PRE-PREPARE`, `PREPARE`, `COMMIT`, `VIEW-CHANGE`, `NEW-VIEW` | `BLOCK-PROPOSAL`, `ATTESTATION`, `SLASHING-EVIDENCE` | `BLOCK-ANNOUNCEMENT`, `QUERY`, `QUERY-RESPONSE` | — |
-| `decided` fires when | `2f+1` `COMMIT` collected for one `(view, seq)` | a checkpoint and its direct child are both justified | the confidence counter reaches `β` | — |
-| Knobs exposed | view-change timeout (`3·E[round_latency]`, `×2^view` backoff); Byzantine fraction | `slots_per_epoch` (2); `slot_duration` (1 s); justification threshold | `(K, α_p, α_c, β)` via the rescaling rule; sampling seed | — |
-| Main simplification | classical variant only — no HotStuff/Tendermint, no signatures | no LMD-GHOST fork choice; attest once per epoch; slashing modeled as a halt | linearized Snowman only — no DAG-Avalanche; no stake-weighted sampling | — |
+| | PBFT | Casper FFG | Snowman |
+|:--|:--|:--|:--|
+| Leader? | Yes — single rotating primary | Yes — slot proposer | No — leaderless |
+| Decision unit (ACU) | one committed block | one finalized checkpoint (+ its ancestors) | one accepted block |
+| Message types | `PRE-PREPARE`, `PREPARE`, `COMMIT`, `VIEW-CHANGE`, `NEW-VIEW` | `BLOCK-PROPOSAL`, `ATTESTATION`, `SLASHING-EVIDENCE` | `BLOCK-ANNOUNCEMENT`, `QUERY`, `QUERY-RESPONSE` |
+| `decided` fires when | `2f+1` `COMMIT` collected for one `(view, seq)` | a checkpoint and its direct child are both justified | the confidence counter reaches `β` |
+| Knobs exposed | view-change timeout (`3·E[round_latency]`, `×2^view` backoff); Byzantine fraction | `slots_per_epoch` (2); `slot_duration` (1 s); justification threshold | `(K, α_p, α_c, β)` via the rescaling rule; sampling seed |
+| Main simplification | classical variant only — no HotStuff/Tendermint, no signatures | no LMD-GHOST fork choice; attest once per epoch; slashing modeled as a halt | linearized Snowman only — no DAG-Avalanche; no stake-weighted sampling |
 
 ### 3.3.1 PBFT
 
@@ -303,18 +275,6 @@ Snowman baseline experiment, in which every validator decides every announced
 block with no forks and byte-identical replay
 [[experiments/2026-05-27_snowman-baseline]].
 
-### 3.3.4 Narwhal+Tusk
-
-Narwhal+Tusk is the DAG-based representative, decoupling data
-availability (the Narwhal mempool) from ordering (the Tusk anchor commit)
-[11]. The simulator's implementation does not yet exist, so this subsection
-carries no decide-path figure or deviation ledger; both, together with the
-reserved column of Table 3.2, are filled once the implementation lands.
-*Validity boundary (already fixed):* the mempool-versus-consensus message split
-this family forces on the metric schema is pinned in
-[[wiki/concepts/metric-reconciliation]] and surfaces in §3.5 as two message
-columns rather than one.
-
 ## 3.4 Simulation setup
 
 ### 3.4.1 Reproducibility and the run lifecycle
@@ -402,7 +362,7 @@ sub-threshold band `φ ∈ {0.10, 0.20, 0.30}` against a `φ = 0` honest control
 Workload defaults are:
 
 - a Poisson arrival process;
-- 512-byte transactions matching the Narwhal benchmark [11];
+- fixed 512-byte transactions;
 - a zero conflict rate;
 - an offered rate of 100 transactions per second in the sub-saturation latency
   regime.
@@ -469,9 +429,8 @@ bound validator's outgoing messages.
    broadcasts `PRE-PREPARE`. Each validator that accepts it broadcasts
    `PREPARE`; once a validator has collected `7` matching prepares it
    broadcasts `COMMIT`; once it has collected `7` matching commits it emits a
-   `decided` event for the block at time `t_decided`. The network applies the
-   `static-baseline` delay to every delivery, and the scheduler advances
-   virtual time only as it pops events.
+   `decided` event for the block at time `t_decided`, under the
+   `static-baseline` delay on every delivery.
 4. **Stop.** The run ends at `quiescence` or `t_max`.
 5. **Flush and reduce.** The harness reduces the event stream to metrics: the
    commit latency of `τ` is `t_decided − t_submit`; throughput is the
@@ -499,32 +458,27 @@ here.
 
 The walkthrough above produces one row of a single file, but the comparison
 rests on two files [[wiki/concepts/output-format]]. The first is a per-trial,
-long-format CSV — `results/baseline/baseline.csv` — that carries one row per
-`(protocol, scenario, seed)`; this is the file step 6 appends to, one row per
-run. The second is produced by a separate, downstream aggregation step: a wide
-CSV — `results/baseline/aggregated.csv` — that carries one row per configuration,
-holding the mean and 95% confidence interval of each metric across the seed set,
-and it is this aggregated file that feeds the Chapter 4 plots. The mean and
-confidence interval are therefore properties of the aggregation, not of any
-single per-trial row.
-
-Repeating the run over seeds `0 … 19` under common random numbers gives the
-aggregation step the sample it reduces to the cell's mean and 95% confidence
-interval. Family B replaces the network phase, Family C attaches an
-`AdversaryProfile` to `φ` of the validators, and the other three protocols
+long-format CSV — `results/baseline/baseline.csv` — carrying one row per
+`(protocol, scenario, seed)`, the file step 6 appends to. The second is produced
+by a separate downstream aggregation step: a wide CSV —
+`results/baseline/aggregated.csv` — carrying one row per configuration with the
+mean and 95% confidence interval of each metric across the seed set, and it is
+this aggregated file that feeds the Chapter 4 plots. The mean and interval are
+therefore properties of the aggregation, not of any single per-trial row;
+repeating the run over seeds `0 … 19` under common random numbers supplies the
+sample it reduces. Family B replaces the network phase, Family C attaches an
+`AdversaryProfile` to `φ` of the validators, and the other two protocols
 substitute their own proposer, message types, and `decided` condition (Table
-3.1) — but the six-phase lifecycle is identical for all four.
+3.1) — but the six-phase lifecycle is identical for all three.
 
 ## 3.5 Metric schema
 
-The four protocols do not emit commensurable events: PBFT commits a block,
-Casper FFG finalizes a checkpoint, Snowman accepts a block once its counter
-reaches `β`, and Narwhal+Tusk commits an anchor-batch over a DAG. They differ
-structurally in four ways — linear-chain versus DAG output, per-block versus
-per-epoch versus per-anchor-batch finality, the Narwhal mempool-versus-consensus
-message split, and Snowman parameter rescaling — so no quantity can be read off
-the raw event stream and compared across families until it is first placed on a
-common axis [[wiki/concepts/metric-reconciliation]]. Building that axis is the
+The three protocols do not emit commensurable events: PBFT commits a block,
+Casper FFG finalizes a checkpoint, and Snowman accepts a block once its counter
+reaches `β`. They differ structurally — PBFT's and Snowman's per-block finality
+against Casper FFG's per-epoch finality, and Snowman's parameter rescaling — so
+no quantity can be read off the raw event stream and compared across families
+until it is first placed on a common axis [[wiki/concepts/metric-reconciliation]]. Building that axis is the
 work of the metric schema, and the schema is uniform across families: each metric
 has one definition, one unit, and one fixed instrumentation point in `src/`, and
 the family-specific differences appear only as different per-protocol formulas
@@ -538,18 +492,16 @@ families cover the evaluation:
 - *reliability* measures whether it preserves safety and liveness under delay
   and adversary.
 
-The device that makes the four commensurable is the *atomic commit unit* (ACU):
+The device that makes the three commensurable is the *atomic commit unit* (ACU):
 the smallest contiguous set of transactions a protocol commits indivisibly.
 Every "per-block" metric is rewritten as "per ACU", where the ACU is one block
-for PBFT, one finalized checkpoint for Casper FFG, one block for Snowman, and one
-anchor-batch for Narwhal+Tusk — so one denominator admits both layered and
-single-layer protocols without a conditional formula. The four protocols are
-thereby plottable on one scale under four stated conventions — the ACU
-denominator, the Narwhal mempool-versus-consensus split, the Snowman parameter
-rescaling, and the Casper FFG calibration of §3.3.2. Because each convention is a
-modeling choice rather than a neutral fact, a verdict is reported as robust only
-when it survives the sensitivity sweep that varies the convention's governing
-knob [[wiki/concepts/metric-reconciliation]].
+for PBFT, one finalized checkpoint for Casper FFG, and one block for Snowman — so
+one denominator serves all three without a conditional formula. The three
+protocols are thereby plottable on one scale under three stated conventions — the
+ACU denominator, the Snowman parameter rescaling, and the Casper FFG calibration
+of §3.3.2. Because each convention is a modeling choice rather than a neutral
+fact, a verdict is reported as robust only when it survives the sensitivity sweep
+that varies the convention's governing knob [[wiki/concepts/metric-reconciliation]].
 
 Latency carries one further convention. Every latency metric is anchored at the
 transaction's submit time, so end-to-end latency is comparable across protocols
@@ -563,17 +515,16 @@ model time; no number is a real-hardware claim, and published production figures
 are order-of-magnitude sanity checks (§1.4), not validation targets.
 
 Tables 3.3 and 3.4 give the per-protocol latency/throughput and
-overhead/reliability formulas; the Narwhal+Tusk column is deferred until that
-family is implemented.
+overhead/reliability formulas.
 
 **Table 3.3 — Latency and throughput per protocol.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
 
-| Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
-| :-- | :-- | :-- | :-- | :-- |
-| `commit_latency_ms` | median per-node time to the first `decided` instance (`2f+1` `COMMIT`) | median per-node time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | median per-node time to counter-`β` acceptance of the first block | — |
-| `tps` | decided ACUs per window (`decided_count / t_max`) | decided epochs per window (`decided_count / t_max`) | decided blocks per window (`decided_count / t_max`) | — |
-| `goodput` | committed transactions per window (`committed_tx / time`) | committed transactions per window over finalized epochs | committed transactions per window | — |
+| Metric | PBFT | Casper FFG | Snowman |
+| :-- | :-- | :-- | :-- |
+| `commit_latency_ms` | median per-node time to the first `decided` instance (`2f+1` `COMMIT`) | median per-node time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | median per-node time to counter-`β` acceptance of the first block |
+| `tps` | decided ACUs per window (`decided_count / t_max`) | decided epochs per window (`decided_count / t_max`) | decided blocks per window (`decided_count / t_max`) |
+| `goodput` | committed transactions per window (`committed_tx / time`) | committed transactions per window over finalized epochs | committed transactions per window |
 
 **Throughput basis.** As implemented, `tps` is a decided-event rate whose
 granularity is protocol-dependent — per block for PBFT and Snowman, per finalized
@@ -584,13 +535,13 @@ transaction rate, and never `tps` [[wiki/concepts/metric-reconciliation]].
 **Table 3.4 — Overhead and reliability per protocol.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
 
-| Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
-| :-- | :-- | :-- | :-- | :-- |
-| `consensus_msgs_per_acu` | `delivery_count / decided_count`, which evaluates to `(2n²−2)/n = 2n − 2/n`; this is `O(n²)` per-instance traffic over an `n`-scaled decided-event denominator, **not** linear scaling | `delivery_count / decided_count`, measured `≈ 1.125n` (un-aggregated all-to-all votes, `O(n²)` traffic; production BLS aggregation to `O(n)` is not modeled) | `delivery_count / decided_count` (`O(K·β)` query/response deliveries per validator, independent of `n`) | — |
-| `total_msgs_per_acu` | all deliveries per ACU; equals `consensus_msgs_per_acu` until a separate mempool layer exists, which only the Narwhal+Tusk family introduces | as PBFT | as PBFT | — |
-| `bytes_per_acu` | wire-byte budget per ACU; payload-dominated at the thesis workload — see note below | attestation + payload bytes per slot; payload-dominated | `O(K·β)` query/response bytes plus payload; payload-dominated | — |
-| `success_rate` | `0/1` indicator per run (`1.0` iff an instance decided); becomes a frequency after `n_runs` aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) | — |
-| safety-violation rate (`fork_rate`) | `0` below threshold by construction; measured `> 0` only above the `1/3` bound under equivocation | `0` below threshold by construction; measured `> 0` only above `1/3` under equivocation — a conflicting finalized checkpoint, not a reorg (LMD-GHOST is not modeled, §3.3.2 ④) | N/A — Snowman's safety is probabilistic, reported via `ε` (empirical conflicting-decision rate against `(1 − α_c/K)^β`); pre-`β` preference switches are convergence transients, not violations | — |
+| Metric | PBFT | Casper FFG | Snowman |
+| :-- | :-- | :-- | :-- |
+| `consensus_msgs_per_acu` | `delivery_count / decided_count`, which evaluates to `(2n²−2)/n = 2n − 2/n`; this is `O(n²)` per-instance traffic over an `n`-scaled decided-event denominator, **not** linear scaling | `delivery_count / decided_count`, measured `≈ 1.125n` (un-aggregated all-to-all votes, `O(n²)` traffic; production BLS aggregation to `O(n)` is not modeled) | `delivery_count / decided_count` (`O(K·β)` query/response deliveries per validator, independent of `n`) |
+| `total_msgs_per_acu` | all deliveries per ACU; equals `consensus_msgs_per_acu`, as none of the three carries a separate mempool layer | as PBFT | as PBFT |
+| `bytes_per_acu` | wire-byte budget per ACU; payload-dominated at the thesis workload — see note below | attestation + payload bytes per slot; payload-dominated | `O(K·β)` query/response bytes plus payload; payload-dominated |
+| `success_rate` | `0/1` indicator per run (`1.0` iff an instance decided); becomes a frequency after `n_runs` aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
+| safety-violation rate (`fork_rate`) | `0` below threshold by construction; measured `> 0` only above the `1/3` bound under equivocation | `0` below threshold by construction; measured `> 0` only above `1/3` under equivocation — a conflicting finalized checkpoint, not a reorg (LMD-GHOST is not modeled, §3.3.2 ④) | N/A — Snowman's safety is probabilistic, reported via `ε` (empirical conflicting-decision rate against `(1 − α_c/K)^β`); pre-`β` preference switches are convergence transients, not violations |
 
 **Byte overhead.** `bytes_per_acu` includes the 512-byte transaction payload on
 every transaction-carrying delivery; at the thesis workload this payload term
@@ -640,24 +591,21 @@ Wilson stays honest at the boundary but does not narrow: even at 30 runs a
 zero-violation cell bounds the true rate only below `≈ 0.11`, so near-threshold
 safety verdicts are read as bounds, not point estimates.
 
-Tables 3.3 and 3.4 list the columns populated at the honest baseline. Three
-column groups are defined in the schema but written only when their owning work
-lands [[wiki/concepts/output-format]]: the mempool throughput and mempool-message
-split (`mempool_tps`, `mempool_msgs_per_acu`) with the Narwhal+Tusk
-implementation; and the adversarial-threshold and probabilistic-safety columns —
+Tables 3.3 and 3.4 list the columns populated at the honest baseline. Two
+column groups are defined in the schema but written only when the RQ4 adversarial
+sweep runs [[wiki/concepts/output-format]]: the adversarial-threshold columns —
 `f_max_count` for PBFT and Snowman or the mutually exclusive `f_max_stake` for
 Casper FFG (the smallest adversary fraction at which a run's safety or liveness
-invariant first breaks), together with the empirical and analytical Snowman
-safety columns discussed above — with the RQ4 adversarial sweep. The finalized
-CSV layout is fixed in [[wiki/concepts/output-format]].
+invariant first breaks) — and the empirical and analytical Snowman safety columns
+discussed above. The finalized CSV layout is fixed in
+[[wiki/concepts/output-format]].
 
 ## 3.6 Summary and threats to validity
 
-The system model (§3.2) and metric schema (§3.5) are family-agnostic: the four
-families' structural asymmetries are absorbed upstream of any experiment by
-the ACU denominator, the layered-versus-single-layer message split, and the
-per-protocol finality semantics, all written to need no revision when the
-deferred Narwhal+Tusk subsection (§3.3.4) is filled.
+The system model (§3.2) and metric schema (§3.5) absorb the three families'
+structural asymmetries upstream of any experiment — through the ACU denominator,
+the per-protocol message accounting, and the per-protocol finality semantics — so
+no experiment sees them.
 
 Three deliberate exclusions in the model bound the claims the chapter can
 support, and are stated here rather than left implicit.
@@ -666,11 +614,11 @@ support, and are stated here rather than left implicit.
   per-byte, processing, or signature-verification cost
   [[wiki/concepts/experiment-matrix]]. This favors the protocols whose
   dominant real-world cost is precisely what the model omits: PBFT's `O(n²)`
-  signature verification and Narwhal's data-availability mempool are charged for
-  the messages and bytes they emit, which the simulator counts directly, but not
-  for the computation those messages imply. The bias is therefore confined to
-  the latency and per-validator-cost verdicts; the message-count and byte-count
-  comparisons are unaffected [[wiki/concepts/evaluation-metrics]].
+  signature verification is charged for the messages and bytes it emits, which
+  the simulator counts directly, but not for the computation those messages
+  imply. The bias is therefore confined to the latency and per-validator-cost
+  verdicts; the message-count and byte-count comparisons are unaffected
+  [[wiki/concepts/evaluation-metrics]].
 - **Synthetic open-loop workload.** The workload is Poisson arrivals of
   fixed-size transactions at a conflict rate of zero (§3.4.2), which isolates
   protocol behavior from workload-induced contention at the cost of not modeling
@@ -701,12 +649,9 @@ exclusion.
 The coverage of the comparison is itself bounded in three ways, each a consequence
 of what the chapter implements rather than of the model.
 
-- **RQ4 fault survey scoped to three families.** Deferring the DAG-based family
-  removes not only its protocol from the comparison but also its catalogued
-  headline weakness — data-availability withholding, in which a validator certifies
-  a header yet refuses to serve its contents — from the adversarial survey
-  [[wiki/concepts/adversary-model#7-2-narwhal-tusk-data-availability-withholding]].
-  The RQ4 verdicts are therefore scoped to the three implemented families.
+- **RQ4 fault survey scoped to three families.** The adversarial survey
+  exercises only the three implemented families, so the RQ4 verdicts are scoped
+  to those three.
 - **Adversary grid covers twelve of eighteen catalogued pairs.** The sweep
   exercises the three generic capabilities — `delay-emission`,
   `withhold-participation`, and `equivocate-vote` — across the protocols, which is
@@ -716,10 +661,8 @@ of what the chapter implements rather than of the model.
   documented pressure point of the leader-driven families, where a faulty primary
   or proposer forces leader rotation — so that surface is not measured here
   [[wiki/concepts/experiment-matrix-runs#uncovered-catalog-surfaces]].
-- **RQ5 synthesis traced over three families.** Because the DAG-based family is
-  deferred, the cross-family Pareto synthesis of Chapter 5 is currently traced over
-  three families, leaving the high-throughput corner the DAG family would occupy
-  unmeasured.
+- **RQ5 synthesis traced over three families.** The cross-family Pareto synthesis
+  of Chapter 5 is traced over the three families evaluated.
 
 A `deadline` stop, finally, is scored as a liveness failure only against the
 in-window commit condition of §3.4.1, not by the clock alone. The model's
