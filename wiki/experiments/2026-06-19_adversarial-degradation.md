@@ -104,11 +104,24 @@ visual clutter were reverted in `adversary_degradation_plots.py`:
   longer clashes stylistically with its neighbours. The `steps` arg of
   `_liveness_axis` is now unused and was dropped. The `φ*` survival-depth box and
   the `n=25` "alive but starved" label are unchanged.
+- **Throughput figure restyled + renumbered.** The RQ2 throughput-degradation
+  figure (the offline `throughput_ratio` reading) is now rendered in the §4.4
+  house style as a faceted 1×2 panel — new `fig_offline_throughput` →
+  `throughput_degradation_vs_phi.{png,pdf}` (PBFT flat, FFG ≈ `1−φ`, Snowman
+  starves; `y = 1−φ` invariant + ⅓ line marked) — superseding, for the chapter,
+  the two square per-`n` plots from `output.offline_plots`
+  (`throughput_vs_f_n{10,25}`, which stay as that experiment's own artifacts).
+  To restore ascending figure order in the draft, the throughput figure and the
+  outcome matrix **swapped draft numbers**: outcome matrix 4.21 → **4.20**,
+  throughput 4.20 → **4.21** (the matrix is captioned first in §4.4.4, the
+  throughput RQ2 reading last). The equivocation figures (4.16–4.19) keep their
+  numbers. The §4.4 figure set rendered by this script is now **8** (was 7).
 
-In-image title + caption reworded to drop "step cliffs"; PNG+PDF re-rendered;
-`output` suite green (172 tests). Draft caption synced (`drafts/ch4_results.md`
-Fig 4.15). The `safety_cliff` figure (4.18) keeps its single-transition
-`steps-post` step — only the offline liveness figure changed.
+In-image title + caption reworded to drop "step cliffs"; all PNG+PDF re-rendered;
+`output` suite green (172 tests). Draft synced (`drafts/ch4_results.md`: Fig 4.15
+caption, the 4.20/4.21 swap, and the throughput caption → single faceted source).
+The `safety_cliff` figure (4.18) keeps its single-transition `steps-post` step —
+only the offline liveness figure changed drawstyle.
 
 ### [2026-06-24] — §4.4 figure-impact pass (T62 figure slice)
 

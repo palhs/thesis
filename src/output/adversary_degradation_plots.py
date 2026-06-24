@@ -10,11 +10,12 @@ byte-identical-CSV gate covers it.
 Figures (draft numbers in parentheses):
   - liveness_vs_phi_delay        (Fig 4.14) liveness + finality blow-up, delay
   - liveness_vs_phi_offline      (Fig 4.15) liveness cliffs (phi* boxed), offline
+  - throughput_degradation_vs_phi (Fig 4.21) throughput degradation (RQ2), offline
   - liveness_vs_phi_equivocate   (Fig 4.16) liveness, equivocate
   - pbft_viewchange_count_vs_phi (Fig 4.17) PBFT view-change COUNT, equivocate
   - safety_cliff_vs_phi          (Fig 4.18) safety-violation rate + 229 annotation
   - ffg_slashable_vs_phi         (Fig 4.19) Casper FFG slashable stake
-  - adversary_tradeoff_matrix    (Fig 4.21) 3x3 protocol x adversary outcome map
+  - adversary_tradeoff_matrix    (Fig 4.20) 3x3 protocol x adversary outcome map
 
 In-image titles are descriptive only; interpretation lives in the chapter
 captions (draft-style.md, no editorializing in figure titles).
@@ -175,6 +176,46 @@ def fig_offline_liveness(rows, plot_dir):
 
 
 # --------------------------------------------------------------------------- #
+# Fig 4.21 — silent non-participation: throughput degradation (the RQ2 reading)
+# --------------------------------------------------------------------------- #
+
+def fig_offline_throughput(rows, plot_dir):
+    """Offline family, faceted by n in the §4.4 house style: committed-unit
+    throughput ratio vs phi — the RQ2 reading of the same sweep behind Fig 4.15.
+    The y = 1 - phi reference is the participating-stake invariant: PBFT holds
+    flat to its quorum cliff, Casper FFG decays ~ (1 - phi), Snowman starves
+    earliest. Supersedes the per-n square plots from output.offline_plots."""
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), sharey=True)
+    for ax, n in zip(axes, NS):
+        phis: set[float] = set()
+        for proto in PROTO_ORDER:
+            tr = aa.offline_throughput_ratio(rows, proto, n)
+            grid = sorted(tr)
+            phis.update(grid)
+            if not grid:
+                continue
+            ax.errorbar(grid, [tr[p].mean for p in grid],
+                        yerr=[tr[p].ci_half for p in grid], capsize=3,
+                        linewidth=1.6, markersize=6, **STYLE[proto])
+        # y = 1 - phi participating-stake invariant across the swept range.
+        ref = sorted(phis)
+        if ref:
+            ax.plot(ref, [1.0 - p for p in ref], color="grey", linewidth=1.0,
+                    linestyle="--", zorder=1, label="$y = 1 - \\varphi$ invariant")
+        _third_line(ax)
+        ax.set_xlim(*XLIM)
+        ax.set_ylim(*YLIM)
+        ax.set_xlabel("silent fraction $\\varphi$")
+        ax.set_title(f"$n = {n}$")
+        _grid(ax)
+    axes[0].set_ylabel("throughput ratio (vs $\\varphi = 0$ control)")
+    axes[1].legend(frameon=False)
+    fig.suptitle("Throughput degradation under silent non-participation "
+                 "(mean $\\pm$ 95% CI)")
+    return _save(fig, plot_dir, "throughput_degradation_vs_phi")
+
+
+# --------------------------------------------------------------------------- #
 # Fig 4.16 — equivocation: liveness
 # --------------------------------------------------------------------------- #
 
@@ -298,7 +339,7 @@ def fig_ffg_slashable(rows, plot_dir):
 
 
 # --------------------------------------------------------------------------- #
-# Fig 4.21 — the cross-adversary outcome matrix (Table 4.2, visualized)
+# Fig 4.20 — the cross-adversary outcome matrix (Table 4.2, visualized)
 # --------------------------------------------------------------------------- #
 
 # Outcome class -> fill colour. Each cell's class encodes the *kind* of outcome;
@@ -374,6 +415,7 @@ def render_all(adversary_dir: str = aa.ADVERSARY_DIR, plot_dir: str = PLOT_DIR):
         names.append(fig_delay_liveness_and_latency(rows, plot_dir))
     if any(r["family"] == "offline" for r in rows):
         names.append(fig_offline_liveness(rows, plot_dir))
+        names.append(fig_offline_throughput(rows, plot_dir))
     if any(r["family"] == "equivocate" for r in rows):
         names.append(fig_equivocate_liveness(rows, plot_dir))
         names.append(fig_pbft_viewchange_count(rows, plot_dir))

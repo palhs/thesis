@@ -551,7 +551,7 @@ the `2f+1` quorum [[wiki/experiments/2026-06-17_offline-validators]]. Casper FFG
 degrades gracefully over the same range, still finalizing at `φ = 0.33`; its
 throughput — the rate of committed units, a separate magnitude from the success
 rate Figure 4.15 plots — decays in proportion to the participating stake,
-approximately `1 − φ` (Figure 4.20), to a worst surviving ratio near 0.49 at
+approximately `1 − φ` (Figure 4.21), to a worst surviving ratio near 0.49 at
 `n = 10` and 0.47 at `n = 25`
 [[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman cliffs earliest,
 and its cliff is committee-size-dependent: it survives only to `φ = 0.10` at
@@ -697,7 +697,7 @@ validator count, with the one-third accountability line marked. Source:
 The three strategies together answer RQ4. No protocol is robust to every
 adversary: the structural choice that defends a protocol against one strategy is
 the same choice that exposes it to another (Table 4.2, rendered as an outcome map
-in Figure 4.21). PBFT's exact quorum and view-change recovery make it the strongest
+in Figure 4.20). PBFT's exact quorum and view-change recovery make it the strongest
 protocol against the two liveness adversaries — immune to delayed voting and
 undegraded under silence up to its quorum cliff — but the same leader-based,
 non-accountable commit rule makes it the worst under equivocation, the only
@@ -740,7 +740,7 @@ on the safety invariant for equivocation. Source:
 | Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (throughput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
-**Figure 4.21 — Adversarial outcomes by protocol and strategy.** The nine
+**Figure 4.20 — Adversarial outcomes by protocol and strategy.** The nine
 protocol–strategy cells of Table 4.2 rendered as an outcome map: the cell color
 encodes the kind of outcome — robust with liveness held, survival at a latency
 cost, liveness loss, accountable safety failure, or unaccountable safety break —
@@ -784,18 +784,18 @@ sustained throughput degrades in three distinct modes — PBFT holds undegraded
 until its quorum cliff, Casper FFG decays gracefully in proportion to the
 participating stake (≈ `1 − φ`), and Snowman starves earliest as its polls fail
 to close — so the rate at which throughput falls is governed by each family's
-quorum structure rather than by `φ` alone (Figure 4.20)
+quorum structure rather than by `φ` alone (Figure 4.21)
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
-**Figure 4.20 — Throughput degradation versus adversarial fraction (silent
+**Figure 4.21 — Throughput degradation versus adversarial fraction (silent
 non-participation).** Committed-unit throughput against the injected silent
-fraction `φ` for each protocol, one panel per committee size (`n = 10`,
-`n = 25`); the three RQ2 degradation modes read off the curves directly — PBFT
-undegraded to its quorum cliff, Casper FFG decaying in proportion to the
-participating stake (≈ `1 − φ`), and Snowman starving earliest. Source:
-`results/adversary/plots/throughput_vs_f_n10.pdf` and
-`results/adversary/plots/throughput_vs_f_n25.pdf`
-[[wiki/experiments/2026-06-17_offline-validators]].
+fraction `φ` for each protocol, faceted by validator count (`n = 10`, `n = 25`)
+with the `y = 1 − φ` participating-stake invariant marked; the three RQ2
+degradation modes read off the curves directly — PBFT undegraded to its quorum
+cliff, Casper FFG decaying in proportion to the participating stake (≈ `1 − φ`),
+and Snowman starving earliest. Source:
+`results/adversary/plots/throughput_degradation_vs_phi.pdf`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 The question of whether any one family occupies a dominant position once the
 baseline, delay, and adversarial regimes are considered jointly — the
