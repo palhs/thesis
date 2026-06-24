@@ -13,8 +13,7 @@ network is clean; §4.3 the network-delay sweep, where the timeline varies while
 the validator set and workload hold fixed; and §4.4 the adversarial sweep, where
 a fraction of the honest validators is replaced by each strategy of the fault
 model. Three protocols are evaluated throughout — PBFT, Casper FFG, and Snowman —
-with the Narwhal+Tusk column reserved until that implementation lands, consistent
-with the chapter scope set in §3.6.
+consistent with the chapter scope set in §3.6.
 
 The baseline serves two purposes: it establishes that each protocol is correct
 on the honest path at every validator count, and it isolates the cost that
@@ -754,12 +753,9 @@ carries the no-dominance verdict and the structural inversions that produce it.
 Source: `results/adversary/plots/adversary_tradeoff_matrix.pdf`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
-Two qualifications bound this verdict. First, the survey covers three families:
-Narwhal+Tusk is unimplemented, so its catalogued weakness — data-availability
-withholding, in which a validator certifies a header yet refuses to serve its
-contents — is absent, and the adversarial verdict is scoped to the three families
-measured [[wiki/concepts/adversary-model]]. The swept strategies are the three
-generic capabilities of the catalog; the leader-disruption surface, plausibly the
+Two qualifications bound this verdict. First, the adversarial verdict is scoped to
+the three families evaluated [[wiki/concepts/adversary-model]]. The swept strategies
+are the three generic capabilities of the catalog; the leader-disruption surface, plausibly the
 sharpest attack on the leader-based protocols, is catalogued but not exercised,
 and because the delayed and silent sets are chosen to spare the view-0 primary,
 PBFT's standing as the strongest protocol against the two liveness adversaries
