@@ -51,6 +51,14 @@ results/**/*.err
 # OS
 .DS_Store
 Thumbs.db
+# macOS / iCloud duplicate-file artifacts ("name 2.ext")
+* 2.*
+
+# Generated review build (regenerates from tools/build_review_html.py)
+review/*.html
+# Overleaf build outputs (compiled PDF + screenshots; regenerable artifacts)
+overleaf-*.pdf
+overleaf-*.png
 
 # Obsidian
 .obsidian
