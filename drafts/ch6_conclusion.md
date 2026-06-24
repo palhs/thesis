@@ -22,42 +22,30 @@ protocols evaluated.** Source: [[wiki/concepts/research-questions]],
 | RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; the mechanism map | each structural defense is also an exposure |
 | RQ5 | consistent Pareto frontier; any dominance | a frontier exists; no family dominates | each family non-dominated on ≥ 1 axis |
 
-RQ1 asked how commit latency scales as network-delay variance rises. The three
-families carry delay very differently: PBFT adds under a second under moderate
-delay, Casper FFG roughly twenty-seven percent — an increase dominated by its
-slot-clock rescaling rather than by attestation propagation — and Snowman an order
-of magnitude, the last being the only protocol sensitive to the shape of the delay
-distribution. Commit latency is otherwise flat in the validator set. The
-network timeline, not the committee size, governs time-to-finality
-[[wiki/concepts/key-findings]]. RQ2 asked how sustained throughput degrades as
-the Byzantine fraction approaches the fault threshold. Throughput degrades in
-three distinct modes — PBFT undegraded until a hard quorum cliff, Casper FFG
-decaying in proportion to the participating stake at approximately `1 − φ`, and
-Snowman starving earliest — so the rate of throughput loss is set by each
-family's quorum structure rather than by the fault fraction alone
-[[wiki/concepts/key-findings]]. RQ3 asked after relative communication overhead.
-Per committed unit, PBFT and Casper FFG grow linearly in the validator set, while
-Snowman's subsampled polling costs an order of magnitude more at thesis scale,
-roughly fourteenfold at `n = 16` [[wiki/concepts/key-findings]].
-
-RQ4 asked which adversary drives which protocol to a liveness loss, a safety
-violation, or neither. No protocol is robust to every adversary. The structural
-choice that defends a family against one strategy is the same that exposes it to
-another, and the contribution is the resulting mechanism map. PBFT is immune to
-the liveness adversaries exercised here — those that spare the view-0 primary —
-but is the source of the only unaccountable fork. Snowman is the equivocation-safety
-leader on its analytical bound, reported rather than empirically witnessed, yet
-the most delay- and silence-exposed of the three. Casper FFG is never first against
-any single adversary but holds the only accountable failure
-[[wiki/concepts/key-findings]].
-RQ5 asked whether a consistent performance–security frontier exists and whether
-any family dominates [[wiki/concepts/research-questions]]. A consistent frontier
-exists across the three families. No family dominates: each is the strict best
-on at least one axis, and the frontier admits no configuration that is at once
-cheap, fast, and resilient [[wiki/concepts/key-findings]]. The verdict does not
-turn on the one axis only a slashing-based protocol can hold: even setting
-accountable safety aside, each family remains non-dominated on a measured axis
-[[wiki/concepts/key-findings]].
+Read together, the five answers tell one story. RQ1–RQ3 fix the per-axis costs:
+commit latency is flat in the validator set but carried very differently under
+delay — Snowman alone pays an order of magnitude and alone is sensitive to the
+shape of the delay distribution, against under a second for PBFT and a slot-clock-
+dominated increase for Casper FFG; sustained throughput degrades as the Byzantine
+fraction rises in three modes set by quorum structure rather than the fault
+fraction alone — PBFT undegraded until a hard cliff, Casper FFG in proportion to
+participating stake at approximately `1 − φ`, Snowman starving earliest; and
+per-unit communication overhead grows linearly for PBFT and Casper FFG but costs
+Snowman's subsampled polling an order of magnitude more, roughly fourteenfold at
+`n = 16` [[wiki/concepts/key-findings]]. RQ4 and RQ5 carry the contribution. No
+protocol is robust to every adversary, because the structural choice that defends
+a family against one strategy is the same that exposes it to another: PBFT is
+immune to the liveness adversaries exercised here — those that spare the view-0
+primary — yet the source of the only unaccountable fork; Snowman leads on
+equivocation safety, on an analytical bound reported rather than empirically
+witnessed, yet is the most delay- and silence-exposed of the three; Casper FFG is
+never first against any single adversary but holds the only accountable failure.
+From that mechanism map follows the RQ5 verdict: a consistent frontier exists
+across the three families and no family dominates — each is the strict best on at
+least one axis, the frontier admits no configuration at once cheap, fast, and
+resilient, and the verdict survives setting aside the one axis only a
+slashing-based protocol can hold [[wiki/concepts/key-findings]]
+[[wiki/concepts/research-questions]].
 
 Returning to the incidents that motivated the study (§1.2), the measured failure
 modes are the controlled analogues of the deployment ones. An attestation quorum
@@ -115,40 +103,30 @@ against adversaries that leave its leader honest [[wiki/concepts/adversary-model
 ### 6.3.1 Production-optimized protocol variants
 
 The communication-overhead comparison of §4.2.4 evaluates each protocol at the
-message granularity of its original specification: classical PBFT with
-all-to-all prepare and commit phases [4], and Casper FFG with individually signed
-attestations counted toward a supermajority [7]
-[[wiki/algorithms/pos#communication-complexity]]. Production deployments of both
-families reduce this cost through signature aggregation. The Ethereum beacon
-chain aggregates committee attestations with BLS signatures, which collapses
-Casper FFG's per-epoch attestation cost from the `O(n²)` of propagated
-individual votes to `O(n)` [8] [[wiki/algorithms/pos#communication-complexity]];
-HotStuff achieves the analogous reduction for the PBFT family, replacing the
-quadratic vote phases with threshold-signature collection at the leader to
-obtain linear normal-case and view-change communication [5]
+message granularity of its original specification — classical PBFT with all-to-all
+prepare and commit phases [4], Casper FFG with individually signed attestations [7]
+[[wiki/algorithms/pos#communication-complexity]]. Production deployments reduce this
+cost through signature aggregation: the Ethereum beacon chain aggregates committee
+attestations with BLS signatures, collapsing Casper FFG's per-epoch cost from
+`O(n²)` to `O(n)` [8], and HotStuff achieves the analogous reduction for the PBFT
+family with threshold-signature collection at the leader [5]
 [[wiki/algorithms/pbft#communication-complexity]]. Modeling these aggregated
-variants is the most direct extension of the present communication-overhead
-results, and would establish whether the per-unit cost ordering observed at the
-as-specified granularity survives at the granularity of deployed systems.
+variants is the most direct extension of the overhead results, and would establish
+whether the per-unit cost ordering observed at the as-specified granularity
+survives at the granularity of deployed systems.
 
-This extension carries a methodological requirement that constrains how it must
-be undertaken. Signature aggregation is a property of a protocol family's
-signature scheme rather than of an individual protocol; introducing it for one
-family while leaving another at its un-aggregated specification would compare
-implementations at different levels of optimization and would therefore
-misstate the per-unit cost contrast that answers RQ3
-[[wiki/concepts/research-questions]]. A faithful extension consequently either
-models all signature-based families at their production-optimized message
-granularity — aggregated Casper FFG against a HotStuff-style PBFT — or reports
-the as-specified and the aggregated regimes side by side, so that the level of
-optimization is held constant across the comparison. Of the two, side-by-side
-reporting is the more conservative: it preserves the present as-specified baseline
-as a point of comparison rather than replacing it, so the per-unit ordering
-reported here remains legible alongside the optimized one. The final choice between
-side-by-side reporting and a uniformly aggregated comparison is a methodological
-decision left to the supervisor. An implementation plan for the Casper FFG side — the aggregation topology, the
-message-counting convention, and the comparability decision described here — is
-recorded as a kickoff specification in the project repository.
+The extension carries one methodological requirement. Because signature aggregation
+is a property of a family's signature scheme rather than of an individual protocol,
+aggregating one family while leaving another at its un-aggregated specification
+would compare implementations at different optimization levels and so misstate the
+per-unit cost contrast that answers RQ3 [[wiki/concepts/research-questions]]. A
+faithful extension therefore holds the optimization level constant — either
+modeling all signature-based families at production granularity (aggregated Casper
+FFG against a HotStuff-style PBFT), or reporting the as-specified and aggregated
+regimes side by side. The side-by-side form is the more conservative, preserving
+the present baseline as a point of comparison; the choice between the two is left
+to the supervisor, and an implementation plan for the Casper FFG side is recorded
+as a kickoff specification in the project repository.
 
 ### 6.3.2 Further directions
 
@@ -169,7 +147,11 @@ budget was set generously enough that recovery timers seldom fired
 third is to witness Snowman's analytical safety bound empirically by driving the
 protocol at a weakened confidence depth where forks become observable, closing the
 gap between the reported bound and a measured rate
-[[wiki/concepts/adversarial-degradation-metrics]]. Finally, the campaign runs at
+[[wiki/concepts/adversarial-degradation-metrics]]. A fourth is to extend the harness
+to a DAG-based family (Narwhal+Tusk), whose data-availability-withholding adversary
+the present sweep does not cover; adding it would populate the high-throughput
+corner that the three-family frontier leaves unmeasured
+[[wiki/concepts/adversary-model]]. Finally, the campaign runs at
 thesis-scale committee sizes under a latency-only network; repeating the
 comparison at larger validator sets and against a transport that models bandwidth
 and retransmission would test how far the rankings reported here survive outside

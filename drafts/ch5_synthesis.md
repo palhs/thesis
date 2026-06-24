@@ -43,45 +43,38 @@ data-generating research questions rather than a set chosen to make the families
 differ, so a family that dominated would do so on the very quantities the
 evaluation was designed to measure.
 
-Two conventions fixed in Chapter 3 and carried through Chapter 4 govern the
-comparison and are restated because the reading rests on them. Cross-protocol
-latency is read from `commit_latency_ms`, the canonical time-to-finality column,
-so that the three protocols' irreversibility milestones are compared like for
-like [[wiki/concepts/output-format]]; cross-protocol throughput is read from
-`goodput`, the rate of committed transaction bytes, rather than from the
-protocol-granularity decision-event rate [[wiki/concepts/evaluation-metrics]].
-Every comparative verdict below inherits one further qualification: the simulator
-charges network latency but no signature-verification or other compute cost, so
-cost and per-validator comparisons flatter the protocols whose equivocation
-handling is compute-bound, namely PBFT and Casper FFG, while the message-count,
-liveness, and safety verdicts are unaffected [[wiki/concepts/network-model]].
+The reading rests on the measurement conventions fixed in Chapter 3 and carried
+through Chapter 4 (§3.5–§3.6): cross-protocol latency from `commit_latency_ms`,
+the canonical time-to-finality column; throughput from `goodput` rather than the
+protocol-granularity decision-event rate; and the latency-only model's
+no-compute-cost caveat, which flatters PBFT and Casper FFG on cost and
+per-validator comparisons while leaving the message-count, liveness, and safety
+verdicts unaffected [[wiki/concepts/output-format]].
 
 ## 5.3 Where each family sits on the frontier
 
 ### 5.3.1 PBFT: fast and live, but the fork is unaccountable
 
 PBFT occupies the low-latency, high-liveness corner of the frontier. At the
-honest baseline it commits in approximately one second, level with Snowman and
-about five times faster than Casper FFG's epoch-granularity finality of roughly
-five seconds, and its latency is flat in the validator set
-[[wiki/experiments/2026-06-03_scaling-baseline]] [[wiki/concepts/key-findings]].
-Its communication overhead grows linearly per committed unit, at approximately
-`2n` messages, the atomic-commit-unit denominator absorbing one factor of the
-all-to-all `O(n²)` instance cost [[wiki/experiments/2026-06-08_baseline-cis]].
-Under network delay it is the least exposed of the three, adding about
-nine-tenths of a second under moderate uniform delay where Snowman pays an order
-of magnitude [[wiki/experiments/2026-06-13_delay-analysis]]. It is the most
-loss-resilient protocol, the only one still finalizing at twenty-percent packet
-loss, ranked first by area under the finalization-rate curve at `n = 10` and tied
-for first at `n = 25` [[wiki/experiments/2026-06-13_delay-comparison]]. Against
+honest baseline it commits in about a second, level with Snowman and roughly five
+times faster than Casper FFG's epoch-granularity finality, with latency flat in
+the validator set [[wiki/experiments/2026-06-03_scaling-baseline]]
+[[wiki/concepts/key-findings]]. Its communication overhead grows linearly per
+committed unit, at approximately `2n` messages — the atomic-commit-unit
+denominator absorbing one factor of the all-to-all `O(n²)` instance cost
+[[wiki/experiments/2026-06-08_baseline-cis]]. It is the least delay-exposed of the
+three, where Snowman pays an order of magnitude more
+[[wiki/experiments/2026-06-13_delay-analysis]], and the most loss-resilient — the
+only one still finalizing at twenty-percent packet loss, first by area under the
+finalization-rate curve [[wiki/experiments/2026-06-13_delay-comparison]]. Against
 the two liveness adversaries it is the strongest of the three — immune to delayed
-voting at unit finality cost and undegraded under silent non-participation through
-`φ = 0.33`, collapsing only at `φ = 0.40`, the first sampled fraction past its
-`2f+1` quorum bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These
-liveness verdicts are established against adversaries that leave the view-0
-primary honest; the leader-disruption surface, plausibly the sharpest attack on a
-leader-based protocol, is catalogued but not measured, so PBFT's liveness standing
-is bounded to non-leader-targeting strategies [[wiki/concepts/adversary-model]].
+voting and undegraded under silent non-participation through `φ = 0.33`,
+collapsing only at `φ = 0.40`, the first sampled fraction past its `2f+1` quorum
+bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These liveness
+verdicts hold against adversaries that leave the view-0 primary honest; the
+leader-disruption surface, plausibly the sharpest attack on a leader-based
+protocol, is catalogued but not measured, so PBFT's liveness standing is bounded
+to non-leader-targeting strategies [[wiki/concepts/adversary-model]].
 
 The mechanism that buys this liveness is the one that disqualifies PBFT on the
 axis it loses. Its leader-based, exact-quorum commit rule recovers from a stalled
@@ -101,15 +94,13 @@ above the threshold and unattributable [4] [[wiki/algorithms/pbft]].
 Casper FFG wins no latency or resilience axis outright, yet it is non-dominated on
 two counts. The first is cost: per committed unit it is the cheapest of the three,
 at approximately `1.2n` messages against PBFT's `2n` and far below Snowman's
-polling overhead [[wiki/experiments/2026-06-08_baseline-cis]]. On the latency and
-resilience axes, by contrast, it trails. It is the slowest of the three at the
-baseline, finalizing at epoch granularity in roughly five seconds, and the lowest
-in honest goodput [[wiki/experiments/2026-06-03_scaling-baseline]]. It is the least loss-resilient,
-ranked last by area under the finalization-rate curve at both committee sizes and
-the first to fall silent under packet loss
-[[wiki/experiments/2026-06-13_delay-comparison]]. Under silence it degrades
-gracefully, its sustained throughput falling in proportion to the participating
-stake, approximately `1 − φ`, and surviving to `φ = 0.33`
+polling overhead [[wiki/experiments/2026-06-08_baseline-cis]]. On the other axes it
+trails — slowest at the baseline at epoch-granularity finality, lowest in honest
+goodput [[wiki/experiments/2026-06-03_scaling-baseline]], and least loss-resilient,
+ranked last by area under the finalization-rate curve and the first to fall silent
+under packet loss [[wiki/experiments/2026-06-13_delay-comparison]]. Under silence it
+degrades gracefully, its sustained throughput falling in proportion to the
+participating stake, approximately `1 − φ`, and surviving to `φ = 0.33`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
 The second count appears on the equivocation axis. Where PBFT forks

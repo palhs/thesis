@@ -17,7 +17,7 @@ becomes solvable for `f < n/3` [3] [[wiki/concepts/synchrony-models]]. Every
 deployed L1 protocol sits at some point in the design space these results
 define.
 
-Four families occupy four distinct points in
+Three families occupy distinct points in
 that space [[wiki/concepts/consensus-families]], each trading a different
 cost for its guarantees:
 
@@ -30,9 +30,6 @@ cost for its guarantees:
 - **Avalanche-style** [9] [[wiki/algorithms/avalanche]] — repeated random
   subsampling; probabilistic finality with tunable confidence; cost: no
   deterministic safety.
-- **DAG-based** [11] [[wiki/algorithms/dag-based]] — dissemination decoupled
-  from ordering via a directed acyclic graph; high throughput; cost:
-  ordering-layer complexity and higher per-validator memory.
 
 How these mechanisms differ in operation is developed in Chapters 2 and 3;
 quantifying the cost differences is the task of this thesis.
@@ -49,9 +46,8 @@ PoS-finality protocol [8], experienced a seven-block reorganization in May
 2022 and a multi-epoch finality stall in May 2023 driven by
 attestation-processing pressure [20], [21]. The Cosmos Hub, secured by a
 PBFT-style protocol [6], halted after its v17.1 upgrade in June 2024 [22].
-Sui, secured by a DAG-based protocol [13], suffered a crash-loop network
-halt in November 2024 [23]. The Avalanche mainnet runs the protocol from
-which its family takes its name [9].
+Sui suffered a crash-loop network halt in November 2024 [23]. The Avalanche
+mainnet runs the protocol from which its family takes its name [9].
 
 These incidents do not invalidate the protocols' theoretical guarantees.
 They demonstrate that the conditions under which those guarantees hold
@@ -76,10 +72,10 @@ measured across the three families on matched assumptions.
 ## 1.3 Problem statement
 
 This thesis investigates the comparative performance–security behavior of
-the four L1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
-PoS-finality [[wiki/algorithms/pos]], Avalanche-style
-[[wiki/algorithms/avalanche]], and DAG-based [[wiki/algorithms/dag-based]]
-— under controlled network delay and adversarial conditions, using a single
+the three L1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
+PoS-finality [[wiki/algorithms/pos]], and Avalanche-style
+[[wiki/algorithms/avalanche]] — under controlled network delay and
+adversarial conditions, using a single
 discrete-event simulator. The contribution is not a benchmark of production
 systems but a reproducible cross-family evaluation framework in which the
 three are measured under matched assumptions. Performance is measured as
@@ -148,11 +144,9 @@ synthesizes it.
   degradation, safety violation, or neither? This maps each adversary onto
   the property each family claims to preserve.
 - **RQ5.** Does a consistent Pareto frontier of the performance–security
-  tradeoff exist across the four families, and does any family dominate
-  across all operating regimes? This is the comparative synthesis and the
-  headline contribution. With the DAG-based family deferred, the frontier
-  reported here is traced over the three implemented families, and the
-  high-throughput corner the DAG family would occupy is left pending.
+  tradeoff exist across the three families evaluated, and does any family
+  dominate across all operating regimes? This is the comparative synthesis
+  and the headline contribution.
 
 Each question is paired with a defined subset of the metric schema
 [[wiki/concepts/evaluation-metrics]] and a defined independent variable in
@@ -166,12 +160,11 @@ The thesis makes four contributions
 1. **Artifact.** A discrete-event simulator for L1 consensus evaluation
    under configurable network delay and adversarial conditions, with a
    shared metric schema and a pluggable protocol interface.
-2. **Implementations.** Simplified reference implementations of one protocol
-   from each of the four families within a single harness, so that
-   reproducible like-for-like comparison is possible. Three of the four are
-   implemented at this stage — the PBFT-style, PoS-finality, and
-   Avalanche-style representatives; the DAG-based representative, Narwhal+Tusk,
-   is scaffolded but its implementation is deferred.
+2. **Implementations.** Simplified reference implementations of one
+   representative protocol from each of the three families within a single
+   harness — the PBFT-style, PoS-finality, and Avalanche-style
+   representatives, all three implemented — so that reproducible like-for-like
+   comparison is possible.
 3. **Dataset and analysis.** An experimental dataset and comparative
    analysis quantifying the performance–security tradeoff across the three
    implemented families under matched conditions, answering RQ1–RQ4 and
@@ -180,7 +173,7 @@ The thesis makes four contributions
    approach of Gervais *et al.* [17], extended from Proof-of-Work to the
    three implemented BFT families on a single harness with matched assumptions.
 
-Chapter 2 reviews the four families and the prior comparative evaluations
+Chapter 2 reviews the three families and the prior comparative evaluations
 that motivate a unified harness. Chapter 3 describes the methodology: the
 system model, the three protocol implementations, the metric schema, and the
 experimental design. Chapter 4 presents the baseline, network-delay, and

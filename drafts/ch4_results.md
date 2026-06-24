@@ -13,8 +13,7 @@ network is clean; §4.3 the network-delay sweep, where the timeline varies while
 the validator set and workload hold fixed; and §4.4 the adversarial sweep, where
 a fraction of the honest validators is replaced by each strategy of the fault
 model. Three protocols are evaluated throughout — PBFT, Casper FFG, and Snowman —
-with the Narwhal+Tusk column reserved until that implementation lands, consistent
-with the chapter scope set in §3.6.
+consistent with the chapter scope set in §3.6.
 
 The baseline serves two purposes: it establishes that each protocol is correct
 on the honest path at every validator count, and it isolates the cost that
@@ -201,26 +200,7 @@ at every `n`, confirming honest-path correctness. Source:
 `results/baseline/plots/success_rate_vs_n.pdf`
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
-### 4.2.6 A note on the latency measurement point
-
-The cross-protocol latency comparison of §4.2.2 — and of the delay sweep in
-§4.3 — is built from `commit_latency_ms`, not `finality_latency_ms`. Despite its
-name, `commit_latency_ms` is the canonical cross-protocol *time-to-finality*
-column: the median per-validator time to each protocol's irreversibility
-milestone — the `2f+1` commit quorum for PBFT, the finalized checkpoint after the
-justify-then-finalize rule for Casper FFG, and counter-`β` acceptance for
-Snowman. Aligning these three milestones on one axis is what makes the comparison
-meaningful [[wiki/concepts/output-format]]. The two columns coincide for Casper
-FFG and Snowman but diverge for PBFT, whose implementation adds a client-reply
-round, so its `finality_latency_ms` sits one network hop past the internal commit
-quorum at client-observed finality; placing all three protocols'
-`finality_latency_ms` on one axis would compare PBFT's client-observed timestamp
-against the others' internal ones — not like for like. This column choice is fixed
-in the schema that governs figure construction, so the comparison's correctness
-does not depend on the reader noticing this paragraph
-[[wiki/concepts/output-format]].
-
-### 4.2.7 Baseline summary
+### 4.2.6 Baseline summary
 
 **Table 4.1 — Baseline means at `n = 25` (production-scale end of the sweep),
 20 seeds.** Latency and overhead are deterministic across seeds; goodput
@@ -256,7 +236,7 @@ over twenty seeds with common random numbers, except the most expensive —
 Snowman at `n = 25` under heavy delay — over eight. As in §4.2, three protocols are covered.
 
 Two measurement properties frame the results. All cross-protocol latency is read
-from `commit_latency_ms`, the canonical time-to-finality column of §4.2.6, so
+from `commit_latency_ms`, the canonical time-to-finality column of §3.5, so
 each protocol's irreversibility milestone is compared like for like
 [[wiki/concepts/output-format]]. And delay and loss attack different properties,
 reported apart: delay inflates time-to-finality (RQ1), loss erodes liveness
@@ -454,7 +434,7 @@ stall of May 2023 there — leave the epoch unjustified and finality stalled
 delay, and adversarial regimes jointly — RQ5 — is taken up in the synthesis of
 Chapter 5 [[wiki/concepts/research-questions]].
 
-Two caveats qualify these results. First, the aligned milestones of §4.2.6 differ
+Two caveats qualify these results. First, the aligned milestones of §3.5 differ
 in kind: PBFT and Casper FFG offer deterministic finality, Casper FFG's
 additionally accountable — reverting a finalized checkpoint requires at least
 one-third of the stake to be slashed
@@ -773,12 +753,9 @@ carries the no-dominance verdict and the structural inversions that produce it.
 Source: `results/adversary/plots/adversary_tradeoff_matrix.pdf`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
-Two qualifications bound this verdict. First, the survey covers three families:
-Narwhal+Tusk is unimplemented, so its catalogued weakness — data-availability
-withholding, in which a validator certifies a header yet refuses to serve its
-contents — is absent, and the adversarial verdict is scoped to the three families
-measured [[wiki/concepts/adversary-model]]. The swept strategies are the three
-generic capabilities of the catalog; the leader-disruption surface, plausibly the
+Two qualifications bound this verdict. First, the adversarial verdict is scoped to
+the three families evaluated [[wiki/concepts/adversary-model]]. The swept strategies
+are the three generic capabilities of the catalog; the leader-disruption surface, plausibly the
 sharpest attack on the leader-based protocols, is catalogued but not exercised,
 and because the delayed and silent sets are chosen to spare the view-0 primary,
 PBFT's standing as the strongest protocol against the two liveness adversaries

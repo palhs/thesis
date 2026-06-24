@@ -5,8 +5,8 @@ work, push for review. Humans mark Completed on merge.
 
 ## Dashboard
 
-- Total tasks: 79 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 91 · In Review: 0 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Total tasks: 80 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
+- Completed: 91 · In Review: 1 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -98,6 +98,12 @@ specs); the `\include{biography}` line has been removed from the template.
   task-ID / `\todo` / raw-unicode remains in ch4–6; figure/table/`tabularx`,
   brace, and `$` balance hold (verified statically — no TeX toolchain on this
   machine, as with the Ch2/Ch3 ports)
+- `[?]` **T73** `H` Writer — Narwhal removal + Tier-1 prose condensation (first pass toward ~60pp)
+  _Outcome:_ Three-family reframing across Ch1–Ch4 (Narwhal/four-family scaffolding stripped, DAG
+  relocated to a single Ch6 §6.3 further-work line) + Tier-1 prose cuts (Ch3 §3.4.4/§3.5/§3.6,
+  Ch5 §5.2/§5.3, Ch6 §6.1/§6.3.1, Ch2 variant trim); draft-narrative ledgers reconciled; figures
+  deferred. · _Artifact:_ `drafts/ch{1,2,3,4,5,6}.md`, `docs/draft-narrative.md`, port-checklist ·
+  _Verify:_ see plan §5; zero residual Narwhal/four-family except the one Ch6 further-work line
 
 ---
 
