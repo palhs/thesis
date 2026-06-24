@@ -488,6 +488,17 @@ reported through its analytical bound `ε` rather than a fork count
 turn — delayed voting, then silent non-participation, then equivocation — and
 closes by drawing the cross-adversary tradeoff that answers RQ4.
 
+The liveness intervals plotted throughout are 95% Wilson-score bands on the
+success rate, and two factors set their width. Because the delayed-voting
+liveness pattern is invariant to the delay magnitude
+[[wiki/experiments/2026-06-14_delayed-voters]], that figure pools each
+adversarial point over all five magnitudes — twenty seeds apiece, roughly a
+hundred runs per point — so its bands are tighter than the twenty-run honest
+control at `φ = 0`; the silent-participation and equivocation figures have no
+magnitude axis and carry twenty runs per point. Within any one figure the Wilson
+width is largest at a mid-range success rate, so the longest bands are Casper
+FFG's partial-success cells, not the saturated cells pinned at 1.0 or 0.
+
 ### 4.4.1 Delayed voting
 
 Under delayed voting the three protocols separate by failure mode, and the

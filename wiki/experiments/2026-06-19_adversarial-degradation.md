@@ -124,6 +124,13 @@ visual clutter were reverted in `adversary_degradation_plots.py`:
   not clipped. Marker x-position only — the data is unchanged. Applies to the four
   faceted curve figures (4.14/4.15/4.16/4.21); the shared `XLIM` widening also
   gives the count/safety/slashable panels (4.17–4.19) a hair more left margin.
+- **Prose: confidence-interval widths now documented.** Added a §4.4-intro
+  paragraph to `drafts/ch4_results.md` explaining why the liveness error bars are
+  uneven — the delay figure pools each point over the 5 delay magnitudes (20
+  seeds each, magnitude-invariant) ≈ 100 runs vs the 20-run `φ=0` control, and the
+  Wilson width peaks at mid-range success (so only Casper FFG shows long bars).
+  This also reconciles the section's "twenty seeds per cell" convention with the
+  pooled delay points.
 
 In-image title + caption reworded to drop "step cliffs"; all PNG+PDF re-rendered;
 `output` suite green (172 tests). Draft synced (`drafts/ch4_results.md`: Fig 4.15
