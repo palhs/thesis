@@ -22,26 +22,25 @@ protocols evaluated.** Source: [[wiki/concepts/research-questions]],
 | RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; the mechanism map | each structural defense is also an exposure |
 | RQ5 | consistent Pareto frontier; any dominance | a frontier exists; no family dominates | each family non-dominated on ≥ 1 axis |
 
-Read together, the five answers tell one story. RQ1–RQ3 fix the per-axis costs:
-commit latency is flat in the validator set but carried very differently under
-delay — Snowman alone pays an order of magnitude and alone is sensitive to the
-shape of the delay distribution, against under a second for PBFT and a slot-clock-
-dominated increase for Casper FFG; sustained throughput degrades as the Byzantine
-fraction rises in three modes set by quorum structure rather than the fault
-fraction alone — PBFT undegraded until a hard cliff, Casper FFG in proportion to
-participating stake at approximately `1 − φ`, Snowman starving earliest; and
-per-unit communication overhead grows linearly for PBFT and Casper FFG but costs
-Snowman's subsampled polling an order of magnitude more, roughly fourteenfold at
-`n = 16` [[wiki/concepts/key-findings]]. RQ4 and RQ5 carry the contribution. No
+Commit latency is flat in the validator set but carried very differently under
+delay: PBFT stays under a second, Casper FFG shows a slot-clock-dominated
+increase, and Snowman alone pays an order of magnitude and alone is sensitive to
+the shape of the delay distribution. Sustained throughput degrades as the
+Byzantine fraction rises in three modes set by quorum structure rather than the
+fault fraction alone: PBFT is undegraded until a hard cliff, Casper FFG degrades
+in proportion to participating stake at approximately `1 − φ`, and Snowman starves
+earliest. Per-unit communication overhead grows linearly for PBFT and Casper FFG,
+but costs Snowman's subsampled polling an order of magnitude more, roughly
+fourteenfold at `n = 16` [[wiki/concepts/key-findings]]. No
 protocol is robust to every adversary, because the structural choice that defends
-a family against one strategy is the same that exposes it to another: PBFT is
+a family against one strategy is the same that exposes it to another. PBFT is
 immune to the liveness adversaries exercised here — those that spare the view-0
-primary — yet the source of the only unaccountable fork; Snowman leads on
+primary — yet is the source of the only unaccountable fork. Snowman leads on
 equivocation safety, on an analytical bound reported rather than empirically
-witnessed, yet is the most delay- and silence-exposed of the three; Casper FFG is
-never first against any single adversary but holds the only accountable failure.
-From that mechanism map follows the RQ5 verdict: a consistent frontier exists
-across the three families and no family dominates — each is the strict best on at
+witnessed, yet is the most delay- and silence-exposed of the three. Casper FFG is
+never first against any single adversary, but holds the only accountable failure.
+From that mechanism map follows the RQ5 verdict. A consistent frontier exists
+across the three families and no family dominates: each is the strict best on at
 least one axis, the frontier admits no configuration at once cheap, fast, and
 resilient, and the verdict survives setting aside the one axis only a
 slashing-based protocol can hold [[wiki/concepts/key-findings]]
@@ -59,21 +58,21 @@ commitments, which is why no single protocol resolves all of them.
 ## 6.2 Limitations
 
 The findings hold within boundaries that Chapter 3 fixed and the analysis honored
-throughout, drawn together here under three headings.
+throughout.
 
 **The cost model.** The simulator charges network latency but no
-signature-verification, execution, or bandwidth cost; this boundary bears on cost
+signature-verification, execution, or bandwidth cost. This boundary bears on cost
 and per-validator verdicts, which it flatters for the compute-bound equivocation
-handling of PBFT and Casper FFG, and it does not bear on the message-count,
+handling of PBFT and Casper FFG. It does not bear on the message-count,
 liveness, or safety results [[wiki/concepts/network-model]]. The throughput model
 has no saturation ceiling: goodput is reported against an offered load below any
 saturation point, so the flat-in-`n` goodput is a property of the unsaturated
 model rather than a claim about peak capacity [[wiki/concepts/output-format]].
 
 **Commensurability.** Thesis-scale committee sizes require rescaling protocol
-parameters — Snowman's `K`, `α_c`, and `β`, and the Casper FFG slot-to-delay
-coherence rule — so the cross-protocol verdicts rest on those conventions and are
-reported as robust only where they survive the governing sensitivity check
+parameters (Snowman's `K`, `α_c`, and `β`, and the Casper FFG slot-to-delay
+coherence rule), so the cross-protocol verdicts rest on those conventions. They
+are reported as robust only where they survive the governing sensitivity check
 [[wiki/concepts/metric-reconciliation]]. The evaluation covers the three protocols
 implemented in the harness, and the comparative verdicts are scoped to them. The
 frontier is likewise traced only over the regimes measured; a high-throughput
@@ -94,9 +93,10 @@ with no transport retransmission, so the loss-resilience curves are an upper bou
 on fragility rather than a model of a retransmitting transport
 [[wiki/concepts/key-findings]]. The sweep exercises the three generic capabilities
 of the adversary catalog and spares the view-0 primary, so the leader-disruption
-surface — plausibly the sharpest attack on the leader-based protocols — is
-catalogued but not measured, and PBFT's liveness standing is established only
-against adversaries that leave its leader honest [[wiki/concepts/adversary-model]].
+surface is catalogued but not measured. That surface is plausibly the sharpest
+attack on the leader-based protocols. PBFT's liveness standing is therefore
+established only against adversaries that leave its leader honest
+[[wiki/concepts/adversary-model]].
 
 ## 6.3 Directions for further work
 
@@ -111,9 +111,8 @@ attestations with BLS signatures, collapsing Casper FFG's per-epoch cost from
 `O(n²)` to `O(n)` [8], and HotStuff achieves the analogous reduction for the PBFT
 family with threshold-signature collection at the leader [5]
 [[wiki/algorithms/pbft#communication-complexity]]. Modeling these aggregated
-variants is the most direct extension of the overhead results, and would establish
-whether the per-unit cost ordering observed at the as-specified granularity
-survives at the granularity of deployed systems.
+variants would establish whether the per-unit cost ordering observed at the
+as-specified granularity survives at the granularity of deployed systems.
 
 The extension carries one methodological requirement. Because signature aggregation
 is a property of a family's signature scheme rather than of an individual protocol,
@@ -130,31 +129,30 @@ as a kickoff specification in the project repository.
 
 ### 6.3.2 Further directions
 
-Beyond the production-optimized variants of §6.3.1, the evaluation leaves several
-directions open. The most direct is a saturation-throughput capacity model: the
+Five directions remain open beyond the production-optimized variants of §6.3.1.
+The first is a saturation-throughput capacity model: the
 present baseline reports goodput against an offered load below saturation, so
 throughput reads as flat in the validator set, and replacing the unsaturated model
 with one that drives each protocol to a measured ceiling would turn the
 flat-goodput baseline into a peak-capacity comparison
-[[wiki/concepts/output-format]]. A second is an adaptive-timeout enhancement —
-exponential backoff with jitter, calibrated to observed round-trip time — which
-the simulator is positioned to evaluate against the baseline; a meaningful
+[[wiki/concepts/output-format]]. The second is an adaptive-timeout enhancement:
+exponential backoff with jitter, calibrated to observed round-trip time, which
+the simulator is positioned to evaluate against the baseline. A meaningful
 comparison would require a regime that stresses timeout calibration directly, such
 as a tight view-change budget under high-jitter delay or a post-GST recovery
-scenario, rather than the steady-state sweeps reported here, in which the view-change
-budget was set generously enough that recovery timers seldom fired
-[[wiki/experiments/2026-06-10_delay-moderate]]. A
+scenario. The steady-state sweeps reported here are not such a regime: in them the
+view-change budget was set generously enough that recovery timers seldom fired
+[[wiki/experiments/2026-06-10_delay-moderate]]. The
 third is to witness Snowman's analytical safety bound empirically by driving the
 protocol at a weakened confidence depth where forks become observable, closing the
 gap between the reported bound and a measured rate
-[[wiki/concepts/adversarial-degradation-metrics]]. A fourth is to extend the harness
+[[wiki/concepts/adversarial-degradation-metrics]]. The fourth is to extend the harness
 to a DAG-based family (Narwhal+Tusk), whose data-availability-withholding adversary
 the present sweep does not cover; adding it would populate the high-throughput
 corner that the three-family frontier leaves unmeasured
-[[wiki/concepts/adversary-model]]. Finally, the campaign runs at
-thesis-scale committee sizes under a latency-only network; repeating the
+[[wiki/concepts/adversary-model]]. The fifth is to repeat the
 comparison at larger validator sets and against a transport that models bandwidth
-and retransmission would test how far the rankings reported here survive outside
+and retransmission, testing how far the rankings reported here survive outside
 the simplifying assumptions that made the controlled comparison possible
 [[wiki/concepts/network-model]].
 
@@ -164,15 +162,14 @@ The contribution of this thesis is a single harness in which representative
 Layer-1 consensus protocols could be subjected to the same delay and adversarial
 conditions and measured against one schema. Across the three protocols evaluated,
 the comparative reading that harness made possible has a single headline: not a
-winner, but a map. No family dominates. The value of the result is the account of
-which structural commitment places each family where on the performance–security
+winner, but a map. No family dominates. The result is an account of which
+structural commitment places each family where on the performance–security
 frontier.
 
-This is more than the truism that three differently optimized protocols each win
-their own axis. The same structural choice that places a family on one corner is
-what exposes it on another, so the result is a map of mechanisms rather than an
-artifact of the comparison set. The deployment failures that opened the study were
-the motivation for asking, and the synthesis answers them in their own terms:
-liveness halts and finality stalls are not interchangeable faults to be engineered
-away by a single better protocol, but the separable consequences of the choices a
-protocol makes, consequences that an evaluation on matched assumptions can name.
+The same structural choice that places a family on one corner is what exposes it
+on another, so the result is a map of mechanisms rather than an artifact of the
+comparison set. The deployment failures that opened the study motivated the
+questions the harness answers. Liveness halts and finality stalls are not
+interchangeable faults to be engineered away by a single better protocol. They are
+the separable consequences of the choices a protocol makes, consequences that an
+evaluation on matched assumptions can name.

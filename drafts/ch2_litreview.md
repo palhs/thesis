@@ -9,17 +9,20 @@ behave arbitrarily is the Byzantine Generals Problem [1]
 bound any solution — the `3f+1` Byzantine threshold [1], the FLP impossibility
 [2], and the partial-synchrony relaxation that makes consensus solvable for
 `f < n/3` [3] [[wiki/concepts/synchrony-models]]. What they jointly produce is
-not a single protocol but a design space of concessions: every Layer-1
-protocol concedes along the synchrony axis (synchronous, partial-synchronous,
-asynchronous, or probabilistic), the fault-model axis (crash, omission, or
-Byzantine, with stake-weighting where applicable [[wiki/concepts/fault-model]]),
-or both. Wherever a family preserves deterministic safety, the `3f+1`
-quorum-intersection arithmetic recurs [[wiki/concepts/quorum-arithmetic]].
+not a single protocol but a design space of concessions. Every Layer-1
+protocol concedes along the synchrony axis, the fault-model axis, or both.
+The synchrony axis runs from synchronous through partial-synchronous and
+asynchronous to probabilistic. The fault-model axis runs from crash through
+omission to Byzantine, with stake-weighting where applicable
+[[wiki/concepts/fault-model]]. Wherever a family preserves deterministic
+safety, the `3f+1` quorum-intersection arithmetic recurs
+[[wiki/concepts/quorum-arithmetic]].
 
-The CAP theorem [18] makes the operational consequence concrete: under
-partition a chain must choose Consistency (PBFT-style and PoS-finality halt
-safely) or Availability (Avalanche-style continues with weakened guarantees),
-with partition-tolerance non-negotiable [[wiki/concepts/cap-theorem]].
+The CAP theorem [18] makes the operational consequence concrete. Under
+partition a chain must choose Consistency or Availability, with
+partition-tolerance non-negotiable: PBFT-style and PoS-finality halt safely
+to keep Consistency, while Avalanche-style continues with weakened guarantees
+to keep Availability [[wiki/concepts/cap-theorem]].
 
 ## 2.2 The fork in the road
 
@@ -44,18 +47,18 @@ Generals Problem to the three families.
   independent of `n` [9], [10].
 
 The choice each family makes determines the vocabulary in which it later
-reports performance (§2.4). The next section examines all three against one
-shared frame.
+reports performance (§2.4).
 
 ## 2.3 The three families
 
 Table 2.1 traces the same event — committing one proposed block — through
 all three families. They do one thing in common: accumulate *agreement* on a
-block until reversal is impossible. They differ on three axes — what counts
-as agreement, how much is enough, and how many times that must happen. Across those three axes the two deterministic families are
-nearly identical (about two-thirds agreement, met twice, giving `ε = 0`),
-and Avalanche-style is the one that breaks the pattern (about 80% of a small
-random sample, repeated `β` times, giving a small positive `ε`).
+block until reversal is impossible. They differ on three axes: what counts
+as agreement, how much is enough, and how many times that must happen. Across
+those three axes the two deterministic families are nearly identical: about
+two-thirds agreement, met twice, giving `ε = 0`. Avalanche-style breaks the
+pattern: about 80% of a small random sample, repeated `β` times, giving a small
+positive `ε`.
 
 **Table 2.1 — How one block becomes irreversible.** Protocol-native terms
 are in parentheses. Notation is defined below the table; per-family
@@ -88,13 +91,13 @@ peers to agree 15 rounds running — reaching `ε ≈ 10⁻¹²` by repetition, 
 one counted quorum.
 
 Table 2.1 fixes how the three differ in operation. What the literature adds,
-and the table cannot carry, is the notable variants of each family and the
+and the table cannot carry, is the documented variants of each family and the
 adversarial weakness documented for it within the §1.4 taxonomy (silent
 non-participation, delayed voting, equivocation). The simulator-level
 treatment of each protocol is deferred to Chapter 3.
 
-**PBFT-style.** The documented weakness — a *delayed-voting* adversary in the
-§1.4 sense — is leader-targeted: a Byzantine or delaying leader triggers
+**PBFT-style.** The documented weakness is a *delayed-voting* adversary in the
+§1.4 sense, and it is leader-targeted. A Byzantine or delaying leader triggers
 successive view changes whose `O(n³)` cost in the original formulation [4]
 degrades latency well before any safety threshold is approached. Safety stays
 unconditional below `f < n/3` — an equivocating leader is caught at the prepare
@@ -105,20 +108,20 @@ round, where no two-thirds agreement forms for either value
 specification [8], has accountable safety as its signature property: two
 conflicting finalized checkpoints imply that at least one-third of stake signed
 a slashable message, making a violation attributable, not merely infeasible
-[7]. The most-studied weakness is *equivocation* — slashing exists to deter it,
-and the safety proof depends on that slashing being credibly enforced [7], [8];
-*silent non-participation*, if prolonged, is the secondary one, leaking absent
-validators' stake to restore a quorum while the time-to-finality window widens
-[[wiki/algorithms/pos#behaviour-under-adversarial-conditions]].
+[7]. The most-studied weakness is *equivocation*. Slashing exists to deter it, and
+the safety proof depends on that slashing being credibly enforced [7], [8]. The
+secondary weakness is *silent non-participation*, which, if prolonged, leaks
+absent validators' stake to restore a quorum while the time-to-finality window
+widens [[wiki/algorithms/pos#behaviour-under-adversarial-conditions]].
 
 **Avalanche-style.** The production form is Snowman, the linearized Avalanche
-variant [9]. The family has no fixed `f < n/3` threshold — the tolerated
-Byzantine fraction is set by the parameter choice — and its per-validator cost
-`O(K·β)` is independent of `n`. The documented weakness is *equivocation*:
+variant [9]. The family has no fixed `f < n/3` threshold: the tolerated
+Byzantine fraction is set by the parameter choice. Its per-validator cost
+`O(K·β)` is independent of `n`. The documented weakness is *equivocation*.
 Amores-Sesar, Cachin and Schneider [10] show that an adversary influencing as
 few as two undecided validators can stall the confidence counter beyond any
 number of rounds polynomial in `β`, a far worse cost than the original analysis
-[9] implies; the same work confirms fast convergence absent such an adversary
+[9] implies. The same work confirms fast convergence absent such an adversary
 and proposes a fix.
 
 ## 2.4 Why the published numbers do not compare
@@ -150,10 +153,10 @@ from the cited primary sources. The columns are not directly comparable.
 
 Hardware, workload, batching, topology, and adversarial assumption differ
 between every pair of rows. The table cannot answer whether PBFT's thousands
-of ops/s on a LAN reflects a family advantage or a more permissive harness, nor
-whether Avalanche's 1.35 s confirmation is structural or an artifact of one
-`K, β` choice. The comparative question is hard to phrase before it is hard to
-answer.
+of ops/s on a LAN reflects a family advantage or a more permissive harness. Nor
+can it answer whether Avalanche's 1.35 s confirmation is structural or an
+artifact of one `K, β` choice. The comparative question is hard to phrase before
+it is hard to answer.
 
 ### 2.4.2 The surveys measure nothing, and the one precedent targets PoW
 
@@ -180,9 +183,9 @@ PoS-finality, and Avalanche-style protocols evaluated jointly.
 The three families respond to the same impossibility and differ only in which
 assumption they relax, so they are commensurable as objects of comparison.
 Their per-family measurements, however abundant, do not support cross-family
-judgment: the obstacle is the reporting vocabulary itself, not any absence of
-measurement. And the one methodological precedent for a matched evaluation —
-Gervais *et al.* [17] — has been applied to Proof-of-Work only. Chapter 3
+judgment. The obstacle is the reporting vocabulary itself, not any absence of
+measurement. The one methodological precedent for a matched evaluation is
+Gervais *et al.* [17], which has been applied to Proof-of-Work only. Chapter 3
 responds with a unified discrete-event simulator, a shared metric schema
 instantiated identically for the three families, and an experiment matrix that
 sweeps the network-delay, Byzantine-fraction, validator-set-size, and
