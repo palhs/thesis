@@ -9,7 +9,7 @@ byte-identical-CSV gate covers it.
 
 Figures (draft numbers in parentheses):
   - liveness_vs_phi_delay        (Fig 4.14) liveness + finality blow-up, delay
-  - liveness_vs_phi_offline      (Fig 4.15) liveness cliffs (steps + phi*), offline
+  - liveness_vs_phi_offline      (Fig 4.15) liveness cliffs (phi* boxed), offline
   - liveness_vs_phi_equivocate   (Fig 4.16) liveness, equivocate
   - pbft_viewchange_count_vs_phi (Fig 4.17) PBFT view-change COUNT, equivocate
   - safety_cliff_vs_phi          (Fig 4.18) safety-violation rate + 229 annotation
@@ -61,13 +61,13 @@ def _third_line(ax):
                zorder=1)
 
 
-def _liveness_axis(ax, rows, family, n, *, steps=False):
+def _liveness_axis(ax, rows, family, n):
     """Draw per-protocol success-rate curves on ax over the shared phi axis.
 
     Returns {protocol: phi*} where phi* is the survival depth (deepest swept phi
-    whose mean success rate is still > 0). Marks each protocol's swept endpoint
-    with a caret on the axis so the sweep-range asymmetry (e.g. Snowman swept
-    only to phi=0.33 on the equivocate family) is visible, not hidden.
+    whose mean success rate is still > 0). Each protocol's swept endpoint reads
+    off where its curve ends (e.g. Snowman is swept only to phi=0.33 on the
+    equivocate family); the chapter captions state the per-family ranges.
     """
     survival: dict[str, float] = {}
     for proto in PROTO_ORDER:
@@ -78,13 +78,8 @@ def _liveness_axis(ax, rows, family, n, *, steps=False):
         ys = [cells[p].mean for p in grid]
         lo = [max(0.0, cells[p].mean - cells[p].lo) for p in grid]
         hi = [max(0.0, cells[p].hi - cells[p].mean) for p in grid]
-        kw = dict(capsize=3, linewidth=1.6, markersize=6, **STYLE[proto])
-        if steps:
-            kw["drawstyle"] = "steps-post"
-        ax.errorbar(grid, ys, yerr=[lo, hi], **kw)
-        # caret on the bottom axis marking this protocol's swept endpoint.
-        ax.plot([grid[-1]], [YLIM[0]], marker=6, markersize=8, clip_on=False,
-                color=STYLE[proto]["color"], zorder=6)
+        ax.errorbar(grid, ys, yerr=[lo, hi], capsize=3, linewidth=1.6,
+                    markersize=6, **STYLE[proto])
         alive = [p for p in grid if cells[p].mean > 0]
         survival[proto] = max(alive) if alive else grid[0]
     _third_line(ax)
@@ -143,12 +138,12 @@ def fig_delay_liveness_and_latency(rows, plot_dir):
 # --------------------------------------------------------------------------- #
 
 def fig_offline_liveness(rows, plot_dir):
-    """Offline family, faceted by n: success rate as step cliffs, with each
+    """Offline family, faceted by n: success rate as liveness cliffs, with each
     protocol's survival depth phi* boxed and the 'alive but starved' Snowman
     cell labelled with its surviving throughput fraction."""
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), sharey=True)
     for ax, n in zip(axes, NS):
-        survival = _liveness_axis(ax, rows, "offline", n, steps=True)
+        survival = _liveness_axis(ax, rows, "offline", n)
         ax.set_title(f"$n = {n}$")
         ax.set_xlabel("silent fraction $\\varphi$")
         parts = [f"{STYLE[p]['label']} {survival[p]:.2f}"
@@ -175,7 +170,7 @@ def fig_offline_liveness(rows, plot_dir):
     axes[0].set_ylabel("finalization success rate")
     axes[1].legend(frameon=False, loc="upper right")
     fig.suptitle("Liveness under silent non-participation "
-                 "(step cliffs; mean $\\pm$ 95% Wilson)")
+                 "(mean $\\pm$ 95% Wilson)")
     return _save(fig, plot_dir, "liveness_vs_phi_offline")
 
 

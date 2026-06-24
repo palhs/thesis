@@ -141,7 +141,7 @@ deepest φ at which the invariant is still intact).
   `safety_broken` from the safety row, not the liveness row).
 - `results/adversary/snowman_epsilon_witness.csv` — the ε witness (2 rows).
 - `results/adversary/plots/*.{pdf,png}` — liveness-vs-φ per family (the delay
-  family paired with its finality blow-up; the offline family as step cliffs),
+  family paired with its finality blow-up; the offline family as liveness cliffs),
   the PBFT view-change count, the FFG slashable-stake curve (with the 1/3 line),
   the cross-protocol safety cliff, and the protocol×adversary outcome matrix.
   (Figures refreshed for impact in the 2026-06-24 §4.4 figure pass — see the

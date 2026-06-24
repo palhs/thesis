@@ -89,6 +89,27 @@ is a discrete cliff, not a smooth retention curve.
 
 ## Revisions
 
+### [2026-06-24] — §4.4 figure cleanup hotfix (carets + Fig 4.15 steps)
+
+Follow-up to the T62 figure pass below, on branch `hotfix/adversary-figure-carets`.
+**Presentation-only, no data change.** Two T62 rendering choices that read as
+visual clutter were reverted in `adversary_degradation_plots.py`:
+
+- The per-protocol endpoint **carets** (drawn off-frame at `y=-0.05` with
+  `clip_on=False`) are removed — they read as stray glyphs hanging below the axis
+  on Figs 4.14/4.15/4.16. Sweep-range asymmetry stays legible from where each
+  curve ends and is stated in the captions.
+- **Fig 4.15** (offline) is redrawn from `steps-post` to the same line+marker
+  style as Figs 4.14/4.16; the cliffs still read as steep drops and the figure no
+  longer clashes stylistically with its neighbours. The `steps` arg of
+  `_liveness_axis` is now unused and was dropped. The `φ*` survival-depth box and
+  the `n=25` "alive but starved" label are unchanged.
+
+In-image title + caption reworded to drop "step cliffs"; PNG+PDF re-rendered;
+`output` suite green (172 tests). Draft caption synced (`drafts/ch4_results.md`
+Fig 4.15). The `safety_cliff` figure (4.18) keeps its single-transition
+`steps-post` step — only the offline liveness figure changed.
+
 ### [2026-06-24] — §4.4 figure-impact pass (T62 figure slice)
 
 A presentation-only pass over the §4.4 adversarial figures (the "regenerate §4.4

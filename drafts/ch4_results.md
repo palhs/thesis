@@ -572,8 +572,8 @@ because a sampled supermajority can wait out a slow peer but cannot complete a
 poll around an absent one.
 
 **Figure 4.15 — Liveness under silent non-participation.** Finalization success
-rate against the injected silent fraction `φ`, drawn as step cliffs, one curve
-per protocol and faceted by validator count, with each protocol's survival depth
+rate against the injected silent fraction `φ`, one curve per protocol and
+faceted by validator count, with each protocol's survival depth
 `φ*` — the deepest fraction at which it still finalizes — boxed. The cliffs place
 PBFT and Casper FFG ahead of Snowman; the Snowman cell that remains alive at
 `n = 25, φ = 0.20` is labelled to mark that it finalizes only at a collapsed
