@@ -3,7 +3,7 @@
 ## 3.1 Overview
 
 This chapter describes the simulator that closes the gap of Chapter 2 and
-operationalizes the four data-generating research questions, RQ1–RQ4
+operationalizes the data-generating research questions RQ1–RQ4
 [[wiki/concepts/research-questions]]: a single discrete-event system in which
 the three families run under one system model (§3.2), one metric schema
 (§3.5), and one experiment matrix (§3.4) that varies each research question's
@@ -104,7 +104,7 @@ schema performs under stated conventions when the per-trial rows are read back
 (§3.5). Finally, an adversary is not a new component but a per-node interceptor
 that alters a single validator's outgoing messages; the Byzantine strategies a
 profile can apply are catalogued in [[wiki/concepts/adversary-model]], and §3.4
-names the three the RQ4 sweep exercises.
+names the three exercised by the RQ4 sweep.
 
 ## 3.3 Algorithms
 
@@ -482,8 +482,8 @@ until it is first placed on a common axis [[wiki/concepts/metric-reconciliation]
 work of the metric schema, and the schema is uniform across families: each metric
 has one definition, one unit, and one fixed instrumentation point in `src/`, and
 the family-specific differences appear only as different per-protocol formulas
-computing the same column [[wiki/concepts/evaluation-metrics]]. Four metric
-families cover the evaluation:
+computing the same column [[wiki/concepts/evaluation-metrics]]. The evaluation
+spans four metric families:
 
 - *latency* measures how quickly a transaction reaches commit or finality;
 - *throughput* measures how many transactions the protocol commits per unit

@@ -27,8 +27,8 @@ No foundational result permits a free lunch: every protocol begins by
 choosing which constraint to relax. PBFT [4] and its descendants HotStuff
 [5] and Tendermint [6] take the most direct point — a `3f+1` quorum under
 partial synchrony. The other two families are best read as answers to a
-single question: *once PBFT's point is fixed, which assumption is loosened
-next?* Figure 2.1 traces the propagation from the Byzantine Generals Problem
+single question — once PBFT's point is fixed, which assumption to loosen
+next. Figure 2.1 traces the propagation from the Byzantine Generals Problem
 to the three families.
 
 **Figure 2.1 ([[diagrams/concepts/bft-families-tree]]).** From the Byzantine
@@ -52,7 +52,7 @@ shared frame.
 Table 2.1 traces the same event — committing one proposed block — through
 all three families. They do one thing in common: accumulate *agreement* on a
 block until reversal is impossible. They differ on three axes — what counts
-as agreement, how much is enough, and how many times that must happen. Read down those three rows: the two deterministic families are
+as agreement, how much is enough, and how many times that must happen. Across those three axes the two deterministic families are
 nearly identical (about two-thirds agreement, met twice, giving `ε = 0`),
 and Avalanche-style is the one that breaks the pattern (about 80% of a small
 random sample, repeated `β` times, giving a small positive `ε`).
