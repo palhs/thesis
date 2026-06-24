@@ -1,11 +1,11 @@
 # BFT families — propagation tree
 
-> Taxonomic tree showing how the four Layer-1 consensus families this
+> Taxonomic tree showing how the three Layer-1 consensus families this
 > thesis evaluates descend from the Byzantine Generals Problem [1].
 > Each branch is a principled relaxation along the synchrony or
 > fault-model axis rather than an arbitrary engineering choice.
 > Mechanism references: [[algorithms/pbft]], [[algorithms/pos]],
-> [[algorithms/avalanche]], [[algorithms/dag-based]]. Concept reference:
+> [[algorithms/avalanche]]. Concept reference:
 > [[concepts/consensus-families#propagation-of-the-bft-problem]].
 >
 > Navigation entry point: [[diagrams/index]]. Owning page:
@@ -24,20 +24,18 @@ flowchart TD
     BGP --> A["Deterministic<br/>quorum-based<br/>partial sync"]
     BGP --> B["Deterministic<br/>stake-weighted<br/>+ economic"]
     BGP --> C["Probabilistic<br/>random<br/>subsampling"]
-    BGP --> D["Decouple data-<br/>availability<br/>from ordering"]
 
     A --> A1["<b>PBFT family</b><br/>PBFT, HotStuff, Tendermint<br/>[4]–[6]"]
     B --> B1["<b>PoS-finality</b><br/>Casper FFG, Gasper<br/>[7], [8]"]
     C --> C1["<b>Avalanche family</b><br/>Slush → Snowflake →<br/>Snowball → Avalanche<br/>[9], [10]"]
-    D --> D1["<b>DAG-based family</b><br/>Narwhal+Tusk, Bullshark,<br/>Mysticeti<br/>[11]–[13]"]
 
     classDef root      fill:#f4f4f4,stroke:#222,stroke-width:1.5px,color:#000
     classDef concession fill:#ffffff,stroke:#666,stroke-width:1px,color:#000
     classDef family    fill:#eef3ff,stroke:#234,stroke-width:1.2px,color:#000
 
     class BGP root
-    class A,B,C,D concession
-    class A1,B1,C1,D1 family
+    class A,B,C concession
+    class A1,B1,C1 family
 ```
 
 ## What this pins
@@ -49,20 +47,18 @@ that occupies that point in the concession space. The reader should
 walk the figure as "BGP → which knob is loosened → which family
 results."
 
-**Four sibling branches, not three plus a child.** The earlier draft
-of the propagation tree in [[concepts/consensus-families]] drew the
-DAG-based family as a *child* of the deterministic branch; this
-figure promotes it to a fourth sibling so that the four families the
-thesis evaluates appear at the same depth. The semantic claim is that
-data-availability/ordering decoupling is a concession on the same
-axis (what to relax against partial synchrony) rather than a
-sub-variant of any one family.
+**Three sibling branches at one depth.** Each of the three families
+the thesis evaluates hangs at the same depth from the Byzantine
+Generals root, one per concession axis. A fourth, DAG-based family
+(Narwhal+Tusk, Bullshark, Mysticeti) decouples data availability from
+ordering on the same axis but is not implemented in this thesis — it
+is named only as a direction for further work (Chapter 6) and is
+therefore not drawn here.
 
 **Citation numerals match Chapter 2's reference list.** `[1]` is
 Lamport, Shostak, Pease (Byzantine Generals); `[4]–[6]` are
 PBFT/HotStuff/Tendermint; `[7], [8]` are Casper FFG and Gasper;
-`[9], [10]` are Avalanche and its formal re-analysis; `[11]–[13]` are
-Narwhal+Tusk, Bullshark, Mysticeti.
+`[9], [10]` are Avalanche and its formal re-analysis.
 
 **Boxes carry no quantitative claim.** The figure is taxonomic, not
 quantitative. Fault thresholds, finality types, and metric
@@ -76,7 +72,7 @@ family-comparison row in [[concepts/consensus-families]].
 - Concession axes: [[concepts/fault-model]],
   [[concepts/quorum-arithmetic]], [[concepts/cap-theorem]].
 - Family pages: [[algorithms/pbft]], [[algorithms/pos]],
-  [[algorithms/avalanche]], [[algorithms/dag-based]].
+  [[algorithms/avalanche]].
 - Consumer: `drafts/ch2_litreview.md` §2.3 (Figure 2.1).
 - Adjacent concept synthesis:
   [[concepts/consensus-families#propagation-of-the-bft-problem]].
@@ -91,4 +87,10 @@ remaining 10 sequence diagrams onto the same toolchain.
 
 ## Revisions
 
-None.
+- **2026-06-24.** Removed the fourth (DAG-based) family branch — node `D`
+  ("Decouple data-availability from ordering") and `D1` ("Narwhal+Tusk,
+  Bullshark, Mysticeti", `[11]–[13]`). The thesis was descoped to three
+  implemented families (PBFT, Casper FFG, Snowman); Narwhal+Tusk is now future
+  work only (Chapter 6). The figure, its caption, and Chapter 2 §2.3 prose now
+  all read "three families". The `.svg`/`.pdf` renders were regenerated from the
+  updated Mermaid source on the same date.
