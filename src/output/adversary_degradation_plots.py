@@ -38,8 +38,10 @@ from output.plots import STYLE, PROTO_ORDER
 PLOT_DIR = "results/adversary/plots"
 NS = (10, 25)
 THIRD = 1.0 / 3.0
-XLIM = (-0.01, 0.51)            # shared phi axis across the liveness figures
+XLIM = (-0.02, 0.51)            # shared phi axis across the liveness figures
 YLIM = (-0.05, 1.08)           # shared rate axis (0..1 metrics)
+DODGE = 0.008                  # per-protocol x-offset so coincident series stay
+                               # visible (e.g. PBFT == Snowman at 1.0 in Fig 4.14)
 
 
 def _save(fig, plot_dir, fname):
@@ -71,7 +73,7 @@ def _liveness_axis(ax, rows, family, n):
     equivocate family); the chapter captions state the per-family ranges.
     """
     survival: dict[str, float] = {}
-    for proto in PROTO_ORDER:
+    for i, proto in enumerate(PROTO_ORDER):
         cells = aa.liveness_rate(rows, family, proto, n)
         grid = sorted(cells)
         if not grid:
@@ -79,7 +81,8 @@ def _liveness_axis(ax, rows, family, n):
         ys = [cells[p].mean for p in grid]
         lo = [max(0.0, cells[p].mean - cells[p].lo) for p in grid]
         hi = [max(0.0, cells[p].hi - cells[p].mean) for p in grid]
-        ax.errorbar(grid, ys, yerr=[lo, hi], capsize=3, linewidth=1.6,
+        xs = [p + (i - 1) * DODGE for p in grid]  # dodge coincident curves apart
+        ax.errorbar(xs, ys, yerr=[lo, hi], capsize=3, linewidth=1.6,
                     markersize=6, **STYLE[proto])
         alive = [p for p in grid if cells[p].mean > 0]
         survival[proto] = max(alive) if alive else grid[0]
@@ -106,12 +109,13 @@ def fig_delay_liveness_and_latency(rows, plot_dir):
         ax_live.set_title(f"$n = {n}$")
 
         ax_lat = axes[1][col]
-        for proto in PROTO_ORDER:
+        for i, proto in enumerate(PROTO_ORDER):
             curve = aa.delay_finality_ratio_by_phi(rows, proto, n)
             grid = sorted(curve)
             if not grid:
                 continue
-            ax_lat.plot(grid, [curve[p] for p in grid], linewidth=1.6,
+            xs = [p + (i - 1) * DODGE for p in grid]  # dodge PBFT/FFG apart at 1.0x
+            ax_lat.plot(xs, [curve[p] for p in grid], linewidth=1.6,
                         markersize=6, **STYLE[proto])
         sm = aa.delay_finality_ratio_by_phi(rows, "snowman", n)
         if sm:
@@ -188,13 +192,14 @@ def fig_offline_throughput(rows, plot_dir):
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), sharey=True)
     for ax, n in zip(axes, NS):
         phis: set[float] = set()
-        for proto in PROTO_ORDER:
+        for i, proto in enumerate(PROTO_ORDER):
             tr = aa.offline_throughput_ratio(rows, proto, n)
             grid = sorted(tr)
             phis.update(grid)
             if not grid:
                 continue
-            ax.errorbar(grid, [tr[p].mean for p in grid],
+            xs = [p + (i - 1) * DODGE for p in grid]  # dodge coincident curves apart
+            ax.errorbar(xs, [tr[p].mean for p in grid],
                         yerr=[tr[p].ci_half for p in grid], capsize=3,
                         linewidth=1.6, markersize=6, **STYLE[proto])
         # y = 1 - phi participating-stake invariant across the swept range.

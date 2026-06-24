@@ -116,6 +116,14 @@ visual clutter were reverted in `adversary_degradation_plots.py`:
   throughput 4.20 → **4.21** (the matrix is captioned first in §4.4.4, the
   throughput RQ2 reading last). The equivocation figures (4.16–4.19) keep their
   numbers. The §4.4 figure set rendered by this script is now **8** (was 7).
+- **Coincident-series legibility.** Lines that sat exactly on top of one another
+  (PBFT == Snowman at 1.0 on Fig 4.14 top; PBFT == Casper FFG at 1.0× on Fig 4.14
+  bottom; FFG == Snowman at 1.0 on Fig 4.16) hid the lower series entirely. Each
+  protocol now gets a small `±0.008` x-dodge (`DODGE`) so coincident curves render
+  side by side; `XLIM` widened to `-0.02` so the leftmost dodged marker at φ=0 is
+  not clipped. Marker x-position only — the data is unchanged. Applies to the four
+  faceted curve figures (4.14/4.15/4.16/4.21); the shared `XLIM` widening also
+  gives the count/safety/slashable panels (4.17–4.19) a hair more left margin.
 
 In-image title + caption reworded to drop "step cliffs"; all PNG+PDF re-rendered;
 `output` suite green (172 tests). Draft synced (`drafts/ch4_results.md`: Fig 4.15
