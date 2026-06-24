@@ -201,26 +201,7 @@ at every `n`, confirming honest-path correctness. Source:
 `results/baseline/plots/success_rate_vs_n.pdf`
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
-### 4.2.6 A note on the latency measurement point
-
-The cross-protocol latency comparison of §4.2.2 — and of the delay sweep in
-§4.3 — is built from `commit_latency_ms`, not `finality_latency_ms`. Despite its
-name, `commit_latency_ms` is the canonical cross-protocol *time-to-finality*
-column: the median per-validator time to each protocol's irreversibility
-milestone — the `2f+1` commit quorum for PBFT, the finalized checkpoint after the
-justify-then-finalize rule for Casper FFG, and counter-`β` acceptance for
-Snowman. Aligning these three milestones on one axis is what makes the comparison
-meaningful [[wiki/concepts/output-format]]. The two columns coincide for Casper
-FFG and Snowman but diverge for PBFT, whose implementation adds a client-reply
-round, so its `finality_latency_ms` sits one network hop past the internal commit
-quorum at client-observed finality; placing all three protocols'
-`finality_latency_ms` on one axis would compare PBFT's client-observed timestamp
-against the others' internal ones — not like for like. This column choice is fixed
-in the schema that governs figure construction, so the comparison's correctness
-does not depend on the reader noticing this paragraph
-[[wiki/concepts/output-format]].
-
-### 4.2.7 Baseline summary
+### 4.2.6 Baseline summary
 
 **Table 4.1 — Baseline means at `n = 25` (production-scale end of the sweep),
 20 seeds.** Latency and overhead are deterministic across seeds; goodput

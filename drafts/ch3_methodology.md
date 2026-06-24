@@ -193,9 +193,10 @@ where the implementation departs from classical PBFT.
   threshold-signature linearization and no Tendermint rotation
   [[wiki/algorithms/pbft]].
 - **② Exponential view-change backoff.** The view-change timeout uses a
-  per-view backoff `vc_delay·2^view`, required so recovery terminates
-  deterministically: a flat timeout that has fired once fires again in the same
-  delay regime.
+  per-view backoff `(3·E[round_latency])·2^view` — where `E[round_latency]` is
+  the expected per-round message latency in the current network phase — required
+  so recovery terminates deterministically: a flat timeout that has fired once
+  fires again in the same delay regime.
 - **③ Digests, not certificates.** The simulator carries no cryptographic
   signatures; message digests serve integrity and deterministic replay only, so
   a `VIEW-CHANGE` message's prepared evidence is an assertion rather than a
@@ -230,8 +231,9 @@ justify→finalize for one epoch with the slashing branch.
 - **③ `slot_duration = 1 s`** (against 12 s), pinned in
   [[wiki/concepts/metric-reconciliation]] — a round, legible cadence an order
   of magnitude below production. The resulting per-epoch finality,
-  `(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s`, is roughly 5× the
-  per-block protocols' ≈1 s commit; this gap is reported as a finding in §4.2,
+  `(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s` — where
+  `attest_offset` is the one-slot delay before attestations are aggregated — is
+  roughly 5× the per-block protocols' ≈1 s commit; this gap is reported as a finding in §4.2,
   not compressed away, and reflects FFG's coarser epoch-granularity finality.
   *Defence:* a sensitivity sweep toward production scale (larger
   `slots_per_epoch` and `slot_duration`) tests whether the comparative ordering
@@ -331,12 +333,10 @@ documented contract rather than an on-disk artifact for every cell
 
 Second, the three termination predicates of §3.2 (`quiescence`, `deadline`,
 `predicate`) interact with the measurement window: time-bounded runs use a buffer
-beyond the window, and the analysis step clips out-of-window events. A `deadline`
-stop is therefore not in itself a liveness failure — a run is scored as a
-liveness failure only when no honest validator commits inside the window, the
-condition the `success_rate` column reports against `t_max`
-[[wiki/concepts/output-format]]. This keeps the RQ4 success-rate column free of
-runs that were healthy but truncated.
+beyond the window, and the analysis step clips out-of-window events. Hitting `t_max` is not itself a liveness failure: a run fails liveness only if
+no honest validator committed within the measurement window. `success_rate`
+records whether at least one did [[wiki/concepts/output-format]], keeping the
+RQ4 column free of runs that were healthy but truncated.
 
 ### 3.4.2 The experiment matrix
 
@@ -407,12 +407,12 @@ Workload defaults are:
 - an offered rate of 100 transactions per second in the sub-saturation latency
   regime.
 
-Because the network is latency-only (§3.2), the simulator has no saturation point — a
-block of one transaction and one of a thousand commit at the same simulated
-latency — so sustained throughput is measured as goodput at this fixed
-sub-saturation rate; a peak-throughput measurement is deferred to a task that
-first adds a capacity or cost model rather than reported as a configuration
-artifact [[wiki/concepts/experiment-matrix]]
+The latency-only network (§3.2) removes the simulator's saturation point: block-commit
+time is independent of block size, so any offered load commits at the same rate and a
+peak-throughput figure would reflect only the chosen input rate rather than a protocol
+limit. Sustained throughput is therefore measured as goodput at the fixed sub-saturation
+rate; peak-throughput measurement is deferred to a task that first adds a capacity or cost
+model [[wiki/concepts/experiment-matrix]]
 [[experiments/2026-06-03_scaling-baseline]].
 
 The three protocols share the same seed set at every configuration point, and
@@ -487,8 +487,8 @@ The row this run appends has the following shape, shown with a few salient
 columns and the remainder elided:
 
 ```text
-run_id,  protocol, n,  seed, …, commit_hash, t_max, commit_latency_ms, finality_latency_ms, …, success_rate, fork_rate, …
-pbft-n10, pbft,    10, 0,    …, 24a491a4,    20.0,  1000.000003,       1000.000004,         …, 1.0,          0.0,       …
+run_id,  protocol, n,  seed, …, commit_hash, t_max, commit_latency_ms, …, success_rate, fork_rate, …
+pbft-n10, pbft,    10, 0,    …, 24a491a4,    20.0,  1000.000003,       …, 1.0,          0.0,       …
 ```
 
 The `commit_hash` (`24a491a4`) and `seed` columns embedded in every row are the
@@ -572,7 +572,7 @@ family is implemented.
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
 | :-- | :-- | :-- | :-- | :-- |
 | `commit_latency_ms` | median per-node time to the first `decided` instance (`2f+1` `COMMIT`) | median per-node time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | median per-node time to counter-`β` acceptance of the first block | — |
-| `tps` | decided ACUs per window (`decided_count / result.now`) | decided epochs per window (`decided_count / t_max`) | decided blocks per window (`decided_count / t_max`) | — |
+| `tps` | decided ACUs per window (`decided_count / t_max`) | decided epochs per window (`decided_count / t_max`) | decided blocks per window (`decided_count / t_max`) | — |
 | `goodput` | committed transactions per window (`committed_tx / time`) | committed transactions per window over finalized epochs | committed transactions per window | — |
 
 **Throughput basis.** As implemented, `tps` is a decided-event rate whose
