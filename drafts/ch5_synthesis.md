@@ -7,8 +7,8 @@ Each of its three movements isolated one stress axis and reported how the
 protocols behaved under it: validator-set size in the baseline, network delay in
 the second sweep, and adversarial behavior in the third. Read separately, each
 sweep produced a clear per-axis verdict. Read together, they raise the question
-this chapter takes up — whether any one family occupies a dominant position once
-the baseline, delay, and adversarial regimes are considered jointly, the
+this chapter takes up: whether any one family occupies a dominant position once
+the baseline, delay, and adversarial regimes are considered jointly. This is the
 Pareto-frontier synthesis of RQ5 [[wiki/concepts/research-questions]].
 
 RQ5 asks whether a consistent Pareto frontier of the performance–security
@@ -46,10 +46,10 @@ evaluation was designed to measure.
 The reading rests on the measurement conventions fixed in Chapter 3 and carried
 through Chapter 4 (§3.5–§3.6): cross-protocol latency from `commit_latency_ms`,
 the canonical time-to-finality column; throughput from `goodput` rather than the
-protocol-granularity decision-event rate; and the latency-only model's
-no-compute-cost caveat, which flatters PBFT and Casper FFG on cost and
-per-validator comparisons while leaving the message-count, liveness, and safety
-verdicts unaffected [[wiki/concepts/output-format]].
+protocol-granularity decision-event rate; and the latency-only model, which
+charges no compute cost. That last convention flatters PBFT and Casper FFG on cost
+and per-validator comparisons, while leaving the message-count, liveness, and
+safety verdicts unaffected [[wiki/concepts/output-format]].
 
 ## 5.3 Where each family sits on the frontier
 
@@ -64,13 +64,13 @@ committed unit, at approximately `2n` messages — the atomic-commit-unit
 denominator absorbing one factor of the all-to-all `O(n²)` instance cost
 [[wiki/experiments/2026-06-08_baseline-cis]]. It is the least delay-exposed of the
 three, where Snowman pays an order of magnitude more
-[[wiki/experiments/2026-06-13_delay-analysis]], and the most loss-resilient — the
-only one still finalizing at twenty-percent packet loss, first by area under the
-finalization-rate curve [[wiki/experiments/2026-06-13_delay-comparison]]. Against
-the two liveness adversaries it is the strongest of the three — immune to delayed
-voting and undegraded under silent non-participation through `φ = 0.33`,
-collapsing only at `φ = 0.40`, the first sampled fraction past its `2f+1` quorum
-bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These liveness
+[[wiki/experiments/2026-06-13_delay-analysis]]. It is also the most loss-resilient:
+the only one still finalizing at twenty-percent packet loss, first by area under
+the finalization-rate curve [[wiki/experiments/2026-06-13_delay-comparison]].
+Against the two liveness adversaries it is the strongest of the three. It is
+immune to delayed voting, undegraded under silent non-participation through
+`φ = 0.33`, and collapses only at `φ = 0.40`, the first sampled fraction past its
+`2f+1` quorum bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These liveness
 verdicts hold against adversaries that leave the view-0 primary honest; the
 leader-disruption surface, plausibly the sharpest attack on a leader-based
 protocol, is catalogued but not measured, so PBFT's liveness standing is bounded
@@ -79,7 +79,7 @@ to non-leader-targeting strategies [[wiki/concepts/adversary-model]].
 The mechanism that buys this liveness is the one that disqualifies PBFT on the
 axis it loses. Its leader-based, exact-quorum commit rule recovers from a stalled
 or slow leader by view-change rotation, which is why it survives delay, loss, and
-silence; but that commit rule is non-accountable, and under equivocation past the
+silence. That same commit rule is non-accountable. Under equivocation past the
 fault threshold it produces a deterministic fork — 229 conflicting committed
 instances at `φ = 0.40` — with no slashable evidence identifying the equivocators
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. View-change activity
@@ -111,11 +111,11 @@ while exposing a slashable stake fraction at or above one-third
 study offers an accountable safety failure. Casper FFG occupies that corner of the
 frontier alone [7] [[wiki/algorithms/pos]]. The cost it pays is
 concentrated on liveness under loss, and that cost is the measured analogue of
-the failure that motivated this study: an epoch whose attestations fail to reach
-a quorum — dropped by a lossy network here, delayed under attestation-processing
-pressure in Ethereum's multi-epoch finality stall of May 2023 [21] there — leaves
-finality stalled, the same class of failure observed in deployment
-[[wiki/algorithms/pos]].
+the failure that motivated this study. An epoch whose attestations fail to reach
+a quorum leaves finality stalled. The quorum is missed by a lossy network here,
+and by delay under attestation-processing pressure in Ethereum's multi-epoch
+finality stall of May 2023 [21] there. The simulated failure is the same class
+observed in that deployment [[wiki/algorithms/pos]].
 
 ### 5.3.3 Snowman: safest under equivocation, costliest under delay
 
@@ -133,22 +133,22 @@ PBFT's 0.533 — the redundancy of its polling scaling with the committee
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
 The same subsampling makes it the costliest protocol under delay and the most
-fragile under silence. Because acceptance requires `β` sequential polling rounds
-and each round waits on the slowest of `K` sampled peers, delay compounds: under
-moderate uniform delay Snowman's time-to-finality grows roughly twelve- to
-fifteenfold, against a fraction of that for the other two, and under a
-delayed-voting adversary its finality cost reaches a factor of sixty-two
+fragile under silence. Acceptance requires `β` sequential polling rounds, and each round waits on the
+slowest of `K` sampled peers, so delay compounds. Under moderate uniform delay
+Snowman's time-to-finality grows roughly twelve- to fifteenfold, against a
+fraction of that for the other two, and under a delayed-voting adversary its
+finality cost reaches a factor of sixty-two
 [[wiki/experiments/2026-06-13_delay-analysis]]
 [[wiki/experiments/2026-06-19_adversary-comparison]]. When peers fall silent
-rather than merely slow, the polls starve: Snowman cliffs earliest of the three,
-finalizing under a silent tenth of the validators but starving once the silent
+rather than merely slow, the polls starve. Snowman cliffs earliest of the three:
+it finalizes under a silent tenth of the validators but starves once the silent
 fraction reaches `φ = 0.20` at `n = 10`, below the one-third the other two
 tolerate [[wiki/experiments/2026-06-19_adversary-comparison]]. The cliff is
-committee-size dependent: the larger `n = 25` sample absorbs more non-responders
+committee-size dependent. The larger `n = 25` sample absorbs more non-responders
 per poll and defers the starvation point to `φ = 0.33`, yet Snowman still fails
 one sampled step before the quorum protocols, remaining the earliest of the three
 to lose liveness under silence [[wiki/experiments/2026-06-17_offline-validators]]. The inversion is the
-sharpest single result of the campaign — the identical structural choice makes
+sharpest single result of the study — the identical structural choice makes
 Snowman the most delay-tolerant family when peers are merely slow and the least
 tolerant when they go silent [9] [[wiki/algorithms/avalanche]]
 [[wiki/concepts/key-findings]].
@@ -221,17 +221,17 @@ safety names a capability only a slashing-based protocol offers. Source:
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 Two features of the frontier carry more weight than the bare verdict. The first
-is a gap in it rather than a point on it. The operator tradeoff of Figure 4.13
+is a gap in it rather than a point on it. Resilience under loss is bought with latency. The operator tradeoff of Figure 4.13
 shows that the protocols which retain finalization under loss are exactly the ones
-that pay the most latency to do so — PBFT and Snowman inflating time-to-finality
-by factors of 2.16 (Snowman, `n = 10`) to 3.57 (PBFT, `n = 25`), each measured at
-that protocol's own deepest surviving loss level rather than a common one and over
-the seeds that still finalize there, so the two figures are not read off a single
-point of Figure 4.13, while Casper FFG, which refuses that trade and stays near
-unit latency, dies first [[wiki/experiments/2026-06-13_delay-comparison]]. The cheap-and-resilient corner
+that pay the most latency to do so. PBFT and Snowman inflate time-to-finality by
+factors of 2.16 (Snowman, `n = 10`) to 3.57 (PBFT, `n = 25`). Each factor is
+measured at that protocol's own deepest surviving loss level rather than a common
+one, and over the seeds that still finalize there, so the two figures are not read
+off a single point of Figure 4.13. Casper FFG refuses that trade and stays near
+unit latency, and dies first [[wiki/experiments/2026-06-13_delay-comparison]]. The cheap-and-resilient corner
 of the plane is empty: resilience is bought with latency, and no measured
 configuration escapes the purchase [[wiki/concepts/key-findings]]. The second is
-that the rankings invert across axes — the family first against delay and silence
+that the rankings invert across axes. The family first against delay and silence
 is last against equivocation, the family first against equivocation is last
 against silence, and the family never first is never catastrophic either
 [[wiki/experiments/2026-06-19_adversary-comparison]]. The frontier is consistent,
@@ -247,8 +247,8 @@ protocol selection cannot be reduced to a single ranking and must instead be rea
 against the deployment's dominant threat: a system that above all must not fork
 without attribution is served by Casper FFG's accountable failure; one that must
 hold liveness through network turbulence by PBFT's view-change recovery; one that
-must resist equivocation outright by Snowman's subsampling — and each of these
-choices accepts the cost the same mechanism imposes elsewhere. The deployment
+must resist equivocation outright by Snowman's subsampling. Each of these choices
+accepts the cost the same mechanism imposes elsewhere. The deployment
 incidents that opened this study (§1.2) are heterogeneous in exactly this way: a
 liveness halt under load on one network and a multi-epoch finality stall on
 another are different failure classes, and the synthesis here is that they are not

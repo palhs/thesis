@@ -8,11 +8,11 @@ transactions across a set of mutually distrusting validators
 height the validator set must agree on a single block; the protocol that
 produces that agreement is the consensus protocol.
 
-Three foundational results bound any such protocol: deterministic Byzantine
-agreement requires `n ≥ 3f+1` replicas [1] [[wiki/concepts/byzantine-generals]];
-under pure asynchrony no deterministic protocol guarantees both safety and
+Three foundational results bound any such protocol. Deterministic Byzantine
+agreement requires `n ≥ 3f+1` replicas [1] [[wiki/concepts/byzantine-generals]].
+Under pure asynchrony no deterministic protocol guarantees both safety and
 liveness against even one crash fault, by the FLP impossibility [2]
-[[wiki/concepts/flp-impossibility]]; and under partial synchrony consensus
+[[wiki/concepts/flp-impossibility]]. Under partial synchrony consensus
 becomes solvable for `f < n/3` [3] [[wiki/concepts/synchrony-models]]. Every
 deployed L1 protocol sits at some point in the design space these results
 define.
@@ -52,8 +52,8 @@ mainnet runs the protocol from which its family takes its name [9].
 These incidents do not invalidate the protocols' theoretical guarantees.
 They demonstrate that the conditions under which those guarantees hold
 (bounded delay, a sufficiently honest validator set) are routinely exited
-in deployment, and that isolating which condition triggers which failure
-requires controlled measurement that live networks do not afford. The
+in deployment. Isolating which condition triggers which failure requires
+controlled measurement that live networks do not afford. The
 primary literature does not supply it: each study fixes its own network
 model, fault assumptions, and workload, and varies one disturbance at a
 time [14], [16]. Live operation combines those disturbances. Validators are
@@ -63,8 +63,8 @@ adversarial.
 
 Under those combined conditions, performance and security cease to be
 independent. A protocol that only *slows* under load may also miss
-finality, fork, or admit conflicting commits across honest validators, a
-coupling invisible to the benign-condition benchmarks each family publishes
+finality, fork, or admit conflicting commits across honest validators. This
+coupling is invisible to the benign-condition benchmarks each family publishes
 [14], [16] [[wiki/concepts/problem-statement#the-gap]]. This thesis is motivated by
 that coupling and by the absence of a unified harness in which it can be
 measured across the three families on matched assumptions.
@@ -79,16 +79,15 @@ adversarial conditions, using a single
 discrete-event simulator. The contribution is not a benchmark of production
 systems but a reproducible cross-family evaluation framework in which the
 three are measured under matched assumptions. Performance is measured as
-commit latency, sustained throughput, and communication overhead; security
-as safety and liveness under adversarial pressure; the unified metric
-schema is defined in Chapter 3 [[wiki/concepts/evaluation-metrics]]. The
+commit latency, sustained throughput, and communication overhead. Security
+is measured as safety and liveness under adversarial pressure. The unified
+metric schema is defined in Chapter 3 [[wiki/concepts/evaluation-metrics]]. The
 approach extends the simulation-based, metrics-instrumented methodology of
 Gervais *et al.* [17], originally applied to Proof-of-Work, to the three implemented BFT
 families [[wiki/concepts/problem-statement#intended-contributions]]. The
 comparison is organized around the Pareto frontier each family traces under
-matched conditions, so that the question of whether any family dominates
-across all operating regimes is answered from data rather than claimed from
-theory.
+matched conditions, and the question of whether any family dominates across all
+operating regimes is answered from experimental data.
 
 ## 1.4 Scope and assumptions
 
@@ -98,7 +97,7 @@ are configurable network delay (constant, uniform, normal, exponential,
 heavy-tailed), configurable packet loss, three Byzantine validator
 behaviors drawn from the primary literature — silent non-participation,
 delayed voting, and equivocation [[wiki/concepts/adversary-model]] — and
-validator sets of n ∈ {4, 7, 10, 16, 25} nodes; extrapolation to the
+validator sets of n ∈ {4, 7, 10, 16, 25} nodes. Extrapolation to the
 several-hundred-node production scale rests on the sensitivity sweeps rather
 than on direct measurement at that scale. Out of scope are Proof-of-Work
 as a subject of comparison (it appears only as the methodological precedent
@@ -146,7 +145,7 @@ synthesizes it.
 - **RQ5.** Does a consistent Pareto frontier of the performance–security
   tradeoff exist across the three families evaluated, and does any family
   dominate across all operating regimes? This is the comparative synthesis
-  and the headline contribution.
+  and the primary contribution.
 
 Each question is paired with a defined subset of the metric schema
 [[wiki/concepts/evaluation-metrics]] and a defined independent variable in
@@ -162,9 +161,8 @@ The thesis makes four contributions
    shared metric schema and a pluggable protocol interface.
 2. **Implementations.** Simplified reference implementations of one
    representative protocol from each of the three families within a single
-   harness — the PBFT-style, PoS-finality, and Avalanche-style
-   representatives, all three implemented — so that reproducible like-for-like
-   comparison is possible.
+   harness — PBFT-style, PoS-finality, and Avalanche-style — enabling
+   reproducible like-for-like comparison.
 3. **Dataset and analysis.** An experimental dataset and comparative
    analysis quantifying the performance–security tradeoff across the three
    implemented families under matched conditions, answering RQ1–RQ4 and

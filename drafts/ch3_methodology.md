@@ -22,11 +22,11 @@ uniformly across them.
 
 The three consensus families decide in genuinely different ways, and that
 diversity is the comparison problem this chapter must solve. They are not one
-protocol run with different constants — they differ in leadership, in what one
+protocol run with different constants. They differ in leadership, in what one
 decision commits, and in layering (established in §2.3, catalogued per protocol
-in §3.3, Table 3.2). Because the three do not even produce the same *kind* of
-decision, a fair comparison cannot be read off raw numbers: it needs both a
-single fixed engine that runs all three identically and a downstream step that
+in §3.3, Table 3.2). The three do not even produce the same *kind* of decision,
+so a fair comparison cannot be read off raw numbers. It needs two things: a
+single fixed engine that runs all three identically, and a downstream step that
 reconciles their differing output onto one scale.
 
 The spine of that engine is short (Figure 3.1). One seed and one configuration
@@ -46,27 +46,27 @@ loader requires seven top-level keys — `n`, `t_max`, `seeds`, `network`,
 `adversary`, `protocol_knobs`, and `workload` — reproduced in full as the input
 contract in Appendix A.
 
-Two features of this contract carry weight later. First, `network` is not a
+Two features of this contract carry weight later. The `network` key is not a
 static setting but a time-stamped sequence of phases, each fixing a delay regime
-and optional message loss and partition over a stated interval; scheduling the
+and optional message loss and partition over a stated interval. Scheduling the
 regime change in advance is what lets one seeded run cross a partial-synchronous
 Global Stabilization Time without mid-run intervention
-[[wiki/concepts/network-model-phases]]. Second, the `adversary`,
-`protocol_knobs`, and `workload` blocks are deliberately opaque — the loader
+[[wiki/concepts/network-model-phases]]. The `adversary`,
+`protocol_knobs`, and `workload` blocks are deliberately opaque. The loader
 admits each whole and leaves interpretation to the protocol or adversary that
-consumes it — which is how one harness admits three protocols that need not share
+consumes it, which is how one harness admits three protocols that need not share
 a knob schema [[wiki/concepts/system-design]].
 
-When wired, each validator is granted exactly three capabilities — the only ways
-it affects anything outside itself — each owned by a different component (the
-full capability contract is tabulated in Appendix A). This three-capability
+When wired, each validator is granted exactly three capabilities, the only ways
+it affects anything outside itself. Each is owned by a different component, and
+the full capability contract is tabulated in Appendix A. This three-capability
 contract is the split-ownership invariant: the scheduler owns time and event
 delivery, the network owns transport, the logger owns the record. Because the
 builder, scheduler, network, and logger are identical across protocols, any
 difference between two rows is attributable to the protocol logic alone
-[[wiki/concepts/system-design]]. The network models timing only — it delivers
-each message at most once, unordered, under per-phase delay, loss, and partition
-— and every protocol's messages travel in one uniform envelope distinguished
+[[wiki/concepts/system-design]]. The network models timing only: it delivers
+each message at most once, unordered, under per-phase delay, loss, and partition.
+Every protocol's messages travel in one uniform envelope distinguished
 only by a per-protocol type (Table 3.2).
 
 The engine's mechanism is one run loop (Figure 3.2) — the scheduler box of
@@ -87,7 +87,7 @@ validator differs.
 event loop — pop the next event, advance the virtual clock to it, let a node
 react, enqueue what it produces — with the three termination paths.
 
-Two properties of this model carry the methodology. First, determinism: the
+Two properties of this model are load-bearing. First, determinism: the
 event queue breaks ties among same-time events by a fixed total order, and every
 random draw derives from a single global seed keyed by stream identity rather
 than by construction order [[wiki/concepts/simulation-design]]. A configuration
@@ -98,10 +98,10 @@ a partial-synchronous Global Stabilization Time without intervention
 [[wiki/concepts/network-model-phases]].
 
 Isolation is not commensurability. Running three kinds of decision through one
-identical engine secures only that the engine adds no difference of its own;
-making them comparable is a separate downstream step — the reconcile the metric
-schema performs under stated conventions when the per-trial rows are read back
-(§3.5). Finally, an adversary is not a new component but a per-node interceptor
+identical engine secures only that the engine adds no difference of its own.
+Making them comparable is a separate downstream step: the reconciliation step the
+metric schema performs under stated conventions when the per-trial rows are read
+back (§3.5). Finally, an adversary is not a new component but a per-node interceptor
 that alters a single validator's outgoing messages; the Byzantine strategies a
 profile can apply are catalogued in [[wiki/concepts/adversary-model]], and §3.4
 names the three exercised by the RQ4 sweep.
@@ -243,18 +243,18 @@ poll loop for one block, accepting at counter `≥ β`.
   safety bound is `ε ≤ (1 − α_c/K)^β` — the analytical ceiling on the
   probability `ε` that two honest validators accept conflicting blocks,
   exponentially small in the confirmation depth `β` [9]. Holding the ratio `α_c/K ≈ 0.8` across the
-  sweep preserves the *shape* of that bound rather than its numerical value: the
-  exponential form is what carries the probabilistic-finality semantics, and
-  because the ceiling rounds `α_c` up, the realized ratio never falls below
-  `0.8`, so the rescaled bound is at least as tight as production
+  sweep preserves the *shape* of that bound rather than its numerical value,
+  because the exponential form is what carries the probabilistic-finality
+  semantics. The ceiling rounds `α_c` up, so the realized ratio never falls below
+  `0.8` and the rescaled bound is at least as tight as production
   [[wiki/concepts/metric-reconciliation]].
 - **④ `β = 15` held fixed.** Holding `β` fixed keeps the *exponent* of the safety
   bound `(1 − α_c/K)^β` constant across the sweep, preserving the exponential form
   that carries the probabilistic-finality semantics. It does not hold the
-  *realized* bound constant: the base `(1 − α_c/K)` tracks the ceiling-rounded
-  ratio of ③, so the analytical ceiling `ε` varies non-monotonically with `n` —
+  *realized* bound constant. The base `(1 − α_c/K)` tracks the ceiling-rounded
+  ratio of ③, so the analytical ceiling `ε` varies non-monotonically with `n`,
   from `≈ 10⁻¹¹` at `n ∈ {16, 25}` down to `≈ 10⁻¹⁵` at `n = 10`, several orders
-  of magnitude — and the smallest sets sit nearest unanimity (`n = 7` gives
+  of magnitude. The smallest sets sit nearest unanimity (`n = 7` gives
   `α_c/K = 5/6 ≈ 0.833`) [[wiki/concepts/metric-reconciliation]]. Together with
   ②–③, the rescaled protocol is therefore one Snowman in *form* across the sweep —
   the same exponential semantics tracked at fixed `β` — rather than an identical
@@ -263,7 +263,7 @@ poll loop for one block, accepting at counter `≥ β`.
 **Degeneracy (excluded).** The rescaling degenerates at `n = 4`, where it
 yields `α_c = K = 3`: every poll then queries all peers and demands unanimity,
 collapsing Snowman to flood-voting and driving the bound `(1 − α_c/K)^β` to
-zero — not because finality is genuinely perfect but because this
+zero. This is not because finality is genuinely perfect, but because this
 parametrization is no longer Snowman, only the degenerate boundary of the
 rescaling rule [[wiki/concepts/metric-reconciliation]]. The `n = 4` Snowman row
 is therefore excluded from the comparative tables of Chapters 4 and 5 and
@@ -282,8 +282,7 @@ block with no forks and byte-identical replay
 The harness wires and runs the system by the bootstrap and run loop of §3.2, and
 the same configuration paired with the same global seed produces a byte-identical
 event stream, since the bootstrap adds no randomness of its own
-[[wiki/concepts/reproducibility]]. Two points specific to the experiments
-reported here are worth stating.
+[[wiki/concepts/reproducibility]]. Two points specific to these experiments follow.
 
 First, the baseline experiments do not load a YAML file per run: they build the
 configuration programmatically, as scenario definitions in code that produce the
@@ -351,7 +350,7 @@ sub-threshold band `φ ∈ {0.10, 0.20, 0.30}` against a `φ = 0` honest control
 - **`withhold-participation`** (silent non-participation) — a silent validator
   that still runs its state machine but emits nothing, the crash-faulty case.
 - **`equivocate-vote`** (equivocation) — sign two conflicting messages where the
-  protocol expects one. This safety-relevant sweep additionally drives PBFT and
+  protocol expects one. This safety-relevant sweep also drives PBFT and
   Casper FFG above the `1/3` bound (`φ ∈ {0.40, 0.50}`) to expose the safety
   cliff; Snowman cannot fork below threshold and is not swept
   above it [[wiki/concepts/experiment-matrix-runs]]. For Snowman the capability
@@ -386,21 +385,21 @@ metric schema (§3.5).
 ### 3.4.3 Regime-coherence constraints
 
 Two coherence constraints keep each protocol in its own regime while it sits on
-the shared axes. The first governs Casper FFG slot timing. The FFG runner
+the shared axes. The FFG runner
 refuses any pairing of the baseline `slot_duration = 1 s` (§3.3.2 ③) with a
-network phase whose `E[delay]` is not far below the slot duration — attestations
-from distant
-validators would arrive after the slot boundary, producing a degraded regime
-that is not Casper FFG — so Family B rescales `slot_duration` upward with the
-delay regime, by the rule `slot_duration ≥ 4·E[delay]`
-[[wiki/concepts/metric-reconciliation]]; the matrix owns the per-timeline
-pairing and the runner refuses to start an incoherent pairing rather than
-report degraded-finality numbers labeled as Casper FFG
+network phase whose `E[delay]` — the mean delay of the phase's distribution — is
+not far below the slot duration. When `E[delay]` approaches `slot_duration`,
+attestations from distant validators arrive after the slot boundary, producing a
+degraded regime that is not Casper FFG. Family B therefore rescales
+`slot_duration` upward with the delay regime, by the rule
+`slot_duration ≥ 4·E[delay]` [[wiki/concepts/metric-reconciliation]]. The matrix
+owns the per-timeline pairing, and the runner refuses to start an incoherent
+pairing rather than report degraded-finality numbers labeled as Casper FFG
 [[wiki/concepts/experiment-matrix]]. Because the slot duration grows with the
 delay regime, Casper FFG's time-to-finality in Family B is slot-dominated and
-necessarily rises with delay: the RQ1 curve for Casper FFG therefore reports the
-protocol's *delay coupling* — the same coupling Ethereum's 12 s slot reflects —
-rather than a free-running delay-sensitivity measurement, and is read as such
+necessarily rises with delay. The RQ1 curve for Casper FFG therefore reports the
+protocol's *delay coupling*, the same coupling Ethereum's 12 s slot reflects,
+rather than a free-running delay-sensitivity measurement. It is read as such
 rather than hidden. The second constraint is the analogous one for Snowman: its
 `(K, α_p, α_c)` are not free axes but functions of `n` fixed by the §3.3.3
 rescaling rule (which also fixes the `n = 4` Snowman exclusion recorded there).
@@ -432,10 +431,10 @@ bound validator's outgoing messages.
    `decided` event for the block at time `t_decided`, under the
    `static-baseline` delay on every delivery.
 4. **Stop.** The run ends at `quiescence` or `t_max`.
-5. **Flush and reduce.** The harness reduces the event stream to metrics: the
-   commit latency of `τ` is `t_decided − t_submit`; throughput is the
-   committed-transaction count over the measurement window; and
-   `consensus_msgs_per_acu` is the per-ACU message cost — the `PRE-PREPARE`
+5. **Flush and reduce.** The harness reduces the event stream to metrics. The
+   commit latency of `τ` is `t_decided − t_submit`, and throughput is the
+   committed-transaction count over the measurement window.
+   `consensus_msgs_per_acu` is the per-ACU message cost: the `PRE-PREPARE`
    broadcast, the all-to-all `PREPARE` and `COMMIT` rounds, and the client
    `REPLY`s total `2(n²−1)` deliveries (`O(n²)` traffic), which over the `n`
    `decided` events is `(2n²−2)/n = 2n − 2/n` (≈ 19.8 at this `n`).
@@ -464,12 +463,12 @@ by a separate downstream aggregation step: a wide CSV —
 `results/baseline/aggregated.csv` — carrying one row per configuration with the
 mean and 95% confidence interval of each metric across the seed set, and it is
 this aggregated file that feeds the Chapter 4 plots. The mean and interval are
-therefore properties of the aggregation, not of any single per-trial row;
-repeating the run over seeds `0 … 19` under common random numbers supplies the
+therefore properties of the aggregation, not of any single per-trial row.
+Repeating the run over seeds `0 … 19` under common random numbers supplies the
 sample it reduces. Family B replaces the network phase, Family C attaches an
 `AdversaryProfile` to `φ` of the validators, and the other two protocols
 substitute their own proposer, message types, and `decided` condition (Table
-3.1) — but the six-phase lifecycle is identical for all three.
+3.1); the six-phase lifecycle is identical for all three.
 
 ## 3.5 Metric schema
 
@@ -567,15 +566,15 @@ finality is probabilistic rather than categorical, so the rate is reported
 instead as both the analytical bound `(1 − α_c/K)^β` (§3.3.3) and the empirical
 conflicting-decision rate across seeds [[wiki/concepts/evaluation-metrics]]. At
 the comparison baseline `β = 15` that analytical bound ranges from ~10⁻¹⁵ at `n = 10` to ~10⁻¹¹ at `n = 25`, so
-the empirical rate is unobservable in feasible seed counts; the empirical side is
+the empirical rate is unobservable in feasible seed counts. The empirical side is
 therefore collected only in a separate RQ4 safety regime at `β ∈ {3, 5}`,
-reported on its own and never placed on a cross-protocol throughput axis —
-lowering `β` cuts Snowman's `O(K·β)` cost and would otherwise manufacture a
+reported on its own and never placed on a cross-protocol throughput axis.
+Lowering `β` cuts Snowman's `O(K·β)` cost and would otherwise manufacture a
 throughput advantage [[wiki/concepts/metric-reconciliation]].
 
-Protocols are compared under the common random numbers of §3.4.2 — shared
-network, arrival, and adversary-placement streams — so each cell measures the
-variance of the cross-protocol *difference*, not of either protocol alone; this
+Protocols are compared under the common random numbers of §3.4.2. They share the
+network, arrival, and adversary-placement streams, so each cell measures the
+variance of the cross-protocol *difference*, not of either protocol alone. This
 is what makes a modest `n_runs = 20` per cell sufficient, raised to `30` at the
 near-threshold Family C points where outcomes are most variable. Snowman's
 internal poll sub-sampling has no cross-protocol counterpart, so its variance
