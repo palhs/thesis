@@ -9,12 +9,13 @@ byte-identical-CSV gate covers it.
 
 Figures (draft numbers in parentheses):
   - liveness_vs_phi_delay        (Fig 4.14) liveness + finality blow-up, delay
-  - liveness_vs_phi_offline      (Fig 4.15) liveness cliffs (steps + phi*), offline
+  - liveness_vs_phi_offline      (Fig 4.15) liveness cliffs (phi* boxed), offline
+  - throughput_degradation_vs_phi (Fig 4.21) throughput degradation (RQ2), offline
   - liveness_vs_phi_equivocate   (Fig 4.16) liveness, equivocate
   - pbft_viewchange_count_vs_phi (Fig 4.17) PBFT view-change COUNT, equivocate
   - safety_cliff_vs_phi          (Fig 4.18) safety-violation rate + 229 annotation
   - ffg_slashable_vs_phi         (Fig 4.19) Casper FFG slashable stake
-  - adversary_tradeoff_matrix    (Fig 4.21) 3x3 protocol x adversary outcome map
+  - adversary_tradeoff_matrix    (Fig 4.20) 3x3 protocol x adversary outcome map
 
 In-image titles are descriptive only; interpretation lives in the chapter
 captions (draft-style.md, no editorializing in figure titles).
@@ -37,8 +38,10 @@ from output.plots import STYLE, PROTO_ORDER
 PLOT_DIR = "results/adversary/plots"
 NS = (10, 25)
 THIRD = 1.0 / 3.0
-XLIM = (-0.01, 0.51)            # shared phi axis across the liveness figures
+XLIM = (-0.02, 0.51)            # shared phi axis across the liveness figures
 YLIM = (-0.05, 1.08)           # shared rate axis (0..1 metrics)
+DODGE = 0.008                  # per-protocol x-offset so coincident series stay
+                               # visible (e.g. PBFT == Snowman at 1.0 in Fig 4.14)
 
 
 def _save(fig, plot_dir, fname):
@@ -61,16 +64,16 @@ def _third_line(ax):
                zorder=1)
 
 
-def _liveness_axis(ax, rows, family, n, *, steps=False):
+def _liveness_axis(ax, rows, family, n):
     """Draw per-protocol success-rate curves on ax over the shared phi axis.
 
     Returns {protocol: phi*} where phi* is the survival depth (deepest swept phi
-    whose mean success rate is still > 0). Marks each protocol's swept endpoint
-    with a caret on the axis so the sweep-range asymmetry (e.g. Snowman swept
-    only to phi=0.33 on the equivocate family) is visible, not hidden.
+    whose mean success rate is still > 0). Each protocol's swept endpoint reads
+    off where its curve ends (e.g. Snowman is swept only to phi=0.33 on the
+    equivocate family); the chapter captions state the per-family ranges.
     """
     survival: dict[str, float] = {}
-    for proto in PROTO_ORDER:
+    for i, proto in enumerate(PROTO_ORDER):
         cells = aa.liveness_rate(rows, family, proto, n)
         grid = sorted(cells)
         if not grid:
@@ -78,13 +81,9 @@ def _liveness_axis(ax, rows, family, n, *, steps=False):
         ys = [cells[p].mean for p in grid]
         lo = [max(0.0, cells[p].mean - cells[p].lo) for p in grid]
         hi = [max(0.0, cells[p].hi - cells[p].mean) for p in grid]
-        kw = dict(capsize=3, linewidth=1.6, markersize=6, **STYLE[proto])
-        if steps:
-            kw["drawstyle"] = "steps-post"
-        ax.errorbar(grid, ys, yerr=[lo, hi], **kw)
-        # caret on the bottom axis marking this protocol's swept endpoint.
-        ax.plot([grid[-1]], [YLIM[0]], marker=6, markersize=8, clip_on=False,
-                color=STYLE[proto]["color"], zorder=6)
+        xs = [p + (i - 1) * DODGE for p in grid]  # dodge coincident curves apart
+        ax.errorbar(xs, ys, yerr=[lo, hi], capsize=3, linewidth=1.6,
+                    markersize=6, **STYLE[proto])
         alive = [p for p in grid if cells[p].mean > 0]
         survival[proto] = max(alive) if alive else grid[0]
     _third_line(ax)
@@ -110,12 +109,13 @@ def fig_delay_liveness_and_latency(rows, plot_dir):
         ax_live.set_title(f"$n = {n}$")
 
         ax_lat = axes[1][col]
-        for proto in PROTO_ORDER:
+        for i, proto in enumerate(PROTO_ORDER):
             curve = aa.delay_finality_ratio_by_phi(rows, proto, n)
             grid = sorted(curve)
             if not grid:
                 continue
-            ax_lat.plot(grid, [curve[p] for p in grid], linewidth=1.6,
+            xs = [p + (i - 1) * DODGE for p in grid]  # dodge PBFT/FFG apart at 1.0x
+            ax_lat.plot(xs, [curve[p] for p in grid], linewidth=1.6,
                         markersize=6, **STYLE[proto])
         sm = aa.delay_finality_ratio_by_phi(rows, "snowman", n)
         if sm:
@@ -143,12 +143,12 @@ def fig_delay_liveness_and_latency(rows, plot_dir):
 # --------------------------------------------------------------------------- #
 
 def fig_offline_liveness(rows, plot_dir):
-    """Offline family, faceted by n: success rate as step cliffs, with each
+    """Offline family, faceted by n: success rate as liveness cliffs, with each
     protocol's survival depth phi* boxed and the 'alive but starved' Snowman
     cell labelled with its surviving throughput fraction."""
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), sharey=True)
     for ax, n in zip(axes, NS):
-        survival = _liveness_axis(ax, rows, "offline", n, steps=True)
+        survival = _liveness_axis(ax, rows, "offline", n)
         ax.set_title(f"$n = {n}$")
         ax.set_xlabel("silent fraction $\\varphi$")
         parts = [f"{STYLE[p]['label']} {survival[p]:.2f}"
@@ -175,8 +175,49 @@ def fig_offline_liveness(rows, plot_dir):
     axes[0].set_ylabel("finalization success rate")
     axes[1].legend(frameon=False, loc="upper right")
     fig.suptitle("Liveness under silent non-participation "
-                 "(step cliffs; mean $\\pm$ 95% Wilson)")
+                 "(mean $\\pm$ 95% Wilson)")
     return _save(fig, plot_dir, "liveness_vs_phi_offline")
+
+
+# --------------------------------------------------------------------------- #
+# Fig 4.21 — silent non-participation: throughput degradation (the RQ2 reading)
+# --------------------------------------------------------------------------- #
+
+def fig_offline_throughput(rows, plot_dir):
+    """Offline family, faceted by n in the §4.4 house style: committed-unit
+    throughput ratio vs phi — the RQ2 reading of the same sweep behind Fig 4.15.
+    The y = 1 - phi reference is the participating-stake invariant: PBFT holds
+    flat to its quorum cliff, Casper FFG decays ~ (1 - phi), Snowman starves
+    earliest. Supersedes the per-n square plots from output.offline_plots."""
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), sharey=True)
+    for ax, n in zip(axes, NS):
+        phis: set[float] = set()
+        for i, proto in enumerate(PROTO_ORDER):
+            tr = aa.offline_throughput_ratio(rows, proto, n)
+            grid = sorted(tr)
+            phis.update(grid)
+            if not grid:
+                continue
+            xs = [p + (i - 1) * DODGE for p in grid]  # dodge coincident curves apart
+            ax.errorbar(xs, [tr[p].mean for p in grid],
+                        yerr=[tr[p].ci_half for p in grid], capsize=3,
+                        linewidth=1.6, markersize=6, **STYLE[proto])
+        # y = 1 - phi participating-stake invariant across the swept range.
+        ref = sorted(phis)
+        if ref:
+            ax.plot(ref, [1.0 - p for p in ref], color="grey", linewidth=1.0,
+                    linestyle="--", zorder=1, label="$y = 1 - \\varphi$ invariant")
+        _third_line(ax)
+        ax.set_xlim(*XLIM)
+        ax.set_ylim(*YLIM)
+        ax.set_xlabel("silent fraction $\\varphi$")
+        ax.set_title(f"$n = {n}$")
+        _grid(ax)
+    axes[0].set_ylabel("throughput ratio (vs $\\varphi = 0$ control)")
+    axes[1].legend(frameon=False)
+    fig.suptitle("Throughput degradation under silent non-participation "
+                 "(mean $\\pm$ 95% CI)")
+    return _save(fig, plot_dir, "throughput_degradation_vs_phi")
 
 
 # --------------------------------------------------------------------------- #
@@ -303,7 +344,7 @@ def fig_ffg_slashable(rows, plot_dir):
 
 
 # --------------------------------------------------------------------------- #
-# Fig 4.21 — the cross-adversary outcome matrix (Table 4.2, visualized)
+# Fig 4.20 — the cross-adversary outcome matrix (Table 4.2, visualized)
 # --------------------------------------------------------------------------- #
 
 # Outcome class -> fill colour. Each cell's class encodes the *kind* of outcome;
@@ -379,6 +420,7 @@ def render_all(adversary_dir: str = aa.ADVERSARY_DIR, plot_dir: str = PLOT_DIR):
         names.append(fig_delay_liveness_and_latency(rows, plot_dir))
     if any(r["family"] == "offline" for r in rows):
         names.append(fig_offline_liveness(rows, plot_dir))
+        names.append(fig_offline_throughput(rows, plot_dir))
     if any(r["family"] == "equivocate" for r in rows):
         names.append(fig_equivocate_liveness(rows, plot_dir))
         names.append(fig_pbft_viewchange_count(rows, plot_dir))
