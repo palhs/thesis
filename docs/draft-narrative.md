@@ -113,19 +113,22 @@ deliver, or to restate the reason it is carried.
 **Carried (consciously deferred, owner = future implementation, not a chapter):**
 
 - the Narwhal+Tusk / DAG-based family and its data-availability-withholding
-  adversary. Stated as three-of-four in Ch1–Ch4; Ch5 and Ch6 use neutral
-  three-family scoping and do **not** name the deferred family (human decision
-  2026-06-22/23), so the §5 "state it once per chapter" rule is suspended for
-  those two chapters and reconciled by the T61 cross-chapter consistency pass
-  (2026-06-24): Ch1–Ch4 name it consistently (the "four evaluated/measured/
-  implemented" overclaims were corrected to three, and Ch4's per-section deferral
-  echoes trimmed to §4.1 + §4.4.4); Ch5–Ch6 confirmed neutral;
+  adversary. **Rescoped by T73 (2026-06-24):** the three-of-four scaffolding is
+  stripped from Ch1–Ch4 — the family is no longer named anywhere in the body —
+  and the DAG acknowledgment is consolidated into a single Ch6 §6.3.2 further-work
+  line that names Narwhal+Tusk, its uncovered data-availability-withholding
+  adversary, and the high-throughput frontier corner left unmeasured
+  [[wiki/concepts/adversary-model]]. The thesis now presents and evaluates three
+  families throughout; the DAG family remains future work owned by a future
+  implementation, not by any chapter, and the prior §5 "state it once per chapter"
+  exception (Ch5/Ch6 neutral, Ch1–Ch4 named) is retired — DAG now appears in
+  exactly one place in the whole document;
 - the empirical/analytical Snowman `ε` columns at weakened confidence depth;
 - the saturation/capacity throughput model.
 
-Rule: the three-family deferral must read the same way in every chapter — neither
-softened into "we evaluate four" nor over-apologized. State it once per chapter at
-the scope boundary and move on.
+Rule (post-T73): the thesis evaluates three families throughout; no chapter body
+softens this into "we evaluate four" or names the deferred DAG family except the
+single Ch6 §6.3.2 further-work line.
 
 ---
 
@@ -188,12 +191,13 @@ wiki page that authorizes the deviation.
   confirmation of it.
 - A **`deadline` stop is not a liveness failure**; only a run in which no honest
   validator commits within the window is.
-- **Three families, Narwhal+Tusk deferred** — stated consistently in Ch1–Ch4
-  (see §3). *Exception (2026-06-23): Ch5 and Ch6 use neutral three-family scoping
-  and do not name the deferred family, per human decision. This is the one
-  authorized deviation from "state it once per chapter"; Ch1–Ch4 still name it,
-  and the asymmetry was reconciled by the T61 cross-chapter consistency pass
-(2026-06-24).*
+- **Three families evaluated; the DAG family is future work only** — as of T73
+  (2026-06-24) the Narwhal+Tusk / DAG-based scaffolding is stripped from the body
+  (see §3). The thesis presents and evaluates three families — PBFT, Casper FFG,
+  Snowman — uniformly across Ch1–Ch6, and the DAG family appears in exactly one
+  place: the Ch6 §6.3.2 further-work line. The prior "stated in Ch1–Ch4 /
+  neutral in Ch5–Ch6" asymmetry and its "state it once per chapter" exception are
+  retired.
 
 ---
 
@@ -346,6 +350,9 @@ writes the prose stays clean and the answer stays sharp.
   conventions honored with declared deviations; `T38.1`/`T51` task-ID leaks
   stripped; §1.2 hook callback present (Ethereum May-2023 finality stall). All
   caveats handed to Ch6. Remaining cross-chapter work lives in Ch5/Ch6 below.
+  *(T73, 2026-06-24: the §4.4 "survey covers three families / Narwhal
+  data-availability-withholding absent" qualification trimmed to the honest
+  three-family scope statement; the DA-withholding point relocated to Ch6 §6.3.2.)*
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
   dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar
@@ -353,14 +360,19 @@ writes the prose stays clean and the answer stays sharp.
   §4.3.4 / §4.4.4 deferrals.
   §1.2 hook callback present (§5.5). Hands off to Ch6. The adaptive-timeout
   enhancement is no longer in Ch5 scope (descoped 2026-06-22; now a Ch6 §6.3.2
-  further-work direction). Neutral three-family scoping — the deferred family is
-  not named.
-- **Ch6 — Conclusion (drafted 2026-06-23, in review).** §6.1 RQ1–RQ5 summary;
-  §6.2 consolidated limitations; §6.3 further work (6.3.1 signature-aggregation
-  variants kept; 6.3.2 rewritten — capacity model, adaptive-timeout enhancement,
-  Snowman `ε` depth, larger-scale validation; the DAG-completion clause and its
-  `T38.1` leak removed); §6.4 returns to the §1.2 incidents. Neutral three-family
-  scoping.
+  further-work direction). Three-family scoping — now uniform across the whole
+  thesis (T73, 2026-06-24); the deferred DAG family is named only in Ch6 §6.3.2.
+  *(T73 also compressed §5.2 convention restatement to a Ch3 cross-reference and
+  trimmed the §5.3 magnitude enumerations that Table 5.1 carries.)*
+- **Ch6 — Conclusion (drafted 2026-06-23, in review).** §6.1 RQ1–RQ5 summary
+  (per-RQ prose walk condensed to one paragraph by T73, 2026-06-24; Table 6.1
+  carries the detail); §6.2 consolidated limitations; §6.3 further work (6.3.1
+  signature-aggregation variants kept, BLS caveat condensed by T73; 6.3.2 —
+  capacity model, adaptive-timeout enhancement, Snowman `ε` depth, **the
+  DAG-family extension (Narwhal+Tusk — the single DAG mention in the thesis,
+  added by T73)**, and larger-scale validation; the earlier DAG-*completion*
+  clause and its `T38.1` leak remain removed); §6.4 returns to the §1.2
+  incidents. Three-family scoping, DAG named only here.
 
 ---
 
