@@ -10,7 +10,7 @@ the three families run under one system model (§3.2), one metric schema
 independent variable in isolation. The fifth question, RQ5 — whether a
 consistent performance–security Pareto frontier emerges across the families —
 is a synthesis over the RQ1–RQ4 data rather than a sweep this matrix
-prescribes, and is answered in Chapter 5. The approach extends the
+prescribes. It is answered in Chapter 5. The approach extends the
 instrumented-harness methodology of Gervais *et al.* [17] from Proof-of-Work
 to the three BFT families.
 
@@ -30,9 +30,9 @@ single fixed engine that runs all three identically, and a downstream step that
 reconciles their differing output onto one scale.
 
 The spine of that engine is short (Figure 3.1). One seed and one configuration
-enter; the harness builds the runtime machinery — scheduler, network,
+enter. The harness builds the runtime machinery — scheduler, network,
 validators, logger — identically for every protocol, swapping only the
-protocol-logic slot; a single run loop (detailed below) drives the run; and a
+protocol-logic slot. A single run loop (detailed below) drives the run, and a
 reducer turns the recorded event stream into one comparable row. The same
 machinery runs once per seed and once per cell of the experiment matrix (§3.4),
 so the only thing that varies between two rows is the quantity under study.
@@ -76,7 +76,7 @@ stops on quiescence. Otherwise the scheduler pops the soonest event, identified
 by the triple `(t, node, seq)`, and advances the virtual clock to `t`. If that
 event is a timer that has since been cancelled, it is skipped. Otherwise the
 logger records it and the scheduler hands it to the target validator, which
-reacts and may schedule new events; the loop then checks the caller's stop
+reacts and may schedule new events. The loop then checks the caller's stop
 predicate before taking the next turn. A run therefore ends on one of three
 termination paths — `quiescence` (the heap is empty), `deadline` (the clock
 reached `t_max`), or `predicate` (a caller-supplied condition became true). The
@@ -220,14 +220,14 @@ justify→finalize for one epoch with the slashing branch.
 
 ### 3.3.3 Snowman
 
-Only the linearized Snowman variant is implemented; full DAG-Avalanche is out
+Only the linearized Snowman variant is implemented. Full DAG-Avalanche is out
 of scope, which keeps the chain structure directly comparable to PBFT and
 Casper FFG under the shared `Node` interface [[wiki/algorithms/avalanche]].
 Production Snowman runs on validator sets in the thousands with
 `(K, α_p, α_c, β) = (20, 11, 16, 15)` — respectively the poll sample size, the
-preference and confidence thresholds, and the decision threshold — so the
+preference and confidence thresholds, and the decision threshold. The
 thesis-scale sweep
-`n ∈ {4, 7, 10, 16, 25}` requires the rescaling rule the deviation ledger
+`n ∈ {4, 7, 10, 16, 25}` therefore requires the rescaling rule the deviation ledger
 records. Figure 3.5 traces the poll loop.
 
 **Figure 3.5 ([[diagrams/protocols/snowman]]).** Snowman subsampled `K`-peer
@@ -352,7 +352,7 @@ sub-threshold band `φ ∈ {0.10, 0.20, 0.30}` against a `φ = 0` honest control
 - **`equivocate-vote`** (equivocation) — sign two conflicting messages where the
   protocol expects one. This safety-relevant sweep also drives PBFT and
   Casper FFG above the `1/3` bound (`φ ∈ {0.40, 0.50}`) to expose the safety
-  cliff; Snowman cannot fork below threshold and is not swept
+  cliff. Snowman cannot fork below threshold and is not swept
   above it [[wiki/concepts/experiment-matrix-runs]]. For Snowman the capability
   has no distinct realization and reduces to a "lying responder" that coincides
   in effect with `withhold-participation`
@@ -426,8 +426,8 @@ bound validator's outgoing messages.
    submit time `t_submit`.
 3. **Run loop.** At its propose timer the primary batches `τ` into a block and
    broadcasts `PRE-PREPARE`. Each validator that accepts it broadcasts
-   `PREPARE`; once a validator has collected `7` matching prepares it
-   broadcasts `COMMIT`; once it has collected `7` matching commits it emits a
+   `PREPARE`. Once a validator has collected `7` matching prepares it
+   broadcasts `COMMIT`. Once it has collected `7` matching commits it emits a
    `decided` event for the block at time `t_decided`, under the
    `static-baseline` delay on every delivery.
 4. **Stop.** The run ends at `quiescence` or `t_max`.
@@ -468,15 +468,15 @@ Repeating the run over seeds `0 … 19` under common random numbers supplies the
 sample it reduces. Family B replaces the network phase, Family C attaches an
 `AdversaryProfile` to `φ` of the validators, and the other two protocols
 substitute their own proposer, message types, and `decided` condition (Table
-3.1); the six-phase lifecycle is identical for all three.
+3.1). The six-phase lifecycle is identical for all three.
 
 ## 3.5 Metric schema
 
 The three protocols do not emit commensurable events: PBFT commits a block,
 Casper FFG finalizes a checkpoint, and Snowman accepts a block once its counter
 reaches `β`. They differ structurally — PBFT's and Snowman's per-block finality
-against Casper FFG's per-epoch finality, and Snowman's parameter rescaling — so
-no quantity can be read off the raw event stream and compared across families
+against Casper FFG's per-epoch finality, and Snowman's parameter rescaling.
+No quantity can therefore be read off the raw event stream and compared across families
 until it is first placed on a common axis [[wiki/concepts/metric-reconciliation]]. Building that axis is the
 work of the metric schema, and the schema is uniform across families: each metric
 has one definition, one unit, and one fixed instrumentation point in `src/`, and
@@ -565,8 +565,8 @@ Snowman is the exception to the zero-by-construction safety-violation rate: its
 finality is probabilistic rather than categorical, so the rate is reported
 instead as both the analytical bound `(1 − α_c/K)^β` (§3.3.3) and the empirical
 conflicting-decision rate across seeds [[wiki/concepts/evaluation-metrics]]. At
-the comparison baseline `β = 15` that analytical bound ranges from ~10⁻¹⁵ at `n = 10` to ~10⁻¹¹ at `n = 25`, so
-the empirical rate is unobservable in feasible seed counts. The empirical side is
+the comparison baseline `β = 15` that analytical bound ranges from ~10⁻¹⁵ at `n = 10` to ~10⁻¹¹ at `n = 25`.
+The empirical rate is therefore unobservable in feasible seed counts. The empirical side is
 therefore collected only in a separate RQ4 safety regime at `β ∈ {3, 5}`,
 reported on its own and never placed on a cross-protocol throughput axis.
 Lowering `β` cuts Snowman's `O(K·β)` cost and would otherwise manufacture a
@@ -616,7 +616,7 @@ support, and are stated here rather than left implicit.
   signature verification is charged for the messages and bytes it emits, which
   the simulator counts directly, but not for the computation those messages
   imply. The bias is therefore confined to the latency and per-validator-cost
-  verdicts; the message-count and byte-count comparisons are unaffected
+  verdicts. The message-count and byte-count comparisons are unaffected
   [[wiki/concepts/evaluation-metrics]].
 - **Synthetic open-loop workload.** The workload is Poisson arrivals of
   fixed-size transactions at a conflict rate of zero (§3.4.2), which isolates

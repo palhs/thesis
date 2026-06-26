@@ -130,12 +130,12 @@ transaction rate (tx/s) for each protocol across the sweep; flat in `n`
 ### 4.2.4 Communication overhead
 
 Communication overhead is the metric on which the protocols separate most
-sharply, and it answers RQ3 [[wiki/concepts/research-questions]]. Messages per
+sharply. It answers RQ3 [[wiki/concepts/research-questions]]. Messages per
 committed unit grow with `n` for all three, but the slopes differ by an order of
 magnitude (Figure 4.5, logarithmic axis): PBFT approaches `2n`, Casper FFG
 `1.2n`, and Snowman `2·K·β`, where `K` is the poll sample size and `β` the
 confidence threshold. Each trend matches the protocol's published asymptotic
-cost — Figure 4.6 overlays the measured `total_msgs_per_acu` on the prediction,
+cost. Figure 4.6 overlays the measured `total_msgs_per_acu` on the prediction,
 and the markers fall on it across the sweep, the largest departures (six to seven
 percent) confined to `n = 4`. PBFT's `2n` traces to its `O(n²)`-per-block cost, the all-to-all PREPARE and COMMIT
 phases [[wiki/sources/2026-04-21_castro-liskov-pbft-1999]]. The
@@ -145,7 +145,7 @@ instance and so absorbs one factor of `n`. That leaves a per-unit cost of `O(n)`
 Casper FFG's attestation phase is likewise all-to-all under the
 individually-signed-vote model that the original protocol specifies
 [[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]] and the simulator
-implements — and so `O(n²)` per epoch; its
+implements — and so `O(n²)` per epoch. Its
 per-unit slope sits below PBFT's not through aggregation but because one
 attestation phase serves more committed decisions than PBFT's two broadcast
 phases. The production BLS aggregation that would cut this to `O(n)` is not in
@@ -314,9 +314,9 @@ finalizes anything — as the tiebreak, the two committee sizes reported separat
 [[wiki/experiments/2026-06-13_delay-comparison]]. At `n = 10` the order is strict
 (Figure 4.10): PBFT leads with an AURC of 0.253 and survives to 20% loss, Snowman
 follows at 0.174, Casper FFG trails at 0.149. At `n = 25` PBFT and Snowman tie at
-the top — Snowman's point estimate of 0.369 and PBFT's of 0.351 carry overlapping
-intervals, [0.366, 0.372] against [0.327, 0.376], so neither outranks the other —
-while Casper FFG remains last at 0.140. Unlike the deterministic baseline of
+the top, while Casper FFG remains last at 0.140. Snowman's point estimate of 0.369
+and PBFT's of 0.351 carry overlapping intervals, [0.366, 0.372] against
+[0.327, 0.376], so neither outranks the other. Unlike the deterministic baseline of
 §4.2.1, the finalization rate genuinely varies with the seed, since which
 messages drop depends on it; the intervals in Figures 4.9 and 4.10 are
 accordingly non-degenerate. They are Wilson-score intervals, the schema's form
@@ -379,7 +379,7 @@ cliff's location and the committee-size ordering, used qualitatively
 
 Casper FFG is the most fragile, having neither recovery nor in-round redundancy.
 Finalization requires a two-thirds-stake supermajority to attest the same
-checkpoint and then two such justifications in consecutive epochs; attestations
+checkpoint and then two such justifications in consecutive epochs. Attestations
 are broadcast once per epoch, so when enough are lost the epoch never justifies,
 with no leader to rotate and no resampling to fall back on. A 5% drop already
 collapses it, and a larger committee is a slight liability, adding attestation
@@ -490,7 +490,7 @@ liveness pattern is invariant to the delay magnitude
 [[wiki/experiments/2026-06-14_delayed-voters]], that figure pools each
 adversarial point over all five magnitudes — twenty seeds apiece, roughly a
 hundred runs per point — so its bands are tighter than the twenty-run honest
-control at `φ = 0`; the silent-participation and equivocation figures have no
+control at `φ = 0`. The silent-participation and equivocation figures have no
 magnitude axis and carry twenty runs per point. Within any one figure the Wilson
 width is largest at a mid-range success rate, so the longest bands are Casper
 FFG's partial-success cells, not the saturated cells pinned at 1.0 or 0.
@@ -513,7 +513,7 @@ proposer rotates, a delayed validator is periodically the proposer, and the
 block it owes stalls for that slot, dropping the success rate to a worst pooled
 0.60 at `n = 10` and 0.65 at `n = 25`
 [[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman is the costliest
-case: it neither forks nor stalls, so the success rate holds, but its
+case: it neither forks nor stalls, so the success rate holds. Yet its
 time-to-finality explodes by a factor of roughly 62 at `n = 10` and 49 at
 `n = 25` against the honest control, because each of its `β` sequential poll
 rounds waits on the slowest sampled peer and a delayed peer inflates every round
@@ -555,12 +555,13 @@ measure of where liveness fails
 quorum cliff: it finalizes with no throughput loss up to `φ = 0.33` and dies at
 `φ = 0.40`, the point at which the silent set drops the honest remainder below
 the `2f+1` quorum [[wiki/experiments/2026-06-17_offline-validators]]. Casper FFG
-degrades gracefully over the same range, still finalizing at `φ = 0.33`; its
-throughput — the rate of committed units, a separate magnitude from the success
-rate Figure 4.15 plots — decays in proportion to the participating stake,
+degrades gracefully over the same range, still finalizing at `φ = 0.33`. Its
+throughput decays in proportion to the participating stake,
 approximately `1 − φ` (Figure 4.21), to a worst surviving ratio near 0.49 at
 `n = 10` and 0.47 at `n = 25`
-[[wiki/experiments/2026-06-19_adversary-comparison]]. Snowman cliffs earliest,
+[[wiki/experiments/2026-06-19_adversary-comparison]]. Throughput here means the
+rate of committed units, a separate magnitude from the success rate Figure 4.15
+plots. Snowman cliffs earliest,
 and its cliff is committee-size-dependent: it survives only to `φ = 0.10` at
 `n = 10` and `φ = 0.20` at `n = 25`, because a poll round closes only once `α_c`
 sampled peers respond and never completes when too many are silent
@@ -762,7 +763,7 @@ Source: `results/adversary/plots/adversary_tradeoff_matrix.pdf`
 
 Two qualifications bound this verdict. First, the adversarial verdict is scoped to
 the three families evaluated [[wiki/concepts/adversary-model]]. The swept strategies
-are the three generic capabilities of the catalog; the leader-disruption surface, plausibly the
+are the three generic capabilities of the catalog. The leader-disruption surface, plausibly the
 sharpest attack on the leader-based protocols, is catalogued but not exercised,
 and because the delayed and silent sets are chosen to spare the view-0 primary,
 PBFT's standing as the strongest protocol against the two liveness adversaries

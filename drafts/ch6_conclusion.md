@@ -75,9 +75,9 @@ coherence rule), so the cross-protocol verdicts rest on those conventions. They
 are reported as robust only where they survive the governing sensitivity check
 [[wiki/concepts/metric-reconciliation]]. The evaluation covers the three protocols
 implemented in the harness, and the comparative verdicts are scoped to them. The
-frontier is likewise traced only over the regimes measured; a high-throughput
-regime outside that span is not represented, so the absence of a configuration
-that is at once cheap, fast, and resilient is a statement about the measured plane
+frontier is likewise traced only over the regimes measured, and a high-throughput
+regime outside that span is not represented. The absence of a configuration
+that is at once cheap, fast, and resilient is therefore a statement about the measured plane
 rather than the whole design space. Snowman's safety is reported through its
 analytical bound `ε ≤ (1 − α_c/K)^β` rather than a fork count, and an empirical
 zero is a non-witness of that bound, not a confirmation of it
