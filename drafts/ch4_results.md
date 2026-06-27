@@ -130,7 +130,8 @@ transaction rate (tx/s) for each protocol across the sweep; flat in `n`
 ### 4.2.4 Communication overhead
 
 Communication overhead is the metric on which the protocols separate most
-sharply. It answers RQ3 [[wiki/concepts/research-questions]]. Messages per
+sharply, and the one that answers RQ3 [[wiki/concepts/research-questions]].
+Messages per
 committed unit grow with `n` for all three, but the slopes differ by an order of
 magnitude (Figure 4.5, logarithmic axis): PBFT approaches `2n`, Casper FFG
 `1.2n`, and Snowman `2·K·β`, where `K` is the poll sample size and `β` the

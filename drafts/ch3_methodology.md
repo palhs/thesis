@@ -10,7 +10,7 @@ the three families run under one system model (§3.2), one metric schema
 independent variable in isolation. The fifth question, RQ5 (whether a
 consistent performance–security Pareto frontier emerges across the families),
 is a synthesis over the RQ1–RQ4 data rather than a sweep this matrix
-prescribes. It is answered in Chapter 5. The approach extends the
+prescribes, and is answered in Chapter 5. The approach extends the
 instrumented-harness methodology of Gervais *et al.* [17] from Proof-of-Work
 to the three BFT families.
 
@@ -457,10 +457,10 @@ here.
 
 The walkthrough above produces one row of a single file, but the comparison
 rests on two files [[wiki/concepts/output-format]]. The first is a per-trial,
-long-format CSV (`results/baseline/baseline.csv`) carrying one row per
+long-format CSV carrying one row per
 `(protocol, scenario, seed)`, the file step 6 appends to. The second is produced
-by a separate downstream aggregation step: a wide CSV
-(`results/baseline/aggregated.csv`) carrying one row per configuration with the
+by a separate downstream aggregation step: a wide CSV carrying one row per
+configuration with the
 mean and 95% confidence interval of each metric across the seed set, and it is
 this aggregated file that feeds the Chapter 4 plots. The mean and interval are
 therefore properties of the aggregation, not of any single per-trial row.
@@ -479,7 +479,8 @@ against Casper FFG's per-epoch finality, and Snowman's parameter rescaling.
 No quantity can therefore be read off the raw event stream and compared across families
 until it is first placed on a common axis [[wiki/concepts/metric-reconciliation]]. Building that axis is the
 work of the metric schema, and the schema is uniform across families: each metric
-has one definition, one unit, and one fixed instrumentation point in `src/`, and
+has one definition, one unit, and one fixed instrumentation point in the
+simulator, and
 the family-specific differences appear only as different per-protocol formulas
 computing the same column [[wiki/concepts/evaluation-metrics]]. The evaluation
 spans four metric families:
