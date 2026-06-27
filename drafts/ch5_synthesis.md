@@ -80,8 +80,8 @@ The mechanism that buys this liveness is the one that disqualifies PBFT on the
 axis it loses. Its leader-based, exact-quorum commit rule recovers from a stalled
 or slow leader by view-change rotation, which is why it survives delay, loss, and
 silence. That same commit rule is non-accountable. Under equivocation past the
-fault threshold it produces a deterministic fork — 229 conflicting committed
-instances at `φ = 0.40` — with no slashable evidence identifying the equivocators
+fault threshold it produces a deterministic fork, 229 conflicting committed
+instances at `φ = 0.40`, with no slashable evidence identifying the equivocators
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. View-change activity
 makes the double edge visible: the mechanism fires for successful recovery at
 fractions up to one-third and degenerates into thrashing above it

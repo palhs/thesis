@@ -7,8 +7,8 @@ operationalizes the data-generating research questions RQ1–RQ4
 [[wiki/concepts/research-questions]]: a single discrete-event system in which
 the three families run under one system model (§3.2), one metric schema
 (§3.5), and one experiment matrix (§3.4) that varies each research question's
-independent variable in isolation. The fifth question, RQ5 — whether a
-consistent performance–security Pareto frontier emerges across the families —
+independent variable in isolation. The fifth question, RQ5 (whether a
+consistent performance–security Pareto frontier emerges across the families),
 is a synthesis over the RQ1–RQ4 data rather than a sweep this matrix
 prescribes. It is answered in Chapter 5. The approach extends the
 instrumented-harness methodology of Gervais *et al.* [17] from Proof-of-Work
@@ -334,8 +334,8 @@ then a bounded-delay phase after it — so one seeded run crosses GST without
 intervention.
 
 Family C fixes the network at `static-baseline` (a constant 10 ms delay) and
-sweeps the adversary — the per-node interceptor of §3.2
-[[wiki/concepts/adversary-model]] — the mirror of Family B. An `AdversaryProfile`
+sweeps the adversary (the per-node interceptor of §3.2
+[[wiki/concepts/adversary-model]]), the mirror of Family B. An `AdversaryProfile`
 is static data: its capability, intensity, and bound node set are fixed at
 sim-start and never adapt mid-run [[wiki/concepts/adversary-model]]. Three
 capabilities are exercised, one per Byzantine behavior of RQ4
@@ -387,7 +387,7 @@ metric schema (§3.5).
 Two coherence constraints keep each protocol in its own regime while it sits on
 the shared axes. The FFG runner
 refuses any pairing of the baseline `slot_duration = 1 s` (§3.3.2 ③) with a
-network phase whose `E[delay]` — the mean delay of the phase's distribution — is
+network phase whose `E[delay]`, the mean delay of the phase's distribution, is
 not far below the slot duration. When `E[delay]` approaches `slot_duration`,
 attestations from distant validators arrive after the slot boundary, producing a
 degraded regime that is not Casper FFG. Family B therefore rescales
@@ -457,10 +457,10 @@ here.
 
 The walkthrough above produces one row of a single file, but the comparison
 rests on two files [[wiki/concepts/output-format]]. The first is a per-trial,
-long-format CSV — `results/baseline/baseline.csv` — carrying one row per
+long-format CSV (`results/baseline/baseline.csv`) carrying one row per
 `(protocol, scenario, seed)`, the file step 6 appends to. The second is produced
-by a separate downstream aggregation step: a wide CSV —
-`results/baseline/aggregated.csv` — carrying one row per configuration with the
+by a separate downstream aggregation step: a wide CSV
+(`results/baseline/aggregated.csv`) carrying one row per configuration with the
 mean and 95% confidence interval of each metric across the seed set, and it is
 this aggregated file that feeds the Chapter 4 plots. The mean and interval are
 therefore properties of the aggregation, not of any single per-trial row.
@@ -551,12 +551,12 @@ payload-subtracted byte figure, not from raw `bytes_per_acu`
 [[wiki/concepts/metric-reconciliation]].
 
 The reliability family operationalizes the §2.1 properties. A *safety violation*
-is an observed breach of Agreement — two honest validators commit conflicting
-values at the same height in one run — measured by the safety-violation rate
+is an observed breach of Agreement (two honest validators commit conflicting
+values at the same height in one run), measured by the safety-violation rate
 (recorded in the `fork_rate` column). For the deterministic-finality families it
 is `0` below threshold by construction and measured only above it. A *liveness
-failure* is an observed breach of Termination — at least one honest validator
-fails to commit within the measurement window — measured by the complement of
+failure* is an observed breach of Termination (at least one honest validator
+fails to commit within the measurement window), measured by the complement of
 `success_rate`. Validity holds by construction and is not instrumented: the
 workload generator emits only well-formed transactions, and no module commits a
 value it did not receive.

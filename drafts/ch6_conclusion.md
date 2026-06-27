@@ -34,8 +34,8 @@ but costs Snowman's subsampled polling an order of magnitude more, roughly
 fourteenfold at `n = 16` [[wiki/concepts/key-findings]]. No
 protocol is robust to every adversary, because the structural choice that defends
 a family against one strategy is the same that exposes it to another. PBFT is
-immune to the liveness adversaries exercised here — those that spare the view-0
-primary — yet is the source of the only unaccountable fork. Snowman leads on
+immune to the liveness adversaries exercised here, those that spare the view-0
+primary, yet is the source of the only unaccountable fork. Snowman leads on
 equivocation safety, on an analytical bound reported rather than empirically
 witnessed, yet is the most delay- and silence-exposed of the three. Casper FFG is
 never first against any single adversary, but holds the only accountable failure.
