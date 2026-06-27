@@ -153,8 +153,8 @@ phases. The production BLS aggregation that would cut this to `O(n)` is not in
 the original specification and is not modelled; introducing it, with the
 corresponding threshold-signature PBFT variant, is identified as future work in
 §6.3. Snowman's overhead matches `2·K·β` to within half a percent across its
-`n = 7`–`25` sweep — the factor of two being the query-and-response pair of each
-poll — confirming the per-validator `O(K·β)` cost the Avalanche family is built
+`n = 7`–`25` sweep (the factor of two being the query-and-response pair of each
+poll), confirming the per-validator `O(K·β)` cost the Avalanche family is built
 around [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]].
 
 The overhead admits two readings that must be kept apart: per committed unit, Snowman is the most
@@ -429,7 +429,7 @@ attestations that fail to reach a quorum — dropped by a lossy network here,
 delayed under attestation-processing pressure in Ethereum's multi-epoch finality
 stall of May 2023 there — leave the epoch unjustified and finality stalled
 [[wiki/algorithms/pos]]. Whether any one family dominates across the baseline,
-delay, and adversarial regimes jointly — RQ5 — is taken up in the synthesis of
+delay, and adversarial regimes jointly (RQ5) is taken up in the synthesis of
 Chapter 5 [[wiki/concepts/research-questions]].
 
 These results carry two caveats: first, the aligned milestones of §3.5 differ
@@ -807,6 +807,6 @@ and Snowman starving earliest. Source:
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 The question of whether any one family occupies a dominant position once the
-baseline, delay, and adversarial regimes are considered jointly — the
-Pareto-frontier synthesis of RQ5 — is taken up in Chapter 5
+baseline, delay, and adversarial regimes are considered jointly (the
+Pareto-frontier synthesis of RQ5) is taken up in Chapter 5
 [[wiki/concepts/research-questions]].

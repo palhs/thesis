@@ -130,8 +130,8 @@ leaves the comparative results valid. Table 3.2 summarizes the three protocols
 at a glance — whether each elects a leader, what one decision commits (its
 *atomic commit unit*, or ACU; defined in §3.5), the message types each carries,
 the event that signals a commit, the knobs exposed to experiments, and the main
-simplification each makes. Each subsection then pairs the protocol's decide-path figure — the
-honest path from first message to `decided` — with a *deviation ledger* whose
+simplification each makes. Each subsection then pairs the protocol's decide-path figure (the
+honest path from first message to `decided`) with a *deviation ledger* whose
 numbered entries name every point at which the implementation departs from the
 family and the validity boundary each departure introduces.
 
@@ -165,8 +165,8 @@ where the implementation departs from classical PBFT.
   threshold-signature linearization and no Tendermint rotation
   [[wiki/algorithms/pbft]].
 - **② Exponential view-change backoff.** The view-change timeout uses a
-  per-view backoff `(3·E[round_latency])·2^view` — where `E[round_latency]` is
-  the expected per-round message latency in the current network phase — required
+  per-view backoff `(3·E[round_latency])·2^view` (where `E[round_latency]` is
+  the expected per-round message latency in the current network phase), required
   so recovery terminates deterministically: a flat timeout that has fired once
   fires again in the same delay regime.
 - **③ Digests, not certificates.** The simulator carries no cryptographic
@@ -203,8 +203,8 @@ justify→finalize for one epoch with the slashing branch.
 - **③ `slot_duration = 1 s`** (against 12 s), pinned in
   [[wiki/concepts/metric-reconciliation]] — a round, legible cadence an order
   of magnitude below production. The resulting per-epoch finality,
-  `(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s` — where
-  `attest_offset` is the one-slot delay before attestations are aggregated — is
+  `(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s` (where
+  `attest_offset` is the one-slot delay before attestations are aggregated), is
   roughly 5× the per-block protocols' ≈1 s commit; this gap is reported as a finding in §4.2,
   not compressed away, and reflects FFG's coarser epoch-granularity finality.
   *Defence:* a sensitivity sweep toward production scale (larger
@@ -256,8 +256,8 @@ poll loop for one block, accepting at counter `≥ β`.
   from `≈ 10⁻¹¹` at `n ∈ {16, 25}` down to `≈ 10⁻¹⁵` at `n = 10`, several orders
   of magnitude. The smallest sets sit nearest unanimity (`n = 7` gives
   `α_c/K = 5/6 ≈ 0.833`) [[wiki/concepts/metric-reconciliation]]. Together with
-  ②–③, the rescaled protocol is therefore one Snowman in *form* across the sweep —
-  the same exponential semantics tracked at fixed `β` — rather than an identical
+  ②–③, the rescaled protocol is therefore one Snowman in *form* across the sweep
+  (the same exponential semantics tracked at fixed `β`) rather than an identical
   numerical guarantee at each `n`.
 
 **Degeneracy (excluded).** The rescaling degenerates at `n = 4`, where it
@@ -376,8 +376,8 @@ model [[wiki/concepts/experiment-matrix]]
 
 The three protocols share the same seed set at every configuration point, and
 because randomness is keyed by stream identity (§3.2), all three draw from the
-same network and arrival randomness — so the cross-protocol comparison is
-paired under common random numbers, a variance-reduction technique on the
+same network and arrival randomness. The cross-protocol comparison is
+therefore paired under common random numbers, a variance-reduction technique on the
 paired differences [[wiki/concepts/experiment-matrix]]. The seed count this
 pairing affords, and the interval machinery that reads it, are set out with the
 metric schema (§3.5).
@@ -495,8 +495,8 @@ spans four metric families:
 The device that makes the three commensurable is the *atomic commit unit* (ACU):
 the smallest contiguous set of transactions a protocol commits indivisibly.
 Every "per-block" metric is rewritten as "per ACU", where the ACU is one block
-for PBFT, one finalized checkpoint for Casper FFG, and one block for Snowman — so
-one denominator serves all three without a conditional formula. The three
+for PBFT, one finalized checkpoint for Casper FFG, and one block for Snowman. One
+denominator therefore serves all three without a conditional formula. The three
 protocols are thereby plottable on one scale under three stated conventions — the
 ACU denominator, the Snowman parameter rescaling, and the Casper FFG calibration
 of §3.3.2. Because each convention is a modeling choice rather than a neutral
