@@ -157,7 +157,7 @@ corresponding threshold-signature PBFT variant, is identified as future work in
 poll — confirming the per-validator `O(K·β)` cost the Avalanche family is built
 around [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]].
 
-The overhead admits two readings that must be kept apart. Per committed unit, Snowman is the most
+The overhead admits two readings that must be kept apart: per committed unit, Snowman is the most
 expensive protocol by an order of magnitude. It pays roughly twenty-four messages
 per validator against PBFT's two, the price of repeated subsampling at thesis
 scale.
@@ -235,7 +235,7 @@ loss as a control and then under per-message drop probabilities of 5%, 10%, and
 over twenty seeds with common random numbers, except the most expensive,
 Snowman at `n = 25` under heavy delay, over eight. As in §4.2, three protocols are covered.
 
-The results that follow rest on two measurement properties. All cross-protocol latency is read
+The results that follow rest on two measurement properties: all cross-protocol latency is read
 from `commit_latency_ms`, the canonical time-to-finality column of §3.5, so
 each protocol's irreversibility milestone is compared like for like
 [[wiki/concepts/output-format]]. And delay and loss attack different properties,
@@ -325,7 +325,7 @@ for rate metrics (§3.5); Snowman's at `n = 25` is widest, that cell being
 estimated from eight seeds rather than twenty
 [[wiki/experiments/2026-06-12_delay-heavy]].
 
-From the loss sweep, two findings stand out. First, PBFT is the only protocol still finalizing at 20%
+From the loss sweep, two findings stand out: first, PBFT is the only protocol still finalizing at 20%
 loss, at both committee sizes — 10% of its control rate at `n = 10`, 6% at
 `n = 25` — whereas neither other survives past 10% loss, each fallen to zero by
 the 20% step [[wiki/experiments/2026-06-13_delay-comparison]]. Second, committee
@@ -432,7 +432,7 @@ stall of May 2023 there — leave the epoch unjustified and finality stalled
 delay, and adversarial regimes jointly — RQ5 — is taken up in the synthesis of
 Chapter 5 [[wiki/concepts/research-questions]].
 
-These results carry two caveats. First, the aligned milestones of §3.5 differ
+These results carry two caveats: first, the aligned milestones of §3.5 differ
 in kind. PBFT and Casper FFG offer deterministic finality. Casper FFG's is
 additionally accountable: reverting a finalized checkpoint requires at least
 one-third of the stake to be slashed
@@ -660,7 +660,7 @@ Ranked by safety, the order is Snowman, Casper FFG, PBFT. All three hold to
 failure occurs above it: Snowman has no fork to suffer,
 Casper FFG forks only at a provable cost of one-third of the stake, and PBFT
 forks deterministically and silently
-[[wiki/experiments/2026-06-19_adversary-comparison]]. The ranking warrants two cautions. The
+[[wiki/experiments/2026-06-19_adversary-comparison]]. The ranking warrants two cautions: the
 three failures sit on incommensurable scales — a conflicting-commit rate for
 PBFT, a slashable-stake fraction for Casper FFG, and an analytical bound for
 Snowman — so the ranking compares kinds of failure, not magnitudes on a single
@@ -762,7 +762,7 @@ carries the no-dominance verdict and the structural inversions that produce it.
 Source: `results/adversary/plots/adversary_tradeoff_matrix.pdf`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
-The verdict holds within two qualifications. First, the adversarial verdict is scoped to
+The verdict holds within two qualifications: first, the adversarial verdict is scoped to
 the three families evaluated [[wiki/concepts/adversary-model]]. The swept strategies
 are the three generic capabilities of the catalog. The leader-disruption surface, plausibly the
 sharpest attack on the leader-based protocols, is catalogued but not exercised,

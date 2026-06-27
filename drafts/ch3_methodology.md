@@ -46,7 +46,7 @@ loader requires seven top-level keys — `n`, `t_max`, `seeds`, `network`,
 `adversary`, `protocol_knobs`, and `workload` — reproduced in full as the input
 contract in Appendix A.
 
-Two features of this contract carry weight later. The `network` key is not a
+This contract has two features that carry weight later: the `network` key is not a
 static setting but a time-stamped sequence of phases, each fixing a delay regime
 and optional message loss and partition over a stated interval. Scheduling the
 regime change in advance is what lets one seeded run cross a partial-synchronous
@@ -303,7 +303,7 @@ An experiment is one point in the product of six axes — validator-set size
 `n`, network timeline, adversary, protocol knobs, workload, and seed
 [[wiki/concepts/experiment-matrix]]. The sweep `n ∈ {4, 7, 10, 16, 25}` is
 `3f+1` at `f ∈ {1, 2, 3, 5, 8}`, giving a clean Byzantine-threshold instance
-at each point. Two fault symbols recur and are kept distinct throughout: `f` is
+at each point. Throughout, two fault symbols recur and are kept distinct: `f` is
 the integer fault threshold a configuration tolerates (`n = 3f + 1`), while `φ`
 is the adversarial fraction actually injected in Family C — a real fraction of
 the validator set, independent of the `n = 3f + 1` relation. Experiments group
@@ -384,8 +384,8 @@ metric schema (§3.5).
 
 ### 3.4.3 Regime-coherence constraints
 
-Two coherence constraints keep each protocol in its own regime while it sits on
-the shared axes. The FFG runner
+Each protocol is held in its own regime on the shared axes by two coherence
+constraints: the FFG runner
 refuses any pairing of the baseline `slot_duration = 1 s` (§3.3.2 ③) with a
 network phase whose `E[delay]`, the mean delay of the phase's distribution, is
 not far below the slot duration. When `E[delay]` approaches `slot_duration`,
@@ -632,8 +632,8 @@ support, and are stated here rather than left implicit.
   rescaling rule degenerates to unanimity, is excluded outright
   [[wiki/concepts/output-format]].
 
-Two further properties of the methodology are sources of caveat rather than
-exclusion.
+The methodology carries two further properties that are sources of caveat
+rather than exclusion:
 
 - **Commensurability by convention.** The cross-protocol comparison is
   commensurable by convention, not by identity of the measured event (§3.5), so

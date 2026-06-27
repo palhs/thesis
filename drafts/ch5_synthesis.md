@@ -220,7 +220,7 @@ safety names a capability only a slashing-based protocol offers. Source:
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
-Two features of the frontier carry more weight than the bare verdict. The first
+The frontier carries two features that weigh more than the bare verdict: the first
 is a gap in it rather than a point on it. Resilience under loss is bought with latency. The operator tradeoff of Figure 4.13
 shows that the protocols which retain finalization under loss are exactly the ones
 that pay the most latency to do so. PBFT and Snowman inflate time-to-finality by
