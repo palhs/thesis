@@ -21,7 +21,7 @@ shape of the tradeoff off them.
 
 The answer is that no family dominates. Each of the three protocols is the strict
 best on at least one axis that no other matches, so each is a non-dominated point
-on the frontier; and the frontier itself has a definite shape: no configuration
+on the frontier. The frontier itself also has a definite shape: no configuration
 is at once cheap, fast, and resilient. The contribution of the
 synthesis is therefore not the bare no-dominance verdict, which a reader of the
 design space might anticipate, but the map of which structural choice places each
@@ -80,8 +80,8 @@ The mechanism that buys this liveness is the one that disqualifies PBFT on the
 axis it loses. Its leader-based, exact-quorum commit rule recovers from a stalled
 or slow leader by view-change rotation, which is why it survives delay, loss, and
 silence. That same commit rule is non-accountable. Under equivocation past the
-fault threshold it produces a deterministic fork — 229 conflicting committed
-instances at `φ = 0.40` — with no slashable evidence identifying the equivocators
+fault threshold it produces a deterministic fork, 229 conflicting committed
+instances at `φ = 0.40`, with no slashable evidence identifying the equivocators
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. View-change activity
 makes the double edge visible: the mechanism fires for successful recovery at
 fractions up to one-third and degenerates into thrashing above it
@@ -157,7 +157,7 @@ tolerant when they go silent [9] [[wiki/algorithms/avalanche]]
 
 Collecting the per-family positions gives the frontier its shape (Table 5.1,
 visualized as the overlaid radar of Figure 5.1). No
-row of the table is won by a single family across the board, and three families
+row of the table is won by a single family across the board. Three families
 each win a row no other does: PBFT the delay, loss, and liveness axes; Casper FFG
 the communication-overhead and accountability axes; Snowman the
 equivocation-safety axis. Each is therefore non-dominated, and no family
@@ -179,7 +179,7 @@ contests: the equivocation-safety row ranks Snowman first on its analytical boun
 accountable-safety row names a capability only a slashing-based protocol can
 offer, so Casper FFG holds it uncontested by construction rather than by winning a
 comparison. The loss-resilience row reports the `n = 10` ranking, where PBFT leads
-cleanly; at `n = 25` PBFT and Snowman are a statistical tie at the top, their
+cleanly. At `n = 25` PBFT and Snowman are a statistical tie at the top, their
 area-under-the-retention-curve confidence intervals overlapping (Snowman
 0.369 [0.366, 0.372], PBFT 0.351 [0.327, 0.376]) on a reduced Snowman seed count
 [[wiki/experiments/2026-06-13_delay-comparison]]. Values pair the committee sizes
@@ -220,7 +220,7 @@ safety names a capability only a slashing-based protocol offers. Source:
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
-Two features of the frontier carry more weight than the bare verdict. The first
+The frontier carries two features that weigh more than the bare verdict: the first
 is a gap in it rather than a point on it. Resilience under loss is bought with latency. The operator tradeoff of Figure 4.13
 shows that the protocols which retain finalization under loss are exactly the ones
 that pay the most latency to do so. PBFT and Snowman inflate time-to-finality by
@@ -235,8 +235,8 @@ that the rankings invert across axes. The family first against delay and silence
 is last against equivocation, the family first against equivocation is last
 against silence, and the family never first is never catastrophic either
 [[wiki/experiments/2026-06-19_adversary-comparison]]. The frontier is consistent,
-holding a stable shape across the regimes, but it is genuinely multi-cornered, and
-a deployment's position on it is fixed by which threat it must tolerate rather
+holding a stable shape across the regimes, but it is genuinely multi-cornered. A
+deployment's position on it is fixed by which threat it must tolerate rather
 than by a single best protocol.
 
 ## 5.5 Implications and hand-off

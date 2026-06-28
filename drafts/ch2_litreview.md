@@ -51,7 +51,7 @@ reports performance (§2.4).
 
 ## 2.3 The three families
 
-Table 2.1 traces the same event — committing one proposed block — through
+Table 2.1 traces the same event, committing one proposed block, through
 all three families. They do one thing in common: accumulate *agreement* on a
 block until reversal is impossible. They differ on three axes: what counts
 as agreement, how much is enough, and how many times that must happen. Across

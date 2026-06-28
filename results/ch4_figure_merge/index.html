@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Ch4 figure merge — so sánh cũ vs mới</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+       margin:0;background:#f5f6f8;color:#1c2128;line-height:1.5}
+  header{background:#11243e;color:#fff;padding:24px 32px}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:0;opacity:.85;font-size:14px}
+  .wrap{max-width:1400px;margin:0 auto;padding:24px 32px 80px}
+  .summary{background:#fff;border:1px solid #d8dee4;border-radius:10px;
+           padding:16px 20px;margin:20px 0}
+  .summary table{border-collapse:collapse;width:100%;font-size:14px}
+  .summary th,.summary td{border:1px solid #e1e4e8;padding:7px 10px;text-align:left}
+  .summary th{background:#f0f3f6}
+  .card{background:#fff;border:1px solid #d8dee4;border-radius:10px;
+        margin:22px 0;overflow:hidden}
+  .card h2{margin:0;padding:14px 20px;font-size:17px;background:#eef2f6;
+           border-bottom:1px solid #d8dee4}
+  .card .body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .col{padding:18px 20px}
+  .col.old{border-right:2px dashed #d0d7de;background:#fcfcfd}
+  .col h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;
+          letter-spacing:.05em;color:#57606a}
+  .col.old h3{color:#9a3412}
+  .col.new h3{color:#1a7f37}
+  .col img{width:100%;height:auto;border:1px solid #eaeef2;border-radius:6px;
+           margin-bottom:10px;background:#fff}
+  .note{font-size:13px;color:#444;margin:8px 0 0}
+  .tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:20px;
+       background:#dbeafe;color:#1e40af;margin-left:8px;vertical-align:middle}
+  .tag.drop{background:#fee2e2;color:#991b1b}
+  .save{font-weight:600;color:#1a7f37}
+  code{background:#eef2f6;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .caveat{background:#fff8e6;border:1px solid #f2d98a;border-radius:10px;
+          padding:14px 20px;margin:20px 0;font-size:13.5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Chapter 4 — gộp figure: so sánh phiên bản cũ vs mới</h1>
+  <p>Hình cũ giữ nguyên trong <code>results/{baseline,delay,adversary}/plots/</code>.
+     Bản ghép mới nằm ở <code>results/ch4_figure_merge/merged/</code>. Chưa đụng drafts/ hay Overleaf.</p>
+</header>
+<div class="wrap">
+
+  <div class="summary">
+    <h2 style="margin-top:0;font-size:16px">Tổng kết</h2>
+    <p style="font-size:14px;margin:.3em 0 1em">
+      21 figure → <b>~15</b>. Ước tính giảm <span class="save">~5–6 trang</span> ở Ch4.
+      Mỗi thẻ dưới đây là một quyết định độc lập — bạn có thể nhận/loại từng cái.</p>
+    <table>
+      <tr><th>ID</th><th>Thao tác</th><th>Hình liên quan</th><th>Tiết kiệm</th></tr>
+      <tr><td>DUP1</td><td>Bỏ trùng (cách 1)</td><td>throughput_vs_n ≡ goodput_ci_vs_n</td><td>~1 trang</td></tr>
+      <tr><td>DUP2</td><td><b>Bỏ trùng</b> (4.5 ⊂ 4.6)</td><td>msgs_vs_n bị theory_vs_measured bao trùm</td><td>~1 trang</td></tr>
+      <tr><td>M2</td><td>Ghép 2→1</td><td>finalization_degradation + resilience_ranking</td><td>~1 trang</td></tr>
+      <tr><td>M3</td><td>Ghép 2→1</td><td>latency_cliff + cost_of_survival</td><td>~1 trang</td></tr>
+      <tr><td style="color:#991b1b"><s>M4</s></td><td style="color:#991b1b"><b>BỎ</b> — không ghép được</td><td>liveness_offline ↔ liveness_equivocate</td><td>—</td></tr>
+      <tr><td>M5</td><td>Ghép 3→1</td><td>pbft_viewchange + safety_cliff + ffg_slashable</td><td>~2 trang</td></tr>
+    </table>
+  </div>
+
+  <div class="caveat">
+    <b>Quy tắc ghép (sau khi soi prose giữa các hình):</b> chỉ ghép sạch khi caption hai hình
+    <b>nằm sát nhau, không có prose ở giữa</b> — khi đó "khoảng trống" trong PDF chỉ là float
+    whitespace, không phải chữ. Đúng với M1/M2/M3. Nếu giữa hai hình có prose (M4: cả một
+    subsection ~90 dòng) thì <b>không ghép được</b> mà không phá cấu trúc. Nếu có hình thứ ba
+    chen giữa (M5: Fig 4.18) thì ghép cả cụm theo đúng thứ tự đọc, không nhảy cóc.
+    <br><br>
+    <b>Lưu ý về bản preview:</b> bản "mới" là <i>ghép trực tiếp PDF đã duyệt</i> (xếp dọc), mỗi
+    panel còn tiêu đề riêng. Bản vector cuối (khi port Overleaf) sẽ gọn hơn: <b>một tiêu đề
+    chung</b>, chung trục x, nhãn (a)/(b)/(c) — tiết kiệm dọc nhiều hơn preview.
+  </div>
+
+  <!-- DUP -->
+  <div class="card">
+    <h2>DUP1 — Bỏ figure trùng <span class="tag drop">cách 1: xoá throughput_vs_n</span></h2>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="col new">
+        <h3>Bằng chứng: hai hình giống hệt (chỉ khác tiêu đề)</h3>
+        <img src="merged/DUP_goodput_sidebyside.png" alt="goodput dup side by side">
+        <p class="note"><b>Trái</b> = <code>goodput_ci_vs_n.pdf</code> (Fig 4.1, §4.2.1).
+          <b>Phải</b> = <code>throughput_vs_n.pdf</code> (Fig 4.4, §4.2.3). Cùng metric "goodput",
+          cùng số liệu (PBFT/Snowman ≈95, Casper FFG ≈80), cùng CI 95%. Ở code
+          (<code>plots.py</code>) cả hai vẽ từ đúng một metric <code>goodput</code>.
+          <br><b>Đề xuất:</b> giữ Fig 4.1, xoá Fig 4.4, ở §4.2.3 trỏ ngược về Fig 4.1.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DUP2 -->
+  <div class="card">
+    <h2>DUP2 — Overhead: Fig 4.5 là tập con của Fig 4.6 <span class="tag drop">bỏ msgs_vs_n</span></h2>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="col new">
+        <h3>Cùng điểm đo y hệt — 4.6 chỉ thêm đường lý thuyết nét đứt</h3>
+        <img src="merged/DUP_overhead_sidebyside.png" alt="overhead side by side">
+        <p class="note"><b>Trái</b> = <code>msgs_vs_n</code> (Fig 4.5): điểm đo nối đường liền.
+          <b>Phải</b> = <code>theory_vs_measured</code> (Fig 4.6): <b>cùng các điểm đo đó</b> +
+          đường nét đứt dự đoán (PBFT 2n, Casper 1.2n, Snowman 2·K·β). Đường liền ở 4.5 chỉ là
+          nối điểm, không phải đại lượng riêng → 4.5 không thêm thông tin gì so với 4.6.
+          <br><b>Đề xuất:</b> bỏ Fig 4.5, giữ Fig 4.6 (vừa cho thấy tách order-of-magnitude cho
+          RQ3, vừa validate lý thuyết). Repoint câu trỏ Fig 4.5 sang 4.6.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- M2 -->
+  <div class="card">
+    <h2>M2 — Loss resilience (delay sweep) <span class="tag">2 → 1</span></h2>
+    <div class="body">
+      <div class="col old">
+        <h3>Cũ — 2 hình rời</h3>
+        <img src="old_png/finalization_degradation.png" alt="finalization">
+        <img src="old_png/resilience_ranking.png" alt="ranking">
+      </div>
+      <div class="col new">
+        <h3>Mới — 1 panel: đường suy giảm + xếp hạng AURC</h3>
+        <img src="merged/M2_loss_resilience.png" alt="M2 merged">
+        <p class="note">Cùng subsection "Packet loss and the resilience ranking".</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- M3 -->
+  <div class="card">
+    <h2>M3 — Cơ chế suy giảm (delay sweep) <span class="tag">2 → 1</span></h2>
+    <div class="body">
+      <div class="col old">
+        <h3>Cũ — 2 hình rời</h3>
+        <img src="old_png/latency_cliff.png" alt="latency cliff">
+        <img src="old_png/cost_of_survival.png" alt="cost of survival">
+      </div>
+      <div class="col new">
+        <h3>Mới — 1 panel: latency cliff + chi phí survival</h3>
+        <img src="merged/M3_degradation_mech.png" alt="M3 merged">
+        <p class="note">Đúng nghĩa "hai cơ chế" của subsection Mechanisms of degradation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- M4 dropped -->
+  <div class="card">
+    <h2>M4 — Liveness offline + equivocation <span class="tag drop">KHÔNG GHÉP ĐƯỢC</span></h2>
+    <div class="body">
+      <div class="col old">
+        <h3>Hai hình bị tách bởi một subsection prose</h3>
+        <img src="old_png/liveness_vs_phi_offline.png" alt="liveness offline">
+        <img src="old_png/liveness_vs_phi_equivocate.png" alt="liveness equiv">
+      </div>
+      <div class="col new">
+        <h3 style="color:#991b1b">Vì sao bỏ</h3>
+        <p class="note">Fig 4.15 (offline) thuộc <b>§4.4.2</b>, Fig 4.16 (equivocation) thuộc
+          <b>§4.4.3</b>. Giữa chúng là <b>~90 dòng prose + ranh giới subsection</b>. Ghép lại
+          sẽ buộc một hình trôi xa khỏi đoạn bàn về nó, hoặc nhồi nguyên subsection vào giữa
+          float — phá cấu trúc đọc. Đây đúng là ca "có chú thích/đoạn văn ở giữa" mà bạn hỏi:
+          <b>không ghép.</b> Hai hình liveness giữ nguyên ở subsection của chúng.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- M5 revised: 3-panel -->
+  <div class="card">
+    <h2>M5 — Equivocation: cơ chế per-protocol <span class="tag">3 → 1</span></h2>
+    <div class="body">
+      <div class="col old">
+        <h3>Cũ — 3 hình rời (4.17 → 4.18 → 4.19)</h3>
+        <img src="old_png/pbft_viewchange_count_vs_phi.png" alt="pbft vc">
+        <img src="old_png/safety_cliff_vs_phi.png" alt="safety cliff">
+        <img src="old_png/ffg_slashable_vs_phi.png" alt="ffg slashable">
+      </div>
+      <div class="col new">
+        <h3>Mới — 1 hình 3-panel, đúng thứ tự đọc</h3>
+        <img src="merged/M5_equiv_3panel.png" alt="M5 merged">
+        <p class="note">Fig 4.18 (safety-cliff) <b>nằm giữa</b> 4.17 và 4.19 trong cả prose lẫn
+          thứ tự caption — nên ghép cả ba, không nhảy cóc. Cả ba đều là "chuyện gì xảy ra trên
+          ngưỡng φ": (a) PBFT view-change, (b) fork safety cross-protocol, (c) FFG slashable.
+          <br><b>Phương án thay thế:</b> nếu muốn giữ Fig 4.18 nổi bật riêng → bỏ luôn M5
+          (4.17 và 4.19 không liền nhau nên không ghép cặp được).</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
