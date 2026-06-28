@@ -361,6 +361,18 @@ writes the prose stays clean and the answer stays sharp.
   PBFT view-change-count figures dropped to one prose sentence each. Leftover
   `mitthesis.cls` Appendix B (heat-conduction example) deleted from the LaTeX
   back matter. No RQ answer, number, or caveat changed.)*
+  *(Page-cut Wave 2, 2026-06-29 — redundancy removal, no argument/number/source-cite
+  lost: no-dominance verdict kept canonical in §5.4 (restatements trimmed in §4.4.4,
+  §5.1, §5.5, §6.1, §6.4); per-protocol findings canonical in §5.3 (§4.4.4 ¶1 and
+  §6.1 prose reduced to pointers); standing caveats defined once in Ch3 (ε §3.5,
+  latency-only §3.6, ε-bound derivation §3.3.3) and cited as bare `(§x)` elsewhere;
+  §1.2 incident callback kept in §5.5 (canonical), §4.3.4, §5.3.2, and §6.4 (Ch6
+  instance retained with [21]), removed from §6.1; §3.6 compressed to a bullet list,
+  §6.2 keeps the full reflective limitations. **Ch2 was renumbered** — old §2.1+§2.2
+  merged into §2.1, so the families/Table-2.1 section is now §2.2 (Ch3's three "§2.3"
+  cross-refs repointed to §2.2; the gap is now §2.4). Ch2's three per-family weakness
+  paragraphs (§2.3.x) cut, their headlines carried by Table 2.1; the Amores-Sesar [10]
+  Snowman-stall sentence preserved.)*
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
   dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar

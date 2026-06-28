@@ -23,7 +23,7 @@ uniformly across them.
 The three consensus families decide in genuinely different ways, and that
 diversity is the comparison problem this chapter must solve. They are not one
 protocol run with different constants. They differ in leadership, in what one
-decision commits, and in layering (established in §2.3, catalogued per protocol
+decision commits, and in layering (established in §2.2, catalogued per protocol
 in §3.3, Table 3.2). The three do not even produce the same *kind* of decision,
 so a fair comparison cannot be read off raw numbers. It needs two things: a
 single fixed engine that runs all three identically, and a downstream step that
@@ -108,7 +108,7 @@ names the three exercised by the RQ4 sweep.
 
 ## 3.3 Algorithms
 
-Each family surveyed in Chapter 2 (§2.3) is represented in the simulator by a
+Each family surveyed in Chapter 2 (§2.2) is represented in the simulator by a
 single protocol [[wiki/algorithms/pbft]], [[wiki/algorithms/pos]],
 [[wiki/algorithms/avalanche]]; Table 3.1 fixes that correspondence, and its
 rightmost column states why each protocol is a faithful representative of its
@@ -123,7 +123,7 @@ from here onward.
 | PoS-finality | Casper FFG | The finality gadget Ethereum deploys; it carries the family's defining stake-weighted, two-checkpoint justification rule. |
 | Avalanche-style | Snowman | The production linear-chain form of the Avalanche family; it exercises the family's defining repeated random-subsample voting. |
 
-Chapter 2 (§2.3, Table 2.1) establishes the *mechanism* of each protocol
+Chapter 2 (§2.2, Table 2.1) establishes the *mechanism* of each protocol
 family; this section does not revisit it. It audits where the simulator's
 implementation *departs* from the textbook family, and why each departure
 leaves the comparative results valid. Table 3.2 summarizes the three protocols
@@ -597,71 +597,42 @@ discussed above. The finalized CSV layout is fixed in
 ## 3.6 Summary and threats to validity
 
 The system model (§3.2) and metric schema (§3.5) absorb the three families'
-structural asymmetries upstream of any experiment — through the ACU denominator,
-the per-protocol message accounting, and the per-protocol finality semantics — so
-no experiment sees them.
-
-Three deliberate exclusions in the model bound the claims the chapter can
-support, and are stated here rather than left implicit.
+structural asymmetries upstream of any experiment, so no experiment sees them.
+Four deliberate exclusions bound the claims this chapter can support; Chapter 6
+takes up the full reflective limitations.
 
 - **No compute or bandwidth cost.** The latency-only network (§3.2) charges no
-  per-byte, processing, or signature-verification cost
-  [[wiki/concepts/experiment-matrix]]. This favors the protocols whose
-  dominant real-world cost is precisely what the model omits: PBFT's `O(n²)`
-  signature verification is charged for the messages and bytes it emits, which
-  the simulator counts directly, but not for the computation those messages
-  imply. The bias is therefore confined to the latency and per-validator-cost
-  verdicts. The message-count and byte-count comparisons are unaffected
-  [[wiki/concepts/evaluation-metrics]].
-- **Synthetic open-loop workload.** The workload is Poisson arrivals of
-  fixed-size transactions at a conflict rate of zero (§3.4.2), which isolates
-  protocol behavior from workload-induced contention at the cost of not modeling
-  real-traffic burstiness or double-spends, so conflict-driven reorganization
-  lies outside the measured range [[wiki/concepts/experiment-matrix]].
-- **Sub-production scale.** The validator-set sweep `n ∈ {4, …, 25}` sits well
-  below the production scale of the deployed protocols, Snowman's in particular,
-  so the RQ3 scaling verdicts are stated within this range and their
-  extrapolation to production `n` rests on the sensitivity sweeps of §3.3.2 and
-  §3.3.3 rather than on the sweep itself; the Snowman `n = 4` point, where the
-  rescaling rule degenerates to unanimity, is excluded outright
-  [[wiki/concepts/output-format]].
+  per-byte, processing, or signature-verification cost, which flatters the
+  protocols whose dominant real-world cost is precisely what the model omits —
+  PBFT's and Casper FFG's `O(n²)` signature verification is charged for the
+  messages and bytes it emits but not for the computation they imply. The bias is
+  confined to the latency and per-validator-cost verdicts; the message-count and
+  byte-count comparisons are unaffected [[wiki/concepts/evaluation-metrics]].
+- **Synthetic open-loop workload.** Poisson arrivals of fixed-size transactions
+  at a zero conflict rate (§3.4.2), so real-traffic burstiness and
+  conflict-driven reorganization lie outside the measured range.
+- **Sub-production scale.** The sweep `n ∈ {4, …, 25}` sits well below the
+  deployed scale, Snowman's in particular, so the RQ3 verdicts hold within this
+  range and extrapolate only through the sensitivity sweeps of §3.3.2 and §3.3.3;
+  the degenerate Snowman `n = 4` point is excluded (§3.3.3).
+- **Leader-disruption surface uncovered.** The adversary grid exercises the three
+  generic capabilities across the protocols — twelve of the eighteen
+  (capability, protocol) pairs the catalogue defines — leaving six unexercised,
+  among them the entire leader-disruption surface, the documented pressure point
+  of the leader-driven families where a faulty primary or proposer forces leader
+  rotation [[wiki/concepts/experiment-matrix-runs#uncovered-catalog-surfaces]].
 
-The methodology carries two further properties that are sources of caveat
-rather than exclusion:
+Two further properties are sources of caveat rather than exclusion:
 
-- **Commensurability by convention.** The cross-protocol comparison is
-  commensurable by convention, not by identity of the measured event (§3.5), so
-  every comparative verdict is qualified by the conventions it rests on and is
-  reported as robust only when it survives the governing sensitivity sweep
+- **Commensurability by convention.** The comparison is commensurable by
+  convention, not by identity of the measured event (§3.5), so every comparative
+  verdict is qualified by the conventions it rests on and is reported as robust
+  only when it survives the governing sensitivity sweep
   [[wiki/concepts/metric-reconciliation]].
 - **Regime-coherence rules, not frozen knobs.** The protocols are held in their
-  own regimes on the shared axes by two coherence rules — the Casper FFG
-  slot-duration-to-delay pairing the runner enforces (§3.4.3) and the Snowman
-  parameter rescaling that keeps one protocol across the sweep (§3.3.3) — rather
-  than by freezing knobs that would place a protocol outside its design point.
-
-The coverage of the comparison is itself bounded in three ways, each a consequence
-of what the chapter implements rather than of the model.
-
-- **RQ4 fault survey scoped to three families.** The adversarial survey
-  exercises only the three implemented families, so the RQ4 verdicts are scoped
-  to those three.
-- **Adversary grid covers twelve of eighteen catalogued pairs.** The sweep
-  exercises the three generic capabilities — `delay-emission`,
-  `withhold-participation`, and `equivocate-vote` — across the protocols, which is
-  twelve of the eighteen valid (capability, protocol) pairs the catalogue defines
-  [[wiki/concepts/adversary-model]]. The remaining six are catalogued design space
-  left unexercised, among them the entire leader-disruption surface — the
-  documented pressure point of the leader-driven families, where a faulty primary
-  or proposer forces leader rotation — so that surface is not measured here
-  [[wiki/concepts/experiment-matrix-runs#uncovered-catalog-surfaces]].
-- **RQ5 synthesis traced over three families.** The cross-family Pareto synthesis
-  of Chapter 5 is traced over the three families evaluated.
-
-A `deadline` stop, finally, is scored as a liveness failure only against the
-in-window commit condition of §3.4.1, not by the clock alone. The model's
-absence of a capacity ceiling (§3.4.2) and the threats named here are revisited
-in Chapter 6.
+  own regimes by two coherence rules — the Casper FFG slot-duration-to-delay
+  pairing (§3.4.3) and the Snowman parameter rescaling (§3.3.3) — rather than by
+  freezing knobs that would place a protocol outside its design point.
 
 Chapter 4 reports the baseline, delay, and adversarial sweeps the matrix
 prescribes and answers RQ1–RQ4 against the schema fixed here.

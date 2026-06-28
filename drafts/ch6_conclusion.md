@@ -22,38 +22,21 @@ protocols evaluated.** Source: [[wiki/concepts/research-questions]],
 | RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; the mechanism map | each structural defense is also an exposure |
 | RQ5 | consistent Pareto frontier; any dominance | a frontier exists; no family dominates | each family non-dominated on ≥ 1 axis |
 
-Commit latency is flat in the validator set but carried very differently under
-delay: PBFT stays under a second, Casper FFG shows a slot-clock-dominated
-increase, and Snowman alone pays an order of magnitude and alone is sensitive to
-the shape of the delay distribution. Sustained throughput degrades as the
-Byzantine fraction rises in three modes set by quorum structure rather than the
-fault fraction alone: PBFT is undegraded until a hard cliff, Casper FFG degrades
-in proportion to participating stake at approximately `1 − φ`, and Snowman starves
-earliest. Per-unit communication overhead grows linearly for PBFT and Casper FFG,
-but costs Snowman's subsampled polling an order of magnitude more, roughly
-fourteenfold at `n = 16` [[wiki/concepts/key-findings]]. No
-protocol is robust to every adversary, because the structural choice that defends
-a family against one strategy is the same that exposes it to another. PBFT is
-immune to the liveness adversaries exercised here, those that spare the view-0
-primary, yet is the source of the only unaccountable fork. Snowman leads on
-equivocation safety, on an analytical bound reported rather than empirically
-witnessed, yet is the most delay- and silence-exposed of the three. Casper FFG is
-never first against any single adversary, but holds the only accountable failure.
-From that mechanism map follows the RQ5 verdict. A consistent frontier exists
-across the three families and no family dominates: each is the strict best on at
-least one axis, the frontier admits no configuration at once cheap, fast, and
-resilient, and the verdict survives setting aside the one axis only a
-slashing-based protocol can hold [[wiki/concepts/key-findings]]
+Table 6.1 carries the detail; the through-line is that each answer is set by a
+structural choice rather than by the fault fraction alone. Latency is flat in `n`
+but carried differently under delay, Snowman alone paying an order of magnitude
+(RQ1); throughput degrades in three quorum-set modes, with Casper FFG tracking
+`1 − φ` and Snowman starving earliest (RQ2); and per-unit overhead is linear for
+PBFT and Casper FFG but roughly fourteenfold heavier for Snowman's subsampled
+polling at `n = 16` (RQ3) [[wiki/concepts/key-findings]]. No protocol is robust to
+every adversary, because each structural defense is also an exposure: PBFT is
+immune to the liveness adversaries exercised here yet is the only unaccountable
+fork, Snowman leads on equivocation safety yet is the most delay- and
+silence-exposed, and Casper FFG is never first yet holds the only accountable
+failure (RQ4). From that mechanism map follows the RQ5 verdict: a consistent
+frontier exists and no family dominates, the verdict surviving even when the one
+axis only a slashing-based protocol can hold is set aside
 [[wiki/concepts/research-questions]].
-
-Returning to the incidents that motivated the study (§1.2), the measured failure
-modes are the controlled analogues of the deployment ones. An attestation quorum
-lost to a lossy network reproduces the class of finality stall observed on
-Ethereum in May 2023 [21], and a leader-based protocol's view-change behavior under
-stress reproduces the class of liveness halt observed when block production stalls
-[[wiki/concepts/key-findings]]. The synthesis is that these are not symptoms of
-one immature technology but the consequences of distinct structural
-commitments, which is why no single protocol resolves all of them.
 
 ## 6.2 Limitations
 
@@ -79,8 +62,8 @@ frontier is likewise traced only over the regimes measured, and a high-throughpu
 regime outside that span is not represented. The absence of a configuration
 that is at once cheap, fast, and resilient is therefore a statement about the measured plane
 rather than the whole design space. Snowman's safety is reported through its
-analytical bound `ε ≤ (1 − α_c/K)^β` rather than a fork count, and an empirical
-zero is a non-witness of that bound, not a confirmation of it
+analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate, so its
+safety standing is the weakest-witnessed of the three (§3.5)
 [[wiki/concepts/adversarial-degradation-metrics]]. Several rankings also rest on
 narrow support: the loss-resilience comparison of the two most resilient families
 at `n = 25` is a statistical tie, their confidence intervals overlapping on a
@@ -160,16 +143,13 @@ the simplifying assumptions that made the controlled comparison possible
 
 The contribution of this thesis is a single harness in which representative
 Layer-1 consensus protocols could be subjected to the same delay and adversarial
-conditions and measured against one schema. Across the three protocols evaluated,
-the comparative reading that harness made possible has a single headline: not a
-winner, but a map. No family dominates. The result is an account of which
-structural commitment places each family where on the performance–security
-frontier.
-
-The same structural choice that places a family on one corner is what exposes it
-on another, so the result is a map of mechanisms rather than an artifact of the
-comparison set. The deployment failures that opened the study motivated the
-questions the harness answers. Liveness halts and finality stalls are not
-interchangeable faults to be engineered away by a single better protocol. They are
-the separable consequences of the choices a protocol makes, consequences that an
-evaluation on matched assumptions can name.
+conditions and measured against one schema. The comparative reading it made
+possible has a single headline: not a winner, but a map of which structural
+commitment places each family where on the performance–security frontier. Because
+the same structural choice that places a family on one corner is what exposes it
+on another, this is a map of mechanisms rather than an artifact of the comparison
+set. The incidents that opened this study (§1.2) — Ethereum's May 2023 finality
+stall [21] and the Solana and Cosmos liveness halts — are read here not as
+interchangeable faults to be engineered away by one better protocol, but as the
+separable consequences of the choices a protocol makes, consequences an evaluation
+on matched assumptions can name.

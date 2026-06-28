@@ -2,54 +2,27 @@
 
 ## 5.1 Chapter roadmap
 
-Chapter 4 closed on a question it had assembled but deliberately did not answer.
-Each of its three movements isolated one stress axis and reported how the
-protocols behaved under it: validator-set size in the baseline, network delay in
-the second sweep, and adversarial behavior in the third. Read separately, each
-sweep produced a clear per-axis verdict. Read together, they raise the question
-this chapter takes up: whether any one family occupies a dominant position once
-the baseline, delay, and adversarial regimes are considered jointly. This is the
-Pareto-frontier synthesis of RQ5 [[wiki/concepts/research-questions]].
-
-RQ5 asks whether a consistent Pareto frontier of the performance–security
-tradeoff exists across the families and whether any family dominates the others
-across all operating regimes [[wiki/concepts/research-questions]]. The frontier
-reported here is traced over the three protocols evaluated throughout this study:
-PBFT, Casper FFG, and Snowman. This chapter introduces no new measurements; it
-collates the per-axis results of Chapter 4 into a single comparison and reads the
+Chapter 4 isolated one stress axis at a time — validator-set size, network delay,
+and adversarial behavior — each yielding a clear per-axis verdict but no joint
+reading. This chapter takes up RQ5: whether a consistent Pareto frontier of the
+performance–security tradeoff exists across the families and whether any one
+dominates the others across all regimes [[wiki/concepts/research-questions]]. It
+introduces no new measurements; it collates the per-axis results of Chapter 4,
+over the three protocols evaluated (PBFT, Casper FFG, and Snowman), and reads the
 shape of the tradeoff off them.
-
-The answer is that no family dominates. Each of the three protocols is the strict
-best on at least one axis that no other matches, so each is a non-dominated point
-on the frontier. The frontier itself also has a definite shape: no configuration
-is at once cheap, fast, and resilient. The contribution of the
-synthesis is therefore not the bare no-dominance verdict, which a reader of the
-design space might anticipate, but the map of which structural choice places each
-family where on the frontier, and the inversions that map reveals.
 
 ## 5.2 The comparison and its axes
 
-A synthesis over heterogeneous sweeps requires a common frame. The frame used
-here is the performance–security plane: each protocol is characterized by its
-position on a set of axes drawn from the three sweeps, and one family is said to
-dominate another when it is no worse on every axis and strictly better on at
-least one. A family that no other dominates lies on the Pareto frontier. The
-axes are the quantities Chapter 4 already reports: baseline commit latency and
-communication overhead from the scaling sweep, time-to-finality under network
-delay and finalization under packet loss from the delay sweep, and liveness and
-safety under each adversarial strategy from the adversarial sweep. The synthesis
-adds a reading, not a measurement. These axes are the primary metrics of the four
-data-generating research questions rather than a set chosen to make the families
-differ, so a family that dominated would do so on the very quantities the
-evaluation was designed to measure.
-
-The reading rests on the measurement conventions fixed in Chapter 3 and carried
-through Chapter 4 (§3.5–§3.6): cross-protocol latency from `commit_latency_ms`,
-the canonical time-to-finality column; throughput from `goodput` rather than the
-protocol-granularity decision-event rate; and the latency-only model, which
-charges no compute cost. That last convention flatters PBFT and Casper FFG on cost
-and per-validator comparisons, while leaving the message-count, liveness, and
-safety verdicts unaffected [[wiki/concepts/output-format]].
+The synthesis reads the families on the performance–security plane, applying the
+Pareto-dominance definition and the measurement conventions fixed in Chapter 3
+(§3.5–§3.6). The axes are the quantities Chapter 4 already reports: baseline
+commit latency and communication overhead from the scaling sweep,
+time-to-finality under delay and finalization under packet loss from the delay
+sweep, and liveness and safety under each adversarial strategy. These are the
+primary metrics of the four data-generating research questions rather than a set
+chosen to make the families differ, so a family that dominated would do so on the
+very quantities the evaluation was designed to measure. The synthesis adds a
+reading, not a measurement [[wiki/concepts/output-format]].
 
 ## 5.3 Where each family sits on the frontier
 
@@ -70,11 +43,9 @@ the finalization-rate curve [[wiki/experiments/2026-06-13_delay-comparison]].
 Against the two liveness adversaries it is the strongest of the three. It is
 immune to delayed voting, undegraded under silent non-participation through
 `φ = 0.33`, and collapses only at `φ = 0.40`, the first sampled fraction past its
-`2f+1` quorum bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These liveness
-verdicts hold against adversaries that leave the view-0 primary honest; the
-leader-disruption surface, plausibly the sharpest attack on a leader-based
-protocol, is catalogued but not measured, so PBFT's liveness standing is bounded
-to non-leader-targeting strategies [[wiki/concepts/adversary-model]].
+`2f+1` quorum bound [[wiki/experiments/2026-06-19_adversary-comparison]]. These
+liveness verdicts hold only against adversaries that leave the view-0 primary
+honest (§6.2) [[wiki/concepts/adversary-model]].
 
 The mechanism that buys this liveness is the one that disqualifies PBFT on the
 axis it loses. Its leader-based, exact-quorum commit rule recovers from a stalled
@@ -109,13 +80,10 @@ into accountable evidence: at `φ = 0.40` the protocol holds with no in-model fo
 while exposing a slashable stake fraction at or above one-third
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. No other family in the
 study offers an accountable safety failure. Casper FFG occupies that corner of the
-frontier alone [7] [[wiki/algorithms/pos]]. The cost it pays is
-concentrated on liveness under loss, and that cost is the measured analogue of
-the failure that motivated this study. An epoch whose attestations fail to reach
-a quorum leaves finality stalled. The quorum is missed by a lossy network here,
-and by delay under attestation-processing pressure in Ethereum's multi-epoch
-finality stall of May 2023 [21] there. The simulated failure is the same class
-observed in that deployment [[wiki/algorithms/pos]].
+frontier alone [7] [[wiki/algorithms/pos]]. The cost it pays is concentrated on
+liveness under loss: an epoch whose attestations fail to reach a quorum leaves
+finality stalled, the same class as Ethereum's multi-epoch finality stall of May
+2023 [21] [[wiki/algorithms/pos]].
 
 ### 5.3.3 Snowman: safest under equivocation, costliest under delay
 
@@ -123,11 +91,9 @@ Snowman occupies a corner defined by a single mechanism pulling in opposite
 directions on different axes. Its `K`-peer subsampling gives it the strongest
 safety posture against equivocation of the three: it presents no fork surface,
 and its probabilistic safety bound is vanishing, with an analytical `ε` near
-`5 × 10⁻¹⁵` at `n = 10`
-[[wiki/experiments/2026-06-19_adversarial-degradation]]. That bound is reported
-rather than empirically witnessed; an empirical fork count of zero at the
-baseline confidence depth is a non-witness of the bound, not a confirmation of it
-[[wiki/concepts/output-format]]. On the light-loss plateau at `n = 25` it retains
+`5 × 10⁻¹⁵` at `n = 10`, reported rather than empirically witnessed (§3.5)
+[[wiki/experiments/2026-06-19_adversarial-degradation]]. On the light-loss plateau
+at `n = 25` it retains
 the highest finalization rate of the three — 0.904 at five-percent loss against
 PBFT's 0.533 — the redundancy of its polling scaling with the committee
 [[wiki/experiments/2026-06-13_delay-comparison]].
@@ -175,7 +141,7 @@ the Chapter 4 sweeps; the final column names the family or families that are
 strict best on that axis. No family wins every row, and each of the three wins at
 least one row no other does, so each is non-dominated. Two rows are not symmetric
 contests: the equivocation-safety row ranks Snowman first on its analytical bound
-`ε`, reported rather than empirically witnessed (§5.3.3), and the
+`ε` (reported, not witnessed; §3.5), and the
 accountable-safety row names a capability only a slashing-based protocol can
 offer, so Casper FFG holds it uncontested by construction rather than by winning a
 comparison. The loss-resilience row reports the `n = 10` ranking, where PBFT leads
