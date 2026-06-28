@@ -97,6 +97,33 @@ def _liveness_axis(ax, rows, family, n):
 # Fig 4.14 — delayed voting: liveness held vs latency paid
 # --------------------------------------------------------------------------- #
 
+def _draw_delay_latency(ax, rows, n):
+    """Per-axis: delayed-voting time-to-finality ratio vs phi (log y) with the
+    Snowman ×peak annotation. Extracted from
+    :func:`fig_delay_liveness_and_latency` for reuse by ``output.panels``."""
+    for i, proto in enumerate(PROTO_ORDER):
+        curve = aa.delay_finality_ratio_by_phi(rows, proto, n)
+        grid = sorted(curve)
+        if not grid:
+            continue
+        xs = [p + (i - 1) * DODGE for p in grid]  # dodge PBFT/FFG apart at 1.0x
+        ax.plot(xs, [curve[p] for p in grid], linewidth=1.6,
+                markersize=6, **STYLE[proto])
+    sm = aa.delay_finality_ratio_by_phi(rows, "snowman", n)
+    if sm:
+        pk_phi = max(sm, key=sm.get)
+        pk = sm[pk_phi]
+        ax.annotate(f"$\\times{pk:.0f}$", (pk_phi, pk),
+                    textcoords="offset points", xytext=(-6, -2),
+                    ha="right", va="top", fontsize=11,
+                    color=STYLE["snowman"]["color"])
+    ax.axhline(1.0, color="grey", linewidth=0.8, linestyle="--", zorder=1)
+    ax.set_yscale("log")
+    ax.set_xlim(*XLIM)
+    ax.set_xlabel("adversarial fraction $\\varphi$")
+    _grid(ax)
+
+
 def fig_delay_liveness_and_latency(rows, plot_dir):
     """Delay family, faceted by n: success rate (top) and the finality blow-up
     (bottom, log scale). The two protocols that hold success at 1.0 in the top
@@ -107,29 +134,7 @@ def fig_delay_liveness_and_latency(rows, plot_dir):
         ax_live = axes[0][col]
         _liveness_axis(ax_live, rows, "delay", n)
         ax_live.set_title(f"$n = {n}$")
-
-        ax_lat = axes[1][col]
-        for i, proto in enumerate(PROTO_ORDER):
-            curve = aa.delay_finality_ratio_by_phi(rows, proto, n)
-            grid = sorted(curve)
-            if not grid:
-                continue
-            xs = [p + (i - 1) * DODGE for p in grid]  # dodge PBFT/FFG apart at 1.0x
-            ax_lat.plot(xs, [curve[p] for p in grid], linewidth=1.6,
-                        markersize=6, **STYLE[proto])
-        sm = aa.delay_finality_ratio_by_phi(rows, "snowman", n)
-        if sm:
-            pk_phi = max(sm, key=sm.get)
-            pk = sm[pk_phi]
-            ax_lat.annotate(f"$\\times{pk:.0f}$", (pk_phi, pk),
-                            textcoords="offset points", xytext=(-6, -2),
-                            ha="right", va="top", fontsize=11,
-                            color=STYLE["snowman"]["color"])
-        ax_lat.axhline(1.0, color="grey", linewidth=0.8, linestyle="--", zorder=1)
-        ax_lat.set_yscale("log")
-        ax_lat.set_xlim(*XLIM)
-        ax_lat.set_xlabel("adversarial fraction $\\varphi$")
-        _grid(ax_lat)
+        _draw_delay_latency(axes[1][col], rows, n)
     axes[0][0].set_ylabel("finalization success rate")
     axes[1][0].set_ylabel("time-to-finality ratio (vs $\\varphi = 0$)")
     axes[0][1].legend(frameon=False)
@@ -142,6 +147,34 @@ def fig_delay_liveness_and_latency(rows, plot_dir):
 # Fig 4.15 — silent non-participation: liveness cliffs as steps, with phi*
 # --------------------------------------------------------------------------- #
 
+def _draw_offline_survival_box(ax, rows, survival, n):
+    """Per-axis decoration for the offline liveness cliffs: the phi* survival-
+    depth box and the Snowman 'alive but starved' annotation. ``survival`` is
+    the ``{protocol: phi*}`` dict returned by :func:`_liveness_axis`. Extracted
+    from :func:`fig_offline_liveness` for reuse by ``output.panels``."""
+    parts = [f"{STYLE[p]['label']} {survival[p]:.2f}"
+             for p in PROTO_ORDER if p in survival]
+    ax.text(0.03, 0.30, "$\\varphi^*$ survival depth\n" + "\n".join(parts),
+            transform=ax.transAxes, fontsize=8, va="top",
+            bbox=dict(boxstyle="round", fc="white", ec="grey", alpha=0.9))
+    # 'alive but starved': annotate a surviving Snowman cell whose throughput
+    # has collapsed (success > 0 but the committed-unit rate is a few %).
+    tr = aa.offline_throughput_ratio(rows, "snowman", n)
+    live = aa.liveness_rate(rows, "offline", "snowman", n)
+    starved = [p for p in sorted(tr)
+               if 0 < tr[p].mean < 0.10 and live.get(p) and live[p].mean > 0]
+    if starved:
+        p0 = starved[-1]
+        # anchor at the plateau: success holds at 1.0 while throughput has
+        # collapsed — that gap is the point of the label.
+        ax.annotate(f"alive but starved\n($\\approx{tr[p0].mean*100:.1f}$% throughput)",
+                    (p0, live[p0].mean), textcoords="offset points",
+                    xytext=(8, -46), ha="left", va="top", fontsize=8,
+                    color=STYLE["snowman"]["color"],
+                    arrowprops=dict(arrowstyle="->", lw=0.8,
+                                    color=STYLE["snowman"]["color"]))
+
+
 def fig_offline_liveness(rows, plot_dir):
     """Offline family, faceted by n: success rate as liveness cliffs, with each
     protocol's survival depth phi* boxed and the 'alive but starved' Snowman
@@ -151,27 +184,7 @@ def fig_offline_liveness(rows, plot_dir):
         survival = _liveness_axis(ax, rows, "offline", n)
         ax.set_title(f"$n = {n}$")
         ax.set_xlabel("silent fraction $\\varphi$")
-        parts = [f"{STYLE[p]['label']} {survival[p]:.2f}"
-                 for p in PROTO_ORDER if p in survival]
-        ax.text(0.03, 0.30, "$\\varphi^*$ survival depth\n" + "\n".join(parts),
-                transform=ax.transAxes, fontsize=8, va="top",
-                bbox=dict(boxstyle="round", fc="white", ec="grey", alpha=0.9))
-        # 'alive but starved': annotate a surviving Snowman cell whose throughput
-        # has collapsed (success > 0 but the committed-unit rate is a few %).
-        tr = aa.offline_throughput_ratio(rows, "snowman", n)
-        live = aa.liveness_rate(rows, "offline", "snowman", n)
-        starved = [p for p in sorted(tr)
-                   if 0 < tr[p].mean < 0.10 and live.get(p) and live[p].mean > 0]
-        if starved:
-            p0 = starved[-1]
-            # anchor at the plateau: success holds at 1.0 while throughput has
-            # collapsed — that gap is the point of the label.
-            ax.annotate(f"alive but starved\n($\\approx{tr[p0].mean*100:.1f}$% throughput)",
-                        (p0, live[p0].mean), textcoords="offset points",
-                        xytext=(8, -46), ha="left", va="top", fontsize=8,
-                        color=STYLE["snowman"]["color"],
-                        arrowprops=dict(arrowstyle="->", lw=0.8,
-                                        color=STYLE["snowman"]["color"]))
+        _draw_offline_survival_box(ax, rows, survival, n)
     axes[0].set_ylabel("finalization success rate")
     axes[1].legend(frameon=False, loc="upper right")
     fig.suptitle("Liveness under silent non-participation "
@@ -285,33 +298,40 @@ def fig_pbft_viewchange_count(rows, plot_dir):
 # Fig 4.18 — equivocation: cross-protocol safety-violation rate + 229 annotation
 # --------------------------------------------------------------------------- #
 
+def _draw_safety_cliff(ax, rows, n):
+    """Per-axis: cross-protocol safety-violation rate vs phi (steps-post) with
+    the PBFT conflicting-instances annotation. Extracted from
+    :func:`fig_safety_cliff` for reuse by ``output.panels``."""
+    for proto in PROTO_ORDER:
+        rate = aa.safety_violation_rate(rows, proto, n)
+        grid = sorted(rate)
+        if not grid:
+            continue
+        ax.plot(grid, [rate[p].mean for p in grid], linewidth=1.6,
+                markersize=6, drawstyle="steps-post", **STYLE[proto])
+    ci = aa.pbft_conflicting_instances(rows, n)
+    brk = [p for p in sorted(ci) if ci[p].mean > 0]
+    if brk:
+        p0 = brk[0]
+        ax.annotate(f"{int(round(ci[p0].mean))} conflicting\ninstances",
+                    (p0, 1.0), textcoords="offset points", xytext=(8, -4),
+                    ha="left", va="top", fontsize=9,
+                    color=STYLE["pbft"]["color"])
+    _third_line(ax)
+    ax.set_xlim(*XLIM)
+    ax.set_ylim(*YLIM)
+    ax.set_xlabel("equivocator fraction $\\varphi$")
+    _grid(ax)
+
+
 def fig_safety_cliff(rows, plot_dir):
     """Cross-protocol safety-violation rate vs phi (equivocate), faceted by n.
     Only PBFT departs from zero, stepping to a deterministic fork at phi=0.40;
     the fork's magnitude (conflicting (view,seq) instances) is annotated."""
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)
     for ax, n in zip(axes, NS):
-        for proto in PROTO_ORDER:
-            rate = aa.safety_violation_rate(rows, proto, n)
-            grid = sorted(rate)
-            if not grid:
-                continue
-            ax.plot(grid, [rate[p].mean for p in grid], linewidth=1.6,
-                    markersize=6, drawstyle="steps-post", **STYLE[proto])
-        ci = aa.pbft_conflicting_instances(rows, n)
-        brk = [p for p in sorted(ci) if ci[p].mean > 0]
-        if brk:
-            p0 = brk[0]
-            ax.annotate(f"{int(round(ci[p0].mean))} conflicting\ninstances",
-                        (p0, 1.0), textcoords="offset points", xytext=(8, -4),
-                        ha="left", va="top", fontsize=9,
-                        color=STYLE["pbft"]["color"])
-        _third_line(ax)
-        ax.set_xlim(*XLIM)
-        ax.set_ylim(*YLIM)
-        ax.set_xlabel("equivocator fraction $\\varphi$")
+        _draw_safety_cliff(ax, rows, n)
         ax.set_title(f"$n = {n}$")
-        _grid(ax)
     axes[0].set_ylabel("safety-violation rate")
     axes[1].legend(frameon=False)
     fig.suptitle("Cross-protocol safety-violation rate under equivocation")

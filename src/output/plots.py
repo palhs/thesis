@@ -51,9 +51,13 @@ def _curve(ax, aggs, show_ci):
         ax.plot(xs, ys, linewidth=1.6, markersize=6, **st)
 
 
-def _fig(idx, metric, title, ylabel, fname, show_ci, logy=False,
-         protocols=PROTO_ORDER):
-    fig, ax = plt.subplots(figsize=(6.2, 4.0))
+def _draw_metric(ax, idx, metric, title, ylabel, show_ci, logy=False,
+                 protocols=PROTO_ORDER, legend=True):
+    """Draw one metric-vs-n axis (one curve per protocol).
+
+    Extracted from :func:`_fig` so both the single-panel figure and the
+    composed Chapter-4 panel (``output.panels``) render an identical axis.
+    """
     for proto in protocols:
         if proto in idx[metric]:
             _curve(ax, idx[metric][proto], show_ci)
@@ -64,7 +68,15 @@ def _fig(idx, metric, title, ylabel, fname, show_ci, logy=False,
         ax.set_yscale("log")
     ax.set_xticks([4, 7, 10, 16, 25])
     ax.grid(True, which="both", linestyle=":", linewidth=0.6, alpha=0.7)
-    ax.legend(frameon=False)
+    if legend:
+        ax.legend(frameon=False)
+
+
+def _fig(idx, metric, title, ylabel, fname, show_ci, logy=False,
+         protocols=PROTO_ORDER):
+    fig, ax = plt.subplots(figsize=(6.2, 4.0))
+    _draw_metric(ax, idx, metric, title, ylabel, show_ci, logy=logy,
+                 protocols=protocols)
     fig.tight_layout()
     os.makedirs(PLOT_DIR, exist_ok=True)
     for ext in ("png", "pdf"):
