@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 80 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 91 · In Review: 1 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 91 · In Review: 1 · In Progress: 1 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -104,6 +104,24 @@ specs); the `\include{biography}` line has been removed from the template.
   Ch5 §5.2/§5.3, Ch6 §6.1/§6.3.1, Ch2 variant trim); draft-narrative ledgers reconciled; figures
   deferred. · _Artifact:_ `drafts/ch{1,2,3,4,5,6}.md`, `docs/draft-narrative.md`, port-checklist ·
   _Verify:_ see plan §5; zero residual Narwhal/four-family except the one Ch6 further-work line
+- `[~]` **T74** `H` Writer — Page-cut Wave 1 (zero content lost): Appendix B + Ch4 figures + table merges
+  _Outcome:_ Execute Wave 1 of `PAGE_CUT_PLAN.md` (80pp → ~41pp; this wave ~18pp, no
+  argument/number lost). Three parts. **1A** delete leftover Appendix B (heat-conduction
+  `mitthesis.cls` example) from the LaTeX + ToC (tex-side only). **1B** Ch4 in-body figures
+  21 → 8 multi-panel merges per the plan table (drop 4.5/4.7/4.17; 4.19/4.20 → appendix;
+  re-letter sequentially); rewrite captions + figure callouts in `drafts/ch4_results.md`,
+  regenerate the merged plot PDFs via `src/output/*.py`, port to `chapter4.tex`. **1C** table
+  merges (10 → ~7): fold Ch3 Table 3.3+3.4 schema into one wide table; fold Ch4 Table 4.1
+  baseline means into §4.2.6 prose. Snapshot edited chapters to `drafts/stale/*.preW1.md`.
+  Reconcile `docs/draft-narrative.md` ledgers for the figure renumber + Appendix B removal.
+  No TeX toolchain here → build/measure handed to human. Overleaf push left to human. ·
+  _Artifact:_ `drafts/ch{3,4}_results.md`, `drafts/stale/*.preW1.md`, `src/output/*.py` +
+  regenerated `results/*/plots/*.pdf`, `../thesis-tex/MIT-thesis-template/{chapter3,chapter4}.tex`
+  + figures, deleted `appendixb.tex`, `docs/draft-narrative.md` · _Verify:_ Ch4 has 8 in-body
+  figure environments (re-lettered, captions match merged panels); no reference to dropped
+  4.5/4.7/4.17; Table 4.1 folded to prose; Ch3 schema tables merged; Appendix B gone from ToC
+  + no `\include{appendixb}`; every INVARIANT in `PAGE_CUT_PLAN.md` preserved; `/humanizer`
+  gate run on edited prose
 
 ---
 
