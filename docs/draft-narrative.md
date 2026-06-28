@@ -65,13 +65,14 @@ the independent variable named in the question.
 | RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
 | RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2.4 | **closed** — "answers RQ3" stated |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4 |
-| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.4 | **closed** (2026-06-23) — Ch5 §5.4 states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1, the native cross-family frontier radar (Fig 5.1, added in the W12 figure pass 2026-06-24), and the operator-tradeoff figure (Fig 4.5c) carry the evidence |
+| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.3 (was §5.4 pre-Wave-3) | **closed** (2026-06-23; relocated by the Wave-3 Ch5 restructure 2026-06-29) — the first of §5.3's three drawn conclusions states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1 and the cross-family frontier radar Fig 5.1 (both now anchored in §5.2) and the operator-tradeoff figure (Fig 4.5c) carry the evidence |
 
 A Writer touching a results or synthesis chapter updates this table and satisfies
 every row it owns. RQ2 was the live trap and is now closed: the §4.4 pass added
 the explicit closure sentence, naming throughput (not success rate) as the
-measured quantity. **RQ5 is now closed by the Ch5 draft (§5.4, in review); all
-five research questions have explicit, located answers.**
+measured quantity. **RQ5 is closed by the Ch5 draft (in §5.3 after the Wave-3
+restructure; in review); all five research questions have explicit, located
+answers.**
 
 ---
 
@@ -85,11 +86,11 @@ deliver, or to restate the reason it is carried.
 **Discharged by Chapter 5 (drafted 2026-06-23, in review):**
 
 - the RQ5 Pareto-frontier synthesis (was deferred from §4.3.4, §4.4.4, §1.5–1.6,
-  §3.1) — delivered in §5.4 over the three families evaluated, and given its own
-  native figure in the W12 figure pass (the cross-family frontier radar,
-  Figure 5.1, 2026-06-24);
-- the explicit "does any family dominate" verdict — delivered as *no* (§5.4,
-  Table 5.1), established over the three families evaluated.
+  §3.1) — delivered in §5.3 (post-Wave-3; was §5.4) over the three families
+  evaluated, and given its own native figure in the W12 figure pass (the
+  cross-family frontier radar, Figure 5.1, 2026-06-24, now anchored in §5.2);
+- the explicit "does any family dominate" verdict — delivered as *no* (§5.3,
+  with Table 5.1 in §5.2), established over the three families evaluated.
 
 **Discharged by Chapter 6 (drafted 2026-06-23, in review):**
 
@@ -373,6 +374,19 @@ writes the prose stays clean and the answer stays sharp.
   cross-refs repointed to §2.2; the gap is now §2.4). Ch2's three per-family weakness
   paragraphs (§2.3.x) cut, their headlines carried by Table 2.1; the Amores-Sesar [10]
   Snowman-stall sentence preserved.)*
+  *(Page-cut Wave 3, 2026-06-29 — deep cut, deletes prose; no RQ answer, result
+  number, caveat, or source-cite lost. Ch4 6930→~5540 w: range-over-points rule
+  (per-cell `n=10/25`/`φ` recitations dropped, trends + thresholds/anomalies kept)
+  across §4.3.1/§4.3.2/§4.4.1–§4.4.3; §4.4.4 four caveats → one-line pointers, hedge
+  kept once; the tex-only "A note on the latency measurement point" subsection removed,
+  the `commit_latency_ms` clause folded into §4.2.2 so md/tex converge; §4.2.1 retained
+  as a one-sentence subsection so numbering stays §4.2.1–§4.2.6 and §4.2.4 remains the
+  RQ3 home. Ch3 5893→~4310 w: §3.4.4 walkthrough deleted (Figure 3.6 + commit_hash/seed
+  kept), §3.3 deviation ledgers → 3 body sentences, §3.5 → Table 3.3 + invariant metric
+  defs, §3.4.2 → a Family A/B/C matrix table, four §3.6 threats verbatim; the seven-key
+  input config contract relocated from an inline chapter3.tex `verbatim` block into
+  Appendix A (matching the §3.2 reference), and the leftover mitthesis-template Lua code
+  listing removed from Appendix A.)*
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
   dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar
@@ -384,6 +398,16 @@ writes the prose stays clean and the answer stays sharp.
   thesis (T73, 2026-06-24); the deferred DAG family is named only in Ch6 §6.3.2.
   *(T73 also compressed §5.2 convention restatement to a Ch3 cross-reference and
   trimmed the §5.3 magnitude enumerations that Table 5.1 carries.)*
+  *(Page-cut Wave 3, 2026-06-29 — Ch5 RESTRUCTURED, 2285→~1560 w. New section map:
+  §5.1 the joint reading (merges old §5.1+§5.2); §5.2 the cross-regime frontier
+  (Table 5.1 + Fig 5.1 moved up as the anchor — all per-family numbers now live in the
+  table/captions, not prose); §5.3 three drawn conclusions written as insights
+  (no-dominance — **the RQ5 answer now lives here**, was §5.4; structural inversions /
+  mechanism map naming Casper FFG's accountable-failure corner, the "map not the bare
+  statement" hedge kept once; the empty corner); §5.4 implications + hand-off (old §5.5,
+  **the §1.2 incident callback's canonical home moved §5.5→§5.4**). Per-family
+  non-domination evidence is not lost — it lives in Table 5.1, honoring the
+  §5.3/§5.4/Table-5.1 invariant: the evidence survives, the prose narration changed.)*
 - **Ch6 — Conclusion (drafted 2026-06-23, in review).** §6.1 RQ1–RQ5 summary
   (per-RQ prose walk condensed to one paragraph by T73, 2026-06-24; Table 6.1
   carries the detail); §6.2 consolidated limitations; §6.3 further work (6.3.1
@@ -393,6 +417,13 @@ writes the prose stays clean and the answer stays sharp.
   added by T73)**, and larger-scale validation; the earlier DAG-*completion*
   clause and its `T38.1` leak remain removed); §6.4 returns to the §1.2
   incidents. Three-family scoping, DAG named only here.
+  *(Page-cut Wave 3, 2026-06-29 — deep compress, 1478→~1090 w. §6.1 prose to ~3
+  sentences (Table 6.1 carries the per-RQ detail); §6.2 keeps every limitation as
+  tight bullets (integrity gate — none dropped); §6.3.1 to ~4 sentences; §6.3.2 five
+  directions to one clause each — **all five kept, including the adaptive-timeout
+  enhancement and the single Narwhal+Tusk/DAG further-work line**; §6.4 to the
+  contribution statement + the §1.2 May-2023 callback [21]. No RQ summary row, limitation,
+  further-work direction, or callback lost.)*
 
 ---
 

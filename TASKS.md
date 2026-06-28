@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 81 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 93 · In Review: 0 · In Progress: 1 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 93 · In Review: 1 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -122,7 +122,7 @@ specs); the `\include{biography}` line has been removed from the template.
   4.5/4.7/4.17; Table 4.1 folded to prose; Ch3 schema tables merged; Appendix B gone from ToC
   + no `\include{appendixb}`; every INVARIANT in `PAGE_CUT_PLAN.md` preserved; `/humanizer`
   gate run on edited prose
-- `[~]` **T75** `H` Writer — Page-cut Wave 3 (deep cut): Ch3 → Ch4 → Ch5 → Ch6 prose
+- `[?]` **T75** `H` Writer — Page-cut Wave 3 (deep cut): Ch3 → Ch4 → Ch5 → Ch6 prose
   _Outcome:_ Execute Wave 3 of `PAGE_CUT_PLAN.md` (the deep cut, ~6,300 words). Unlike
   Waves 1–2 this wave **deletes content** (page-count is the hard cap; relocation does not
   help). **Ch1/Ch2 untouched** (Ch2 at target after Wave 2). Per-chapter cycle: snapshot to
