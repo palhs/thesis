@@ -65,7 +65,7 @@ the independent variable named in the question.
 | RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
 | RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2.4 | **closed** — "answers RQ3" stated |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4 |
-| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.4 | **closed** (2026-06-23) — Ch5 §5.4 states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1, the native cross-family frontier radar (Fig 5.1, added in the W12 figure pass 2026-06-24), and the operator-tradeoff figure (Fig 4.13) carry the evidence |
+| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.4 | **closed** (2026-06-23) — Ch5 §5.4 states a consistent frontier over the three families evaluated and that no family dominates; Table 5.1, the native cross-family frontier radar (Fig 5.1, added in the W12 figure pass 2026-06-24), and the operator-tradeoff figure (Fig 4.5c) carry the evidence |
 
 A Writer touching a results or synthesis chapter updates this table and satisfies
 every row it owns. RQ2 was the live trap and is now closed: the §4.4 pass added
@@ -353,6 +353,14 @@ writes the prose stays clean and the answer stays sharp.
   *(T73, 2026-06-24: the §4.4 "survey covers three families / Narwhal
   data-availability-withholding absent" qualification trimmed to the honest
   three-family scope statement; the DA-withholding point relocated to Ch6 §6.3.2.)*
+  *(Page-cut Wave 1, 2026-06-29: Ch4 in-body figures consolidated 21 → 8
+  multi-panel figures (4.1–4.8); old single figures merged — operator tradeoff is
+  now Fig 4.5c (was 4.13), referenced from Ch5 §5.4 and the §2 RQ5 row; the Casper
+  slashable-stake and adversary outcome-map figures relocated to Appendix A as
+  Figs A.1/A.2; Table 4.1 baseline means folded into §4.2.6 prose; success/fork and
+  PBFT view-change-count figures dropped to one prose sentence each. Leftover
+  `mitthesis.cls` Appendix B (heat-conduction example) deleted from the LaTeX
+  back matter. No RQ answer, number, or caveat changed.)*
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
   dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar

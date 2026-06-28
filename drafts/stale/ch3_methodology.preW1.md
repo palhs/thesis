@@ -514,10 +514,10 @@ cross-protocol finality-latency claim is read from it
 model time; no number is a real-hardware claim, and published production figures
 are order-of-magnitude sanity checks (§1.4), not validation targets.
 
-Table 3.3 gives the per-protocol metric schema across all four metric families —
-latency, throughput, overhead, and reliability.
+Tables 3.3 and 3.4 give the per-protocol latency/throughput and
+overhead/reliability formulas.
 
-**Table 3.3 — Per-protocol metric schema.** Adapted from
+**Table 3.3 — Latency and throughput per protocol.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
 
 | Metric | PBFT | Casper FFG | Snowman |
@@ -525,17 +525,23 @@ latency, throughput, overhead, and reliability.
 | `commit_latency_ms` | median per-node time to the first `decided` instance (`2f+1` `COMMIT`) | median per-node time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | median per-node time to counter-`β` acceptance of the first block |
 | `tps` | decided ACUs per window (`decided_count / t_max`) | decided epochs per window (`decided_count / t_max`) | decided blocks per window (`decided_count / t_max`) |
 | `goodput` | committed transactions per window (`committed_tx / time`) | committed transactions per window over finalized epochs | committed transactions per window |
-| `consensus_msgs_per_acu` | `delivery_count / decided_count`, which evaluates to `(2n²−2)/n = 2n − 2/n`; this is `O(n²)` per-instance traffic over an `n`-scaled decided-event denominator, **not** linear scaling | `delivery_count / decided_count`, measured `≈ 1.125n` (un-aggregated all-to-all votes, `O(n²)` traffic; production BLS aggregation to `O(n)` is not modeled) | `delivery_count / decided_count` (`O(K·β)` query/response deliveries per validator, independent of `n`) |
-| `total_msgs_per_acu` | all deliveries per ACU; equals `consensus_msgs_per_acu`, as none of the three carries a separate mempool layer | as PBFT | as PBFT |
-| `bytes_per_acu` | wire-byte budget per ACU; payload-dominated at the thesis workload — see note below | attestation + payload bytes per slot; payload-dominated | `O(K·β)` query/response bytes plus payload; payload-dominated |
-| `success_rate` | `0/1` indicator per run (`1.0` iff an instance decided); becomes a frequency after `n_runs` aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
-| safety-violation rate (`fork_rate`) | `0` below threshold by construction; measured `> 0` only above the `1/3` bound under equivocation | `0` below threshold by construction; measured `> 0` only above `1/3` under equivocation — a conflicting finalized checkpoint, not a reorg (LMD-GHOST is not modeled, §3.3.2 ④) | N/A — Snowman's safety is probabilistic, reported via `ε` (empirical conflicting-decision rate against `(1 − α_c/K)^β`); pre-`β` preference switches are convergence transients, not violations |
 
 **Throughput basis.** As implemented, `tps` is a decided-event rate whose
 granularity is protocol-dependent — per block for PBFT and Snowman, per finalized
 epoch for Casper FFG — so it is not a like-for-like cross-protocol quantity.
 Cross-protocol throughput comparison therefore uses `goodput`, the committed-
 transaction rate, and never `tps` [[wiki/concepts/metric-reconciliation]].
+
+**Table 3.4 — Overhead and reliability per protocol.** Adapted from
+[[wiki/concepts/metric-reconciliation]].
+
+| Metric | PBFT | Casper FFG | Snowman |
+| :-- | :-- | :-- | :-- |
+| `consensus_msgs_per_acu` | `delivery_count / decided_count`, which evaluates to `(2n²−2)/n = 2n − 2/n`; this is `O(n²)` per-instance traffic over an `n`-scaled decided-event denominator, **not** linear scaling | `delivery_count / decided_count`, measured `≈ 1.125n` (un-aggregated all-to-all votes, `O(n²)` traffic; production BLS aggregation to `O(n)` is not modeled) | `delivery_count / decided_count` (`O(K·β)` query/response deliveries per validator, independent of `n`) |
+| `total_msgs_per_acu` | all deliveries per ACU; equals `consensus_msgs_per_acu`, as none of the three carries a separate mempool layer | as PBFT | as PBFT |
+| `bytes_per_acu` | wire-byte budget per ACU; payload-dominated at the thesis workload — see note below | attestation + payload bytes per slot; payload-dominated | `O(K·β)` query/response bytes plus payload; payload-dominated |
+| `success_rate` | `0/1` indicator per run (`1.0` iff an instance decided); becomes a frequency after `n_runs` aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
+| safety-violation rate (`fork_rate`) | `0` below threshold by construction; measured `> 0` only above the `1/3` bound under equivocation | `0` below threshold by construction; measured `> 0` only above `1/3` under equivocation — a conflicting finalized checkpoint, not a reorg (LMD-GHOST is not modeled, §3.3.2 ④) | N/A — Snowman's safety is probabilistic, reported via `ε` (empirical conflicting-decision rate against `(1 − α_c/K)^β`); pre-`β` preference switches are convergence transients, not violations |
 
 **Byte overhead.** `bytes_per_acu` includes the 512-byte transaction payload on
 every transaction-carrying delivery; at the thesis workload this payload term

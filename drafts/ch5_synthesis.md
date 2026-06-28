@@ -221,13 +221,13 @@ safety names a capability only a slashing-based protocol offers. Source:
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 The frontier carries two features that weigh more than the bare verdict: the first
-is a gap in it rather than a point on it. Resilience under loss is bought with latency. The operator tradeoff of Figure 4.13
+is a gap in it rather than a point on it. Resilience under loss is bought with latency. The operator tradeoff of Figure 4.5c
 shows that the protocols which retain finalization under loss are exactly the ones
 that pay the most latency to do so. PBFT and Snowman inflate time-to-finality by
 factors of 2.16 (Snowman, `n = 10`) to 3.57 (PBFT, `n = 25`). Each factor is
 measured at that protocol's own deepest surviving loss level rather than a common
 one, and over the seeds that still finalize there, so the two figures are not read
-off a single point of Figure 4.13. Casper FFG refuses that trade and stays near
+off a single point of Figure 4.5c. Casper FFG refuses that trade and stays near
 unit latency, and dies first [[wiki/experiments/2026-06-13_delay-comparison]]. The cheap-and-resilient corner
 of the plane is empty: resilience is bought with latency, and no measured
 configuration escapes the purchase [[wiki/concepts/key-findings]]. The second is

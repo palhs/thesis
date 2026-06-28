@@ -47,15 +47,21 @@ few seeds: at zero delay a protocol's round structure and message counts are
 fixed once `(protocol, n)` is fixed, and the only seeded randomness, the
 workload arrival process, perturbs goodput alone. Goodput therefore carries
 the sole non-degenerate interval: a coefficient of variation near 2.2% and a
-half-width near 1% of its mean (Figure 4.1a). Twenty seeds are therefore more than
+half-width near 1% of its mean (Figure 4.1). Twenty seeds are therefore more than
 adequate. A larger set cannot narrow a degenerate interval, and goodput is
 already bounded to within a percent of its mean.
+
+**Figure 4.1 — Goodput with 95% confidence intervals (baseline).** Per-protocol
+goodput across `n ∈ {4, 7, 10, 16, 25}`; the sole non-degenerate interval
+(coefficient of variation ≈ 2.2%), every structural metric being deterministic
+across seeds. Source: `results/baseline/plots/goodput_ci_vs_n.pdf`
+[[wiki/experiments/2026-06-08_baseline-cis]].
 
 ### 4.2.2 Latency
 
 Commit latency is flat in the validator count for all three protocols: absent
 network delay, latency is set by each protocol's round and timer structure, not
-by the size of the validator set (Figure 4.1b). PBFT and Snowman commit the first
+by the size of the validator set (Figure 4.2). PBFT and Snowman commit the first
 unit at approximately 1000 ms and Casper FFG at approximately 5000 ms, and none
 changes measurably as `n` grows from 4 to 25. PBFT's figure is one proposal
 interval ahead of its three-phase commit; Snowman's is one slot driving its
@@ -86,15 +92,21 @@ This flatness is a property of the zero-delay model; the latency cost that grows
 with the validator set and separates the protocols surfaces only under the delay
 sweep of §4.3.
 
+**Figure 4.2 — Commit latency versus validator-set size (baseline).** Median
+per-validator `commit_latency_ms` for each protocol across the sweep at zero
+injected delay; flat in `n` (PBFT and Snowman ≈ 1000 ms, Casper FFG ≈ 5000 ms).
+Source: `results/baseline/plots/latency_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
 ### 4.2.3 Throughput and goodput
 
 The schema's two throughput columns are not interchangeable. The decision rate
 `tps` grows linearly in `n`, per-validator constant at 0.95 for PBFT and Snowman
-and 0.40 for Casper FFG (Figure 4.1c), confirming that it is a decision-event rate
+and 0.40 for Casper FFG (Figure 4.3), confirming that it is a decision-event rate
 scaling with the validator set, not a measure of system throughput. The
 comparable measure is goodput (§3.5), the rate of committed transaction bytes,
 flat in `n`: approximately 95 tx/s for the per-block protocols PBFT and Snowman and
-approximately 80 tx/s for Casper FFG (Figure 4.1d). The Casper FFG shortfall is a
+approximately 80 tx/s for Casper FFG (Figure 4.4). The Casper FFG shortfall is a
 finality-tail effect — its per-epoch finality leaves the window's last
 unfinalized epoch uncommitted, a fixed end-of-window loss the per-block protocols
 avoid. Flat goodput is the expected result on a latency-only model with no
@@ -103,16 +115,16 @@ cadence is always absorbed [[wiki/experiments/2026-06-03_scaling-baseline]]; it
 is not a measured capacity ceiling, which would require a capacity model and is
 deferred [[wiki/concepts/output-format]].
 
-**Figure 4.1 — Baseline scaling with validator-set size.** Per-protocol metrics
-across `n ∈ {4, 7, 10, 16, 25}` at zero injected delay, twenty seeds per cell:
-(a) goodput with 95% confidence intervals — the sole non-degenerate interval
-(coefficient of variation ≈ 2.2%), every structural metric being deterministic
-across seeds; (b) median commit latency, flat in `n` (PBFT and Snowman ≈ 1000 ms,
-Casper FFG ≈ 5000 ms); (c) decision rate (`tps`), growing linearly in `n` by
-construction and so not a system-throughput measure; (d) goodput, flat in `n`
+**Figure 4.3 — Decision rate (`tps`) versus validator-set size (baseline).**
+Per-protocol `tps` (decision events per window), growing linearly in `n` by
+construction — not a system-throughput measure (contrast Figure 4.4). Source:
+`results/baseline/plots/decision_rate_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
+**Figure 4.4 — Goodput versus validator-set size (baseline).** Committed-
+transaction rate (tx/s) for each protocol across the sweep; flat in `n`
 (≈ 95 tx/s for PBFT and Snowman, ≈ 80 tx/s for Casper FFG). Source:
-`results/baseline/plots/baseline_panel.pdf`
-[[wiki/experiments/2026-06-08_baseline-cis]]
+`results/baseline/plots/throughput_vs_n.pdf`
 [[wiki/experiments/2026-06-03_scaling-baseline]].
 
 ### 4.2.4 Communication overhead
@@ -121,10 +133,10 @@ Communication overhead is the metric on which the protocols separate most
 sharply, and the one that answers RQ3 [[wiki/concepts/research-questions]].
 Messages per
 committed unit grow with `n` for all three, but the slopes differ by an order of
-magnitude (Figure 4.2, logarithmic axis): PBFT approaches `2n`, Casper FFG
+magnitude (Figure 4.5, logarithmic axis): PBFT approaches `2n`, Casper FFG
 `1.2n`, and Snowman `2·K·β`, where `K` is the poll sample size and `β` the
 confidence threshold. Each trend matches the protocol's published asymptotic
-cost. Figure 4.2 overlays the measured `total_msgs_per_acu` on the prediction,
+cost. Figure 4.6 overlays the measured `total_msgs_per_acu` on the prediction,
 and the markers fall on it across the sweep, the largest departures (six to seven
 percent) confined to `n = 4`. PBFT's `2n` traces to its `O(n²)`-per-block cost, the all-to-all PREPARE and COMMIT
 phases [[wiki/sources/2026-04-21_castro-liskov-pbft-1999]]. The
@@ -158,36 +170,48 @@ until it saturates at the production value of 20 near `n = 21`. The result is th
 reported as a per-unit cost contrast, with the per-validator scalability stated
 separately so the figure is not misread.
 
-**Figure 4.2 — Communication overhead: measured against predicted asymptotic
-cost.** `total_msgs_per_acu` for each protocol across the sweep, logarithmic
-vertical axis; the order-of-magnitude separation between the protocols is the
-result that answers RQ3. Markers are the measured values; dashed lines the
-per-protocol predictions — PBFT `2n`, Casper FFG `1.2n`, and Snowman `2·K·β` with
-`K = min(20, n−1)`. The markers fall on the predictions across the sweep, the
-residual gaps at `n = 4` being finite-`n` corrections
-[[wiki/experiments/2026-06-08_baseline-cis]]. Source:
+**Figure 4.5 — Communication overhead versus validator-set size (baseline).**
+`total_msgs_per_acu` for each protocol across the sweep, logarithmic vertical
+axis; the order-of-magnitude separation that answers RQ3. Source:
+`results/baseline/plots/msgs_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
+**Figure 4.6 — Measured message overhead against predicted asymptotic cost.**
+Markers are the measured `total_msgs_per_acu`; dashed lines the per-protocol
+predictions — PBFT `2n`, Casper FFG `1.2n`, and Snowman `2·K·β` with
+`K = min(20, n−1)`; logarithmic vertical axis. The residual gaps at `n = 4` are
+finite-`n` corrections [[wiki/experiments/2026-06-08_baseline-cis]]. Source:
 `results/baseline/plots/theory_vs_measured.pdf`, generated by
 `src/output/explain.py` [[wiki/experiments/2026-06-09_baseline-explainers]].
 
 ### 4.2.5 Reliability
 
 Every scenario commits and none forks: success rate is 1.0 and fork rate 0.0 at
-every validator count for all three protocols. This confirms
+every validator count for all three protocols (Figure 4.7). This confirms
 honest-path correctness (each protocol terminates and preserves agreement when
 no validator deviates) but carries no comparative information, the three being
 indistinguishable on both columns. These metrics become discriminating only once
 the adversarial sweep drives validators past their fault thresholds, where the
 per-protocol safety invariants of §3.5 diverge; that analysis is §4.4.
 
+**Figure 4.7 — Success and fork rate versus validator-set size (baseline).**
+Per-protocol success rate across the sweep; success rate 1.0 and fork rate 0.0
+at every `n`, confirming honest-path correctness. Source:
+`results/baseline/plots/success_rate_vs_n.pdf`
+[[wiki/experiments/2026-06-03_scaling-baseline]].
+
 ### 4.2.6 Baseline summary
 
-At the production-scale end of the sweep (`n = 25`, twenty seeds) the per-protocol
-means are as follows. PBFT commits at 1000 ms with 94.8 ± 1.0 tx/s goodput and
-49.9 messages per committed unit; Casper FFG at 5000 ms with 79.6 ± 0.8 tx/s and
-29.3 messages; and Snowman at 1000 ms with 94.8 ± 1.0 tx/s but 601 messages per
-committed unit. Every protocol commits every instance with no fork (success 1.0,
-fork 0.0). Latency and overhead are deterministic across seeds; only goodput
-carries a confidence interval [[wiki/experiments/2026-06-08_baseline-cis]].
+**Table 4.1 — Baseline means at `n = 25` (production-scale end of the sweep),
+20 seeds.** Latency and overhead are deterministic across seeds; goodput
+carries a 95% confidence interval. Source:
+[[wiki/experiments/2026-06-08_baseline-cis]].
+
+| Protocol | `commit_latency_ms` | goodput (tx/s) | `total_msgs_per_acu` | success | fork |
+| :-- | --: | --: | --: | --: | --: |
+| PBFT | 1000.0 | 94.82 ± 1.01 | 49.9 | 1.0 | 0.0 |
+| Casper FFG | 5000.0 | 79.64 ± 0.82 | 29.3 | 1.0 | 0.0 |
+| Snowman | 1000.0 | 94.82 ± 1.01 | 601.0 | 1.0 | 0.0 |
 
 Three results carry forward to the later sweeps. All three protocols are correct
 on the honest path at every validator count. At zero delay both latency and
@@ -222,7 +246,7 @@ reported apart: delay inflates time-to-finality (RQ1), loss erodes liveness
 
 Under moderate delay the three protocols separate by nearly an order of
 magnitude, governed by each protocol's round structure rather than the network
-(Figure 4.3). PBFT rises from its ≈1000 ms zero-delay baseline to approximately
+(Figure 4.8). PBFT rises from its ≈1000 ms zero-delay baseline to approximately
 1.95 s — about 0.9 s, one network round-trip absorbed into each of its three
 phases — and is near-flat in `n` because those phases overlap across the
 validator set [[wiki/experiments/2026-06-10_delay-moderate]]. Casper FFG rises
@@ -264,7 +288,7 @@ round-bounded protocols stay near-insensitive to the tail, while Snowman, whose
 `β` sequential polls each wait on the slowest sampled peer, is acutely sensitive
 to it [[wiki/experiments/2026-06-10_delay-moderate]].
 
-**Figure 4.3 — Commit latency under moderate delay.** Median per-validator
+**Figure 4.8 — Commit latency under moderate delay.** Median per-validator
 `commit_latency_ms` under the two equal-mean moderate timelines
 (`delay-uniform` and `delay-exponential`), grouped by protocol and faceted by
 validator count; logarithmic vertical axis. Source:
@@ -276,7 +300,7 @@ validator count; logarithmic vertical axis. Source:
 Under packet loss the question shifts from how long finalization takes to
 whether it happens at all. The measure is the finalization rate: instances
 finalized under loss as a fraction of those finalized on the matched loss-free
-control [[wiki/experiments/2026-06-12_delay-heavy]]. Figure 4.4a plots it against
+control [[wiki/experiments/2026-06-12_delay-heavy]]. Figure 4.9 plots it against
 drop probability per protocol and committee size, showing three degradation
 shapes: PBFT declines along a shallow tail that stays above zero to the deepest
 tested loss, Snowman holds a high plateau then falls to near-zero within a single
@@ -289,13 +313,13 @@ The protocols are therefore ranked by the area under the finalization-rate curve
 (AURC), with survival depth (the deepest loss at which a protocol still
 finalizes anything) as the tiebreak, the two committee sizes reported separately
 [[wiki/experiments/2026-06-13_delay-comparison]]. At `n = 10` the order is strict
-(Figure 4.4b): PBFT leads with an AURC of 0.253 and survives to 20% loss, Snowman
+(Figure 4.10): PBFT leads with an AURC of 0.253 and survives to 20% loss, Snowman
 follows at 0.174, Casper FFG trails at 0.149. At `n = 25` PBFT and Snowman tie at
 the top, while Casper FFG remains last at 0.140. Snowman's point estimate of 0.369
 and PBFT's of 0.351 carry overlapping intervals, [0.366, 0.372] against
 [0.327, 0.376], so neither outranks the other. Unlike the deterministic baseline of
 §4.2.1, the finalization rate genuinely varies with the seed, since which
-messages drop depends on it; the intervals in Figure 4.4 are
+messages drop depends on it; the intervals in Figures 4.9 and 4.10 are
 accordingly non-degenerate. They are Wilson-score intervals, the schema's form
 for rate metrics (§3.5); Snowman's at `n = 25` is widest, that cell being
 estimated from eight seeds rather than twenty
@@ -313,19 +337,23 @@ is a mild liability for Casper FFG, whose 5%-loss rate falls slightly, 0.070 to
 0.051. Throughout the loss sweep no protocol forks: loss degrades liveness, not
 safety [[wiki/experiments/2026-06-12_delay-heavy]].
 
-**Figure 4.4 — Packet-loss resilience.** Both panels faceted by validator count,
-with 95% confidence intervals. (a) Finalization rate against per-message drop
-probability, one curve per protocol, showing the three degradation shapes. (b)
-The loss-resilience ranking: area under the finalization-rate curve (AURC),
-annotated with each cell's survival depth `p*`; overlapping intervals share a
-rank (the `n = 25` PBFT–Snowman tie). Source:
-`results/delay/plots/loss_resilience_panel.pdf`
+**Figure 4.9 — Finalization rate under packet loss.** Finalization rate against
+per-message drop probability, one curve per protocol, faceted by validator
+count, with 95% confidence intervals. Source:
+`results/delay/plots/finalization_degradation.pdf`
+[[wiki/experiments/2026-06-13_delay-comparison]].
+
+**Figure 4.10 — Loss-resilience ranking.** Area under the finalization-rate
+curve (AURC) with 95% confidence intervals, annotated with each cell's survival
+depth `p*`, faceted by validator count; overlapping intervals share a rank (the
+`n = 25` PBFT–Snowman tie). Source:
+`results/delay/plots/resilience_ranking.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
 ### 4.3.3 Mechanisms of degradation
 
 The ranking follows from what each protocol can do when messages are lost
-(Figure 4.5, panels a and b) [[wiki/experiments/2026-06-13_delay-analysis]]. PBFT is
+(Figures 4.11 and 4.12) [[wiki/experiments/2026-06-13_delay-analysis]]. PBFT is
 the most robust because it has a genuine recovery path: when dropped prepare or
 commit messages stall an instance below its quorum, a per-instance timer fires,
 the replicas rotate the leader through a view-change, and the instance is
@@ -334,7 +362,7 @@ round with fresh messages, and so a fresh chance to assemble the quorum — and
 enough retries eventually succeed even under heavy loss. The recovery is visible
 in the view-change count, climbing with loss from zero to sixteen and then thirty
 at `n = 10`, and from zero through twenty-eight and sixty-three to seventy-five at
-`n = 25` (Figure 4.5b).
+`n = 25` (Figure 4.12).
 
 Snowman's robustness is of a different kind: redundancy within a single poll
 round, not recovery across rounds. A round closes once `α_c` agreeing responses
@@ -363,10 +391,21 @@ heavy-delay experiments converts what would have been a crash into an honest
 stall, the node skipping the attestation and retrying at a later slot
 [[wiki/experiments/2026-06-12_delay-heavy]].
 
+**Figure 4.11 — Commit-latency growth under loss.** `commit_latency_ms` against
+drop probability on a logarithmic axis; a solid line marks the levels at which
+a protocol still finalizes and a cross marks the level at which liveness is
+lost. Source: `results/delay/plots/latency_cliff.pdf`
+[[wiki/experiments/2026-06-13_delay-comparison]].
+
+**Figure 4.12 — Communication cost of survival.** Messages per committed unit
+against drop probability on a logarithmic axis, with PBFT's view-change counts
+annotated. Source: `results/delay/plots/cost_of_survival.pdf`
+[[wiki/experiments/2026-06-13_delay-comparison]].
+
 ### 4.3.4 The latency–liveness tradeoff
 
 The two stress axes converge on one result: the protocols that survive loss are
-the ones that pay the most latency to do so (Figure 4.5c). PBFT and Snowman both
+the ones that pay the most latency to do so (Figure 4.13). PBFT and Snowman both
 inflate their time-to-finality by factors of roughly two to three-and-a-half at
 the worst loss they survive, converting that cost into survival — PBFT a long
 tail to 20% loss, Snowman a high but brittle plateau
@@ -412,16 +451,11 @@ Casper FFG most fragile — is a property of the protocols' recovery mechanisms 
 would survive a retransmitting transport, but the absolute collapse levels of 5%
 to 20% would shift higher beneath one.
 
-**Figure 4.5 — Mechanisms of degradation under packet loss.** Three rows, each
-faceted by validator count. (a) Commit-latency growth: `commit_latency_ms` against
-drop probability on a logarithmic axis, a solid line marking the levels at which a
-protocol still finalizes and a cross the level at which liveness is lost. (b)
-Communication cost of survival: messages per committed unit against drop
-probability on a logarithmic axis, with PBFT's view-change counts annotated. (c)
-The operator tradeoff: finalization rate retained against the added-latency ratio
-(loss latency over control latency, logarithmic); cells that no longer finalize are
-pinned on a "no finality" band, and the operator-best region is the upper left.
-Source: `results/delay/plots/degradation_mechanism_panel.pdf`
+**Figure 4.13 — The operator tradeoff.** Finalization rate retained against the
+added-latency ratio (loss latency over control latency, logarithmic), faceted by
+validator count; cells that no longer finalize are pinned on a "no finality"
+band; the operator-best region is the upper left. Source:
+`results/delay/plots/operator_pareto.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
 ## 4.4 Adversarial sweep
@@ -466,7 +500,7 @@ FFG's partial-success cells, not the saturated cells pinned at 1.0 or 0.
 
 Under delayed voting the three protocols separate by failure mode, and the
 split follows protocol structure rather than the size of the delayed set
-(Figure 4.6, panels a and b). PBFT is immune: its delayed validators are backups, the honest
+(Figure 4.14). PBFT is immune: its delayed validators are backups, the honest
 remainder already meets the `2f+1` prepare and commit quorums, and the view-0
 primary commits without rotation, so time-to-finality holds at its baseline, a
 ratio of 1.0 against the honest control, and the success rate stays at 1.0 to
@@ -500,10 +534,20 @@ on the finality-cost tiebreak
 delayed voting threatens liveness and latency, never agreement
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
+**Figure 4.14 — Liveness and time-to-finality under delayed voting.** Top row:
+finalization success rate against the injected adversarial fraction `φ`, faceted
+by validator count, on which PBFT and Snowman coincide at 1.0 while Casper FFG
+dips. Bottom row, on a logarithmic scale: the time-to-finality ratio against the
+honest control, which separates the two protocols the top row leaves
+indistinguishable — PBFT and Casper FFG hold at 1.0× while Snowman pays a blow-up
+of roughly ×62 at `n = 10` and ×49 at `n = 25`. Source:
+`results/adversary/plots/liveness_vs_phi_delay.pdf`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
+
 ### 4.4.2 Silent non-participation
 
 When the adversarial validators go silent rather than slow, the question becomes
-how deep a fraction each protocol can lose and still finalize (Figure 4.6c). The
+how deep a fraction each protocol can lose and still finalize (Figure 4.15). The
 protocols are ranked by survival depth (the deepest `φ` at which a protocol
 still finalizes anything) rather than by the onset of degradation, because the
 two keys order Casper FFG and Snowman oppositely, and survival is the faithful
@@ -514,10 +558,10 @@ quorum cliff: it finalizes with no throughput loss up to `φ = 0.33` and dies at
 the `2f+1` quorum [[wiki/experiments/2026-06-17_offline-validators]]. Casper FFG
 degrades gracefully over the same range, still finalizing at `φ = 0.33`. Its
 throughput decays in proportion to the participating stake,
-approximately `1 − φ` (Figure 4.8), to a worst surviving ratio near 0.49 at
+approximately `1 − φ` (Figure 4.21), to a worst surviving ratio near 0.49 at
 `n = 10` and 0.47 at `n = 25`
 [[wiki/experiments/2026-06-19_adversary-comparison]]. Throughput here means the
-rate of committed units, a separate magnitude from the success rate Figure 4.6c
+rate of committed units, a separate magnitude from the success rate Figure 4.15
 plots. Snowman cliffs earliest,
 and its cliff is committee-size-dependent: it survives only to `φ = 0.10` at
 `n = 10` and `φ = 0.20` at `n = 25`, because a poll round closes only once `α_c`
@@ -536,18 +580,14 @@ validators, albeit at a latency cost, is the least tolerant of silent ones,
 because a sampled supermajority can wait out a slow peer but cannot complete a
 poll around an absent one.
 
-**Figure 4.6 — Liveness under delayed voting and silent non-participation.** Each
-row faceted by validator count, success rate plotted against the injected
-adversarial fraction `φ` with 95% Wilson intervals. (a) Delayed-voting success
-rate, on which PBFT and Snowman coincide at 1.0 while Casper FFG dips. (b)
-Delayed-voting time-to-finality ratio against the honest control, on a logarithmic
-scale, separating the two protocols (a) leaves indistinguishable — PBFT and Casper
-FFG hold at 1.0× while Snowman pays a blow-up of roughly ×62 at `n = 10` and ×49 at
-`n = 25`. (c) Silent-participation success rate, with each protocol's survival
-depth `φ*` boxed; the cliffs place PBFT and Casper FFG ahead of Snowman, and the
-Snowman cell still alive at `n = 25, φ = 0.20` is labelled to mark that it
-finalizes only at a collapsed fraction of its control throughput. Source:
-`results/adversary/plots/liveness_delay_offline_panel.pdf`
+**Figure 4.15 — Liveness under silent non-participation.** Finalization success
+rate against the injected silent fraction `φ`, one curve per protocol and
+faceted by validator count, with each protocol's survival depth
+`φ*`, the deepest fraction at which it still finalizes, boxed. The cliffs place
+PBFT and Casper FFG ahead of Snowman; the Snowman cell that remains alive at
+`n = 25, φ = 0.20` is labelled to mark that it finalizes only at a collapsed
+fraction of its control throughput. Source:
+`results/adversary/plots/liveness_vs_phi_offline.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 ### 4.4.3 Equivocation
@@ -555,7 +595,7 @@ finalizes only at a collapsed fraction of its control throughput. Source:
 Equivocation is the only one of the three strategies that can break safety, and
 it is the axis on which PBFT and Casper FFG are driven past the one-third
 threshold to expose the breaking point. Below the threshold all three protocols
-preserve agreement and, with one exception, liveness (Figure 4.7a): Casper FFG's
+preserve agreement and, with one exception, liveness (Figure 4.16): Casper FFG's
 success rate holds across the full swept range to `φ = 0.50`, Snowman's to the
 top of its grid at `φ = 0.33`, while PBFT's dips through a view-change window
 before an apparent recovery above the threshold — a recovery that is the safety
@@ -568,13 +608,13 @@ and the difference is the kind of failure, not its onset
 PBFT fails catastrophically and without accountability. Below the threshold its
 view-change mechanism absorbs the equivocation (an equivocating primary is
 detected and the replicas rotate to a new leader), and the view-changes multiply
-with the equivocator fraction, reaching 10 rotations at `n = 10`
+with the equivocator fraction (Figure 4.17), reaching 10 rotations at `n = 10`
 and 25 at `n = 25` at the last safe fraction
 [[wiki/experiments/2026-06-19_adversarial-degradation]]. At `φ = 0.40` the
 equivocating set exceeds what rotation can contain, and two honest replicas
 commit conflicting values at the same height: the safety-violation rate steps
 from zero to a deterministic breach, with 229 conflicting instances at both
-committee sizes (Figure 4.7b)
+committee sizes (Figure 4.18)
 [[wiki/experiments/2026-06-19_adversary-comparison]]. The fork is deterministic.
 It is invariant across seeds because the equivocating set is fixed rather than sampled.
 It is identical in count at both committee sizes because the number of conflicting
@@ -590,7 +630,7 @@ threshold, and above it the failure surfaces not as a fork but as slashable
 stake: the stake an adversary must expose to force a conflicting checkpoint rises
 with the equivocator fraction and crosses the one-third accountability line at
 `φ = 0.40`, peaking at 0.50 of stake at `n = 10` and 0.48 at `n = 25`
-(Figure A.1) [[wiki/experiments/2026-06-19_adversary-comparison]]. This is the
+(Figure 4.19) [[wiki/experiments/2026-06-19_adversary-comparison]]. This is the
 accountable-safety property of the finality gadget: a safety violation is
 possible only at the cost of at least one-third of the stake being provably
 slashable [[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]]. Casper
@@ -630,16 +670,35 @@ swept only to `φ = 0.33` for Snowman; it is ranked first for having no safety
 failure mode to expose, not for surviving a fraction at which the others break
 (§3.4.2).
 
-**Figure 4.7 — Liveness and safety under equivocation.** Each row faceted by
-validator count, plotted against the equivocator fraction `φ`. (a) Finalization
-success rate, one curve per protocol; PBFT's curve is non-monotone, its apparent
-recovery above `φ = 0.33` being the safety failure of panel (b), not restored
-liveness. (b) Cross-protocol safety-violation rate, drawn as steps; only PBFT
-departs from zero, stepping to a deterministic fork at `φ = 0.40`, where the
-magnitude of the fork — 229 conflicting `(view, seq)` instances at both committee
-sizes — is annotated. Casper FFG and Snowman stay at zero; their failure modes
-appear on the stake axis of Figure A.1 and through `ε` respectively. Source:
-`results/adversary/plots/equivocation_panel.pdf`
+**Figure 4.16 — Liveness under equivocation.** Finalization success rate against
+the equivocator fraction `φ`, one curve per protocol, faceted by validator
+count; PBFT's curve is non-monotone, its apparent recovery above `φ = 0.33`
+being the safety failure of Figure 4.18, not restored liveness. Source:
+`results/adversary/plots/liveness_vs_phi_equivocate.pdf`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
+
+**Figure 4.17 — PBFT view-change count under equivocation.** Number of
+view-changes against the equivocator fraction `φ`, on a count axis shared across
+the two committee sizes so the size effect is visible; the count rises to its
+plateau, ten at `n = 10` and twenty-five at `n = 25`, at the last safe fraction
+and collapses to zero at `φ = 0.40`, where the deterministic fork replaces leader
+rotation. Source: `results/adversary/plots/pbft_viewchange_count_vs_phi.pdf`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
+
+**Figure 4.18 — Cross-protocol safety-violation rate under equivocation.**
+Safety-violation rate against the equivocator fraction `φ`, drawn as steps, one
+curve per protocol and faceted by validator count; only PBFT departs from zero,
+stepping to a deterministic fork at `φ = 0.40`, where the magnitude of the fork —
+229 conflicting `(view, seq)` instances at both committee sizes — is annotated.
+Casper FFG and Snowman stay at zero; their failure modes appear on the stake axis
+of Figure 4.19 and through `ε` respectively. Source:
+`results/adversary/plots/safety_cliff_vs_phi.pdf`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
+
+**Figure 4.19 — Casper FFG slashable stake under equivocation.** Maximum
+slashable stake fraction against the equivocator fraction `φ`, faceted by
+validator count, with the one-third accountability line marked. Source:
+`results/adversary/plots/ffg_slashable_vs_phi.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 ### 4.4.4 The performance–security tradeoff
@@ -647,7 +706,7 @@ appear on the stake axis of Figure A.1 and through `ε` respectively. Source:
 The three strategies together answer RQ4. No protocol is robust to every
 adversary: the structural choice that defends a protocol against one strategy is
 the same choice that exposes it to another (Table 4.2, rendered as an outcome map
-in Figure A.2). PBFT's exact quorum and view-change recovery make it the strongest
+in Figure 4.20). PBFT's exact quorum and view-change recovery make it the strongest
 protocol against the two liveness adversaries, immune to delayed voting and
 undegraded under silence up to its quorum cliff, but the same leader-based,
 non-accountable commit rule makes it the worst under equivocation, the only
@@ -690,6 +749,19 @@ on the safety invariant for equivocation. Source:
 | Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (throughput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
+**Figure 4.20 — Adversarial outcomes by protocol and strategy.** The nine
+protocol–strategy cells of Table 4.2 rendered as an outcome map: the cell color
+encodes the kind of outcome — robust with liveness held, survival at a latency
+cost, liveness loss, accountable safety failure, or unaccountable safety break —
+and each cell label carries the governing magnitude. No protocol occupies a
+single color across its row: PBFT runs from robust under the two liveness
+adversaries to an unaccountable break under equivocation, Snowman from costly
+survival under delay through liveness loss under silence to robust under
+equivocation, and Casper FFG is never first yet never catastrophic. The image
+carries the no-dominance verdict and the structural inversions that produce it.
+Source: `results/adversary/plots/adversary_tradeoff_matrix.pdf`
+[[wiki/experiments/2026-06-19_adversary-comparison]].
+
 The verdict holds within two qualifications: first, the adversarial verdict is scoped to
 the three families evaluated [[wiki/concepts/adversary-model]]. The swept strategies
 are the three generic capabilities of the catalog. The leader-disruption surface, plausibly the
@@ -721,10 +793,10 @@ sustained throughput degrades in three distinct modes — PBFT holds undegraded
 until its quorum cliff, Casper FFG decays gracefully in proportion to the
 participating stake (≈ `1 − φ`), and Snowman starves earliest as its polls fail
 to close — so the rate at which throughput falls is governed by each family's
-quorum structure rather than by `φ` alone (Figure 4.8)
+quorum structure rather than by `φ` alone (Figure 4.21)
 [[wiki/experiments/2026-06-19_adversary-comparison]].
 
-**Figure 4.8 — Throughput degradation versus adversarial fraction (silent
+**Figure 4.21 — Throughput degradation versus adversarial fraction (silent
 non-participation).** Committed-unit throughput against the injected silent
 fraction `φ` for each protocol, faceted by validator count (`n = 10`, `n = 25`)
 with the `y = 1 − φ` participating-stake invariant marked; the three RQ2
@@ -738,27 +810,3 @@ The question of whether any one family occupies a dominant position once the
 baseline, delay, and adversarial regimes are considered jointly (the
 Pareto-frontier synthesis of RQ5) is taken up in Chapter 5
 [[wiki/concepts/research-questions]].
-
-<!-- Appendix figures: the two detail figures below are referenced from §4.4.3
-and §4.4.4 but rendered in Appendix A to keep the chapter's figure budget on the
-load-bearing results. On LaTeX export their figure environments live in
-appendixa.tex; the body keeps only the cross-references (Figure A.1, Figure A.2). -->
-
-**Figure A.1 — Casper FFG slashable stake under equivocation.** Maximum
-slashable stake fraction against the equivocator fraction `φ`, faceted by
-validator count, with the one-third accountability line marked. Source:
-`results/adversary/plots/ffg_slashable_vs_phi.pdf`
-[[wiki/experiments/2026-06-19_adversarial-degradation]].
-
-**Figure A.2 — Adversarial outcomes by protocol and strategy.** The nine
-protocol–strategy cells of Table 4.2 rendered as an outcome map: the cell color
-encodes the kind of outcome — robust with liveness held, survival at a latency
-cost, liveness loss, accountable safety failure, or unaccountable safety break —
-and each cell label carries the governing magnitude. No protocol occupies a
-single color across its row: PBFT runs from robust under the two liveness
-adversaries to an unaccountable break under equivocation, Snowman from costly
-survival under delay through liveness loss under silence to robust under
-equivocation, and Casper FFG is never first yet never catastrophic. The image
-carries the no-dominance verdict and the structural inversions that produce it.
-Source: `results/adversary/plots/adversary_tradeoff_matrix.pdf`
-[[wiki/experiments/2026-06-19_adversary-comparison]].
