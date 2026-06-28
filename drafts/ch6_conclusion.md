@@ -59,7 +59,7 @@ The findings hold within boundaries that Chapter 3 fixed.
   [[wiki/concepts/key-findings]].
 - **Leader-sparing coverage.** The sweep exercises the three generic capabilities
   of the adversary catalog and spares the view-0 primary, so the leader-disruption
-  surface — plausibly the sharpest attack on the leader-based protocols — is
+  surface, plausibly the sharpest attack on the leader-based protocols, is
   catalogued but not measured, and PBFT's liveness standing is established only
   against adversaries that leave its leader honest [[wiki/concepts/adversary-model]].
 
@@ -75,30 +75,33 @@ from `O(n²)` to `O(n)` [8], and HotStuff achieves the analogous reduction for t
 PBFT family through threshold-signature collection at the leader [5]
 [[wiki/algorithms/pbft#communication-complexity]]. Because aggregation is a property
 of a family's signature scheme rather than of an individual protocol, a faithful
-extension holds the optimization level constant — either modeling all
-signature-based families at production granularity, or reporting the as-specified
-and aggregated regimes side by side — so that the per-unit cost contrast answering
-RQ3 is not misstated by comparing implementations at different optimization levels.
+extension holds the optimization level constant: it either models all
+signature-based families at production granularity, or reports the as-specified
+and aggregated regimes side by side. Otherwise the per-unit cost contrast that
+answers RQ3 is misstated by a comparison of implementations at different
+optimization levels.
 An implementation plan for the Casper FFG side is recorded as a kickoff
 specification in the project repository.
 
 ### 6.3.2 Further directions
 
-Five directions remain open beyond §6.3.1. First, a saturation-throughput capacity
-model that drives each protocol to a measured ceiling would turn the flat-goodput
-baseline into a peak-capacity comparison [[wiki/concepts/output-format]]. Second, an
-adaptive-timeout enhancement — exponential backoff with jitter, calibrated to
-observed round-trip time — evaluated against the baseline in a regime that stresses
-timeout calibration directly, which the steady-state sweeps reported here are not.
-Third, witnessing Snowman's analytical safety bound empirically by driving the
-protocol at a weakened confidence depth `ε` where forks become observable
-[[wiki/concepts/adversarial-degradation-metrics]]. Fourth, extending the harness to
-a DAG-based family (Narwhal+Tusk), whose data-availability-withholding adversary
-the present sweep does not cover and which would populate the high-throughput
-corner the three-family frontier leaves unmeasured [[wiki/concepts/adversary-model]].
-Fifth, repeating the comparison at larger validator sets and against a transport
-that models bandwidth and retransmission, testing how far the rankings survive
-outside the simplifying assumptions that made the controlled comparison possible
+Five directions remain open beyond §6.3.1. The first is a saturation-throughput
+capacity model that drives each protocol to a measured ceiling, which would turn
+the flat-goodput baseline into a peak-capacity comparison
+[[wiki/concepts/output-format]]. The second is an adaptive-timeout enhancement,
+exponential backoff with jitter calibrated to observed round-trip time, evaluated
+against the baseline in a regime that stresses timeout calibration directly; the
+steady-state sweeps reported here are not such a regime. The third is an empirical
+witness of Snowman's analytical safety bound, obtained by driving the protocol at a
+weakened confidence depth `ε` at which forks become observable
+[[wiki/concepts/adversarial-degradation-metrics]]. The fourth is an extension of the
+harness to a DAG-based family (Narwhal+Tusk), whose data-availability-withholding
+adversary the present sweep does not cover and which would populate the
+high-throughput corner the three-family frontier leaves unmeasured
+[[wiki/concepts/adversary-model]]. The fifth is a repetition of the comparison at
+larger validator sets and against a transport that models bandwidth and
+retransmission, which would test how far the rankings survive outside the
+simplifying assumptions that made the controlled comparison possible
 [[wiki/concepts/network-model]].
 
 ## 6.4 Concluding remarks

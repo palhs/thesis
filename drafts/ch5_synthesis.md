@@ -21,11 +21,12 @@ measure. The synthesis adds a reading, not a measurement
 
 Table 5.1 collects the per-family positions on the eight cross-regime axes, and
 Figure 5.1 renders the same data as an overlaid radar. Together they are the
-anchor for the rest of the chapter: every per-family number — baseline latency,
-the `2n` / `1.2n` / `2Kβ` overhead split, the time-to-finality multipliers under
-delay, the loss-resilience ordering, the silence cliffs, the 229-instance fork,
-the `ε` safety bound, and the slashable-stake fraction — lives in the table and
-caption, and the conclusions of §5.3 read off them rather than restating them.
+anchor for the rest of the chapter. Every per-family number lives in the table
+and caption: baseline latency, the `2n` / `1.2n` / `2Kβ` overhead split, the
+time-to-finality multipliers under delay, the loss-resilience ordering, the
+silence cliffs, the 229-instance fork, the `ε` safety bound, and the
+slashable-stake fraction. The conclusions of §5.3 read these values off the table
+rather than restating them.
 
 **Table 5.1 — Cross-regime comparison of the three families on the
 performance–security plane (`n = 10 / 25`, 20 seeds; 8 for the Snowman `n = 25`
@@ -81,9 +82,7 @@ only a slashing-based protocol offers. Source:
 
 ## 5.3 Conclusions drawn from the frontier
 
-Three conclusions follow from the frontier of §5.2. The first answers RQ5; the
-second reads the mechanism behind the shape; the third names what the shape
-leaves empty.
+Three conclusions follow from the frontier of §5.2.
 
 **No family dominates.** No row of Table 5.1 is won by a single family across the
 board, and each of the three wins at least one row no other does: PBFT the delay,

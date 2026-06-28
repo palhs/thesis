@@ -50,11 +50,11 @@ harness admits three protocols that need not share a knob schema
 [[wiki/concepts/system-design]].
 
 Each validator is granted exactly three capabilities, each owned by a different
-component (the full contract is in Appendix A). This split-ownership invariant —
-the scheduler owns time and event delivery, the network owns transport, the
-logger owns the record — means that because every component but the protocol slot
-is identical across protocols, any difference between two rows is attributable to
-the protocol logic alone [[wiki/concepts/system-design]]. The network models
+component (the full contract is in Appendix A). Under this split-ownership
+invariant the scheduler owns time and event delivery, the network owns transport,
+and the logger owns the record. Because every component but the protocol slot is
+identical across protocols, any difference between two rows is attributable to the
+protocol logic alone [[wiki/concepts/system-design]]. The network models
 timing only (at most once, unordered, under per-phase delay, loss, and
 partition), and every protocol's messages travel in one uniform envelope
 distinguished only by a per-protocol type (Table 3.2).
@@ -148,10 +148,11 @@ still admits a multi-slot epoch) and `slot_duration = 1 s` (against 12 s). The
 resulting per-epoch finality,
 `(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s` (where `attest_offset`
 is the one-slot delay before attestations are aggregated), is roughly 5× the
-per-block protocols' ≈1 s commit; this gap is reported as a finding in §4.2, not
-compressed away, and reflects FFG's coarser epoch-granularity finality. A
-sensitivity sweep toward production scale (larger `slots_per_epoch` and
-`slot_duration`) tests whether the comparative ordering is preserved.
+per-block protocols' ≈1 s commit. This gap reflects FFG's coarser
+epoch-granularity finality and is reported as a finding in §4.2 rather than
+absorbed into the calibration. A sensitivity sweep toward production scale (larger
+`slots_per_epoch` and `slot_duration`) tests whether the comparative ordering is
+preserved.
 
 **Figure 3.4 ([[diagrams/protocols/casper-ffg]]).** Casper FFG
 justify→finalize for one epoch with the slashing branch.
@@ -176,18 +177,14 @@ safety bound `ε ≤ (1 − α_c/K)^β` — the analytical ceiling on the probab
 that two honest validators accept conflicting blocks, exponentially small in the
 confirmation depth `β` [9] — rather than its numerical value, which varies
 non-monotonically with `n` from `≈ 10⁻¹¹` at `n ∈ {16, 25}` to `≈ 10⁻¹⁵` at
-`n = 10` (`n = 7` gives `α_c/K = 5/6 ≈ 0.833`, nearest unanimity). The rescaled
-protocol is thus one Snowman in *form* across the sweep, not an identical
-numerical guarantee at each `n`.
+`n = 10`.
 
-The rescaling degenerates at `n = 4`, where it yields `α_c = K = 3`: every poll
-demands unanimity, collapsing Snowman to flood-voting and driving the bound to
-zero — this parametrization is no longer Snowman. The `n = 4` Snowman row is
-therefore excluded from the comparative tables of Chapters 4 and 5 and reported
-once as a rescaling sanity check, leaving PBFT and Casper FFG at `n = 4`
-unaffected. The honest path is verified at `n ∈ {4, 7, 10}` by the Snowman
-baseline experiment, with no forks and byte-identical replay
-[[experiments/2026-05-27_snowman-baseline]].
+The rescaling degenerates at `n = 4`, where `α_c = K = 3` forces unanimity and
+drives the bound to zero; the `n = 4` Snowman row is therefore excluded from the
+comparative tables of Chapters 4 and 5 and reported once as a rescaling sanity
+check, leaving PBFT and Casper FFG at `n = 4` unaffected. The honest path is
+verified at `n ∈ {4, 7, 10}` by the Snowman baseline experiment, with no forks
+and byte-identical replay [[experiments/2026-05-27_snowman-baseline]].
 
 ## 3.4 Simulation setup
 
@@ -231,8 +228,8 @@ crossing GST recorded in Table 3.2a [[wiki/concepts/network-model-phases]].
 
 Family C fixes the network at `static-baseline` and sweeps the adversary (the
 per-node interceptor of §3.2 [[wiki/concepts/adversary-model]]), the mirror of
-Family B. An `AdversaryProfile` is static data, fixed at sim-start and never
-adapting mid-run. Three capabilities are exercised, one per Byzantine behavior of
+Family B. An `AdversaryProfile` is static data: its capability, intensity, and bound node
+set are fixed at sim-start and do not adapt mid-run. Three capabilities are exercised, one per Byzantine behavior of
 RQ4, each at intensity `φ` denominated in each protocol's natural unit (replicas
 for PBFT, validators for Snowman, stake for Casper FFG):
 
@@ -300,10 +297,10 @@ baseline (Family A). The adversary is drawn inside the Validator lane, not as
 a separate component: it is the per-node interceptor of §3.2 that alters a
 bound validator's outgoing messages.
 
-Every appended row embeds a `commit_hash` and `seed` column; together these pin
-the exact code and random draws that produced it, so any number can be
-regenerated from the record alone — the hard evidence of reproducibility. The
-comparison rests on two files [[wiki/concepts/output-format]]: a per-trial
+Every appended row embeds a `commit_hash` and `seed` column. Together these pin
+the exact code and random draws that produced the row, so any number can be
+regenerated from the record alone; this is the hard evidence of reproducibility.
+The comparison rests on two files [[wiki/concepts/output-format]]: a per-trial
 long-format CSV (one row per `(protocol, scenario, seed)`) and a downstream wide
 CSV (one row per configuration with each metric's mean and 95% confidence
 interval across the seed set), the latter feeding the Chapter 4 plots. Family B
@@ -318,10 +315,9 @@ Casper FFG finalizes a checkpoint, Snowman accepts a block at counter `β`), so 
 quantity can be compared across families until it is placed on a common axis
 [[wiki/concepts/metric-reconciliation]]. The schema that builds that axis is
 uniform across families — each metric has one definition, one unit, and one fixed
-instrumentation point, with the family-specific differences appearing only as
-different per-protocol formulas for the same column — and spans four metric
-families: latency, throughput, overhead, and reliability
-[[wiki/concepts/evaluation-metrics]].
+instrumentation point, the family differences appearing only as per-protocol
+formulas for the same column — and spans four families: latency, throughput,
+overhead, and reliability [[wiki/concepts/evaluation-metrics]].
 
 The device that makes the three commensurable is the *atomic commit unit* (ACU):
 the smallest contiguous set of transactions a protocol commits indivisibly — one
@@ -343,7 +339,7 @@ simulator's model time; published production figures are order-of-magnitude
 sanity checks (§1.4), not validation targets. Cross-protocol throughput
 comparison uses `goodput`, the committed-transaction rate, and never `tps`, whose
 granularity is protocol-dependent (per block for PBFT and Snowman, per finalized
-epoch for Casper FFG) and so not like-for-like.
+epoch for Casper FFG) and is therefore not a like-for-like quantity.
 
 Table 3.3 gives the per-protocol metric schema across all four metric families.
 
