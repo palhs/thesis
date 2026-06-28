@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 80 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 91 · In Review: 1 · In Progress: 1 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 91 · In Review: 2 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -104,7 +104,7 @@ specs); the `\include{biography}` line has been removed from the template.
   Ch5 §5.2/§5.3, Ch6 §6.1/§6.3.1, Ch2 variant trim); draft-narrative ledgers reconciled; figures
   deferred. · _Artifact:_ `drafts/ch{1,2,3,4,5,6}.md`, `docs/draft-narrative.md`, port-checklist ·
   _Verify:_ see plan §5; zero residual Narwhal/four-family except the one Ch6 further-work line
-- `[~]` **T74** `H` Writer — Page-cut Wave 1 (zero content lost): Appendix B + Ch4 figures + table merges
+- `[?]` **T74** `H` Writer — Page-cut Wave 1 (zero content lost): Appendix B + Ch4 figures + table merges
   _Outcome:_ Execute Wave 1 of `PAGE_CUT_PLAN.md` (80pp → ~41pp; this wave ~18pp, no
   argument/number lost). Three parts. **1A** delete leftover Appendix B (heat-conduction
   `mitthesis.cls` example) from the LaTeX + ToC (tex-side only). **1B** Ch4 in-body figures
