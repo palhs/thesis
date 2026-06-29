@@ -29,14 +29,11 @@ interval is degenerate regardless.
 ### 4.2.1 Statistical reliability
 
 The seed has almost no effect at this baseline: every structural metric (commit
-latency, message overhead, success rate, and fork rate) has a
-coefficient of variation of zero across the twenty seeds and therefore a
-degenerate confidence interval, because at zero delay a protocol's round
-structure and message counts are fixed once `(protocol, n)` is, and the only
-seeded randomness, the workload arrival process, perturbs goodput alone.
-Goodput accordingly carries the sole non-degenerate interval (coefficient of
-variation ≈ 2.2%, half-width ≈ 1% of its mean, Figure 4.1a), so twenty seeds are
-more than adequate.
+latency, message overhead, success rate, fork rate) is fixed once `(protocol, n)`
+is, leaving a degenerate confidence interval, while the only seeded randomness —
+the workload arrival process — perturbs goodput alone. Goodput accordingly carries
+the sole non-degenerate interval (Figure 4.1a), so twenty seeds are more than
+adequate.
 
 ### 4.2.2 Latency
 
@@ -51,17 +48,15 @@ roughly two epochs at the configured one-second slot and two-slot epoch
 [[wiki/algorithms/pos#communication-complexity]]. Latency throughout is read from
 `commit_latency_ms`, the canonical cross-protocol time-to-finality column (§3.5).
 
-Only the Casper FFG figure carries a calibration qualification. Its finality
+Only the Casper FFG figure carries a calibration qualification: its finality
 interval is a fixed multiple of the slot, so the absolute ≈5000 ms is set by the
-chosen one-second slot, not fixed by the protocol, and only the cross-protocol
-comparison of *absolute* latency is conditional on that choice
+chosen one-second slot, not by the protocol, and only the comparison of *absolute*
+latency is conditional on that choice
 [[wiki/concepts/metric-reconciliation#calibration-defaults]]. The
 protocol-intrinsic result, confirmed by a slot-duration sensitivity sweep
 [[wiki/experiments/2026-06-22_ffg-slot-sensitivity]], is that Casper FFG finalizes
-at epoch granularity, coarser than per-block or per-poll commit at any realistic
-slot and far below the 12 s slot a deployed finality gadget such as Ethereum runs
-[[wiki/sources/2026-04-21_buterin-gasper-2020]]. The specific fivefold gap is not
-intrinsic; it moves with the calibration.
+at epoch granularity — coarser than per-block or per-poll commit at any realistic
+slot.
 
 This flatness is a property of the zero-delay model; the latency cost that grows
 with the validator set and separates the protocols surfaces only under the delay
@@ -94,24 +89,18 @@ sharply, and the one that answers RQ3 [[wiki/concepts/research-questions]].
 Messages per committed unit grow with `n` for all three, but the slopes differ by
 an order of magnitude (Figure 4.2, logarithmic axis): PBFT approaches `2n`, Casper
 FFG `1.2n`, and Snowman `2·K·β`, where `K` is the poll sample size and `β` the
-confidence threshold. Each trend matches the protocol's published asymptotic cost,
-the markers falling on the prediction across the sweep with the largest departures
-confined to `n = 4`. PBFT's `2n` traces to its `O(n²)`-per-block all-to-all PREPARE
-and COMMIT phases [[wiki/sources/2026-04-21_castro-liskov-pbft-1999]], the
-atomic-commit-unit denominator (§3.5) absorbing one factor of `n` to leave `O(n)`
-per unit [[wiki/concepts/metric-reconciliation]]. Casper FFG's attestation phase
-is likewise all-to-all under the individually-signed-vote model the original
-protocol specifies [[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]]
-and the simulator implements, hence `O(n²)` per epoch; its per-unit slope sits
-below PBFT's not through aggregation but because one attestation phase serves more
-committed decisions than PBFT's two broadcast phases. The production BLS
-aggregation that would cut this to `O(n)` is not in the original specification and
-is not modelled; introducing it, with the corresponding threshold-signature PBFT
-variant, is identified as future work in §6.3. Snowman's overhead matches `2·K·β`
-to within half a percent across its sweep (the factor of two being the
-query-and-response pair of each poll), confirming the per-validator `O(K·β)` cost
-the Avalanche family is built around
-[[wiki/sources/2026-04-21_team-rocket-avalanche-2019]].
+confidence threshold. Each trend matches the protocol's published asymptotic cost, the markers falling
+on the prediction across the sweep, the largest departures confined to `n = 4`.
+The slopes trace to each protocol's all-to-all structure: PBFT's PREPARE and
+COMMIT phases [[wiki/sources/2026-04-21_castro-liskov-pbft-1999]], Casper FFG's
+individually-signed attestation phase
+[[wiki/sources/2026-04-21_buterin-griffith-casper-ffg-2017]], and Snowman's
+`K`-peer query-and-response polls (the factor of two being the query–response
+pair) [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]], the last matched to
+within half a percent. Casper FFG's per-unit slope sits below PBFT's because one
+attestation phase serves more committed decisions than PBFT's two broadcast
+phases; the production BLS aggregation that would cut both protocols' cost is not
+in the original specification and is identified as future work (§6.3).
 
 The overhead admits two readings that must be kept apart. Per committed unit,
 Snowman is the most expensive protocol by an order of magnitude, roughly
@@ -143,18 +132,16 @@ once the adversarial sweep (§4.4) drives validators past their fault thresholds
 
 ### 4.2.6 Baseline summary
 
-At the production-scale end of the sweep (`n = 25`, twenty seeds) PBFT commits at
-1000 ms with 94.8 ± 1.0 tx/s goodput and 49.9 messages per committed unit; Casper
-FFG at 5000 ms with 79.6 ± 0.8 tx/s and 29.3 messages; and Snowman at 1000 ms with
-94.8 ± 1.0 tx/s but 601 messages per committed unit, every instance committing
-with no fork [[wiki/experiments/2026-06-08_baseline-cis]].
+At the production-scale end of the sweep (`n = 25`) the overhead gap spans an
+order of magnitude — ≈50 messages per committed unit for PBFT and ≈29 for Casper
+FFG against ≈601 for Snowman — every instance committing with no fork
+[[wiki/experiments/2026-06-08_baseline-cis]].
 
-Three results carry forward. All three protocols are correct on the honest path
-at every validator count. At zero delay both latency and goodput are flat in `n`,
-so neither separates the protocols here; that separation comes from the delay and
-adversarial axes. Communication overhead already separates them by an order of magnitude in a
-direction matching their published asymptotic costs, establishing the
-performance–structure contrast RQ3 asks about and that §4.3 will stress further.
+Two results carry forward: all three protocols are correct on the honest path at
+every validator count, and at zero delay latency and goodput are flat in `n`
+while communication overhead already separates them by an order of magnitude in a
+direction matching their published asymptotic costs — the performance–structure
+contrast RQ3 asks about, which §4.3 stresses further.
 
 ## 4.3 Network-delay sweep
 
@@ -170,12 +157,9 @@ loss as a control and then under per-message drop probabilities of 5%, 10%, and
 over twenty seeds with common random numbers, except the most expensive,
 Snowman at `n = 25` under heavy delay, over eight.
 
-The results that follow rest on two measurement properties: all cross-protocol
-latency is read from `commit_latency_ms`, the canonical time-to-finality column of
-§3.5, so each protocol's irreversibility milestone is compared like for like
-[[wiki/concepts/output-format]]; and delay and loss attack different properties,
-reported apart, with delay inflating time-to-finality (RQ1) and loss eroding
-liveness (RQ4) [[wiki/concepts/research-questions]].
+Delay and loss attack different properties and are reported apart: delay inflates
+time-to-finality (RQ1, §4.3.1) and loss erodes liveness (RQ4, §4.3.2)
+[[wiki/concepts/research-questions]].
 
 ### 4.3.1 Delay and time-to-finality
 
@@ -185,10 +169,9 @@ magnitude, governed by each protocol's round structure rather than the network
 network round-trip absorbed into each of its three phases — and is near-flat in
 `n` because those phases overlap across the validator set
 [[wiki/experiments/2026-06-10_delay-moderate]]. Casper FFG's rise of about 27% is
-slot-dominated, not network-dominated: the coherence rule `slot ≥ 4·E[delay]`
-(§3.4.3) rescales the finality-gadget slot, and the same factor scales the
-slot-bound finality interval, so its delay sensitivity is indirect, mediated by
-its slot clock [[wiki/concepts/experiment-matrix]]. Snowman is by far the most
+slot-mediated, not network-driven: the coherence rule of §3.4.3 rescales its slot
+with the delay regime, so the finality interval rises with it
+[[wiki/concepts/experiment-matrix]]. Snowman is by far the most
 delay-exposed, rising to a factor of twelve to fifteen over baseline: its
 confidence counter requires `β = 15` sequential poll rounds (§3.3.3), each a
 query-and-response exchange costing about two network delays. Its latency too is
@@ -203,10 +186,9 @@ Snowman is the exception: its exponential-timeline latency exceeds its
 uniform-timeline latency at both committee sizes (15.3 against 12.6 s at
 `n = 10`), because each poll round waits on the slowest of its `K` sampled peers
 and the memoryless tail inflates that slowest response across the fifteen
-sequential rounds [[wiki/experiments/2026-06-10_delay-moderate]]. Communication
-overhead, by contrast, does not move with delay: PBFT and Snowman hold within
-about two percent of the message counts measured at zero delay, confirming that
-message count is fixed by protocol structure, not network timing (§4.2.4).
+sequential rounds [[wiki/experiments/2026-06-10_delay-moderate]]. Message counts,
+by contrast, hold within about two percent of their zero-delay values: overhead is
+fixed by protocol structure, not network timing (§4.2.4).
 
 These results answer RQ1: as the network-delay distribution widens from the
 nominal baseline toward heavier tails, commit latency scales by a factor fixed by
@@ -229,9 +211,9 @@ whether it happens at all. The measure is the finalization rate: instances
 finalized under loss as a fraction of those finalized on the matched loss-free
 control [[wiki/experiments/2026-06-12_delay-heavy]]. Figure 4.4a plots it against
 drop probability per protocol and committee size, showing three degradation
-shapes: PBFT declines along a shallow tail that stays above zero to the deepest
-tested loss, Snowman holds a high plateau then falls to near-zero within a single
-step, and Casper FFG collapses at the first loss step. A fixed 95%-finalization
+shapes: PBFT's shallow tail staying above zero to the deepest tested loss,
+Snowman's high plateau then single-step cliff, and Casper FFG's collapse at the
+first loss step. A fixed 95%-finalization
 breakpoint was rejected as a resilience score: every protocol is already below it
 at the lightest tested loss, collapsing the field to an uninformative tie
 [[wiki/experiments/2026-06-13_delay-comparison]].
@@ -240,14 +222,12 @@ The protocols are therefore ranked by the area under the finalization-rate curve
 (AURC), with survival depth (the deepest loss at which a protocol still finalizes
 anything) as the tiebreak, the two committee sizes reported separately
 [[wiki/experiments/2026-06-13_delay-comparison]]. At `n = 10` the order is strict
-(Figure 4.4b): PBFT leads with an AURC of 0.253 and survives to 20% loss, Snowman
-follows at 0.174, Casper FFG trails at 0.149. At `n = 25` PBFT and Snowman tie at
-the top — point estimates of 0.351 and 0.369 with overlapping intervals,
-[0.327, 0.376] against [0.366, 0.372] — while Casper FFG remains last at 0.140.
-Unlike the deterministic baseline of §4.2, the finalization rate genuinely varies
-with the seed, since which messages drop depends on it, so these are
-non-degenerate Wilson-score intervals (§3.5), Snowman's at `n = 25` widest from
-being estimated over eight seeds rather than twenty
+(Figure 4.4b): PBFT leads (AURC 0.253) and survives to 20% loss, Snowman follows
+(0.174), Casper FFG trails (0.149). At `n = 25` PBFT and Snowman tie at the top —
+0.351 and 0.369 with overlapping intervals — while Casper FFG remains last
+(0.140). The finalization rate genuinely varies with the seed here, since which
+messages drop depends on it, so these intervals are non-degenerate (§3.5),
+Snowman's at `n = 25` widest from its eight seeds
 [[wiki/experiments/2026-06-12_delay-heavy]].
 
 Two findings stand out. PBFT is the only protocol still finalizing at 20% loss at
@@ -369,12 +349,10 @@ a per-protocol safety-violation rate, except for Snowman, whose probabilistic
 finality is reported through its analytical bound `ε` rather than a fork count
 [[wiki/concepts/evaluation-metrics]].
 
-The liveness intervals plotted throughout are 95% Wilson-score bands on the
-success rate (§3.5). Because the delayed-voting liveness pattern is invariant to
-the delay magnitude [[wiki/experiments/2026-06-14_delayed-voters]], that figure
-pools each adversarial point over all five magnitudes (roughly a hundred runs per
-point), so its bands are tighter than the twenty-run honest control; the
-silent-participation and equivocation figures carry twenty runs per point.
+The liveness intervals throughout are 95% Wilson bands on the success rate (§3.5).
+The delayed-voting figure pools each point over all five delay magnitudes
+(invariant to magnitude [[wiki/experiments/2026-06-14_delayed-voters]]), so its
+bands are tighter; the other adversarial figures carry twenty runs per point.
 
 ### 4.4.1 Delayed voting
 
