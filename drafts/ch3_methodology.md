@@ -337,9 +337,10 @@ latency is comparable whether or not a protocol carries a separate mempool.
 acceptance — so every finality-latency claim is read from it. Time is the
 simulator's model time; published production figures are order-of-magnitude
 sanity checks (§1.4), not validation targets. Cross-protocol throughput
-comparison uses `goodput`, the committed-transaction rate, and never `tps`, whose
-granularity is protocol-dependent (per block for PBFT and Snowman, per finalized
-epoch for Casper FFG) and is therefore not a like-for-like quantity.
+comparison uses `goodput`, the committed-transaction rate, rather than a raw
+decided-event rate, whose granularity is protocol-dependent (per block for PBFT
+and Snowman, per finalized epoch for Casper FFG) and is therefore not a
+like-for-like quantity.
 
 Table 3.3 gives the per-protocol metric schema across all four metric families.
 
@@ -349,7 +350,6 @@ Table 3.3 gives the per-protocol metric schema across all four metric families.
 | Metric | PBFT | Casper FFG | Snowman |
 | :-- | :-- | :-- | :-- |
 | `commit_latency_ms` | median per-node time to the first `decided` instance (`2f+1` `COMMIT`) | median per-node time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | median per-node time to counter-`β` acceptance of the first block |
-| `tps` | decided ACUs per window (`decided_count / t_max`) | decided epochs per window (`decided_count / t_max`) | decided blocks per window (`decided_count / t_max`) |
 | `goodput` | committed transactions per window (`committed_tx / time`) | committed transactions per window over finalized epochs | committed transactions per window |
 | `consensus_msgs_per_acu` | `delivery_count / decided_count`, which evaluates to `(2n²−2)/n = 2n − 2/n`; this is `O(n²)` per-instance traffic over an `n`-scaled decided-event denominator, **not** linear scaling | `delivery_count / decided_count`, measured `≈ 1.125n` (un-aggregated all-to-all votes, `O(n²)` traffic; production BLS aggregation to `O(n)` is not modeled) | `delivery_count / decided_count` (`O(K·β)` query/response deliveries per validator, independent of `n`) |
 | `total_msgs_per_acu` | all deliveries per ACU; equals `consensus_msgs_per_acu`, as none of the three carries a separate mempool layer | as PBFT | as PBFT |

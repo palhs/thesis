@@ -29,7 +29,7 @@ interval is degenerate regardless.
 ### 4.2.1 Statistical reliability
 
 The seed has almost no effect at this baseline: every structural metric (commit
-latency, decision rate, message overhead, success rate, and fork rate) has a
+latency, message overhead, success rate, and fork rate) has a
 coefficient of variation of zero across the twenty seeds and therefore a
 degenerate confidence interval, because at zero delay a protocol's round
 structure and message counts are fixed once `(protocol, n)` is, and the only
@@ -69,13 +69,9 @@ sweep of §4.3.
 
 ### 4.2.3 Throughput and goodput
 
-The schema's two throughput columns are not interchangeable. The decision rate
-`tps` grows linearly in `n`, per-validator constant at 0.95 for PBFT and Snowman
-and 0.40 for Casper FFG (Figure 4.1c), confirming that it is a decision-event rate
-scaling with the validator set, not a measure of system throughput. The
-comparable measure is goodput (§3.5), the rate of committed transaction bytes,
+Throughput is reported as goodput (§3.5), the rate of committed transactions,
 flat in `n`: approximately 95 tx/s for the per-block protocols PBFT and Snowman and
-approximately 80 tx/s for Casper FFG (Figure 4.1d). The Casper FFG shortfall is a
+approximately 80 tx/s for Casper FFG (Figure 4.1a). The Casper FFG shortfall is a
 finality-tail effect: its per-epoch finality leaves the window's last unfinalized
 epoch uncommitted, a fixed end-of-window loss the per-block protocols avoid. Flat goodput is the expected result on a latency-only model with no
 per-transaction cost and no queue, where offered load below the protocol's
@@ -86,7 +82,7 @@ deferred [[wiki/concepts/output-format]].
 **Figure 4.1 — Baseline scaling with validator-set size.** Per-protocol metrics
 across `n ∈ {4, 7, 10, 16, 25}` at zero injected delay, twenty seeds per cell:
 (a) goodput with 95% confidence intervals, the sole non-degenerate interval;
-(b) median commit latency; (c) decision rate (`tps`); (d) goodput. Source:
+(b) median commit latency. Source:
 `results/baseline/plots/baseline_panel.pdf`
 [[wiki/experiments/2026-06-08_baseline-cis]]
 [[wiki/experiments/2026-06-03_scaling-baseline]].

@@ -70,26 +70,22 @@ def _save(fig, plot_dir: str, fname: str) -> str:
 # --------------------------------------------------------------------------- #
 
 def baseline_panel(plot_dir: str = bp.PLOT_DIR) -> str:
-    """2x2 baseline panel: (a) goodput w/ 95% CI, (b) commit latency,
-    (c) decision-rate tps, (d) goodput (plain). x-axis is validator-set size n;
-    Snowman's curve starts at n=7 (absent at n=4 by design)."""
+    """1x2 baseline panel: (a) goodput w/ 95% CI, (b) commit latency. x-axis is
+    validator-set size n; Snowman's curve starts at n=7 (absent at n=4 by
+    design). The decision-event (tps) panel and the redundant plain-goodput
+    panel were retired with the tps metric: goodput is the sole cross-protocol
+    throughput axis, and panel (a) already carries it with CI bars."""
     rows = analysis.load_rows(bp.CSV_PATH)
     idx = analysis.by_metric(analysis.aggregate(rows))
 
-    fig, axes = plt.subplots(2, 2, figsize=(10.5, 8.0))
-    (ax_a, ax_b), (ax_c, ax_d) = axes
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    ax_a, ax_b = axes
 
     bp._draw_metric(ax_a, idx, "goodput",
                     "(a) goodput (mean $\\pm$ 95% CI)",
                     "goodput (committed tx/s)", show_ci=True, legend=True)
     bp._draw_metric(ax_b, idx, "commit_latency_ms",
                     "(b) commit latency", "commit latency (ms)",
-                    show_ci=False, legend=False)
-    bp._draw_metric(ax_c, idx, "tps",
-                    "(c) decision-event rate", "tps (decided events/s)",
-                    show_ci=False, legend=False)
-    bp._draw_metric(ax_d, idx, "goodput",
-                    "(d) goodput", "goodput (committed tx/s)",
                     show_ci=False, legend=False)
     return _save(fig, plot_dir, "baseline_panel")
 

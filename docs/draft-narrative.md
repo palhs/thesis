@@ -176,8 +176,9 @@ wiki page that authorizes the deviation.
 
 - Cross-protocol **latency** is read from `commit_latency_ms` (the canonical
   time-to-finality column), never `finality_latency_ms` (§4.2.6).
-- Cross-protocol **throughput** uses `goodput`, never `tps` (`tps` is a
-  protocol-granularity decision-event rate, not like-for-like).
+- Cross-protocol **throughput** uses `goodput`, the committed-transaction rate.
+  A raw decided-event rate (the retired `tps` column — protocol-granularity, not
+  like-for-like) is not reported as throughput and must not be reintroduced as one.
 - All per-unit metrics use the **ACU** denominator.
 - **Snowman `n = 4`** is excluded from comparative tables (rescaling degenerates
   to unanimity); report it once as a sanity check at most.
