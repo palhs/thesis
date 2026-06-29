@@ -10,12 +10,7 @@ conditions their guarantees assume away. Table 6.1 collects the answers to the f
 research questions; each answer is a claim about the representative implementation
 evaluated, not about its whole protocol family. Each answer is set by a structural
 choice rather than by the fault fraction alone, and no protocol is robust to every
-adversary because each structural defense is also an exposure. Two of the
-cross-regime axes are not symmetric measured contests: accountable safety is a
-capability only Casper FFG offers by construction, and the equivocation-safety
-comparison turns on a difference in the *kind* of failure each protocol admits —
-PBFT's fork is measured directly, whereas Snowman's safety is reported through an
-analytical bound the simulator never witnesses.
+adversary because each structural defense is also an exposure.
 
 **Table 6.1 — The five research questions and their answers over the three
 protocols evaluated.** Source: [[wiki/concepts/research-questions]],
@@ -52,14 +47,13 @@ The findings hold within boundaries that Chapter 3 fixed.
   configuration that is at once cheap, fast, and resilient is a statement about the
   measured plane rather than the whole design space.
 - **Family-vs-protocol generalization.** Each verdict is established for one
-  representative implementation — classical all-to-all PBFT, the Casper FFG finality
-  gadget without LMD-GHOST, and a linearized small-`n` Snowman — and does not
-  transfer automatically to the rest of that protocol's family. A family-mate with a
-  different structural choice can invert a verdict: HotStuff replaces PBFT's
-  all-to-all round with a leader-collected threshold-signature pipeline that lowers
-  communication overhead from `O(n²)` to `O(n)`, so the RQ3 cost standing of PBFT is
-  a property of the classical construction measured here, not of the leader-based
-  family as such [[wiki/algorithms/pbft#communication-complexity]].
+  representative implementation and does not transfer automatically to the rest of
+  its family. A family-mate with a different structural choice can invert a verdict —
+  HotStuff replaces PBFT's all-to-all round with a leader-collected
+  threshold-signature pipeline that lowers overhead from `O(n²)` to `O(n)`, so PBFT's
+  RQ3 cost standing is a property of the classical construction measured here, not of
+  the leader-based family as such
+  [[wiki/algorithms/pbft#communication-complexity]].
 - **Snowman safety witnessed by bound.** Snowman's safety is reported through its
   analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate, so its
   safety standing is the weakest-witnessed of the three (§3.5)
@@ -127,11 +121,9 @@ consensus protocols were subjected to the same delay and adversarial conditions
 and measured against one schema, and the comparative reading that harness made
 possible: not a winner, but a map of which structural commitment places each
 representative implementation where on the performance–security frontier. No one
-of the three dominates — a verdict that rests on the measured performance and
-resilience axes together with two safety axes that are definitional rather than
-measured, accountability being a capability only Casper FFG offers by construction
-and Snowman's equivocation safety resting on an analytical bound the simulator
-never witnesses. Because the same structural choice that places a family on one
+of the three dominates — a verdict resting on the measured axes plus two safety
+axes that are definitional rather than measured (§5.3). Because the same
+structural choice that places a family on one
 corner is what exposes it on another, the map records mechanisms rather than an
 artifact of the comparison set. The
 incidents that opened this study (§1.2) — Ethereum's May 2023 finality stall [21]

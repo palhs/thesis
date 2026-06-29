@@ -85,12 +85,9 @@ within half a percent. Casper FFG's per-unit slope sits below PBFT's because one
 attestation phase serves more committed decisions than PBFT's two broadcast
 phases; the production BLS aggregation that would cut both protocols' cost is not
 in the original specification and is identified as future work (§6.3). This
-overhead verdict is a property of the implemented protocol, classical PBFT with
-its `O(n²)` all-to-all PREPARE and COMMIT broadcasts, not of the leader-based
-family as a whole: a linear-message family-mate such as HotStuff, which collects
-votes at a rotating leader for an `O(n)` per-decision cost, would invert PBFT's
-standing on this axis. The claim is therefore protocol-level, not family-level
-[[wiki/sources/2026-04-21_castro-liskov-pbft-1999]].
+verdict is a property of classical PBFT's `O(n²)` all-to-all broadcasts, not the
+leader-based family as a whole — a linear-message descendant such as HotStuff
+would invert PBFT's standing on this axis (§6.2).
 
 The overhead admits two readings that must be kept apart. Per committed unit,
 Snowman is the most expensive protocol by an order of magnitude, roughly

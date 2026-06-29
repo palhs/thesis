@@ -15,12 +15,10 @@ Pareto-dominance definition and the measurement conventions fixed in Chapter 3
 questions rather than a set chosen to make the families differ, so a family that
 dominated would do so on the very quantities the evaluation was designed to
 measure. Throughout, the verdicts are about the *implemented* protocol — classical
-PBFT with its `O(n²)` all-to-all commit, the Casper FFG finality gadget without an
-LMD-GHOST fork-choice rule, and a linearized small-`n` Snowman — and not the
-family in the abstract: a family-mate can invert a verdict, and the communication
-axis below is the clearest case, where a linear-message HotStuff-style descendant
-would overturn PBFT's `O(n²)` overhead. The synthesis adds a reading, not a
-measurement [[wiki/concepts/output-format]].
+`O(n²)` PBFT, the Casper FFG finality gadget without LMD-GHOST, and a linearized
+small-`n` Snowman — not the family in the abstract, since a family-mate can invert
+a verdict (§6.2). The synthesis adds a reading, not a measurement
+[[wiki/concepts/output-format]].
 
 ## 5.2 The cross-regime frontier
 
@@ -33,44 +31,26 @@ read these values off the table rather than restating them. The table is the
 anchor for the rest of the chapter; the no-dominance claim rests on it and on the
 prose argument of §5.3, not on the radar of Figure 5.1.
 
-Six of the eight axes are *measured* contests, decided by numbers the simulator
-produced under matched assumptions: baseline latency, communication overhead,
-time-to-finality under delay, loss resilience, and the two liveness axes. The
-remaining two are not measured comparisons and must be read with that caveat. The
-accountable-safety axis is *definitional*: attributable, slashable failure is a
-capability only a slashing-based protocol offers by construction, so Casper FFG
-holds that axis uncontested rather than by out-scoring a rival. The
-equivocation-safety axis is *analytical*: Snowman's first-place position rests on
-the bound `ε ≈ (1−α_c/K)^β` (≈ 10⁻¹⁵), a probabilistic guarantee the simulator
-never empirically witnesses, whereas PBFT's fork at the same axis is a *measured*
-deterministic event. The two are different *kinds* of guarantee, not two points on
-one scale: Snowman is best on this axis only because it presents no fork-inducing
-surface for the simulator to exercise, so its safety is a probabilistic analytical
-claim and weaker in kind than PBFT's measured deterministic safety, not stronger.
-
-Figure 5.1 renders the same eight axes as an overlaid radar, but it is
-illustrative only. Each axis is normalized to *ordinal rank* — best, middle, worst
-— so the figure discards all magnitude: a family that is best by a hair and one
-that is best by an order of magnitude both reach the outer ring, and a family that
-loses an axis by an order of magnitude shows only as an inner-ring point. Snowman's
-communication overhead, for instance, is roughly an order of magnitude worse than
-the other two families (≈ 14× PBFT at `n = 16`), yet the radar registers it as a
-single inner-ring point indistinguishable from a near miss. The radar is therefore
-a visual summary of the *shape* of non-domination, not its evidence; the evidence
-is Table 5.1 and the argument of §5.3.
+Two of the eight axes are not symmetric measured contests. Accountable safety is
+*definitional* — only a slashing-based protocol can make a failure attributable, so
+Casper FFG holds it by construction. Equivocation safety is *analytical* — Snowman
+ranks first on the bound `ε ≈ (1−α_c/K)^β` (≈ 10⁻¹⁵) the simulator never witnesses,
+a different *kind* of guarantee than PBFT's measured deterministic fork, not a
+stronger one on a shared scale. Figure 5.1 renders the eight axes as a radar, but it
+is illustrative only: ordinal-rank normalization discards magnitude, so Snowman's
+order-of-magnitude overhead deficit (≈ 14× PBFT at `n = 16`) collapses to a single
+inner-ring point — the evidence is Table 5.1, not the radar.
 
 **Table 5.1 — Cross-regime comparison of the three families on the
 performance–security plane (`n = 10 / 25`, 20 seeds; 8 for the Snowman `n = 25`
 delay cell).** Each row is one axis from the Chapter 4 sweeps; the final column
 names the family or families that are strict best on that axis. No family wins
 every row, and each of the three wins at least one row no other does, so each is
-non-dominated. Two rows are not symmetric measured contests. The equivocation-safety
-row ranks Snowman first on its analytical bound `ε` (reported, not witnessed; §3.5):
-Snowman presents no fork-inducing surface, so its first place is a probabilistic
-analytical guarantee of a different *kind* than PBFT's measured deterministic fork
-on the same row, not a stronger guarantee on one scale. The accountable-safety row
-names a capability only a slashing-based protocol can offer, so Casper FFG holds it
-uncontested by construction rather than by winning a comparison. The loss-resilience row reports the `n = 10` ranking, where
+non-dominated. Two rows are not symmetric measured contests (§5.2): the
+equivocation-safety row ranks Snowman first on its analytical bound `ε` (reported,
+not witnessed; §3.5), and the accountable-safety row names a capability only a
+slashing-based protocol can offer, so Casper FFG holds it by construction. The
+loss-resilience row reports the `n = 10` ranking, where
 PBFT leads cleanly. At `n = 25` PBFT and Snowman are a statistical tie at the top,
 their area-under-the-retention-curve confidence intervals overlapping (Snowman
 0.369 [0.366, 0.372], PBFT 0.351 [0.327, 0.376]) on a reduced Snowman seed count
@@ -95,20 +75,14 @@ Source: [[wiki/concepts/key-findings]],
 **Figure 5.1 — Cross-family performance–security frontier (illustrative,
 ordinal only).** The three families scored on the eight cross-regime axes of
 Table 5.1, normalized by *ordinal rank* per axis: the outer ring marks the strict
-best on an axis, the center the worst, ties shared. Because the normalization is
-ordinal, the figure discards magnitude — a best-by-a-hair axis and a best-by-an-
-order-of-magnitude axis both reach the outer ring, and a large deficit collapses
-to a single inner-ring point (Snowman's communication overhead, ≈ 14× PBFT, shows
-only as an inner-ring point indistinguishable from a near miss). The figure is a
-visual summary of the shape of non-domination, not its evidence: the non-dominance
-claim rests on Table 5.1 and the prose argument of §5.3, not on this radar. With
-that caveat, the polygons overlap and none encloses another — each family reaches
-the outer ring on at least one axis no other matches (PBFT on the delay, loss, and
-liveness axes; Casper FFG on communication overhead and accountable safety; Snowman
-on the analytical equivocation-safety axis), so each is non-dominated and no family
-dominates. Of those corners, two are not measured contests: accountable safety is
-Casper FFG's by construction, and Snowman's equivocation-safety corner is an
-unwitnessed analytical bound, not a measured win. Source:
+best on an axis, the center the worst, ties shared. Ordinal normalization discards
+magnitude — a large deficit collapses to a single inner-ring point (Snowman's
+communication overhead, ≈ 14× PBFT, shows only as an inner-ring point) — so the
+evidence is Table 5.1 and §5.3, not this radar. With that caveat, the polygons
+overlap and none encloses another — each family reaches the outer ring on at least
+one axis no other matches (PBFT on the delay, loss, and liveness axes; Casper FFG on
+communication overhead and accountable safety; Snowman on the analytical
+equivocation-safety axis), so each is non-dominated and no family dominates. Source:
 [[wiki/concepts/key-findings]], [[wiki/experiments/2026-06-13_delay-comparison]],
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
@@ -124,26 +98,14 @@ axes; Snowman the equivocation-safety axis. Each is therefore non-dominated. Thi
 answers RQ5 directly over the three protocols evaluated: a consistent
 performance–security frontier exists, and no family dominates it.
 
-The robustness of the verdict turns on which corners are measured contests. Two of
-the eight axes are not. The accountable-safety axis is definitional — only a
-slashing-based protocol can make a failure attributable and slashable, so Casper
-FFG holds it by construction. The equivocation-safety axis is analytical — Snowman
-ranks first on the `ε` bound, a probabilistic guarantee the simulator never
-witnesses, while PBFT's fork on the same axis is a measured deterministic event of
-a different kind. Stripping both non-measured axes is the honest test of
-non-domination, and it cuts unevenly. Two families keep a uniquely-best measured
-corner: Casper FFG on communication overhead, PBFT on delay, loss, and liveness.
-Snowman does not. On the measured axes alone Snowman is best on none outright — it
-ties PBFT for the lowest baseline latency and is bested by PBFT on delay — so its
-distinct corner is the analytical equivocation-safety bound, which the simulator
-cannot confirm. The multi-cornered shape that establishes no-dominance therefore
-survives the removal of the definitional accountable-safety row, because Casper FFG
-and PBFT each retain a measured corner; it does not survive the additional removal
-of the analytical equivocation-safety row as a *three*-way contest, since Snowman's
-sole unique corner is that analytical bound. The honest statement is that
-no-domination among PBFT and Casper FFG rests entirely on measured contests,
-whereas Snowman's claim to non-domination rests on an unwitnessed analytical
-guarantee rather than on a measured win.
+The robustness of this verdict turns on which corners are measured. Stripping the
+two non-measured axes (accountable safety, definitional to Casper FFG; equivocation
+safety, Snowman's unwitnessed analytical bound) cuts unevenly: Casper FFG keeps a
+measured corner (communication overhead) and PBFT keeps three (delay, loss,
+liveness), but Snowman keeps none — on the measured axes it only ties PBFT on
+baseline latency and is bested on delay. So no-domination between PBFT and Casper
+FFG rests on measured contests, whereas Snowman's claim to non-domination rests on
+an analytical bound the simulator cannot confirm.
 
 **Every defense is also an exposure.** The frontier has the shape it does because
 the structural choice that places a family at the outer ring on one axis is the
