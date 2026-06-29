@@ -5,10 +5,9 @@
 This thesis measured, on matched assumptions and in a single harness, how three
 representative Layer-1 consensus protocols — PBFT, Casper FFG, and Snowman —
 behave under the network and adversarial conditions their guarantees assume away.
-Table 6.1 collects the answers to the five research questions; the through-line is
-that each answer is set by a structural choice rather than by the fault fraction
-alone, and that no protocol is robust to every adversary because each structural
-defense is also an exposure.
+Table 6.1 collects the answers to the five research questions. Each answer is set
+by a structural choice rather than by the fault fraction alone, and no protocol is
+robust to every adversary because each structural defense is also an exposure.
 
 **Table 6.1 — The five research questions and their answers over the three
 protocols evaluated.** Source: [[wiki/concepts/research-questions]],
@@ -106,13 +105,13 @@ simplifying assumptions that made the controlled comparison possible
 
 ## 6.4 Concluding remarks
 
-The contribution of this thesis is a single harness in which representative
-Layer-1 consensus protocols were subjected to the same delay and adversarial
-conditions and measured against one schema, together with the comparative reading
-it made possible: not a winner, but a map of which structural commitment places
-each family where on the performance–security frontier. Because the same
-structural choice that places a family on one corner is what exposes it on another,
-this is a map of mechanisms rather than an artifact of the comparison set. The
+This thesis contributes a single harness in which representative Layer-1
+consensus protocols were subjected to the same delay and adversarial conditions
+and measured against one schema, and the comparative reading that harness made
+possible: not a winner, but a map of which structural commitment places each
+family where on the performance–security frontier. Because the same structural
+choice that places a family on one corner is what exposes it on another, the map
+records mechanisms rather than an artifact of the comparison set. The
 incidents that opened this study (§1.2) — Ethereum's May 2023 finality stall [21]
 and the Solana and Cosmos liveness halts — are read here not as interchangeable
 faults to be engineered away by one better protocol, but as the separable

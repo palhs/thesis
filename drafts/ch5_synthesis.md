@@ -3,7 +3,7 @@
 ## 5.1 The joint reading
 
 Chapter 4 isolated one stress axis at a time — validator-set size, network delay,
-and adversarial behavior — each yielding a clear per-axis verdict but no joint
+and adversarial behavior — and each produced a clear per-axis verdict but no joint
 reading. This chapter takes up RQ5: whether a consistent Pareto frontier of the
 performance–security tradeoff exists across the three protocols evaluated (PBFT,
 Casper FFG, and Snowman) and whether any one dominates the others across all
@@ -98,8 +98,8 @@ answer but starves on no answer. PBFT shows the same inversion across the
 security boundary: the leader-based, exact-quorum commit rule whose view-change
 recovery carries it through delay, loss, and silence is the rule that, past the
 fault threshold, forks without leaving slashable evidence. Casper FFG sits at
-neither extreme — never first on any axis, yet never catastrophic on any either,
-trailing on latency and loss-resilience while holding the accountable-failure
+neither extreme: never first on any axis, yet never catastrophic on any either.
+It trails on latency and loss-resilience while holding the accountable-failure
 corner that only a slashing-based protocol can occupy, where an equivocation
 becomes attributable, slashable stake rather than an unattributable fork. The
 contribution of this synthesis is that map of structural commitments to their
@@ -110,7 +110,7 @@ bought with latency: the protocols that retain finalization deepest into packet
 loss are exactly the ones that pay the most time-to-finality to do so, while the
 family that refuses the trade and stays near unit latency dies first
 (Figure 4.5c). No measured configuration escapes the purchase, so the frontier
-carries a gap rather than a point — the corner that would be cheap, fast, and
+carries a gap rather than a point: the corner that would be cheap, fast, and
 resilient at once is unoccupied.
 
 ## 5.4 Implications and hand-off
@@ -126,7 +126,7 @@ accepts the cost the same mechanism imposes elsewhere. The deployment incidents
 that opened this study (§1.2) are heterogeneous in exactly this way: a liveness
 halt under load on one network and a multi-epoch finality stall on another are not
 competing symptoms of one immature technology but the same class of failure seen
-from two distinct structural commitments, the predictable shadows of the
+from two distinct structural commitments, the predictable consequence of the
 mechanisms Table 5.1 maps [[wiki/concepts/key-findings]].
 
 This chapter answered the last of the five research questions and, with it, closed

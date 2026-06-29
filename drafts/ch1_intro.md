@@ -166,7 +166,7 @@ The thesis makes four contributions
 3. **Dataset and analysis.** An experimental dataset and comparative
    analysis quantifying the performance–security tradeoff across the three
    implemented families under matched conditions, answering RQ1–RQ4 and
-   underwriting the RQ5 synthesis over those three.
+   supporting the RQ5 synthesis over those three.
 4. **Methodological framing.** The simulation-based, metrics-instrumented
    approach of Gervais *et al.* [17], extended from Proof-of-Work to the
    three implemented BFT families on a single harness with matched assumptions.

@@ -241,7 +241,7 @@ baseline (Family A).
 
 Every appended row embeds a `commit_hash` and `seed` column, pinning the exact
 code and random draws that produced it, so any number can be regenerated from the
-record alone — the hard evidence of reproducibility. Results land in a per-trial
+record alone. Results land in a per-trial
 CSV that is aggregated to per-configuration means with 95% confidence intervals,
 feeding the Chapter 4 plots. Family B replaces the network phase, Family C
 attaches an `AdversaryProfile` to `φ` of the validators, and the other protocols

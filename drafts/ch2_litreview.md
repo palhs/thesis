@@ -8,10 +8,9 @@ behave arbitrarily is the Byzantine Generals Problem [1]
 [[wiki/concepts/byzantine-generals]]. Chapter 1 fixed the three results that
 bound any solution — the `3f+1` Byzantine threshold [1], the FLP impossibility
 [2], and the partial-synchrony relaxation that makes consensus solvable for
-`f < n/3` [3] [[wiki/concepts/synchrony-models]]. No foundational result
-permits a free lunch: what they jointly produce is not a single protocol but a
-design space of concessions, and every Layer-1 protocol begins by choosing
-which constraint to relax along the synchrony axis (synchronous through
+`f < n/3` [3] [[wiki/concepts/synchrony-models]]. Jointly they produce not a single
+protocol but a design space of concessions, and every Layer-1 protocol begins
+by choosing which constraint to relax along the synchrony axis (synchronous through
 partial-synchronous, asynchronous, probabilistic), the fault-model axis (crash
 through omission to Byzantine, with stake-weighting where applicable
 [[wiki/concepts/fault-model]]), or both. The CAP theorem [18] makes the
@@ -22,10 +21,10 @@ Avalanche-style continues with weakened guarantees to keep Availability
 [[wiki/concepts/cap-theorem]].
 
 PBFT [4] and its descendants HotStuff [5] and Tendermint [6] take the most
-direct point — a `3f+1` quorum under partial synchrony, where the
+direct option, a `3f+1` quorum under partial synchrony, where the
 quorum-intersection arithmetic recurs [[wiki/concepts/quorum-arithmetic]]. The
-other two families are best read as answers to a single question: once PBFT's
-point is fixed, which assumption to loosen next. Figure 2.1 traces the
+other two families answer a single question: once PBFT's choice is fixed, which
+assumption to loosen next. Figure 2.1 traces the
 propagation from the Byzantine Generals Problem to the three families.
 
 **Figure 2.1 ([[diagrams/concepts/bft-families-tree]]).** From the Byzantine
@@ -123,8 +122,8 @@ Hardware, workload, batching, topology, and adversarial assumption differ
 between every pair of rows. The table cannot answer whether PBFT's thousands
 of ops/s on a LAN reflects a family advantage or a more permissive harness. Nor
 can it answer whether Avalanche's 1.35 s confirmation is structural or an
-artifact of one `K, β` choice. The comparative question is hard to phrase before
-it is hard to answer.
+artifact of one `K, β` choice. The comparative question cannot even be posed in
+a shared vocabulary, let alone answered.
 
 ### 2.3.2 The surveys measure nothing, and the one precedent targets PoW
 

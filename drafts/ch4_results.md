@@ -68,7 +68,7 @@ across `n ∈ {4, 7, 10, 16, 25}` at zero injected delay, twenty seeds per cell:
 ### 4.2.4 Communication overhead
 
 Communication overhead is the metric on which the protocols separate most
-sharply, and the one that answers RQ3 [[wiki/concepts/research-questions]].
+sharply, and it answers RQ3 [[wiki/concepts/research-questions]].
 Messages per committed unit grow with `n` for all three, but the slopes differ by
 an order of magnitude (Figure 4.2, logarithmic axis): PBFT approaches `2n`, Casper
 FFG `1.2n`, and Snowman `2·K·β`, where `K` is the poll sample size and `β` the
@@ -227,7 +227,7 @@ the worst loss they survive, converting that cost into survival: a long tail to
 it inflates latency by only about three to ten percent, but over the few seeds
 that still finalize and to no benefit, since it no longer finalizes by 10% loss.
 No configuration is both cheap and resilient; protecting liveness against a lossy
-network is a choice of how much latency to spend, not whether to spend it.
+network requires spending latency, and the only variable is how much.
 
 The delay-family verdict follows. PBFT degrades most gracefully, alive at the
 deepest tested loss at both committee sizes; Snowman is strong but brittle, best
