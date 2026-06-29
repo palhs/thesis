@@ -73,7 +73,7 @@ are in parentheses. Notation is defined below the table.
 | Agreement threshold | ~⅔ of all validators (`2f+1`) | ~⅔ of all stake | ~80% of a small random sample (`α_c` of `K`) |
 | Agreement rounds | twice (`prepare`, `commit`) | twice, ≥2 epochs apart (`justify`, `finalize`) | `β`≈15 sampling rounds in a row |
 | Finality guarantee | deterministic, `ε = 0` | deterministic, `ε = 0` | probabilistic, `ε ≤ (1−α_c/K)^β` |
-| Communication cost | `O(n²)` | `O(n)`, BLS-aggregated to ~1 | `O(K·β)`, independent of `n` |
+| Communication cost | `O(n²)` | `O(n)`, BLS-aggregated to ~1 | `O(K·β)` per validator (aggregate `O(n·K·β)`) |
 | Adversarial pressure point | stall the leader (liveness); safety holds `<n/3` | stall finality; breaking safety burns ≥⅓ stake | stall the counter (liveness); safety statistical |
 
 **Notation.**

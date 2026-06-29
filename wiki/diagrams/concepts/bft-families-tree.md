@@ -19,15 +19,15 @@
 
 ```mermaid
 flowchart TD
-    BGP["<b>Byzantine Generals Problem</b><br/>n ≥ 3f+1, safety + liveness [1]"]
+    BGP["<b>Byzantine Generals Problem</b><br/>n ≥ 3f+1, safety + liveness"]
 
     BGP --> A["Deterministic<br/>quorum-based<br/>partial sync"]
     BGP --> B["Deterministic<br/>stake-weighted<br/>+ economic"]
     BGP --> C["Probabilistic<br/>random<br/>subsampling"]
 
-    A --> A1["<b>PBFT family</b><br/>PBFT, HotStuff, Tendermint<br/>[4]–[6]"]
-    B --> B1["<b>PoS-finality</b><br/>Casper FFG, Gasper<br/>[7], [8]"]
-    C --> C1["<b>Avalanche family</b><br/>Slush → Snowflake →<br/>Snowball → Avalanche<br/>[9], [10]"]
+    A --> A1["<b>PBFT family</b><br/>PBFT, HotStuff, Tendermint"]
+    B --> B1["<b>PoS-finality</b><br/>Casper FFG, Gasper"]
+    C --> C1["<b>Avalanche family</b><br/>Slush → Snowflake →<br/>Snowball → Avalanche"]
 
     classDef root      fill:#f4f4f4,stroke:#222,stroke-width:1.5px,color:#000
     classDef concession fill:#ffffff,stroke:#666,stroke-width:1px,color:#000
@@ -55,10 +55,15 @@ ordering on the same axis but is not implemented in this thesis — it
 is named only as a direction for further work (Chapter 6) and is
 therefore not drawn here.
 
-**Citation numerals match Chapter 2's reference list.** `[1]` is
-Lamport, Shostak, Pease (Byzantine Generals); `[4]–[6]` are
-PBFT/HotStuff/Tendermint; `[7], [8]` are Casper FFG and Gasper;
-`[9], [10]` are Avalanche and its formal re-analysis.
+**No citation numerals in the figure.** The boxes name the origin
+problem and the protocols only; the supporting citations (Lamport-
+Shostak-Pease for the Byzantine Generals Problem; PBFT/HotStuff/
+Tendermint; Casper FFG and Gasper; Avalanche and its formal
+re-analysis) live in the Chapter 2 §2.1 body prose, where the
+`\cite` keys resolve through biblatex. Bracketed numerals were
+removed from the diagram because a baked-in image cannot track the
+compiled bibliography's numbering, and the old hardcoded `[4]–[10]`
+labels had drifted out of sync with the LaTeX reference list.
 
 **Boxes carry no quantitative claim.** The figure is taxonomic, not
 quantitative. Fault thresholds, finality types, and metric
@@ -87,6 +92,14 @@ remaining 10 sequence diagrams onto the same toolchain.
 
 ## Revisions
 
+- **2026-06-29.** Removed the bracketed citation numerals (`[1]`, `[4]–[6]`,
+  `[7], [8]`, `[9], [10]`) from the four boxes. The baked-in numerals were the
+  old markdown numbering and no longer matched the compiled biblatex
+  bibliography (where those numbers resolve to deployment-incident sources, not
+  the protocol papers). A taxonomic figure does not need inline citations — the
+  protocols are cited in the §2.1 body prose — so the numerals were dropped
+  rather than re-baked, which would only re-desync on the next bib edit. `.svg`/
+  `.pdf` regenerated from the updated Mermaid source.
 - **2026-06-24.** Removed the fourth (DAG-based) family branch — node `D`
   ("Decouple data-availability from ordering") and `D1` ("Narwhal+Tusk,
   Bullshark, Mysticeti", `[11]–[13]`). The thesis was descoped to three

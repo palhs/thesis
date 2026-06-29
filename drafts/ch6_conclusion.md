@@ -3,11 +3,19 @@
 ## 6.1 Summary of findings
 
 This thesis measured, on matched assumptions and in a single harness, how three
-representative Layer-1 consensus protocols — PBFT, Casper FFG, and Snowman —
-behave under the network and adversarial conditions their guarantees assume away.
-Table 6.1 collects the answers to the five research questions. Each answer is set
-by a structural choice rather than by the fault fraction alone, and no protocol is
-robust to every adversary because each structural defense is also an exposure.
+representative Layer-1 consensus protocols, as implemented here — classical
+all-to-all PBFT, the Casper FFG finality gadget without its LMD-GHOST fork-choice,
+and a linearized small-`n` Snowman — behave under the network and adversarial
+conditions their guarantees assume away. Table 6.1 collects the answers to the five
+research questions; each answer is a claim about the representative implementation
+evaluated, not about its whole protocol family. Each answer is set by a structural
+choice rather than by the fault fraction alone, and no protocol is robust to every
+adversary because each structural defense is also an exposure. Two of the
+cross-regime axes are not symmetric measured contests: accountable safety is a
+capability only Casper FFG offers by construction, and the equivocation-safety
+comparison turns on a difference in the *kind* of failure each protocol admits —
+PBFT's fork is measured directly, whereas Snowman's safety is reported through an
+analytical bound the simulator never witnesses.
 
 **Table 6.1 — The five research questions and their answers over the three
 protocols evaluated.** Source: [[wiki/concepts/research-questions]],
@@ -18,8 +26,8 @@ protocols evaluated.** Source: [[wiki/concepts/research-questions]],
 | RQ1 | latency under rising network-delay variance | flat in `n`; PBFT +≈ 0.9 s, Casper FFG +≈ 27%, Snowman ×12–13 | round structure vs. `β` sequential polls |
 | RQ2 | sustained throughput as `φ` rises to the threshold | three modes: PBFT holds then cliffs, Casper FFG ≈ `1 − φ`, Snowman starves earliest | quorum structure |
 | RQ3 | communication overhead per committed unit | PBFT ≈ `2n`, Casper FFG ≈ `1.2n` (cheapest), Snowman ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | all-to-all / attestation vs. `K`-poll |
-| RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; the mechanism map | each structural defense is also an exposure |
-| RQ5 | consistent Pareto frontier; any dominance | a frontier exists; no family dominates | each family non-dominated on ≥ 1 axis |
+| RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; only PBFT's fork is measured, Snowman's safety rests on an unwitnessed analytical bound, Casper FFG alone is accountable by construction | each structural defense is also an exposure; safety differs in kind, not rank |
+| RQ5 | consistent Pareto frontier; any dominance | a frontier exists; no family dominates across the measured axes plus the definitional safety ones | each family non-dominated on ≥ 1 axis |
 
 ## 6.2 Limitations
 
@@ -43,6 +51,15 @@ The findings hold within boundaries that Chapter 3 fixed.
   high-throughput regime outside that span is not represented, so the absence of a
   configuration that is at once cheap, fast, and resilient is a statement about the
   measured plane rather than the whole design space.
+- **Family-vs-protocol generalization.** Each verdict is established for one
+  representative implementation — classical all-to-all PBFT, the Casper FFG finality
+  gadget without LMD-GHOST, and a linearized small-`n` Snowman — and does not
+  transfer automatically to the rest of that protocol's family. A family-mate with a
+  different structural choice can invert a verdict: HotStuff replaces PBFT's
+  all-to-all round with a leader-collected threshold-signature pipeline that lowers
+  communication overhead from `O(n²)` to `O(n)`, so the RQ3 cost standing of PBFT is
+  a property of the classical construction measured here, not of the leader-based
+  family as such [[wiki/algorithms/pbft#communication-complexity]].
 - **Snowman safety witnessed by bound.** Snowman's safety is reported through its
   analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate, so its
   safety standing is the weakest-witnessed of the three (§3.5)
@@ -109,9 +126,14 @@ This thesis contributes a single harness in which representative Layer-1
 consensus protocols were subjected to the same delay and adversarial conditions
 and measured against one schema, and the comparative reading that harness made
 possible: not a winner, but a map of which structural commitment places each
-family where on the performance–security frontier. Because the same structural
-choice that places a family on one corner is what exposes it on another, the map
-records mechanisms rather than an artifact of the comparison set. The
+representative implementation where on the performance–security frontier. No one
+of the three dominates — a verdict that rests on the measured performance and
+resilience axes together with two safety axes that are definitional rather than
+measured, accountability being a capability only Casper FFG offers by construction
+and Snowman's equivocation safety resting on an analytical bound the simulator
+never witnesses. Because the same structural choice that places a family on one
+corner is what exposes it on another, the map records mechanisms rather than an
+artifact of the comparison set. The
 incidents that opened this study (§1.2) — Ethereum's May 2023 finality stall [21]
 and the Solana and Cosmos liveness halts — are read here not as interchangeable
 faults to be engineered away by one better protocol, but as the separable

@@ -109,7 +109,15 @@ the family's message-complexity range, so the RQ3 verdict reported for
 
 The implementation is a simplified Casper FFG gadget [[wiki/algorithms/pos#simulator-mapping]]
 (justify→finalize over one epoch with a slashing branch; sequence diagram in
-Appendix A). Proposer assignment is a deterministic stake-weighted function of the global
+Appendix A). One simplification is more than cosmetic and must be stated plainly:
+Casper FFG is in reality a *finality gadget* layered over a separate
+fork-choice and block-production layer (LMD-GHOST in Ethereum's Gasper [8]),
+which this study removes. What is implemented and measured here is therefore the
+finality gadget running as a standalone protocol with its own proposer schedule,
+not a complete Gasper deployment; its latency, throughput, and liveness numbers
+are properties of the gadget-as-modeled, and the "no LMD-GHOST" entry in
+Table 3.2 is this deliberate simplification, not an omission to be read past.
+Proposer assignment is a deterministic stake-weighted function of the global
 seed and slot, verified for fairness at four stake distributions
 [[experiments/2026-05-23_pos-selection-fairness]]; slashing is modeled as
 detection-and-halt only, so the economic penalty lies outside scope per §1.4. The one load-bearing departure is the slot cadence, calibrated against
@@ -323,10 +331,20 @@ takes up the full reflective limitations.
 - **Synthetic open-loop workload.** Poisson arrivals of fixed-size transactions
   at a zero conflict rate (§3.4.2), so real-traffic burstiness and
   conflict-driven reorganization lie outside the measured range.
-- **Sub-production scale.** The sweep `n ∈ {4, …, 25}` sits well below the
-  deployed scale, Snowman's in particular, so the RQ3 verdicts hold within this
-  range and extrapolate only through the sensitivity sweeps of §3.3.2 and §3.3.3;
-  the degenerate Snowman `n = 4` point is excluded (§3.3.3).
+- **Sub-production scale, and a collapsed subsample for Snowman.** The sweep
+  `n ∈ {4, …, 25}` sits well below the deployed scale, Snowman's in particular, so
+  the RQ3 verdicts hold within this range and extrapolate only through the
+  sensitivity sweeps of §3.3.2 and §3.3.3; the degenerate Snowman `n = 4` point is
+  excluded (§3.3.3). A sharper threat is specific to Snowman: the rescaling rule
+  `K = min(20, n−1)` (§3.3.3) sets `K ≈ n` at every tested committee size — at
+  `n = 10` the protocol samples 9 of its 10 peers, so it is barely *subsampling*
+  at all. Avalanche-style security is an asymptotic argument over a large sampled
+  population; at `n ∈ {7, 10}` the repeated-random-subsample mechanism that
+  distinguishes the family is largely collapsed. Snowman's measured delay, loss,
+  and silence fragility may therefore be partly an artifact of this degenerate
+  small-`n` regime rather than a property of Avalanche-style consensus at scale,
+  and the Snowman-specific failure modes of Chapter 4 are reported under that
+  caveat [[wiki/concepts/metric-reconciliation]].
 - **Leader-disruption surface uncovered.** The adversary grid exercises the three
   generic capabilities across the protocols — twelve of the eighteen
   (capability, protocol) pairs the catalogue defines — leaving six unexercised,

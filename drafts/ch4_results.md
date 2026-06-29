@@ -17,12 +17,13 @@ The baseline dataset sweeps validator-set size `n ∈ {4, 7, 10, 16, 25}` at
 twenty seeds per configuration under a common deterministic Poisson workload
 (100 tx/s, 512-byte transactions, zero conflict rate), with common
 random numbers so that seed `k` presents the same arrival stream to every
-protocol [[wiki/experiments/2026-06-03_scaling-baseline]]. The 300 trials,
-fifteen scenarios of twenty seeds, are aggregated to per-scenario means with
-95% confidence intervals [[wiki/experiments/2026-06-08_baseline-cis]]. Snowman
-is evaluated from `n = 7` upward: at `n = 4` its parameter rescaling collapses
-to the degenerate unanimity boundary `α_c = K` and is excluded by the schema
-[[wiki/concepts/output-format]].
+protocol [[wiki/experiments/2026-06-03_scaling-baseline]]. Snowman is excluded
+at `n = 4` — its parameter rescaling collapses to the degenerate unanimity
+boundary `α_c = K` there and is dropped by the schema
+[[wiki/concepts/output-format]] — leaving fourteen protocol×`n` cells, so the
+280 trials of twenty seeds each are aggregated to per-scenario means with 95%
+confidence intervals [[wiki/experiments/2026-06-08_baseline-cis]]. Snowman is
+therefore evaluated from `n = 7` upward.
 
 ### 4.2.1 Statistical reliability
 
@@ -83,7 +84,13 @@ pair) [[wiki/sources/2026-04-21_team-rocket-avalanche-2019]], the last matched t
 within half a percent. Casper FFG's per-unit slope sits below PBFT's because one
 attestation phase serves more committed decisions than PBFT's two broadcast
 phases; the production BLS aggregation that would cut both protocols' cost is not
-in the original specification and is identified as future work (§6.3).
+in the original specification and is identified as future work (§6.3). This
+overhead verdict is a property of the implemented protocol, classical PBFT with
+its `O(n²)` all-to-all PREPARE and COMMIT broadcasts, not of the leader-based
+family as a whole: a linear-message family-mate such as HotStuff, which collects
+votes at a rotating leader for an `O(n)` per-decision cost, would invert PBFT's
+standing on this axis. The claim is therefore protocol-level, not family-level
+[[wiki/sources/2026-04-21_castro-liskov-pbft-1999]].
 
 The overhead admits two readings that must be kept apart. Per committed unit,
 Snowman is the most expensive protocol by an order of magnitude, roughly
@@ -233,9 +240,14 @@ The delay-family verdict follows. PBFT degrades most gracefully, alive at the
 deepest tested loss at both committee sizes; Snowman is strong but brittle, best
 in class at light loss with a large committee but prone to sudden collapse; Casper
 FFG is fragile, never establishing a resilient plateau. The `n = 25` PBFT–Snowman
-tie is a genuine crossover: the two win on different virtues, Snowman on area
-under the curve (retaining 0.90 finality at 5% loss) and PBFT on survival depth
-(alone alive at 20%) [[wiki/experiments/2026-06-13_delay-comparison]]. Casper FFG's
+result is not a separable ranking but a non-rejection: the two AURC values (PBFT
+0.351, Snowman 0.369) sit inside overlapping confidence intervals, and the
+Snowman heavy-delay cell at this committee size rests on only eight seeds against
+the others' twenty, so the two are indistinguishable within the intervals rather
+than genuinely crossed. The descriptive numbers behind the tie still differ in
+shape — Snowman holds 0.90 finality at 5% loss while PBFT alone survives to 20% —
+but at `n = 25` the area-under-curve ordering between them cannot be resolved from
+this data [[wiki/experiments/2026-06-13_delay-comparison]]. Casper FFG's
 fragility is, in mechanism, the failure that motivated this study (§1.2):
 attestations that fail to reach a quorum — dropped by a lossy network here, delayed
 under attestation-processing pressure in Ethereum's multi-epoch finality stall of
@@ -337,9 +349,10 @@ Equivocation is the only one of the three strategies that can break safety: all
 three hold agreement to `φ = 0.33` and differ entirely above it, in the kind of
 failure rather than its onset (Figure 4.7). PBFT fails with a deterministic,
 unaccountable fork: at `φ = 0.40` two honest replicas commit conflicting values at
-the same height and the safety-violation rate steps from zero to 229 conflicting
-instances, identical at both committee sizes, a breach PBFT cannot attribute to
-its cause [[wiki/experiments/2026-06-18_equivocating-nodes]]. Casper FFG never
+the same height, and the safety-violation indicator steps from zero to one in
+every seed-run: all 229 of the run's decided instances fork, the count fixed by
+the round cadence and so identical at both committee sizes — a breach PBFT cannot
+attribute to its cause [[wiki/experiments/2026-06-18_equivocating-nodes]]. Casper FFG never
 forks but fails accountably, the failure surfacing as slashable stake that crosses
 the one-third line at `φ = 0.40` (Figure A.1), so a safety violation costs at least
 one-third of the stake, provably slashable
