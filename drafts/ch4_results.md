@@ -22,15 +22,13 @@ fifteen scenarios of twenty seeds, are aggregated to per-scenario means with
 95% confidence intervals [[wiki/experiments/2026-06-08_baseline-cis]]. Snowman
 is evaluated from `n = 7` upward: at `n = 4` its parameter rescaling collapses
 to the degenerate unanimity boundary `α_c = K` and is excluded by the schema
-[[wiki/concepts/output-format]]. Confidence intervals use a Student-t critical
-value at nineteen degrees of freedom; for the deterministic metrics below the
-interval is degenerate regardless.
+[[wiki/concepts/output-format]].
 
 ### 4.2.1 Statistical reliability
 
 The seed perturbs only goodput — every structural metric is degenerate once
 `(protocol, n)` is fixed — so goodput carries the sole non-degenerate interval
-(Figure 4.1a) and twenty seeds are more than adequate.
+(Figure 4.1a).
 
 ### 4.2.2 Latency
 
@@ -288,8 +286,7 @@ finality is reported through its analytical bound `ε` rather than a fork count
 
 The liveness intervals throughout are 95% Wilson bands on the success rate (§3.5).
 The delayed-voting figure pools each point over all five delay magnitudes
-(invariant to magnitude [[wiki/experiments/2026-06-14_delayed-voters]]), so its
-bands are tighter; the other adversarial figures carry twenty runs per point.
+(invariant to magnitude [[wiki/experiments/2026-06-14_delayed-voters]]).
 
 ### 4.4.1 Delayed voting
 

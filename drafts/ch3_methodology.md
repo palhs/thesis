@@ -222,9 +222,8 @@ peak-throughput deferred to a task that first adds a capacity or cost model
 The three protocols share the same seed set at every configuration point, and
 because randomness is keyed by stream identity (§3.2), all three draw the same
 network and arrival randomness. The cross-protocol comparison is therefore paired
-under common random numbers, a variance-reduction technique on the paired
-differences whose seed count and interval machinery are set out in §3.5
-[[wiki/concepts/experiment-matrix]].
+under common random numbers; the seed count and interval machinery are set out
+in §3.5 [[wiki/concepts/experiment-matrix]].
 
 ### 3.4.3 One run, end to end
 
@@ -300,18 +299,14 @@ complement of `success_rate`. Validity holds by construction and is not
 instrumented.
 
 Snowman is the exception: its finality is probabilistic, so its safety is
-reported via the analytical bound `(1 − α_c/K)^β` of §3.3.3 — below feasible seed
-counts at the comparison `β = 15` — plus an empirical conflicting-decision rate
-collected only in a separate RQ4 safety regime at `β ∈ {3, 5}`, never placed on a
+reported via the analytical bound `(1 − α_c/K)^β` of §3.3.3, plus an empirical
+conflicting-decision rate collected only in a separate RQ4 safety regime at
+`β ∈ {3, 5}`, never placed on a
 cross-protocol throughput axis since lowering `β` cuts the `O(K·β)` cost
 [[wiki/concepts/evaluation-metrics]].
 
-Protocols are compared under the common random numbers of §3.4.2: sharing the
-network, arrival, and adversary-placement streams makes each cell measure the
-variance of the cross-protocol *difference*, which is what makes a modest
-`n_runs = 20` per cell sufficient, raised to `30` at the near-threshold Family C
-points. Because even 30 runs bound the true rate only below `≈ 0.11`,
-near-threshold safety verdicts are read as bounds, not point estimates.
+Each cell is run over `n_runs = 20` seeds, raised to `30` at the near-threshold
+Family C points.
 
 ## 3.6 Summary and threats to validity
 
