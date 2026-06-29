@@ -60,22 +60,13 @@ Source: [[wiki/concepts/key-findings]],
 | Accountable safety | none (unattributable fork) | slashable ≥ ⅓ stake | not applicable (probabilistic) | Casper FFG |
 
 **Figure 5.1 — Cross-family performance–security frontier.** The three families
-evaluated, scored on the eight cross-regime axes of Table 5.1 and normalized by
-ordinal rank per axis: the outer ring marks the strict best on an axis and the
-center the worst, with ties shared. The polygons overlap and none encloses
-another. Each family reaches the outer ring on at least one axis no other
-matches — PBFT on the delay, loss, and liveness axes, Casper FFG on communication
-overhead and accountable safety, Snowman on equivocation safety — so each is
-non-dominated and no family dominates, the verdict of Table 5.1 read directly off
-one image. The rank scale sets aside the magnitudes that drive it, which are the
-Chapter 4 headlines: Snowman's time-to-finality grows roughly sixty-twofold under
-delayed voting and its polling overhead reaches about fourteen times PBFT's, PBFT
-forks into 229 conflicting committed instances past its threshold, and Snowman's
-analytical safety bound is near `5 × 10⁻¹⁵` while Casper FFG exposes at least
-one-third of stake as slashable. Two axes are not symmetric contests, as in
-Table 5.1: equivocation safety ranks Snowman first on its reported analytical
-bound rather than an empirical witness, and accountable safety names a capability
-only a slashing-based protocol offers. Source:
+scored on the eight cross-regime axes of Table 5.1, normalized by ordinal rank
+per axis: the outer ring marks the strict best on an axis, the center the worst,
+ties shared. The polygons overlap and none encloses another — each family reaches
+the outer ring on at least one axis no other matches (PBFT on the delay, loss,
+and liveness axes; Casper FFG on communication overhead and accountable safety;
+Snowman on equivocation safety), so each is non-dominated and no family
+dominates. Source:
 [[wiki/concepts/key-findings]], [[wiki/experiments/2026-06-13_delay-comparison]],
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
