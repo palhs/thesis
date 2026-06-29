@@ -316,10 +316,7 @@ network, arrival, and adversary-placement streams makes each cell measure the
 variance of the cross-protocol *difference*, which is what makes a modest
 `n_runs = 20` per cell sufficient, raised to `30` at the near-threshold Family C
 points. Because even 30 runs bound the true rate only below `≈ 0.11`,
-near-threshold safety verdicts are read as bounds, not point estimates. The
-adversarial-threshold columns (`f_max_count`/`f_max_stake`, the smallest adversary
-fraction at which a run's invariant first breaks) and the Snowman safety columns
-are written only when the RQ4 sweep runs [[wiki/concepts/output-format]].
+near-threshold safety verdicts are read as bounds, not point estimates.
 
 ## 3.6 Summary and threats to validity
 
