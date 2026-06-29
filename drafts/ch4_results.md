@@ -15,7 +15,7 @@ with each protocol's published asymptotic theory.
 
 The baseline dataset sweeps validator-set size `n ∈ {4, 7, 10, 16, 25}` at
 twenty seeds per configuration under a common deterministic Poisson workload
-(`offered_rate = 100` tx/s, `tx_bytes = 512`, `conflict_rate = 0`), with common
+(100 tx/s, 512-byte transactions, zero conflict rate), with common
 random numbers so that seed `k` presents the same arrival stream to every
 protocol [[wiki/experiments/2026-06-03_scaling-baseline]]. The 300 trials,
 fifteen scenarios of twenty seeds, are aggregated to per-scenario means with

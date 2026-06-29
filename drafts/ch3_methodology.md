@@ -109,15 +109,14 @@ the family's message-complexity range, so the RQ3 verdict reported for
 
 The implementation is a simplified Casper FFG gadget [[wiki/algorithms/pos#simulator-mapping]]
 (justify→finalize over one epoch with a slashing branch; sequence diagram in
-Appendix A). Proposer assignment is a deterministic stake-weighted function of
-`(global_seed, slot)`, verified for fairness at four stake distributions
+Appendix A). Proposer assignment is a deterministic stake-weighted function of the global
+seed and slot, verified for fairness at four stake distributions
 [[experiments/2026-05-23_pos-selection-fairness]]; slashing is modeled as
 detection-and-halt only, so the economic penalty lies outside scope per §1.4. The one load-bearing departure is the slot cadence, calibrated against
 production: `slots_per_epoch = 2` (against Ethereum's 32, the smallest value that
 still admits a multi-slot epoch) and `slot_duration = 1 s` (against 12 s). The
-resulting per-epoch finality,
-`(2·slots_per_epoch + attest_offset)·slot_duration ≈ 5 s` is roughly 5× the
-per-block protocols' ≈1 s commit. This gap reflects FFG's coarser
+resulting per-epoch finality is ≈ 5 s, roughly 5× the per-block protocols'
+≈ 1 s commit. This gap reflects FFG's coarser
 epoch-granularity finality and is reported as a finding in §4.2 rather than
 absorbed into the calibration. A sensitivity sweep toward production scale (larger
 `slots_per_epoch` and `slot_duration`) tests whether the comparative ordering is
@@ -159,13 +158,11 @@ and byte-identical replay [[experiments/2026-05-27_snowman-baseline]].
 
 ### 3.4.1 Reproducibility and the run lifecycle
 
-The baseline experiments build the configuration programmatically rather than from
-a YAML file per run, producing the same `Config` object the loader would
-[[wiki/concepts/simulation-design]]. Time-bounded runs use a buffer beyond the
-measurement window and the analysis step clips out-of-window events, so hitting
-`t_max` is not itself a liveness failure: a run fails liveness only if no honest
-validator committed within the window, which `success_rate` records
-[[wiki/concepts/output-format]].
+The baseline experiments build the configuration in code rather than from a
+per-run file. Time-bounded runs use a buffer beyond the measurement window and
+clip out-of-window events, so reaching the deadline is not itself a liveness
+failure: a run fails liveness only if no honest validator committed within the
+window, which `success_rate` records [[wiki/concepts/output-format]].
 
 ### 3.4.2 The experiment matrix
 
@@ -245,11 +242,9 @@ baseline (Family A).
 
 Every appended row embeds a `commit_hash` and `seed` column, pinning the exact
 code and random draws that produced it, so any number can be regenerated from the
-record alone — the hard evidence of reproducibility. The comparison rests on two
-files [[wiki/concepts/output-format]]: a per-trial long-format CSV (one row per
-`(protocol, scenario, seed)`) and a downstream wide CSV (one row per configuration
-with each metric's mean and 95% confidence interval across the seed set), the
-latter feeding the Chapter 4 plots. Family B replaces the network phase, Family C
+record alone — the hard evidence of reproducibility. Results land in a per-trial
+CSV that is aggregated to per-configuration means with 95% confidence intervals,
+feeding the Chapter 4 plots. Family B replaces the network phase, Family C
 attaches an `AdversaryProfile` to `φ` of the validators, and the other protocols
 substitute their own proposer, message types, and `decided` condition (Table 3.2);
 the lifecycle is identical for all three.
