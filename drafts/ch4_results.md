@@ -260,11 +260,10 @@ Casper FFG, whose 5%-loss rate falls slightly. Throughout the loss sweep no
 protocol forks: loss degrades liveness, not safety
 [[wiki/experiments/2026-06-12_delay-heavy]].
 
-**Figure 4.4 — Packet-loss resilience.** Both panels faceted by validator count,
-with 95% confidence intervals. (a) Finalization rate against per-message drop
-probability, one curve per protocol. (b) The loss-resilience ranking: area under
-the finalization-rate curve (AURC), annotated with each cell's survival depth
-`p*`. Source: `results/delay/plots/loss_resilience_panel.pdf`
+**Figure 4.4 — Packet-loss resilience.** Faceted by validator count, 95%
+confidence intervals. (a) Finalization rate against per-message drop probability,
+one curve per protocol. (b) Loss-resilience ranking by area under the
+finalization-rate curve (AURC), labelled with each cell's survival depth `p*`. Source: `results/delay/plots/loss_resilience_panel.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
 ### 4.3.3 Mechanisms of degradation
@@ -338,13 +337,12 @@ kinds of finality being timed differ (deterministic for PBFT and Casper FFG,
 the latter additionally accountable; probabilistic for Snowman), a distinction
 returned to in §4.4.3.
 
-**Figure 4.5 — Mechanisms of degradation under packet loss.** Three rows, each
-faceted by validator count. (a) Commit-latency growth against drop probability
-(logarithmic), a cross marking where liveness is lost. (b) Messages per committed
-unit against drop probability (logarithmic), with PBFT's view-change counts
-annotated. (c) The operator tradeoff: finalization rate retained against the
-added-latency ratio (logarithmic); non-finalizing cells pinned on a "no finality"
-band, the operator-best region upper left. Source:
+**Figure 4.5 — Mechanisms of degradation under packet loss.** Three rows faceted
+by validator count. (a) Commit latency against drop probability (logarithmic), a
+cross marking lost liveness. (b) Messages per committed unit against drop
+probability (logarithmic), PBFT view-changes annotated. (c) Finalization rate
+retained against added-latency ratio (logarithmic), non-finalizing cells pinned
+on a no-finality band. Source:
 `results/delay/plots/degradation_mechanism_panel.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
 
@@ -446,11 +444,10 @@ because a sampled supermajority can wait out a slow peer but cannot complete a
 poll around an absent one.
 
 **Figure 4.6 — Liveness under delayed voting and silent non-participation.** Each
-row faceted by validator count, plotted against the injected adversarial fraction
-`φ` with 95% Wilson intervals. (a) Delayed-voting success rate. (b) Delayed-voting
-time-to-finality ratio against the honest control (logarithmic), separating the
-protocols (a) leaves indistinguishable. (c) Silent-participation success rate,
-with each protocol's survival depth `φ*` boxed. Source:
+row faceted by validator count, against the injected adversarial fraction `φ`
+with 95% Wilson intervals. (a) Delayed-voting success rate. (b) Delayed-voting
+time-to-finality ratio against the honest control (logarithmic). (c)
+Silent-participation success rate, each protocol's survival depth `φ*` boxed. Source:
 `results/adversary/plots/liveness_delay_offline_panel.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
@@ -505,13 +502,9 @@ failure, not magnitudes; and Snowman's first place is in part structural, ranked
 first for having no fork-inducing surface to expose (§3.4.2).
 
 **Figure 4.7 — Liveness and safety under equivocation.** Each row faceted by
-validator count, plotted against the equivocator fraction `φ`. (a) Finalization
-success rate, one curve per protocol; PBFT's curve is non-monotone, its apparent
-recovery above `φ = 0.33` being the safety failure of panel (b). (b)
-Cross-protocol safety-violation rate, drawn as steps; only PBFT departs from zero,
-stepping to a deterministic fork at `φ = 0.40` (229 conflicting `(view, seq)`
-instances at both committee sizes, annotated). Casper FFG and Snowman stay at
-zero; their failure modes appear on the stake axis of Figure A.1 and through `ε`.
+validator count, against the equivocator fraction `φ`. (a) Finalization success
+rate, one curve per protocol. (b) Cross-protocol safety-violation rate, drawn as
+steps.
 Source: `results/adversary/plots/equivocation_panel.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
@@ -585,9 +578,7 @@ validator count, with the one-third accountability line marked. Source:
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 **Figure A.2 — Adversarial outcomes by protocol and strategy.** The nine
-protocol–strategy cells of Table 4.2 rendered as an outcome map: cell color
-encodes the kind of outcome (robust, survival at a latency cost, liveness loss,
-accountable safety failure, or unaccountable safety break) and each label carries
-the governing magnitude. Source:
+protocol–strategy cells of Table 4.2 as an outcome map: cell colour encodes the
+outcome kind and each label its governing magnitude. Source:
 `results/adversary/plots/adversary_tradeoff_matrix.pdf`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
