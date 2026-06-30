@@ -27,6 +27,9 @@ other two families answer a single question: once PBFT's choice is fixed, which
 assumption to loosen next. Figure 2.1 traces the
 propagation from the Byzantine Generals Problem to the three families.
 
+**Figure 2.1 ([[diagrams/concepts/bft-families-tree]]).** From the Byzantine
+Generals Problem to the three families.
+
 - **PoS-finality** keeps the `3f+1` quorum and partial synchrony but adds an
   *economic* layer: a validator that equivocates can be slashed, converting
   the Byzantine fault model from an external assumption into a
@@ -38,9 +41,6 @@ propagation from the Byzantine Generals Problem to the three families.
 
 The choice each family makes determines the vocabulary in which it later
 reports performance (§2.3).
-
-**Figure 2.1 ([[diagrams/concepts/bft-families-tree]]).** From the Byzantine
-Generals Problem to the three families.
 
 ## 2.2 The three families
 
@@ -86,6 +86,11 @@ are in parentheses. Notation is defined below the table.
 | `β` | consecutive agreeing rounds before a block is accepted | `β ≈ 15`; holding `β` fixed makes `ε` invariant in `n` |
 | `ε` | probability two honest validators commit conflicting blocks | `0` for the two deterministic families; `≤ (1−α_c/K)^β` for Snowman |
 
+*At `n = 7`:* the two deterministic families lock a block with a ~5-of-7
+agreement (or ⅔ of stake), met twice. Snowman instead needs ~5-of-6 polled
+peers to agree 15 rounds running — reaching `ε ≈ 10⁻¹²` by repetition, not by
+one counted quorum.
+
 ## 2.3 Why the published numbers do not compare
 
 The three families have all been measured, and the field has produced three
@@ -123,17 +128,19 @@ a shared vocabulary, let alone answered.
 ### 2.3.2 The surveys measure nothing, and the one precedent targets PoW
 
 Three taxonomic surveys place the families in qualitative terms — Bano *et al.*
-[14] supply the canonical Systematization of Knowledge this chapter's taxonomy
-reuses, Xiao *et al.* [15] aggregate reported throughput, latency, and
-fault-tolerance ranges while flagging the cross-harness incomparability, and Cachin
-and Vukolić [16] critique vendor-published permissioned-chain BFT numbers — but none
-measures the families, and the two that aggregate numbers do so under the caveat that
-the harnesses are not matched. The single quantitative precedent is Gervais *et al.*
-[17], whose unified Proof-of-Work simulator — one metric schema, swept over block
-size and propagation delay — is structurally the evaluation the BFT families have not
-received; its limitation here is its target, Proof-of-Work. No equivalent
-unified-harness study exists for PBFT-style, PoS-finality, and Avalanche-style
-protocols evaluated jointly.
+[14] supply the canonical Systematization of Knowledge and the taxonomic
+backbone this chapter reuses, Xiao *et al.* [15] aggregate reported throughput,
+latency, and fault-tolerance ranges across families while flagging the
+cross-harness incomparability, and Cachin and Vukolić [16] critique the
+robustness of vendor-published permissioned-chain BFT numbers — but none
+measures the families, and the two that aggregate numbers do so under the
+caveat that the harnesses are not matched. The single quantitative precedent is
+Gervais *et al.* [17], whose unified Proof-of-Work simulator — one metric
+schema, swept over block size and propagation delay, applied uniformly — is
+structurally the evaluation the BFT families have not received; its limitation
+for this thesis is its target, Proof-of-Work rather than the three BFT
+families. No equivalent unified-harness study exists for PBFT-style,
+PoS-finality, and Avalanche-style protocols evaluated jointly.
 
 ## 2.4 The gap
 

@@ -5,8 +5,8 @@ work, push for review. Humans mark Completed on merge.
 
 ## Dashboard
 
-- Total tasks: 80 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 91 · In Review: 1 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Total tasks: 82 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
+- Completed: 93 · In Review: 2 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -98,12 +98,73 @@ specs); the `\include{biography}` line has been removed from the template.
   task-ID / `\todo` / raw-unicode remains in ch4–6; figure/table/`tabularx`,
   brace, and `$` balance hold (verified statically — no TeX toolchain on this
   machine, as with the Ch2/Ch3 ports)
-- `[?]` **T73** `H` Writer — Narwhal removal + Tier-1 prose condensation (first pass toward ~60pp)
+- `[x]` **T73** `H` Writer — Narwhal removal + Tier-1 prose condensation (first pass toward ~60pp)
   _Outcome:_ Three-family reframing across Ch1–Ch4 (Narwhal/four-family scaffolding stripped, DAG
   relocated to a single Ch6 §6.3 further-work line) + Tier-1 prose cuts (Ch3 §3.4.4/§3.5/§3.6,
   Ch5 §5.2/§5.3, Ch6 §6.1/§6.3.1, Ch2 variant trim); draft-narrative ledgers reconciled; figures
   deferred. · _Artifact:_ `drafts/ch{1,2,3,4,5,6}.md`, `docs/draft-narrative.md`, port-checklist ·
   _Verify:_ see plan §5; zero residual Narwhal/four-family except the one Ch6 further-work line
+- `[x]` **T74** `H` Writer — Page-cut Wave 1 (zero content lost): Appendix B + Ch4 figures + table merges
+  _Outcome:_ Execute Wave 1 of `PAGE_CUT_PLAN.md` (80pp → ~41pp; this wave ~18pp, no
+  argument/number lost). Three parts. **1A** delete leftover Appendix B (heat-conduction
+  `mitthesis.cls` example) from the LaTeX + ToC (tex-side only). **1B** Ch4 in-body figures
+  21 → 8 multi-panel merges per the plan table (drop 4.5/4.7/4.17; 4.19/4.20 → appendix;
+  re-letter sequentially); rewrite captions + figure callouts in `drafts/ch4_results.md`,
+  regenerate the merged plot PDFs via `src/output/*.py`, port to `chapter4.tex`. **1C** table
+  merges (10 → ~7): fold Ch3 Table 3.3+3.4 schema into one wide table; fold Ch4 Table 4.1
+  baseline means into §4.2.6 prose. Snapshot edited chapters to `drafts/stale/*.preW1.md`.
+  Reconcile `docs/draft-narrative.md` ledgers for the figure renumber + Appendix B removal.
+  No TeX toolchain here → build/measure handed to human. Overleaf push left to human. ·
+  _Artifact:_ `drafts/ch{3,4}_results.md`, `drafts/stale/*.preW1.md`, `src/output/*.py` +
+  regenerated `results/*/plots/*.pdf`, `../thesis-tex/MIT-thesis-template/{chapter3,chapter4}.tex`
+  + figures, deleted `appendixb.tex`, `docs/draft-narrative.md` · _Verify:_ Ch4 has 8 in-body
+  figure environments (re-lettered, captions match merged panels); no reference to dropped
+  4.5/4.7/4.17; Table 4.1 folded to prose; Ch3 schema tables merged; Appendix B gone from ToC
+  + no `\include{appendixb}`; every INVARIANT in `PAGE_CUT_PLAN.md` preserved; `/humanizer`
+  gate run on edited prose
+- `[?]` **T75** `H` Writer — Page-cut Wave 3 (deep cut): Ch3 → Ch4 → Ch5 → Ch6 prose
+  _Outcome:_ Execute Wave 3 of `PAGE_CUT_PLAN.md` (the deep cut, ~6,300 words). Unlike
+  Waves 1–2 this wave **deletes content** (page-count is the hard cap; relocation does not
+  help). **Ch1/Ch2 untouched** (Ch2 at target after Wave 2). Per-chapter cycle: snapshot to
+  `drafts/stale/ch{N}_*.preW3.md` → full-file rewrite of `drafts/ch{N}_*.md` → mirror into
+  `../thesis-tex/MIT-thesis-template/chapter{N}.tex` → commit. **Ch3** (§3.4.4 walkthrough,
+  §3.2 dup framing, §3.5 notes, §3.3 ledgers→3 body sentences, §3.6 recap, §3.4.1/§3.4.2);
+  **Ch4** (range-over-points rule; trim §4.1/§4.2 scaffolding; tex-drift fix for the
+  latency-measurement-point subsection); **Ch5** (RESTRUCTURE: §5.1 joint reading, §5.2
+  frontier anchor Table 5.1+Fig 5.1, §5.3 three drawn conclusions, §5.4 hand-off); **Ch6**
+  (deep compress §6.1–§6.4, keep every limitation + all five further-work directions).
+  Every INVARIANT in `PAGE_CUT_PLAN.md` preserved (all five RQ answers, all result numbers,
+  Table 4.2/5.1/6.1, ε bound, φ* cliffs, 229-fork, May-2023 callback). Reconcile
+  `docs/draft-narrative.md` §1/§2/§3/§10. Run `/humanizer` before In Review. No TeX
+  toolchain here → build/measure handed to human; Overleaf push left to human. ·
+  _Artifact:_ `drafts/ch{3,4,5,6}_*.md`, `drafts/stale/*.preW3.md`,
+  `../thesis-tex/MIT-thesis-template/chapter{3,4,5,6}.tex`, `docs/draft-narrative.md` ·
+  _Verify:_ word counts land near plan targets (Ch3 ~3,150 · Ch4 ~5,200 · Ch5 ~1,150 ·
+  Ch6 ~780); zero INVARIANT lost (every RQ answer + Table number + φ*/ε/229/×62 present);
+  no `[[wiki/concepts|experiments/...]]` link carries a load-bearing claim; tex mirrors
+  drafts; `/humanizer` gate run + re-verified per `draft-narrative.md` §8
+- `[?]` **T76** `H` Writer — Page-cut Wave 4 (examinability cut): 62pp → ~40pp (content 50 → ~30)
+  _Outcome:_ Execute Wave 4 of `PAGE_CUT_PLAN.md`. Waves 1–3 stalled at 62pp because the prior
+  INVARIANTS protected the implementation depth; this wave **overrides them** per the author's
+  2026-06-30 directive: the report should expose only the four examiner pillars (why · how:
+  fair harness + simple protocol distinction + metrics + comparison · commentary + future work)
+  and cut implementation depth that creates grilling surface without earning marks. Locked
+  (2026-06-30): deep cut on Ch3+Appendix · consolidate §3.6 threats into one §6.2 limitations
+  section. Biggest levers: **Appendix** delete 3 protocol sequence diagrams (Fig A.3–A.5) +
+  config-contract YAML (keep Fig A.1/A.2, cited by §4.4); **Ch3** delete Fig 3.2 (event loop)
+  + Fig 3.3 (run walkthrough) + §3.4.3, collapse §3.3.1–§3.3.3 ledgers/rescaling derivations
+  to the 3 load-bearing facts, trim §3.2/§3.4/§3.5 (keep Fig 3.1 harness + at-a-glance protocol
+  table + metric schema); **Ch4** harden range-over-points, compress §4.2 baseline; **Ch5/Ch6**
+  tighten meta-prose, fold threats into §6.2; **Ch1/Ch2** light trim. Keep stable: §3.3.2,
+  §3.3.3, §3.4.2, §3.5 numbers; migrate §3.6 refs → §6.2. Preserve every RQ answer, result
+  number, Table 4.2/5.1/6.1, ε/φ*/229/×62, May-2023 callback. Per-chapter snapshot →
+  `drafts/stale/*.preW4.md` → rewrite → port to tex → commit. Reconcile `docs/draft-narrative.md`
+  §1/§2/§3/§5/§10. `/humanizer` before In Review. No TeX toolchain here → build/measure + Overleaf
+  push handed to human. · _Artifact:_ `drafts/ch{1,2,3,4,5,6}_*.md`, `drafts/stale/*.preW4.md`,
+  `PAGE_CUT_PLAN.md`, `../thesis-tex/MIT-thesis-template/{chapter1-6,appendixa}.tex` + removed
+  figures, `docs/draft-narrative.md` · _Verify:_ rendered PDF ≤ ~40pp (content ~30); Appendix has
+  no sequence diagrams / no config YAML; Ch3 ≤ ~6pp; every INVARIANT in the revised Wave-4 list
+  preserved; §3.6 refs migrated; `/humanizer` run
 
 ---
 
