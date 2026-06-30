@@ -31,7 +31,11 @@ introduced in Chapter 3 are collected here in full.
 - **Cost model.** The simulator charges network latency but no signature-verification,
   execution, or bandwidth cost. This flatters the cost and per-validator verdicts for
   the compute-bound equivocation handling of PBFT and Casper FFG; it does not bear on
-  the message-count, liveness, or safety results.
+  the message-count, liveness, or safety results. Communication overhead is reported as
+  message count per agreed unit only; the byte-per-unit figure the harness also computes
+  is payload-dominated at the synthetic workload — it tracks transaction payload
+  amortized over committed units rather than protocol message structure — so the
+  asymptotic-scaling contrast RQ3 examines is read from the message-count axis.
 - **Synthetic workload, no capacity model.** Goodput is reported against a Poisson
   stream of fixed-size transactions at a zero conflict rate, below saturation — so the
   flat-in-`n` goodput is a property of the unsaturated model rather than a claim about

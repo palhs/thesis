@@ -180,7 +180,6 @@ and so not like-for-like.
 | `commit_latency_ms` | time to the first `decided` instance (`2f+1` `COMMIT`) | time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | time to counter-`β` acceptance of the first block |
 | `goodput` | committed transactions per window | committed transactions per window over finalized epochs | committed transactions per window |
 | `total_msgs_per_acu` | all deliveries per ACU; evaluates to `(2n²−2)/n`, i.e. `O(n²)` traffic over an `n`-scaled denominator | `≈ 1.125n` (un-aggregated all-to-all votes; production BLS aggregation to `O(n)` not modeled) | `O(K·β)` query/response deliveries per validator, independent of `n` |
-| `bytes_per_acu` | wire bytes per ACU; payload-dominated | attestation + payload bytes; payload-dominated | `O(K·β)` query/response bytes plus payload; payload-dominated |
 | `success_rate` | `0/1` per run (`1` iff an instance decided); a frequency after aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
 | safety (`fork_rate`) | `0` below threshold by construction; `> 0` only above `1/3` under equivocation | `0` below threshold; `> 0` only above `1/3` (a conflicting finalized checkpoint, not a reorg) | N/A — probabilistic safety, reported via `ε` against `(1 − α_c/K)^β` |
 
