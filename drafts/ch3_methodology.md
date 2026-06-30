@@ -162,7 +162,11 @@ finalized checkpoint for Casper FFG, one accepted block for Snowman. Every "per-
 metric is rewritten "per ACU", so one denominator serves all three. Because the ACU
 denominator, the Snowman rescaling, and the Casper FFG calibration are modeling
 conventions, a verdict is reported robust only when it survives the sensitivity sweep that
-varies the convention's governing knob.
+varies the convention's governing knob. Cross-protocol verdicts are read off this schema
+through *Pareto dominance*: one protocol dominates another when it is no worse on every
+axis of comparison and strictly better on at least one, and is *non-dominated* when no
+other protocol dominates it. Chapter 5 applies this relation across the metric axes to
+test whether any family dominates the rest.
 
 Two definitions are load-bearing. `commit_latency_ms` is the canonical time-to-finality
 axis: the `decided` event fires at each protocol's irreversibility milestone — PBFT's
@@ -191,7 +195,12 @@ Termination (no honest validator commits within the window), measured by the com
 `success_rate`. Validity holds by construction and is not instrumented. Snowman is the
 exception: its finality is probabilistic, so its safety is reported via the analytical
 bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate — the weakest-witnessed safety
-of the three, a limitation taken up with the others in §6.2.
+of the three, a limitation taken up with the others in §6.2. Across seeds, continuous
+metrics are aggregated with a 95% Student-t interval and rate metrics (`success_rate`,
+`fork_rate`) with a 95% Wilson score interval; the Wilson form stays honest at the
+boundary, so a zero-violation cell is reported as `0/n_runs`, bounding the true rate from
+above rather than collapsing to a degenerate point estimate, and near-threshold safety and
+liveness figures are read as bounds, not point values.
 
 The deliberate exclusions that bound these metrics — no compute or bandwidth cost, a
 synthetic open-loop workload, sub-production scale, and an uncovered leader-disruption
