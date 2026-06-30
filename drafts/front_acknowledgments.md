@@ -3,23 +3,22 @@ front_acknowledgments.md — acknowledgments front matter.
 Ports into ../thesis-tex/MIT-thesis-template/acknowledgments.tex: copy the
 paragraph prose below into the chapter body, after \chapter*{Acknowledgments}.
 This is front matter, not wiki knowledge — it carries no wikilinks.
-Every TODO(human) marker MUST be resolved by the author before submission;
-the surrounding phrasing is a neutral scaffold only.
+No thesis committee / readers are named: the thesis is submitted before the
+committee is known, and the supervisor also serves as the accepting authority.
 -->
 
-I am grateful to my thesis advisor, Dr. Giang Anh Tuan,
-for guidance and supervision throughout this work, and for the feedback
-that shaped its direction and methodology. I also thank
-TODO(human: committee members or thesis readers, with titles) for their
-time and comments on the work, and the faculty and staff of
-TODO(human: department or program name) for the instruction and support
-that made it possible.
+I am grateful to my thesis advisor, Dr. Giang Anh Tuan, for his guidance and
+supervision throughout this work. His feedback shaped the thesis at every
+stage, and his patience with my many questions and false starts made the work
+better than I could have managed alone. I am thankful for the time and care he
+gave to reading each draft.
 
-I thank TODO(human: fellow students, collaborators, or colleagues) for the
-discussions and feedback that improved this thesis. This work was supported
-by TODO(human: funding source, fellowship, or grant number — delete this
-sentence if no such support applies), and I am grateful for the resources
-and compute that support provided.
+I also thank the faculty and staff of the Department of Information and
+Communication Technology at the University of Science and Technology of Hanoi.
+What I learned over the course of my degree gave me the grounding in
+distributed systems and networking that this thesis depends on, and the
+department's support helped me see the work through.
 
-Finally, I thank TODO(human: family members, partner, and friends) for
-their patience, encouragement, and support throughout my studies.
+Finally, I thank my family for their patience and encouragement throughout my
+studies. Their support carried me through the long hours this thesis demanded,
+and I could not have finished it without them.
