@@ -61,7 +61,7 @@ they differ. Source: [[wiki/concepts/key-findings]],
 | :-- | :-- | :-- | :-- | :-- |
 | Baseline commit latency | ≈ 1 s | ≈ 5 s | ≈ 1 s | PBFT ≈ Snowman |
 | Communication overhead per unit | ≈ `2n` | ≈ `1.2n` | ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | Casper FFG |
-| Finality slowdown under delay (× baseline) | ×1.9 | ×1.3 | ×12–13 | Casper FFG |
+| Finality slowdown under delay (× baseline) | ×1.9 | ×1.3 | ×12–15 | Casper FFG |
 | Loss resilience (AURC; survival depth) | first; alive at 20% loss | last | AURC tie at `n = 25`; cliffs by 10% loss | PBFT |
 | Liveness under delayed voting | immune (1.0×) | dips (success → 0.60) | survives at ×62 finality | PBFT |
 | Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | cliff at `φ = 0.20` (`n = 10`) / `φ = 0.33` (`n = 25`) | PBFT ≈ FFG |
@@ -91,7 +91,7 @@ subsampling that keeps it live (finalizing, only far slower) under slow rather t
 silent peers is the identical mechanism that makes it the least tolerant once those
 peers go silent, since a poll that waits on the slowest sampled peer tolerates a slow
 answer but starves on no answer. That same wait is why Snowman pays the steepest
-finality slowdown under delay, ×12–13: liveness is held, latency surrendered. PBFT shows
+finality slowdown under delay, ×12–15: liveness is held, latency surrendered. PBFT shows
 the same inversion across the security boundary: the leader-based,
 exact-quorum commit rule whose view-change recovery carries it through delay, loss, and
 silence is the rule that, past the fault threshold, forks without leaving slashable
