@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 83 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 96 · In Review: 1 · In Progress: 0 · Not Started: 7 · Blocked: 2 · Descoped: 2
+- Completed: 97 · In Review: 0 · In Progress: 0 · Not Started: 7 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -376,7 +376,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ 2+ rehearsals; 15–20 min; answers to 10 expected questions · _Artifact:_ rehearsal notes in `wiki/log.md`
 - `[ ]` **T66** `H` Engineer — Final code package + README + reproducibility check
   _Outcome:_ Zip archive: code, configs, seeds, README, sample output verified · _Artifact:_ `results/release/` · _KPI checkpoint_
-- `[?]` **T69** `H` Writer — Draft the abstract
+- `[x]` **T69** `H` Writer — Draft the abstract
   _Outcome:_ ~500-word abstract for the MIT front matter, written from the
   finished and revised chapters: problem, method (four-protocol simulation
   study), headline results, contribution. No formulas or special characters
