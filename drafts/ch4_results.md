@@ -94,17 +94,17 @@ factor of twelve to fifteen over baseline, and its exponential-timeline latency
 memoryless tail inflates that slowest response across the rounds. Message counts, by
 contrast, hold within about two percent of their zero-delay values.
 
-This answers **RQ1**: as the network-delay distribution widens toward heavier tails,
-commit latency scales by a factor fixed by each family's round structure rather than
-by the validator-set size — the round-bounded protocols stay near-insensitive to the
-tail, while Snowman, whose `β` sequential polls each wait on the slowest sampled peer,
-is acutely sensitive to it.
-
 **Figure 4.2 — Commit latency under moderate delay.** Median per-validator
 `commit_latency_ms` under the two equal-mean moderate timelines (`delay-uniform` and
 `delay-exponential`), grouped by protocol and faceted by validator count; logarithmic
 vertical axis. Source: `results/delay/plots/moderate_latency.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].
+
+This answers **RQ1**: as the network-delay distribution widens toward heavier tails,
+commit latency scales by a factor fixed by each family's round structure rather than
+by the validator-set size — the round-bounded protocols stay near-insensitive to the
+tail, while Snowman, whose `β` sequential polls each wait on the slowest sampled peer,
+is acutely sensitive to it.
 
 ### 4.3.2 Packet loss and the resilience ranking
 
@@ -238,18 +238,18 @@ responder (§3.4), so its safety is reported through the analytical bound
 `ε ≤ (1 − α_c/K)^β`, ≈ `5 × 10⁻¹⁵` at `n = 10` and a looser `3 × 10⁻¹¹` at `n = 25`,
 which the empirical zero on every cell cannot witness.
 
+**Figure 4.5 — Liveness and safety under equivocation.** Each row faceted by validator
+count, against the equivocator fraction `φ`. (a) Finalization success rate, one curve
+per protocol. (b) Cross-protocol safety-violation rate, drawn as steps. Source:
+`results/adversary/plots/equivocation_panel.pdf`
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
+
 The safety order is therefore Snowman, Casper FFG, PBFT, set by what failure occurs
 above `φ = 0.33` rather than which fraction each tolerates. Two cautions: the three
 failures sit on incommensurable scales (a conflicting-commit rate, a slashable-stake
 fraction, an analytical bound), so the ranking compares kinds of failure, not
 magnitudes; and Snowman's first place is in part structural, ranked first for having
 no fork-inducing surface to expose.
-
-**Figure 4.5 — Liveness and safety under equivocation.** Each row faceted by validator
-count, against the equivocator fraction `φ`. (a) Finalization success rate, one curve
-per protocol. (b) Cross-protocol safety-violation rate, drawn as steps. Source:
-`results/adversary/plots/equivocation_panel.pdf`
-[[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 ### 4.4.4 The performance–security tradeoff
 

@@ -27,9 +27,6 @@ other two families answer a single question: once PBFT's choice is fixed, which
 assumption to loosen next. Figure 2.1 traces the
 propagation from the Byzantine Generals Problem to the three families.
 
-**Figure 2.1 ([[diagrams/concepts/bft-families-tree]]).** From the Byzantine
-Generals Problem to the three families.
-
 - **PoS-finality** keeps the `3f+1` quorum and partial synchrony but adds an
   *economic* layer: a validator that equivocates can be slashed, converting
   the Byzantine fault model from an external assumption into a
@@ -41,6 +38,9 @@ Generals Problem to the three families.
 
 The choice each family makes determines the vocabulary in which it later
 reports performance (§2.3).
+
+**Figure 2.1 ([[diagrams/concepts/bft-families-tree]]).** From the Byzantine
+Generals Problem to the three families.
 
 ## 2.2 The three families
 
