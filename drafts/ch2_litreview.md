@@ -40,25 +40,23 @@ Generals Problem to the three families.
 
 ## 2.2 The three families
 
-Table 2.1 traces the same event, a block becoming irreversible, through
-all three families. PBFT and Snowman act on the block directly; Casper FFG
-finalizes blocks in batches at fixed checkpoints, not one at a time. They do
-one thing in common: accumulate *agreement* on a block until reversal is
-impossible. They differ on three axes: what counts
-as agreement, how much is enough, and how many times that must happen. Across
-those three axes the two deterministic families are nearly identical: about
-two-thirds agreement, met twice, giving `ε = 0`. Avalanche-style breaks the
-pattern: about 80% of a small random sample, repeated `β` times, giving a small
-positive `ε`. Each family's primary papers also document an adversarial
-weakness within the §1.4 taxonomy (silent non-participation, delayed voting,
-equivocation), summarized in Table 2.1's "Adversarial pressure point" row and
-measured directly in Chapter 4. One such result has no counterpart elsewhere
-in the literature and grounds Snowman's measured delay and silence fragility:
-Amores-Sesar, Cachin and Schneider [10] show that an adversary influencing as
-few as two undecided validators can stall Snowman's confidence counter beyond
-any number of rounds polynomial in `β`, a far worse cost than the original
-Avalanche analysis [9] implies. The simulator-level treatment of each protocol
-is deferred to Chapter 3.
+Table 2.1 traces one event, a block becoming irreversible, through all three
+families. PBFT and Snowman act on the block directly; Casper FFG finalizes
+blocks in batches at fixed checkpoints, not one at a time. All three accumulate
+*agreement* until reversal is impossible; they differ in what counts as
+agreement, how much locks the block, and how many times that repeats. On those
+axes the two deterministic families nearly coincide (about two-thirds, met
+twice, `ε = 0`); Avalanche-style is the outlier: about 80% of a small random
+sample, repeated `β` times, for a small positive `ε`.
+
+The table's last row names each family's adversarial weak point within the §1.4
+taxonomy (silence, delayed voting, equivocation), measured directly in Chapter
+4. One has no counterpart in the literature: Amores-Sesar, Cachin and Schneider
+[10] show that an adversary swaying as few as two undecided validators can stall
+Snowman's confidence counter beyond any number of rounds polynomial in `β`, far
+worse than the original Avalanche analysis [9] implies. That result grounds
+Snowman's delay and silence fragility. The simulator-level treatment of each
+protocol is deferred to Chapter 3.
 
 **Table 2.1 — How one block becomes irreversible.** Protocol-native terms
 are in parentheses. Notation is defined below the table.
