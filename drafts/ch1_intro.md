@@ -104,22 +104,19 @@ as a subject of comparison (it appears only as the methodological precedent
 [17]), Layer-2 protocols, deployment on testnet or mainnet, economic and
 incentive design, and the performance of cryptographic primitives.
 
-Simulation is chosen over testnet or live-network measurement for three
-reasons: reproducibility of seeded runs, controlled isolation of one
-independent variable at a time, and a matched harness across the three implemented
-families. The choice carries four framing assumptions
-[[wiki/concepts/problem-statement#assumptions-and-limitations]]. First, each
-family is represented by a deliberately simplified implementation, since the
-aim is fair like-for-like comparison rather than reproduction of any
-production codebase's throughput. Second, the network is idealized: delay
-and loss are configurable parameters, but TCP congestion control, kernel
-scheduling, and physical-layer jitter are not modeled. Third, the
-adversarial strategies evaluated are those most frequently discussed in the
-primary literature; attacks requiring specialized cryptographic or economic
-modeling are left to future work. Fourth, published production figures are
-treated as order-of-magnitude sanity checks rather than validation targets;
-the simulator's contribution is internal consistency across families under
-matched assumptions, not the reproduction of production throughput.
+Simulation is chosen over testnet or live-network measurement for
+reproducibility of seeded runs, controlled isolation of one variable at a time,
+and a matched harness across the three families. The choice carries four framing
+assumptions [[wiki/concepts/problem-statement#assumptions-and-limitations]]: each
+family is a deliberately simplified implementation (the aim is fair like-for-like
+comparison, not reproduction of a production codebase's throughput); the network is
+idealized (delay and loss are configurable, but TCP congestion control, kernel
+scheduling, and physical-layer jitter are not modeled); the adversarial strategies
+are those most discussed in the primary literature, attacks needing specialized
+cryptographic or economic modeling being left to future work; and published
+production figures are treated as order-of-magnitude sanity checks, not validation
+targets — the simulator's contribution is internal consistency across families
+under matched assumptions, not the reproduction of production throughput.
 
 ## 1.5 Research questions
 

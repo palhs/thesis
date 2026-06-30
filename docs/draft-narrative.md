@@ -63,7 +63,7 @@ the independent variable named in the question.
 |:--|:--|:--|:--|:--|
 | RQ1 | commit-latency scaling as network-delay variance rises nominal→heavy-tailed | network timeline (Family B) | §4.3.1 | **closed** — stated as the delay/time-to-finality result |
 | RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
-| RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2.4 | **closed** — "answers RQ3" stated |
+| RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2 (was §4.2.4 pre-Wave-4) | **closed** — "answers RQ3" stated. (2026-06-30, Wave-4) §4.2 was de-subsectioned in the examinability cut, so the RQ3 home is now §4.2 (the overhead paragraph + Fig 4.1, formerly Fig 4.2). |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4. (2026-06-29, examiner-response pass) Safety is now framed as a *kind* of failure, not a rank: PBFT's fork is measured directly, Snowman's safety rests on an analytical `ε` bound the simulator never witnesses, and Casper FFG alone is accountable by construction — Snowman is no longer called "safest". |
 | RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.3 (was §5.4 pre-Wave-3) | **closed** (2026-06-23; relocated by the Wave-3 Ch5 restructure 2026-06-29) — the first of §5.3's three drawn conclusions states a consistent frontier over the three protocols evaluated and that no protocol dominates. (2026-06-29, examiner-response pass) Qualified: of the eight cross-regime axes, six are *measured* contests and two are *definitional/analytical* (accountable safety = Casper FFG by construction; equivocation safety = Snowman's unwitnessed `ε`). On the measured axes PBFT and Casper FFG each hold a unique corner; Snowman keeps no uniquely-best *measured* corner, so its non-domination rests on the analytical safety axis — stated honestly in §5.3. Fig 5.1 (radar) is now labelled illustrative/ordinal-only; the evidence is Table 5.1 + the §5.3 prose, not the radar. |
 
@@ -96,7 +96,13 @@ deliver, or to restate the reason it is carried.
 
 - the consolidated **Limitations** section — delivered §6.2 (latency-only model,
   no-capacity-model, small-n rescaling, three-family scope,
-  commensurability-by-convention, permanent-loss bound, leader-sparing coverage);
+  commensurability-by-convention, permanent-loss bound, leader-sparing coverage).
+  **(2026-06-30, Wave-4)** §6.2 is now the *single* home for threats-to-validity:
+  the old Ch3 §3.6 "Summary and threats" section was deleted in the examinability
+  cut and its four deliberate exclusions (no compute/bandwidth cost; synthetic
+  open-loop workload; sub-production scale + collapsed Snowman subsample;
+  leader-disruption surface uncovered) folded into the §6.2 bullets. The four
+  §3.6 cross-references in Ch4/Ch5 were repointed to §6.2;
 - the RQ1–RQ5 summary of findings — delivered §6.1;
 - future directions — delivered §6.3 (6.3.1 signature-aggregation variants kept;
   6.3.2 capacity model, adaptive-timeout enhancement, Snowman `ε` confidence
@@ -388,6 +394,26 @@ writes the prose stays clean and the answer stays sharp.
   input config contract relocated from an inline chapter3.tex `verbatim` block into
   Appendix A (matching the §3.2 reference), and the leftover mitthesis-template Lua code
   listing removed from Appendix A.)*
+  *(Page-cut Wave 4, 2026-06-30 — EXAMINABILITY CUT, overrides prior INVARIANTS per
+  author directive: report exposes only the four examiner pillars (why · fair harness +
+  simple protocol distinction + metrics + comparison · commentary + future work) and
+  drops implementation depth. 62pp → ~40pp target. **No RQ answer, result number, Table
+  4.2/5.1/6.1 value, ε/φ*/229/×62, or May-2023 callback lost.** Changes: **Ch3** deep
+  cut 3504→1962 w — dropped Fig 3.2 (event loop) + Fig 3.3 (run walkthrough), Table 3.1
+  (validator capabilities) + Table 3.2 (family-to-protocol, folded into the at-a-glance
+  table), de-subsectioned §3.3 and §3.4 (the §3.3.1–§3.3.3 ledgers/rescaling derivations
+  collapsed to 3 load-bearing facts; the §3.4.1/§3.4.2/§3.4.3 one-run walkthrough merged),
+  and **deleted §3.6** (threats → §6.2). **Appendix** dropped the 3 protocol sequence
+  diagrams (Figs A.3–A.5) + the input-config-contract `verbatim` (kept Figs A.1/A.2,
+  cited by §4.4). **Ch4** 4004→3251 w — dropped Fig 4.1 (null baseline panel) + Fig 4.5
+  (degradation-mechanism panel, latency–liveness verdict kept in §4.3.3 prose); §4.2
+  de-subsectioned (RQ3 home now §4.2); figures renumbered 4.1–4.6; §3.3.2/§3.3.3→§3.3,
+  §3.4.2→§3.4, §3.6→§6.2. **Ch5** 1666→1396 w — defensive meta-prose trimmed; "Figure
+  4.5c" ref → "§4.3.3" (figure dropped); §3.5–§3.6 → §3.5. **Ch6** absorbed the four §3.6
+  exclusions into the §6.2 limitations bullets (single threats home); §4.2.4→§4.2.
+  **Ch1/Ch2** light trims (§1.4 four-assumptions condensed; §2.3.2 surveys condensed;
+  the "At n=7" worked example dropped). Section numbers kept stable except the
+  intentional §4.2.4→§4.2 and §3.6→§6.2 migrations logged above.)*
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
   dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar
