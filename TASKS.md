@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 82 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 93 · In Review: 1 · In Progress: 1 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 93 · In Review: 2 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -143,7 +143,7 @@ specs); the `\include{biography}` line has been removed from the template.
   Ch6 ~780); zero INVARIANT lost (every RQ answer + Table number + φ*/ε/229/×62 present);
   no `[[wiki/concepts|experiments/...]]` link carries a load-bearing claim; tex mirrors
   drafts; `/humanizer` gate run + re-verified per `draft-narrative.md` §8
-- `[~]` **T76** `H` Writer — Page-cut Wave 4 (examinability cut): 62pp → ~40pp (content 50 → ~30)
+- `[?]` **T76** `H` Writer — Page-cut Wave 4 (examinability cut): 62pp → ~40pp (content 50 → ~30)
   _Outcome:_ Execute Wave 4 of `PAGE_CUT_PLAN.md`. Waves 1–3 stalled at 62pp because the prior
   INVARIANTS protected the implementation depth; this wave **overrides them** per the author's
   2026-06-30 directive: the report should expose only the four examiner pillars (why · how:
