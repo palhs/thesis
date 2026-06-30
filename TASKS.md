@@ -5,8 +5,8 @@ work, push for review. Humans mark Completed on merge.
 
 ## Dashboard
 
-- Total tasks: 81 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 93 · In Review: 1 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Total tasks: 82 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
+- Completed: 93 · In Review: 1 · In Progress: 1 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -143,6 +143,28 @@ specs); the `\include{biography}` line has been removed from the template.
   Ch6 ~780); zero INVARIANT lost (every RQ answer + Table number + φ*/ε/229/×62 present);
   no `[[wiki/concepts|experiments/...]]` link carries a load-bearing claim; tex mirrors
   drafts; `/humanizer` gate run + re-verified per `draft-narrative.md` §8
+- `[~]` **T76** `H` Writer — Page-cut Wave 4 (examinability cut): 62pp → ~40pp (content 50 → ~30)
+  _Outcome:_ Execute Wave 4 of `PAGE_CUT_PLAN.md`. Waves 1–3 stalled at 62pp because the prior
+  INVARIANTS protected the implementation depth; this wave **overrides them** per the author's
+  2026-06-30 directive: the report should expose only the four examiner pillars (why · how:
+  fair harness + simple protocol distinction + metrics + comparison · commentary + future work)
+  and cut implementation depth that creates grilling surface without earning marks. Locked
+  (2026-06-30): deep cut on Ch3+Appendix · consolidate §3.6 threats into one §6.2 limitations
+  section. Biggest levers: **Appendix** delete 3 protocol sequence diagrams (Fig A.3–A.5) +
+  config-contract YAML (keep Fig A.1/A.2, cited by §4.4); **Ch3** delete Fig 3.2 (event loop)
+  + Fig 3.3 (run walkthrough) + §3.4.3, collapse §3.3.1–§3.3.3 ledgers/rescaling derivations
+  to the 3 load-bearing facts, trim §3.2/§3.4/§3.5 (keep Fig 3.1 harness + at-a-glance protocol
+  table + metric schema); **Ch4** harden range-over-points, compress §4.2 baseline; **Ch5/Ch6**
+  tighten meta-prose, fold threats into §6.2; **Ch1/Ch2** light trim. Keep stable: §3.3.2,
+  §3.3.3, §3.4.2, §3.5 numbers; migrate §3.6 refs → §6.2. Preserve every RQ answer, result
+  number, Table 4.2/5.1/6.1, ε/φ*/229/×62, May-2023 callback. Per-chapter snapshot →
+  `drafts/stale/*.preW4.md` → rewrite → port to tex → commit. Reconcile `docs/draft-narrative.md`
+  §1/§2/§3/§5/§10. `/humanizer` before In Review. No TeX toolchain here → build/measure + Overleaf
+  push handed to human. · _Artifact:_ `drafts/ch{1,2,3,4,5,6}_*.md`, `drafts/stale/*.preW4.md`,
+  `PAGE_CUT_PLAN.md`, `../thesis-tex/MIT-thesis-template/{chapter1-6,appendixa}.tex` + removed
+  figures, `docs/draft-narrative.md` · _Verify:_ rendered PDF ≤ ~40pp (content ~30); Appendix has
+  no sequence diagrams / no config YAML; Ch3 ≤ ~6pp; every INVARIANT in the revised Wave-4 list
+  preserved; §3.6 refs migrated; `/humanizer` run
 
 ---
 

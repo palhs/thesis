@@ -1,5 +1,13 @@
 # Thesis page-cut plan — 80+ pp → ~41 pp (hard cap 50, incl. appendix)
 
+> **WAVE 4 (2026-06-30) supersedes the budget above.** Waves 1–3 stalled at a rendered
+> 62 pp (content ~50) because the INVARIANTS below protected the implementation depth.
+> The author's 2026-06-30 directive resets the target to **~40 pp total / ~30 content**
+> and reframes the cut around four examiner pillars, deliberately *losing* implementation
+> content. See the **WAVE 4** section at the bottom; where it conflicts with the §0 budget
+> and the INVARIANTS, Wave 4 wins.
+
+
 **Locked decisions (2026-06-29):** medium cut (~40–42 pp body+appendix) · keep all 6
 chapters (no Ch5/Ch6 merge) · Appendix A kept lean (~2 pp). Status: PLAN ONLY — no
 chapter edited yet.
@@ -311,3 +319,58 @@ between waves and the pre-cut text stays available for side-by-side review:
   post-Ch3 chapters).
 - After Wave 1, rebuild the PDF and re-measure. If already ≤44 pp, Wave 3 can be
   partial — cut only to the budget, preserving prose where possible.
+
+---
+
+## WAVE 4 — EXAMINABILITY CUT (2026-06-30). 62pp → ~40pp (content ~50 → ~30).
+
+**Why a Wave 4.** The rendered PDF is still 62 pp after Waves 1–3. Page weight is driven by
+**floats** (figures, full-page sequence diagrams, List-of-Figures), not word count — so prose
+nips cannot reach the target. The author's directive: the report should expose only the four
+examiner pillars and stop short of implementation depth (there is a defense presentation for
+mechanics). "Report ít nhưng chất lượng — report nhiều bị vặn hỏi nhiều."
+
+**The four pillars (keep + polish):**
+1. **Why** — motivation (deployment incidents → performance+security coupling → no unified harness).
+2. **How** — (a) the *fair* single harness; (b) a *simple* protocol distinction (at-a-glance table,
+   not mechanics); (c) the metrics measured; (d) the comparison results.
+3. **Commentary** on the protocols + (4) future-work upgrades.
+
+**Game-theoretic targeting — cut where grilling-surface is high and pillars don't need it:**
+claimed precision a BSc author can't defend (ε bounds, αc/K rescaling derivation, slot
+calibration math); implementation choices (sequence diagrams, config YAML, exposed knobs);
+stacked self-caveats (consolidate to one limitations section); defensive synthesis hedging.
+
+### Revised INVARIANTS (override the list above)
+- Keep all five RQ answers, every result number, Table 4.2 / 5.1 / 6.1, the ε bound, the φ*
+  cliffs, the 229-conflict fork, ×62/×49, the May-2023 callback, Fig 4.2 (theory-vs-measured).
+- Keep the **fairness argument** (single fixed engine, only protocol slot swapped, split-ownership
+  ⇒ difference attributable to protocol, determinism/reproducibility) + **Fig 3.1**.
+- Keep the **at-a-glance protocol table** (the simple "how each differs") + the **metric schema**
+  (ACU, commit_latency_ms, goodput-not-tps, safety/liveness semantics) + Table 3.2 run families.
+- Threats-to-validity substance survives — **moved into one §6.2 limitations section**, not deleted.
+- Stable section numbers (heavily cross-referenced): §3.3.2, §3.3.3, §3.4.2, §3.5. Migrate the
+  four §3.6 refs (Ch4 ×3, Ch5 ×1) → §6.2.
+
+### Cut list (per chapter)
+- **Appendix A**: DELETE Fig A.3/A.4/A.5 (the three protocol sequence diagrams) + the A.3
+  config-contract YAML section. KEEP Fig A.1 (Casper slashable) + Fig A.2 (outcome map) — both
+  cited by §4.4. Remove "sequence diagram in Appendix A" / "input contract in Appendix A" call-outs.
+- **Ch3** (12pp → ~5–6pp): delete Fig 3.2 (event loop) + Fig 3.3 (run walkthrough) + §3.4.3;
+  collapse §3.3.1–§3.3.3 to short paragraphs carrying only the 3 load-bearing facts (PBFT classical
+  =O(n²); Casper slot→≈5s finality as a finding; Snowman rescale + n=4 excluded) — drop the ε
+  non-monotonicity, slashing-economics, proposer-fairness, Family-B slot-coupling derivations;
+  fold family-to-protocol mapping into the at-a-glance table; trim §3.2/§3.4.1/§3.4.2/§3.5; delete
+  §3.6 (forward-point to §6.2).
+- **Ch4** (16pp → ~9pp): compress §4.2 baseline (the "flat in n" calibration result) to ~1
+  paragraph + the overhead figure; harden the range-over-points rule in §4.3/§4.4; trim caveat prose
+  (migrate §3.6 refs → §6.2). Keep all findings + figures the RQ answers need.
+- **Ch5** (5pp → ~3pp): keep Table 5.1 + Fig 5.1 + no-dominance conclusion + implications; cut the
+  ordinal-normalization / "two axes not symmetric" defensive meta-prose.
+- **Ch6** (4pp → ~3pp): one consolidated §6.2 limitations (absorbs §3.6); keep Table 6.1 + all five
+  further-work directions; tighten re-narration.
+- **Ch2** (5pp → ~3.5pp): light trim of §2.3; keep the gap + Table 2.1 + Fig 2.1.
+- **Ch1** (4pp → ~3pp): light trim, keep motivation strong.
+
+Mechanism unchanged from the per-wave cycle above (snapshot `*.preW4.md` → rewrite drafts → port
+tex → commit → human builds/measures + pushes Overleaf). Reconcile draft-narrative §1/§2/§3/§5/§10.
