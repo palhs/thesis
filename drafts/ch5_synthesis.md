@@ -29,6 +29,18 @@ deterministic fork, not a stronger one on a shared scale. Figure 5.1 renders the
 axes as a radar for shape only: ordinal-rank normalization discards magnitude (Snowman's
 ≈ 14× overhead deficit collapses to one inner-ring point), so the evidence is the table.
 
+**Figure 5.1 — Cross-family performance–security frontier (illustrative, ordinal
+only).** The three families scored on the eight cross-regime axes of Table 5.1,
+normalized by *ordinal rank* per axis: the outer ring marks the strict best on an
+axis, the center the worst, ties shared. The polygons overlap and none encloses
+another — each family reaches the outer ring on at least one axis no other matches
+(PBFT on the delay, loss, and liveness axes; Casper FFG on communication overhead and
+accountable safety; Snowman on the analytical equivocation-safety axis) — so each is
+non-dominated and no family dominates. Source: [[wiki/concepts/key-findings]],
+[[wiki/experiments/2026-06-13_delay-comparison]],
+[[wiki/experiments/2026-06-19_adversary-comparison]],
+[[wiki/experiments/2026-06-19_adversarial-degradation]].
+
 **Table 5.1 — Cross-regime comparison of the three families on the
 performance–security plane (`n = 10 / 25`, 20 seeds; 8 for the Snowman `n = 25` delay
 cell).** Each row is one axis from the Chapter 4 sweeps; the final column names the
@@ -55,18 +67,6 @@ they differ. Source: [[wiki/concepts/key-findings]],
 | Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | cliff at `φ = 0.20` (`n = 10`) / `φ = 0.33` (`n = 25`) | PBFT ≈ FFG |
 | Safety under equivocation | deterministic fork at `φ = 0.40` | accountable, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵` / `3 × 10⁻¹¹` | Snowman |
 | Accountable safety | none (unattributable fork) | slashable ≥ ⅓ stake | not applicable (probabilistic) | Casper FFG |
-
-**Figure 5.1 — Cross-family performance–security frontier (illustrative, ordinal
-only).** The three families scored on the eight cross-regime axes of Table 5.1,
-normalized by *ordinal rank* per axis: the outer ring marks the strict best on an
-axis, the center the worst, ties shared. The polygons overlap and none encloses
-another — each family reaches the outer ring on at least one axis no other matches
-(PBFT on the delay, loss, and liveness axes; Casper FFG on communication overhead and
-accountable safety; Snowman on the analytical equivocation-safety axis) — so each is
-non-dominated and no family dominates. Source: [[wiki/concepts/key-findings]],
-[[wiki/experiments/2026-06-13_delay-comparison]],
-[[wiki/experiments/2026-06-19_adversary-comparison]],
-[[wiki/experiments/2026-06-19_adversarial-degradation]].
 
 ## 5.3 Conclusions drawn from the frontier
 

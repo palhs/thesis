@@ -292,16 +292,16 @@ quorum cliff, Casper FFG decaying in proportion to the participating stake, ≈ 
 and Snowman starving earliest), so the rate of decay is governed by each family's
 quorum structure rather than by `φ` alone (Figure 4.6).
 
+Whether any one family occupies a dominant position once the baseline, delay, and
+adversarial regimes are considered jointly — the Pareto-frontier synthesis of RQ5 — is
+taken up in Chapter 5.
+
 **Figure 4.6 — Throughput degradation versus adversarial fraction (silent
 non-participation).** Committed-unit throughput against the injected silent fraction
 `φ` for each protocol, faceted by validator count, with the `y = 1 − φ`
 participating-stake invariant marked. Source:
 `results/adversary/plots/throughput_degradation_vs_phi.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
-
-Whether any one family occupies a dominant position once the baseline, delay, and
-adversarial regimes are considered jointly — the Pareto-frontier synthesis of RQ5 — is
-taken up in Chapter 5.
 
 <!-- Appendix figures: the two detail figures below are referenced from §4.4.3 and
 §4.4.4 but rendered in Appendix A to keep the chapter's figure budget on the
