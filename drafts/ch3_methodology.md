@@ -23,7 +23,7 @@ harness — scheduler, network, validators, logger — in which only the protoco
 slot is swapped, turning one experiment-matrix cell and seed into one comparable
 per-trial row.
 
-The harness builds the runtime machinery — scheduler, network, validators, logger —
+The harness builds the runtime machinery (scheduler, network, validators, logger)
 identically for every protocol; a run loop drives the simulation and a reducer turns
 the event stream into one comparable row per seed and per matrix cell (Figure 3.1).
 Ownership is split so that no protocol can reach the shared machinery: the scheduler
