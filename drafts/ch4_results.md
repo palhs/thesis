@@ -259,8 +259,8 @@ another, so the protocol best on one axis is last on another in every case (Tabl
 mapped in Figure A.2): PBFT first against delay and silence but last against
 equivocation, Snowman first against equivocation but last against silence, Casper FFG
 never first but never catastrophic. The contribution is the mechanism-level map of
-which structural feature produces which failure: the subsampling that makes Snowman
-the most delay-tolerant protocol when peers are slow makes it the least tolerant when
+which structural feature produces which failure: the subsampling that keeps Snowman
+live under slow peers — finalizing, merely far slower — makes it the least tolerant when
 they fall silent, and PBFT's leader-based commit rule is at once the source of its
 liveness robustness and of its unaccountable fork. Whether this is an artifact of the
 adversary choice, and the broader joint-regime synthesis, are taken up in Chapter 5.
@@ -273,7 +273,7 @@ safety invariant for equivocation. Source:
 
 | Adversarial strategy | PBFT | Casper FFG | Snowman | Robustness order |
 | :-- | :-- | :-- | :-- | :-- |
-| Delayed voting | immune; finality 1.0×, no view-changes | liveness dips (success → 0.60 / 0.65) | survives; finality ×62 / ×49 | PBFT ≈ Snowman ≫ FFG |
+| Delayed voting | success 1.0; finality 1.0× (immune, no view-changes) | success → 0.60 / 0.65; finality 1.0× (liveness dips) | success 1.0; finality ×62 / ×49 (full liveness, crawls) | PBFT ≈ Snowman ≫ FFG |
 | Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (throughput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 

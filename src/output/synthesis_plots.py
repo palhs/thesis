@@ -41,7 +41,7 @@ PLOT_DIR = "results/synthesis/plots"
 AXES = (
     "Baseline\nlatency",
     "Comm.\noverhead",
-    "Delay\nfinality",
+    "Delay\nslowdown",
     "Loss\nresilience",
     "Liveness\n(slow voters)",
     "Liveness\n(silence)",
@@ -56,7 +56,9 @@ AXES = (
 #                           [[experiments/2026-06-03_scaling-baseline]]
 #   1 comm. overhead        Casper FFG ~1.2n < PBFT ~2n < Snowman ~2Kbeta (~14x)
 #                           [[experiments/2026-06-08_baseline-cis]]
-#   2 delay finality        PBFT +~0.9s < Casper FFG +~27% < Snowman x12-13
+#   2 delay slowdown        Casper FFG x1.3 (slot-bound, least) < PBFT x1.9
+#                           < Snowman x12-13 (relative finality slowdown vs
+#                           baseline; least slowdown = best)
 #                           [[experiments/2026-06-13_delay-analysis]]
 #   3 loss resilience       PBFT first (alive @20%) > Snowman (cliffs by 10%)
 #                           > Casper FFG last
@@ -75,8 +77,8 @@ AXES = (
 #                           [[experiments/2026-06-19_adversarial-degradation]]
 RANK = {
     #                bal ovh dly los lvD lvS eqS acS
-    "pbft":         (3,  2,  3,  3,  3,  3,  1,  1),
-    "casper-ffg":   (1,  3,  2,  1,  1,  3,  2,  3),
+    "pbft":         (3,  2,  2,  3,  3,  3,  1,  1),
+    "casper-ffg":   (1,  3,  3,  1,  1,  3,  2,  3),
     "snowman":      (3,  1,  1,  2,  2,  1,  3,  1),
 }
 

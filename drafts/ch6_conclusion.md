@@ -17,7 +17,7 @@ evaluated.** Source: [[wiki/concepts/research-questions]], [[wiki/concepts/key-f
 
 | RQ | Question | Answer | Governing mechanism |
 | :-- | :-- | :-- | :-- |
-| RQ1 | latency under rising network-delay variance | flat in `n`; PBFT +≈ 0.9 s, Casper FFG +≈ 27%, Snowman ×12–13 | round structure vs. `β` sequential polls |
+| RQ1 | latency under rising network-delay variance | flat in `n`; finality slows least for Casper FFG (×1.3, slot-bound), then PBFT (×1.9), then Snowman (×12–13) | round structure vs. `β` sequential polls |
 | RQ2 | sustained throughput as `φ` rises to the threshold | three modes: PBFT holds then cliffs, Casper FFG ≈ `1 − φ`, Snowman starves earliest | quorum structure |
 | RQ3 | communication overhead per committed unit | PBFT ≈ `2n`, Casper FFG ≈ `1.2n` (cheapest), Snowman ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | all-to-all / attestation vs. `K`-poll |
 | RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; only PBFT's fork is measured, Snowman's safety rests on an unwitnessed analytical bound, Casper FFG alone is accountable by construction | each structural defense is also an exposure; safety differs in kind, not rank |
