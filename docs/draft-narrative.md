@@ -61,11 +61,11 @@ the independent variable named in the question.
 
 | RQ | Question (as written, §1.5) | Independent variable | Answered where | Status |
 |:--|:--|:--|:--|:--|
-| RQ1 | commit-latency scaling as network-delay variance rises nominal→heavy-tailed | network timeline (Family B) | §4.3.1 | **closed** — stated as the delay/time-to-finality result |
+| RQ1 | commit-latency scaling as network-delay variance rises nominal→heavy-tailed | network timeline (Family B) | §4.3.1 | **closed** — stated as the delay/time-to-finality result. (2026-06-30, T77) The cross-chapter comparison tables (5.1, 6.1) and the radar now report the delay result as *relative finality slowdown* (× baseline: Casper FFG ×1.3 < PBFT ×1.9 < Snowman ×12–13) rather than mixed absolute/percent/multiplier units; §4.3.1 prose unchanged (already relative). |
 | RQ2 | **sustained throughput** degradation as Byzantine fraction approaches the threshold from below | adversarial fraction φ (Family C) | §4.4 (evidence in §4.4.2 throughput ≈ 1−φ) | **closed** (2026-06-22) — §4.4 now states the explicit closure, naming sustained throughput (≈ 1−φ) as the measured quantity |
 | RQ3 | relative communication overhead (msgs + bytes per agreed unit) | n (Family A) | §4.2 (was §4.2.4 pre-Wave-4) | **closed** — "answers RQ3" stated. (2026-06-30, Wave-4) §4.2 was de-subsectioned in the examinability cut, so the RQ3 home is now §4.2 (the overhead paragraph + Fig 4.1, formerly Fig 4.2). |
 | RQ4 | which adversary → liveness loss / safety violation / neither | adversary (Family C) | §4.4 | **closed** — per-strategy, with the mechanism map in §4.4.4. (2026-06-29, examiner-response pass) Safety is now framed as a *kind* of failure, not a rank: PBFT's fork is measured directly, Snowman's safety rests on an analytical `ε` bound the simulator never witnesses, and Casper FFG alone is accountable by construction — Snowman is no longer called "safest". |
-| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.3 (was §5.4 pre-Wave-3) | **closed** (2026-06-23; relocated by the Wave-3 Ch5 restructure 2026-06-29) — the first of §5.3's three drawn conclusions states a consistent frontier over the three protocols evaluated and that no protocol dominates. (2026-06-29, examiner-response pass) Qualified: of the eight cross-regime axes, six are *measured* contests and two are *definitional/analytical* (accountable safety = Casper FFG by construction; equivocation safety = Snowman's unwitnessed `ε`). On the measured axes PBFT and Casper FFG each hold a unique corner; Snowman keeps no uniquely-best *measured* corner, so its non-domination rests on the analytical safety axis — stated honestly in §5.3. Fig 5.1 (radar) is now labelled illustrative/ordinal-only; the evidence is Table 5.1 + the §5.3 prose, not the radar. |
+| RQ5 | does a consistent perf–security Pareto frontier exist; does any family dominate | synthesis over RQ1–RQ4 | §5.3 (was §5.4 pre-Wave-3) | **closed** (2026-06-23; relocated by the Wave-3 Ch5 restructure 2026-06-29) — the first of §5.3's three drawn conclusions states a consistent frontier over the three protocols evaluated and that no protocol dominates. (2026-06-29, examiner-response pass) Qualified: of the eight cross-regime axes, six are *measured* contests and two are *definitional/analytical* (accountable safety = Casper FFG by construction; equivocation safety = Snowman's unwitnessed `ε`). On the measured axes PBFT and Casper FFG each hold a unique corner; Snowman keeps no uniquely-best *measured* corner, so its non-domination rests on the analytical safety axis — stated honestly in §5.3. Fig 5.1 (radar) is now labelled illustrative/ordinal-only; the evidence is Table 5.1 + the §5.3 prose, not the radar. (2026-06-30, T77 metric-alignment) The delay axis is now expressed as *relative finality slowdown* (× baseline) rather than absolute time-to-finality, which moves its best from PBFT to Casper FFG (slot-bound finality, ×1.3 vs PBFT ×1.9 vs Snowman ×12–13). Net: PBFT holds two measured corners (loss, delayed-voting liveness), Casper FFG two (delay-robustness, communication overhead), Snowman still none — non-domination unchanged. Table 5.1 row relabelled "Finality slowdown under delay (× baseline)"; Table 6.1 RQ1 row and the radar's delay axis ("Delay slowdown") regenerated to match; §5.3 ¶1/¶2 re-attributed and the "Casper never first" line retired. |
 
 A Writer touching a results or synthesis chapter updates this table and satisfies
 every row it owns. RQ2 was the live trap and is now closed: the §4.4 pass added
@@ -148,8 +148,9 @@ What makes the document read as one argument rather than five reports:
   section answers before the numbers arrive.
 - **Surface the inversions.** The thesis's non-obvious results are the
   contribution; lead with them, do not bury them under expected ones:
-  - the same subsampling makes Snowman the *most* delay-tolerant protocol when
-    peers are merely slow and the *least* tolerant when they fall silent;
+  - the same subsampling keeps Snowman live (finalizing, far slower — it pays the
+    steepest finality slowdown under delay, ×12–13) when peers are merely slow, yet
+    starves it when they fall silent — liveness held, latency surrendered;
   - PBFT's leader-based commit rule is at once the source of its liveness
     robustness and of its unaccountable fork;
   - the protocols that survive loss are exactly the ones that pay the most
@@ -414,6 +415,12 @@ writes the prose stays clean and the answer stays sharp.
   **Ch1/Ch2** light trims (§1.4 four-assumptions condensed; §2.3.2 surveys condensed;
   the "At n=7" worked example dropped). Section numbers kept stable except the
   intentional §4.2.4→§4.2 and §3.6→§6.2 migrations logged above.)*
+  *(T77, 2026-06-30 — metric alignment: Table 4.1 "Delayed voting" row de-mixed so
+  all three cells lead with the same primary axis (success-rate) and carry the
+  finality-multiplier as a secondary clause (was finality-× for PBFT/Snowman but
+  success-rate for Casper); §4.4.4 prose "most delay-tolerant" superlative reworded to
+  "keeps Snowman live under slow peers" to avoid clashing with Table 5.1's new
+  "Finality slowdown under delay" axis. No number or verdict changed.)*
 - **Ch5 — Synthesis (drafted 2026-06-23, in review).** Owns RQ5: traced the
   Pareto frontier over the three families evaluated and answered "does any family
   dominate" = *no* (§5.4, Table 5.1 and the native cross-family frontier radar
@@ -435,6 +442,13 @@ writes the prose stays clean and the answer stays sharp.
   **the §1.2 incident callback's canonical home moved §5.5→§5.4**). Per-family
   non-domination evidence is not lost — it lives in Table 5.1, honoring the
   §5.3/§5.4/Table-5.1 invariant: the evidence survives, the prose narration changed.)*
+  *(T77, 2026-06-30 — metric alignment: Table 5.1 delay row relabelled "Finality
+  slowdown under delay (× baseline)" and re-expressed as relative slowdown
+  (×1.9 / ×1.3 / ×12–13), moving Best PBFT→Casper FFG; Fig 5.1 radar delay axis
+  relabelled "Delay slowdown" and regenerated; §5.2 caption + §5.3 ¶1 axis attribution
+  updated; §5.3 ¶2 "Casper never first" line retired (Casper now first on
+  delay-robustness + overhead) and the Snowman "delay-tolerant" wording disambiguated.
+  Non-domination unchanged; see the §2 RQ5 row for the full rationale.)*
 - **Ch6 — Conclusion (drafted 2026-06-23, in review).** §6.1 RQ1–RQ5 summary
   (per-RQ prose walk condensed to one paragraph by T73, 2026-06-24; Table 6.1
   carries the detail); §6.2 consolidated limitations; §6.3 further work (6.3.1
@@ -451,6 +465,10 @@ writes the prose stays clean and the answer stays sharp.
   enhancement and the single Narwhal+Tusk/DAG further-work line**; §6.4 to the
   contribution statement + the §1.2 May-2023 callback [21]. No RQ summary row, limitation,
   further-work direction, or callback lost.)*
+  *(T77, 2026-06-30 — metric alignment: Table 6.1 RQ1 row re-expressed as relative
+  finality slowdown (Casper FFG ×1.3 least, then PBFT ×1.9, then Snowman ×12–13),
+  matching Table 5.1 and the radar; was the mixed-unit "+0.9 s / +27% / ×12–13". No
+  RQ answer changed.)*
 
 ---
 

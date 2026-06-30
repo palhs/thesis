@@ -34,9 +34,9 @@ only).** The three families scored on the eight cross-regime axes of Table 5.1,
 normalized by *ordinal rank* per axis: the outer ring marks the strict best on an
 axis, the center the worst, ties shared. The polygons overlap and none encloses
 another — each family reaches the outer ring on at least one axis no other matches
-(PBFT on the delay, loss, and liveness axes; Casper FFG on communication overhead and
-accountable safety; Snowman on the analytical equivocation-safety axis) — so each is
-non-dominated and no family dominates. Source: [[wiki/concepts/key-findings]],
+(PBFT on the loss and liveness axes; Casper FFG on delay-robustness, communication
+overhead, and accountable safety; Snowman on the analytical equivocation-safety axis) —
+so each is non-dominated and no family dominates. Source: [[wiki/concepts/key-findings]],
 [[wiki/experiments/2026-06-13_delay-comparison]],
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
@@ -61,7 +61,7 @@ they differ. Source: [[wiki/concepts/key-findings]],
 | :-- | :-- | :-- | :-- | :-- |
 | Baseline commit latency | ≈ 1 s | ≈ 5 s | ≈ 1 s | PBFT ≈ Snowman |
 | Communication overhead per unit | ≈ `2n` | ≈ `1.2n` | ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | Casper FFG |
-| Time-to-finality under delay | + ≈ 0.9 s | + ≈ 27% | × 12–13 | PBFT |
+| Finality slowdown under delay (× baseline) | ×1.9 | ×1.3 | ×12–13 | Casper FFG |
 | Loss resilience (AURC; survival depth) | first; alive at 20% loss | last | AURC tie at `n = 25`; cliffs by 10% loss | PBFT |
 | Liveness under delayed voting | immune (1.0×) | dips (success → 0.60) | survives at ×62 finality | PBFT |
 | Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | cliff at `φ = 0.20` (`n = 10`) / `φ = 0.33` (`n = 25`) | PBFT ≈ FFG |
@@ -73,27 +73,34 @@ they differ. Source: [[wiki/concepts/key-findings]],
 Three conclusions follow from the frontier of §5.2.
 
 **No family dominates.** No row of Table 5.1 is won by a single family across the
-board, and each of the three wins at least one row no other does: PBFT the delay, loss,
-and liveness axes; Casper FFG the communication-overhead and accountability axes;
-Snowman the equivocation-safety axis. Each is therefore non-dominated. This answers RQ5
-directly over the three protocols evaluated: a consistent performance–security frontier
-exists, and no family dominates it. The verdict's strength does differ by axis —
-stripping the two non-measured axes, PBFT keeps three measured corners and Casper FFG
-one, but Snowman keeps none, so its claim to non-domination rests on an analytical
-bound the simulator cannot confirm rather than on a measured contest.
+board, and each of the three wins at least one row no other does: PBFT the loss and
+liveness axes; Casper FFG the delay-robustness, communication-overhead, and
+accountability axes; Snowman the equivocation-safety axis. Each is therefore
+non-dominated. This answers RQ5 directly over the three protocols evaluated: a
+consistent performance–security frontier exists, and no family dominates it. The
+verdict's strength does differ by axis — stripping the two non-measured axes, PBFT keeps
+two measured corners (loss and delayed-voting liveness) and Casper FFG two (delay
+robustness and communication overhead), but Snowman keeps none, so its claim to
+non-domination rests on an analytical bound the simulator cannot confirm rather than on
+a measured contest.
 
 **Every defense is also an exposure.** The frontier has its shape because the
 structural choice that places a family at the outer ring on one axis is the same choice
 that pins it to the center on another. The sharpest instance is Snowman: the `K`-peer
-subsampling that makes it the most delay-tolerant family when peers are merely slow is
-the identical mechanism that makes it the least tolerant when those peers go silent — a
-poll that waits on the slowest sampled peer tolerates a slow answer but starves on no
-answer. PBFT shows the same inversion across the security boundary: the leader-based,
+subsampling that keeps it live (finalizing, only far slower) under slow rather than
+silent peers is the identical mechanism that makes it the least tolerant once those
+peers go silent, since a poll that waits on the slowest sampled peer tolerates a slow
+answer but starves on no answer. That same wait is why Snowman pays the steepest
+finality slowdown under delay, ×12–13: liveness is held, latency surrendered. PBFT shows
+the same inversion across the security boundary: the leader-based,
 exact-quorum commit rule whose view-change recovery carries it through delay, loss, and
 silence is the rule that, past the fault threshold, forks without leaving slashable
-evidence. Casper FFG sits at neither extreme — never first on any axis, yet never
-catastrophic on any — trailing on latency and loss-resilience while holding the
-accountable-failure corner that only a slashing-based protocol can occupy. The
+evidence. Casper FFG completes the pattern from the middle: the slot-bound, epoch-paced
+finality that makes it the cheapest in communication overhead and the least perturbed by
+network delay, its slot clock barely moving (×1.3) where PBFT nearly doubles and Snowman
+blows up by an order of magnitude, is the same conservatism that leaves it trailing on
+baseline latency and the first to collapse under packet loss, even as it holds the
+accountable-failure corner only a slashing-based protocol can occupy. The
 contribution of this synthesis is that map of structural commitments to their paired
 exposures, not the bare statement that no family wins.
 

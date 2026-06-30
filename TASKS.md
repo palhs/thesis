@@ -5,8 +5,8 @@ work, push for review. Humans mark Completed on merge.
 
 ## Dashboard
 
-- Total tasks: 82 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 93 · In Review: 2 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Total tasks: 83 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
+- Completed: 93 · In Review: 3 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -497,6 +497,23 @@ task. Not week-bound.
   path; `make test` green; under path B the CSVs are byte-identical (no re-run);
   under path A the new inclusion column re-derives and the existing T48/T49
   numbers are unchanged
+
+---
+
+## Draft consistency follow-up — metric alignment
+
+Surfaced 2026-06-30 in chat review of Ch5: the cross-protocol comparison tables
+mix incompatible units within a single row, which reads as incoherent and
+invites examiner objections. One issue is the load-bearing one (delay row), one
+is lighter-touch (adversarial table). Writer task; touches Ch4/5/6 drafts, the
+radar generator + asset, and the cross-chapter ledger.
+
+- `[?]` **T77** `M` Writer — Align the delay-slowdown metric across Tables 5.1/6.1 and de-mix the Table 4.1 delayed-voting row
+  _Problem:_ Table 5.1 + Table 6.1 (RQ1) report the delay row as `+0.9 s / +27% / ×12–13` — three different units (absolute seconds, percent, multiplier) in one row, and the implied "best = PBFT" holds only under the absolute reading. The better insight is *relative degradation* (which protocol's finality is least disturbed by delay): Casper FFG, ×1.3, because its finality is slot-bound not network-bound (key-findings F3). Table 4.1's "Delayed voting" row separately mixes finality-multiplier (PBFT/Snowman) with success-rate (Casper).
+  _Decision (user, 2026-06-30):_ delay row reports **relative slowdown (× baseline), pure multiplier, no parenthetical absolute**; axis relabelled to `Finality slowdown under delay (× baseline)`; **Best = Casper FFG**. Values from F3: PBFT ×1.9, Casper FFG ×1.3, Snowman ×12–13.
+  _Scope:_ (1) `drafts/ch5_synthesis.md` Table 5.1 delay row + label; §5.2 Fig 5.1 caption (delay corner → Casper); §5.3 ¶1 axis attribution + ¶2 "never first on any axis" rewrite. (2) `drafts/ch6_conclusion.md` Table 6.1 RQ1 row. (3) `drafts/ch4_results.md` Table 4.1 delayed-voting row: lead all three cells with the same primary axis (liveness/success-rate), latency cost as secondary clause; verify Snowman success-rate from the experiment page, do not invent. (4) `src/output/synthesis_plots.py` RANK axis-2 (pbft 3→2, casper-ffg 2→3), label + provenance comment; regenerate `results/synthesis/plots/frontier_radar.{pdf,png}`. (5) `docs/draft-narrative.md` §2 RQ5 row + §10 cheat-sheet + line-151 cross-check (ledger debt). (6) `wiki/log.md` entry; `wiki/concepts/key-findings.md` F3 stays as-is (mechanism record, not a Best-declaring table — note why in log).
+  _Out of scope (handoff):_ the `../thesis-tex/` port (chapter5.tex Table 5.1, chapter6.tex Table 6.1, chapter4.tex Table 4.1, `figures/frontier_radar.pdf`) already exists (T72) and will go stale — list the exact tex edits in the handoff for the human Overleaf push; do not edit the sibling repo here.
+  _Verify:_ no delay cell carries mixed units; radar renders Casper on the outer ring of the delay axis; Table 5.1 ↔ Table 6.1 ↔ radar ↔ ledger all agree Best = Casper FFG; `/humanizer` on any reworked prose; `superpowers:verification-before-completion` before In Review.
 
 ---
 
