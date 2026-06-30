@@ -6,7 +6,7 @@ work, push for review. Humans mark Completed on merge.
 ## Dashboard
 
 - Total tasks: 83 · Sync tasks: 10 · Lint checkpoints: 5 · Lint follow-ups: 4
-- Completed: 93 · In Review: 3 · In Progress: 0 · Not Started: 8 · Blocked: 2 · Descoped: 2
+- Completed: 96 · In Review: 1 · In Progress: 0 · Not Started: 7 · Blocked: 2 · Descoped: 2
 
 ## Legend
 
@@ -122,7 +122,7 @@ specs); the `\include{biography}` line has been removed from the template.
   4.5/4.7/4.17; Table 4.1 folded to prose; Ch3 schema tables merged; Appendix B gone from ToC
   + no `\include{appendixb}`; every INVARIANT in `PAGE_CUT_PLAN.md` preserved; `/humanizer`
   gate run on edited prose
-- `[?]` **T75** `H` Writer — Page-cut Wave 3 (deep cut): Ch3 → Ch4 → Ch5 → Ch6 prose
+- `[x]` **T75** `H` Writer — Page-cut Wave 3 (deep cut): Ch3 → Ch4 → Ch5 → Ch6 prose
   _Outcome:_ Execute Wave 3 of `PAGE_CUT_PLAN.md` (the deep cut, ~6,300 words). Unlike
   Waves 1–2 this wave **deletes content** (page-count is the hard cap; relocation does not
   help). **Ch1/Ch2 untouched** (Ch2 at target after Wave 2). Per-chapter cycle: snapshot to
@@ -143,7 +143,7 @@ specs); the `\include{biography}` line has been removed from the template.
   Ch6 ~780); zero INVARIANT lost (every RQ answer + Table number + φ*/ε/229/×62 present);
   no `[[wiki/concepts|experiments/...]]` link carries a load-bearing claim; tex mirrors
   drafts; `/humanizer` gate run + re-verified per `draft-narrative.md` §8
-- `[?]` **T76** `H` Writer — Page-cut Wave 4 (examinability cut): 62pp → ~40pp (content 50 → ~30)
+- `[x]` **T76** `H` Writer — Page-cut Wave 4 (examinability cut): 62pp → ~40pp (content 50 → ~30)
   _Outcome:_ Execute Wave 4 of `PAGE_CUT_PLAN.md`. Waves 1–3 stalled at 62pp because the prior
   INVARIANTS protected the implementation depth; this wave **overrides them** per the author's
   2026-06-30 directive: the report should expose only the four examiner pillars (why · how:
@@ -376,7 +376,7 @@ specs); the `\include{biography}` line has been removed from the template.
   _Outcome:_ 2+ rehearsals; 15–20 min; answers to 10 expected questions · _Artifact:_ rehearsal notes in `wiki/log.md`
 - `[ ]` **T66** `H` Engineer — Final code package + README + reproducibility check
   _Outcome:_ Zip archive: code, configs, seeds, README, sample output verified · _Artifact:_ `results/release/` · _KPI checkpoint_
-- `[ ]` **T69** `H` Writer — Draft the abstract
+- `[?]` **T69** `H` Writer — Draft the abstract
   _Outcome:_ ~500-word abstract for the MIT front matter, written from the
   finished and revised chapters: problem, method (four-protocol simulation
   study), headline results, contribution. No formulas or special characters
@@ -508,7 +508,7 @@ invites examiner objections. One issue is the load-bearing one (delay row), one
 is lighter-touch (adversarial table). Writer task; touches Ch4/5/6 drafts, the
 radar generator + asset, and the cross-chapter ledger.
 
-- `[?]` **T77** `M` Writer — Align the delay-slowdown metric across Tables 5.1/6.1 and de-mix the Table 4.1 delayed-voting row
+- `[x]` **T77** `M` Writer — Align the delay-slowdown metric across Tables 5.1/6.1 and de-mix the Table 4.1 delayed-voting row
   _Problem:_ Table 5.1 + Table 6.1 (RQ1) report the delay row as `+0.9 s / +27% / ×12–13` — three different units (absolute seconds, percent, multiplier) in one row, and the implied "best = PBFT" holds only under the absolute reading. The better insight is *relative degradation* (which protocol's finality is least disturbed by delay): Casper FFG, ×1.3, because its finality is slot-bound not network-bound (key-findings F3). Table 4.1's "Delayed voting" row separately mixes finality-multiplier (PBFT/Snowman) with success-rate (Casper).
   _Decision (user, 2026-06-30):_ delay row reports **relative slowdown (× baseline), pure multiplier, no parenthetical absolute**; axis relabelled to `Finality slowdown under delay (× baseline)`; **Best = Casper FFG**. Values from F3: PBFT ×1.9, Casper FFG ×1.3, Snowman ×12–13.
   _Scope:_ (1) `drafts/ch5_synthesis.md` Table 5.1 delay row + label; §5.2 Fig 5.1 caption (delay corner → Casper); §5.3 ¶1 axis attribution + ¶2 "never first on any axis" rewrite. (2) `drafts/ch6_conclusion.md` Table 6.1 RQ1 row. (3) `drafts/ch4_results.md` Table 4.1 delayed-voting row: lead all three cells with the same primary axis (liveness/success-rate), latency cost as secondary clause; verify Snowman success-rate from the experiment page, do not invent. (4) `src/output/synthesis_plots.py` RANK axis-2 (pbft 3→2, casper-ffg 2→3), label + provenance comment; regenerate `results/synthesis/plots/frontier_radar.{pdf,png}`. (5) `docs/draft-narrative.md` §2 RQ5 row + §10 cheat-sheet + line-151 cross-check (ledger debt). (6) `wiki/log.md` entry; `wiki/concepts/key-findings.md` F3 stays as-is (mechanism record, not a Best-declaring table — note why in log).
