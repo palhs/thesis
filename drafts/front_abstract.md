@@ -2,12 +2,12 @@
 
 Front matter. Ports into `../thesis-tex/MIT-thesis-template/abstract.tex`
 (replace the template's placeholder text). MIT spec: about 500 words or
-fewer, no formulas or special characters. This draft is ~380 words.
+fewer, no formulas or special characters. This draft is ~245 words
+(shortened ~1/3 so the supervisor block stays on the abstract page).
 
-Structure follows the standard publication abstract — Background, Aim,
-Methods, Results, Conclusion (four paragraphs; Background and Aim merged).
-Results carry concrete, wiki-traceable numbers; the Conclusion interprets
-significance rather than restating them.
+Structure follows the standard publication abstract — Background+Aim /
+Methods / Results / Conclusion (four paragraphs). Results carry concrete,
+wiki-traceable numbers; the Conclusion interprets significance.
 
 Three protocols evaluated (PBFT, Casper FFG, Snowman), matching the locked
 three-family scope of the body; the deferred DAG family is not named here.
@@ -16,40 +16,29 @@ three-family scope of the body; the deferred DAG family is not named here.
 
 Layer-1 blockchain consensus protocols are proven safe and live under their
 stated assumptions, yet deployed networks still halt, stall, and fork when
-those assumptions are stretched by real operating conditions. Performance and
-security have been studied largely in isolation, and reported numbers come
-from different testbeds, workloads, and network topologies, so the field has
-no internally consistent basis for comparing protocol families under the same
-realistic stress. This thesis quantifies the performance-security tradeoff
-across consensus families under matched network-delay and adversarial
+those conditions are stretched. Performance and security are usually measured
+separately, on different harnesses, so the field lacks a like-for-like
+comparison of protocol families under realistic stress. This thesis quantifies
+that performance-security tradeoff under matched network-delay and adversarial
 conditions.
 
 A single discrete-event simulator hosts simplified implementations of three
-representative protocols, one from each of three families: PBFT, Casper FFG,
-and Snowman. The three share one metric schema
-covering latency, throughput, communication overhead, and consensus
-reliability, and are run over a controlled matrix of validator-set sizes,
-network-delay distributions, packet-loss levels, and three adversarial
-strategies: delayed voting, non-participation, and equivocation. Common random
-seeds let the protocols be compared on identical inputs.
+protocols, one per family: PBFT, Casper FFG, and Snowman. The three share one
+metric schema for latency, throughput, communication overhead, and
+reliability, and run under controlled network delay, packet loss, and three
+adversarial strategies: delayed voting, non-participation, and equivocation.
 
-No protocol dominates. Communication overhead splits into two regimes: PBFT
-and Casper FFG grow linearly with the validator count, while Snowman sits an
-order of magnitude higher because of its repeated random subsampling. Under
-network delay Snowman is by far the most affected, with its time to finality
-rising about twelve to thirteen times its baseline, whereas PBFT and Casper
-FFG stay close to theirs. Under packet loss PBFT is the most resilient, the
-only protocol still finalizing at twenty percent message loss, and Casper FFG
-the most fragile. Under equivocating validators the failure modes diverge:
-once the Byzantine fraction passes one third PBFT forks without holding
-anyone accountable, Casper FFG keeps safety and makes every offending validator
-slashable, and Snowman shows no fork at all. The rankings invert from one
-condition to the next, and in every case resilience is bought with added
-latency.
+No protocol dominates. Communication overhead grows linearly in the validator
+count for PBFT and Casper FFG, and is an order of magnitude higher for Snowman,
+which polls by repeated random subsampling. Under network delay Snowman is the
+most affected, its time to finality rising about twelve to thirteen times,
+while the others stay near baseline. Packet loss leaves PBFT the most resilient
+and Casper FFG the most fragile. Under equivocation the failure modes diverge:
+past one third Byzantine, PBFT forks unaccountably, Casper FFG preserves safety and
+makes every offender slashable, and Snowman shows no fork. Rankings invert
+across conditions, and resilience is always bought with added latency.
 
-Because each family is best on some axis and worst on another, the right
-protocol depends on the expected deployment condition rather than on a single
-headline benchmark. The thesis contributes a reproducible simulator and
-dataset, and a mechanism map that links each protocol's structural design
-choice to the failure mode it produces. This map is the like-for-like
-comparison the existing literature does not provide.
+Because each family is best on one axis and worst on another, protocol choice
+should follow the expected deployment condition rather than a single benchmark.
+The thesis contributes a reproducible simulator and dataset, and a mechanism
+map linking each protocol's design choice to the failure mode it produces.
