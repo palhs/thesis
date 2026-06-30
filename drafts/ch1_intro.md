@@ -102,7 +102,11 @@ several-hundred-node production scale rests on the sensitivity sweeps rather
 than on direct measurement at that scale. Out of scope are Proof-of-Work
 as a subject of comparison (it appears only as the methodological precedent
 [17]), Layer-2 protocols, deployment on testnet or mainnet, economic and
-incentive design, and the performance of cryptographic primitives.
+incentive design, and the performance of cryptographic primitives. Pure
+asynchrony is likewise out of scope: all timelines use bounded delay, so the
+evaluation stays within partial synchrony and never reaches the regime where the
+FLP impossibility binds — FLP marks the edge of the modeled space, not a measured
+quantity.
 
 Simulation is chosen over testnet or live-network measurement for
 reproducibility of seeded runs, controlled isolation of one variable at a time,
