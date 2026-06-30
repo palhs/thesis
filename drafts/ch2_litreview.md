@@ -2,31 +2,27 @@
 
 ## 2.1 Three families, one impossibility
 
-A Layer-1 blockchain commits one block per height across a set of mutually
-distrusting validators; producing that agreement despite validators that may
-behave arbitrarily is the Byzantine Generals Problem [1]
-[[wiki/concepts/byzantine-generals]]. Chapter 1 fixed the three results that
-bound any solution — the `3f+1` Byzantine threshold [1], the FLP impossibility
+A Layer-1 blockchain keeps a shared ledger across validators that do not trust
+one another. They have to agree on the same transactions in the same order;
+otherwise the same coin can be spent twice, or a transaction that already
+settled can be rewritten. Reaching that agreement while some validators behave
+arbitrarily is the Byzantine Generals Problem [1] [[wiki/concepts/byzantine-generals]]. Chapter 1 fixed the three results that
+bound any solution: the `3f+1` Byzantine threshold [1], the FLP impossibility
 [2], and the partial-synchrony relaxation that makes consensus solvable for
-`f < n/3` [3] [[wiki/concepts/synchrony-models]]. Jointly they produce not a single
-protocol but a design space of concessions, and every Layer-1 protocol begins
-by choosing which constraint to relax along the synchrony axis (synchronous through
-partial-synchronous, asynchronous, probabilistic), the fault-model axis (crash
-through omission to Byzantine, with stake-weighting where applicable
-[[wiki/concepts/fault-model]]), or both. The CAP theorem [18] makes the
-operational consequence concrete: under partition a chain must choose
-Consistency or Availability, with partition-tolerance non-negotiable —
-PBFT-style and PoS-finality halt safely to keep Consistency, while
-Avalanche-style continues with weakened guarantees to keep Availability
-[[wiki/concepts/cap-theorem]].
+`f < n/3` [3] [[wiki/concepts/synchrony-models]].
 
-PBFT [4] and its descendants HotStuff [5] and Tendermint [6] take the most
-direct option, a `3f+1` quorum under partial synchrony, where the
-quorum-intersection arithmetic recurs [[wiki/concepts/quorum-arithmetic]]. The
-other two families answer a single question: once PBFT's choice is fixed, which
-assumption to loosen next. Figure 2.1 traces the
-propagation from the Byzantine Generals Problem to the three families.
+No protocol escapes these bounds, so each must concede something. Every
+Layer-1 design answers the same question: relax the timing assumption, the
+fault model [[wiki/concepts/fault-model]], or both. The CAP theorem makes the
+cost concrete: under partition a chain must give up either Consistency or
+Availability, with partition-tolerance non-negotiable [18]
+[[wiki/concepts/cap-theorem]]. The three families are three answers, each traced
+from the Byzantine Generals Problem in Figure 2.1. Each makes a different choice:
 
+- **PBFT-style** keeps the classical Byzantine fault model and the `3f+1`
+  quorum, relaxing only timing (synchrony to partial synchrony) to make
+  consensus solvable [4]; HotStuff [5] and Tendermint [6] inherit the same
+  quorum-intersection arithmetic [[wiki/concepts/quorum-arithmetic]].
 - **PoS-finality** keeps the `3f+1` quorum and partial synchrony but adds an
   *economic* layer: a validator that equivocates can be slashed, converting
   the Byzantine fault model from an external assumption into a
@@ -44,9 +40,11 @@ Generals Problem to the three families.
 
 ## 2.2 The three families
 
-Table 2.1 traces the same event, committing one proposed block, through
-all three families. They do one thing in common: accumulate *agreement* on a
-block until reversal is impossible. They differ on three axes: what counts
+Table 2.1 traces the same event, a block becoming irreversible, through
+all three families. PBFT and Snowman act on the block directly; Casper FFG
+finalizes blocks in batches at fixed checkpoints, not one at a time. They do
+one thing in common: accumulate *agreement* on a block until reversal is
+impossible. They differ on three axes: what counts
 as agreement, how much is enough, and how many times that must happen. Across
 those three axes the two deterministic families are nearly identical: about
 two-thirds agreement, met twice, giving `ε = 0`. Avalanche-style breaks the
@@ -68,7 +66,7 @@ are in parentheses. Notation is defined below the table.
 | | PBFT-style | PoS-finality | Avalanche-style |
 |:--|:--|:--|:--|
 | Synchrony assumption | partial synchrony | partial synchrony | asynchronous / probabilistic |
-| Block proposer | one rotating leader (primary) | one leader per slot (stake-weighted) | one leader per slot (round-robin) |
+| Block proposer | one rotating leader (primary) | one leader per block (stake-weighted) | one leader per block (round-robin) |
 | Unit of agreement | a replica's vote (`PREPARE`/`COMMIT`) | an attestation, weighted by stake | a polled peer's preference (`QUERY-RESPONSE`) |
 | Agreement threshold | ~⅔ of all validators (`2f+1`) | ~⅔ of all stake | ~80% of a small random sample (`α_c` of `K`) |
 | Agreement rounds | twice (`prepare`, `commit`) | twice, ≥2 epochs apart (`justify`, `finalize`) | `β`≈15 sampling rounds in a row |
@@ -97,8 +95,9 @@ a cross-family comparison under matched conditions, for two distinct reasons.
 Each family's primary papers report what its design concedes, and little
 else. The PBFT and HotStuff papers report operations per second on a
 low-latency LAN with view-change cost as the disturbance metric [4], [5].
-Casper FFG reports time-to-finality in *epochs*, a unit that becomes physical
-only after multiplication by a slot duration [7], [8]. Avalanche reports two
+Casper FFG reports time-to-finality in *epochs* (fixed batches of blocks, 32
+on Ethereum), a unit that becomes physical only after multiplying by the block
+time [7], [8]. Avalanche reports two
 figures absent elsewhere: the probabilistic safety bound `ε` and a
 per-transaction latency under one `K, α, β` parameterization [9], [10]. Table
 2.2 collects the headline numbers.
