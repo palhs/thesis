@@ -18,11 +18,6 @@ cannot be read off each family's own published numbers. The design answers this 
 one device: a single fixed engine that runs all three identically, with only the
 protocol logic swapped.
 
-**Figure 3.1 ([[diagrams/runtime/architecture]]).** Structural view: one fixed
-harness — scheduler, network, validators, logger — in which only the protocol-logic
-slot is swapped, turning one experiment-matrix cell and seed into one comparable
-per-trial row.
-
 The harness builds the runtime machinery (scheduler, network, validators, logger)
 identically for every protocol; a run loop drives the simulation and a reducer turns
 the event stream into one comparable row per seed and per matrix cell (Figure 3.1).
@@ -42,6 +37,11 @@ reproducible [[wiki/concepts/reproducibility]]; each output row carries its
 `commit_hash` and `seed`, so it can be regenerated from the record alone. Making the
 three protocols *comparable* is then a separate downstream step the metric schema
 performs (§3.5).
+
+**Figure 3.1 ([[diagrams/runtime/architecture]]).** Structural view: one fixed
+harness — scheduler, network, validators, logger — in which only the protocol-logic
+slot is swapped, turning one experiment-matrix cell and seed into one comparable
+per-trial row.
 
 ## 3.3 The three protocols
 
