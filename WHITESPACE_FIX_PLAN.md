@@ -12,6 +12,34 @@ is the port (mirror any prose-affecting change both ways). Overleaf push is the 
 
 ---
 
+## Outcome (executed 2026-06-30)
+
+**Result: 48 → 45 pages.** Executed Tier 1 fully, then per-figure repositioning
+(keeping `[H]`) rather than a blanket `[tbp]`, because the author requires figures
+pinned in reading-order (a trial `[tbp]` on Fig 3.1 floated it out of its slot and was
+rejected). Each tex change was mirrored into the `drafts/` source.
+
+- **Tier 1 (done):** removed all 36 `\addlinespace`; added
+  `\captionsetup{font=small,skip=4pt}` in `mydesign.tex`. Tables checked — not cramped.
+- **Repositioned (keep `[H]`):** Fig 3.1 → end of §3.2; Fig 2.1 → end of §2.1 (both
+  fully closed their page gaps — these are the "figure precedes a block of prose" case
+  that reposition genuinely fixes). Fig 4.2/4.5 → up next to their reference paragraph;
+  Fig 4.6 → chapter end; Fig 5.1 → before Table 5.1 (these compacted the document but
+  only *relocated* their local gaps).
+- **Fig 4.4 → `[tbp]`:** the one near-full-page panel; lands on its own float page
+  (accepted by author).
+- **Tier 2 height-caps:** tried on Fig 4.2 and Fig 5.1, then reverted at author's
+  request (shrinking hurt legibility) — gaps on pages 25/35 accepted.
+
+**Accepted (not fixable without shrinking floats or breaking reading order):** mid-page
+gaps at pp. 25, 29 (two tall §4.4 panels adjacent), 35; chapter-end gaps (pp. 13, 33,
+appendix). These are structural: tall floats under `[H]` leave prose no room to flow past.
+
+**Not done:** Tier 3 (`[tbp]` for all figures) — rejected on reading-order grounds.
+Tier 4 (11pt, front-matter) — not attempted.
+
+---
+
 ## Diagnosis (already done — don't re-investigate from scratch)
 
 - `\documentclass[oneside]{mitthesis}`; mitthesis `\LoadClass[12pt,openright]{report}`.
