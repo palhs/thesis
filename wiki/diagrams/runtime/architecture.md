@@ -20,40 +20,42 @@
 
 ```mermaid
 flowchart LR
-    IN["<b>INPUT — one experiment-matrix cell + seed</b><br/>protocol · n = 4 to 25 validators<br/>network conditions: delay, loss, partitions (configure the NETWORK below)<br/>adversary (behaviour + strength) · workload (transactions) · seed"]
+    CFG["<b>One run</b><br/>protocol · n validators · seed<br/>network timeline · adversary · workload"]
 
-    subgraph HARNESS["THE HARNESS — identical for every protocol; only the protocol logic is swapped"]
+    subgraph HARNESS["Fixed harness — identical for every protocol"]
         direction TB
-        HB["<b>BUILDER</b><br/>assembles the system<br/>and loads the workload"]
-        SCH["<b>SCHEDULER</b><br/>the single run loop<br/>and virtual clock<br/><i>one turn = the event-loop figure</i>"]
-        SLOT["<b>PROTOCOL LOGIC</b><br/>the only swappable part<br/>a state machine for one<br/>of the three protocols"]
-        NET["<b>NETWORK</b><br/>delivers messages with<br/>delay, loss and partitions<br/>(timing only — no CPU<br/>or signature cost)"]
-        LOG["<b>LOGGER</b><br/>records what happened:<br/>decided, halted, messages"]
-        HB --- SCH
-        SCH --- SLOT
-        SLOT --- NET
-        SLOT -. "results &amp; messages" .-> LOG
+        SCH["<b>Scheduler</b><br/>virtual clock + event delivery"]
+        SLOT["<b>Protocol logic</b><br/>PBFT · Casper FFG · Snowman<br/><i>(the only swappable part)</i>"]
+        NET["<b>Network</b><br/>delay, loss, partition<br/><i>phase-varying · timing only</i>"]
+        ADV["<b>Adversary</b><br/>per-node interceptor<br/>delay · silent · equivocation"]
+        LOG["<b>Logger</b><br/>records decisions, halts, messages"]
+        SCH --> SLOT
+        SLOT --> NET
+        SLOT --> ADV
+        SLOT -.-> LOG
     end
 
-    RED["<b>REDUCE + RECONCILE</b><br/>the three emit different kinds of decision — put them on one common scale<br/>(per ACU for overhead · rescale Snowman)"]
-    OUT["<b>OUTPUT — one row of results.csv (one comparable data point)</b><br/>time-to-finality &amp; throughput (per transaction)<br/>message &amp; byte overhead (per ACU)<br/>reliability: agreement · safety · liveness (defined with the metrics) · run outcome"]
-    RQ["comparison plots that answer the research questions (§3.1)"]
+    RED["<b>Normalise</b><br/>three decision types →<br/>one shared scale"]
+    OUT["<b>One result row</b><br/>latency · throughput<br/>message overhead · reliability"]
+    AGG["<b>Aggregate</b><br/>N seeds →<br/>95% CI row"]
 
-    IN -- "build + load workload" --> HARNESS
-    HARNESS -- "flush events" --> RED
+    CFG --> HARNESS
+    HARNESS --> RED
     RED --> OUT
-    OUT --> RQ
+    OUT -- "next seed / next cell" --> CFG
+    OUT --> AGG
 
     classDef io fill:#eef6ff,stroke:#3366aa,color:#000
     classDef eng fill:#f4f4f4,stroke:#666,color:#000
     classDef proto fill:#eefaee,stroke:#557755,color:#000
     classDef red fill:#f3eefb,stroke:#7755aa,color:#000
-    classDef rq fill:#fff4e6,stroke:#bb8833,color:#000
-    class IN,OUT io
+    classDef agg fill:#fff4e6,stroke:#bb8833,color:#000
+    class CFG,OUT io
     class RED red
-    class RQ rq
-    class HB,SCH,NET,LOG eng
+    class SCH,NET,LOG eng
     class SLOT proto
+    class ADV eng
+    class AGG agg
 ```
 
 ## What this pins
