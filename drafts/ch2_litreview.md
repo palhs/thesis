@@ -91,14 +91,14 @@ to prove.
 PBFT and HotStuff were replacing slow replicated databases, so their papers
 report throughput: thousands of operations per second on a low-latency local
 network [4], [5]. Casper FFG was grafted onto Ethereum's existing block stream
-to add irreversibility — it reports finality delay in epochs, two of them,
+to add irreversibility; it reports finality delay in epochs, two of them,
 about twelve minutes on mainnet [7], [8]. Avalanche skips quorum entirely and
 reports safety probability `ε` and per-transaction latency for one fixed
 parameter set [9], [10].
 
 None of them covers all three dimensions. PBFT says nothing about finality
 delay. Casper FFG says nothing about throughput. Avalanche's latency figure is
-only valid at one `K, β` setting — change the parameters and the number
+only valid at one `K, β` setting: change the parameters and the number
 changes too.
 
 No shared unit exists for asking "which family is faster?" or "which is
@@ -115,7 +115,7 @@ another matter.
 
 One study comes close. Gervais *et al.* [17] built a unified Proof-of-Work
 simulator with a single metric schema, swept across block sizes and propagation
-delays — the kind of controlled cross-condition evaluation the three BFT
+delays: the kind of controlled cross-condition evaluation the three BFT
 families have never received. The limitation is the target: Proof-of-Work only.
 No equivalent study covers PBFT-style, PoS-finality, and Avalanche-style
 protocols under matched conditions.

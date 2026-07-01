@@ -39,14 +39,14 @@ and it answers **RQ3**. Messages per committed unit grow with `n` for all three,
 the slopes differ by an order of magnitude (Figure 4.1, logarithmic axis): PBFT
 approaches `2n`, Casper FFG `1.2n`, and Snowman `2·K·β`, where `K` is the poll sample
 size and `β` the confidence threshold. Each measured trend matches the protocol's
-published asymptotic cost, the markers falling on the prediction across the sweep —
+published asymptotic cost, the markers falling on the prediction across the sweep:
 PBFT's two all-to-all broadcast phases, Casper FFG's single attestation phase (whose
 per-unit slope sits below PBFT's because one phase serves more committed decisions),
 and Snowman's `K`-peer query/response polls, the last matched to within half a
 percent. Two readings must be kept apart: per committed unit Snowman is the most
 expensive by an order of magnitude (≈ 24 messages per validator against PBFT's two),
-the price of repeated subsampling; yet the property for which Avalanche is known —
-that its *per-validator* cost is independent of `n` — is a statement about
+the price of repeated subsampling; yet the property for which Avalanche is known
+(that its *per-validator* cost is independent of `n`) is a statement about
 per-validator work, not the network-aggregate plotted here, which necessarily grows
 with `n`. This verdict is a property of classical PBFT's `O(n²)` broadcasts, not the
 leader-based family as a whole: a linear-message descendant such as HotStuff would
@@ -107,7 +107,7 @@ vertical axis. Source: `results/delay/plots/moderate_latency.pdf`
 
 This answers **RQ1**: as the network-delay distribution widens toward heavier tails,
 commit latency scales by a factor fixed by each family's round structure rather than
-by the validator-set size — the round-bounded protocols stay near-insensitive to the
+by the validator-set size: the round-bounded protocols stay near-insensitive to the
 tail, while Snowman, whose `β` sequential polls each wait on the slowest sampled peer,
 is acutely sensitive to it.
 
@@ -153,7 +153,7 @@ ones that pay the most latency to do so. PBFT and Snowman both inflate their
 time-to-finality by factors of roughly two to three-and-a-half at the worst loss they
 survive, converting that cost into survival; Casper FFG does not make the trade,
 inflating latency by only three to ten percent but over the few seeds that still
-finalize and to no benefit. No configuration is both cheap and resilient — protecting
+finalize and to no benefit. No configuration is both cheap and resilient: protecting
 liveness against a lossy network costs latency, and the only variable is how much.
 
 So PBFT degrades most gracefully, alive at the deepest tested loss at both committee
@@ -185,9 +185,9 @@ safety failure is possible (equivocation against PBFT and Casper FFG), and the p
 committee sizes separate size-invariant results from size-dependent ones such as
 Snowman's silence cliff. It reports the two outcome families RQ4 separates: liveness,
 the success rate of seed-runs that finalize within the window (95% Wilson intervals,
-§3.5), and safety, a per-protocol safety-violation rate — except for Snowman, whose
+§3.5), and safety, a per-protocol safety-violation rate (except for Snowman, whose
 probabilistic finality is reported through its analytical bound `ε` rather than a
-fork count.
+fork count).
 
 ### 4.4.1 Delayed voting
 
@@ -298,7 +298,7 @@ and Snowman starving earliest), so the rate of decay is governed by each family'
 quorum structure rather than by `φ` alone (Figure 4.6).
 
 Whether any one family occupies a dominant position once the baseline, delay, and
-adversarial regimes are considered jointly — the Pareto-frontier synthesis of RQ5 — is
+adversarial regimes are considered jointly (the Pareto-frontier synthesis of RQ5) is
 taken up in Chapter 5.
 
 **Figure 4.6 — Goodput degradation versus adversarial fraction (silent

@@ -5,8 +5,8 @@
 This chapter describes the simulator that closes the gap of Chapter 2 and answers
 the data-generating questions RQ1–RQ4: a single discrete-event system in which the
 three families run under one system model (§3.2), one experiment design (§3.4), and
-one metric schema (§3.5). RQ5 — whether a consistent performance–security frontier
-emerges across the families — is a synthesis over that data rather than a sweep, and
+one metric schema (§3.5). RQ5 (whether a consistent performance–security frontier
+emerges across the families) is a synthesis over that data rather than a sweep, and
 is answered in Chapter 5. The approach extends the instrumented-harness methodology
 of Gervais *et al.* [17] from Proof-of-Work to the three BFT families.
 
@@ -72,7 +72,7 @@ validators, not the checkpoint.
 
 When attestations worth ≥⅔ of total stake accumulate for a link, the target
 checkpoint is *justified*. It becomes *finalized* only once its child checkpoint
-is also justified. C3 in the figure is still pending — not enough attestations
+is also justified. C3 in the figure is still pending: not enough attestations
 yet.
 
 **Figure 3.3 ([[diagrams/concepts/casper-ffg-flow]]).** Casper FFG checkpoint
@@ -120,13 +120,13 @@ finding can point back rather than re-argue.
    cryptographic signatures are modeled, so the adversary catalogue has no
    evidence-forgery capability; messages still carry an authenticated sender identity
    and a content digest, so what classical PBFT lacks under equivocation is an
-   *accountability gadget* — a slashing layer that names the faulty replica — not the
+   *accountability gadget*: a slashing layer that names the faulty replica, not the
    harness's ability to attribute a vote. The same signature-free harness detects
    Casper FFG's slashable offences (below), which fixes the gap as a protocol property
    rather than a modeling artifact. The full three-phase protocol including view-change
    and `NEW-VIEW` leader recovery is implemented; leader-disruption is a catalogued but
    un-swept adversary surface (§6.2), not an absent mechanism.
-2. **Casper FFG** runs as a standalone finality gadget — its real LMD-GHOST
+2. **Casper FFG** runs as a standalone finality gadget: its real LMD-GHOST
    fork-choice and block-production layer (Ethereum's Gasper [8]) are removed, so the
    measured latency, throughput, and liveness are properties of the gadget as modeled,
    not of a full Gasper deployment. Its slot cadence is compressed (`slots_per_epoch =
@@ -136,10 +136,10 @@ finding can point back rather than re-argue.
    block at `slots_per_epoch = 1`) [[wiki/concepts/metric-reconciliation]]. The
    cadence is a configurable parameter, not a hard-coded constant, and a sensitivity sweep over
    `slot_duration ∈ {0.5, 1, 2} s` confirms finality latency scales linearly with it,
-   so the resulting ≈ 5 s epoch-granularity finality is reported as a *finding* in §4.2
-   — a transparent function of the calibration, not an artifact absorbed into it.
+   so the resulting ≈ 5 s epoch-granularity finality is reported as a *finding* in §4.2:
+   a transparent function of the calibration, not an artifact absorbed into it.
    Slashing is modeled as detection: the gadget identifies both double-vote and
-   surround-vote offences and reports the slashable stake fraction, then halts — the
+   surround-vote offences and reports the slashable stake fraction, then halts; the
    economic penalty itself is out of scope (§1.4).
 3. **Snowman** is the linearized variant (no DAG), rescaled for thesis-scale validator
    sets: `K = min(20, n−1)`, `α_c = ⌈0.8·K⌉`, `β = 15` held fixed. Holding the ratio
@@ -203,9 +203,9 @@ fails liveness only if no honest validator commits within the measurement window
 
 ## 3.5 Metric schema
 
-Each metric has one definition, one unit, and one fixed instrumentation point. Protocol differences appear only as per-protocol formulas within the same column [[wiki/concepts/evaluation-metrics]]. The device that makes the three comparable is the *atomic commit unit* (ACU): the smallest set of transactions a protocol commits indivisibly — one block for PBFT, one finalized checkpoint for Casper FFG, one accepted block for Snowman. Every "per-block" metric is recast as "per ACU", giving all three protocols the same denominator.
+Each metric has one definition, one unit, and one fixed instrumentation point. Protocol differences appear only as per-protocol formulas within the same column [[wiki/concepts/evaluation-metrics]]. The device that makes the three comparable is the *atomic commit unit* (ACU): the smallest set of transactions a protocol commits indivisibly, whether one block for PBFT, one finalized checkpoint for Casper FFG, or one accepted block for Snowman. Every "per-block" metric is recast as "per ACU", giving all three protocols the same denominator.
 
-Some of these denominators are modeling conventions — the ACU definition, the Snowman rescaling, the Casper FFG slot calibration. A verdict is only reported as robust when it survives the sensitivity sweep that varies the convention's governing parameter.
+Some of these denominators are modeling conventions: the ACU definition, the Snowman rescaling, the Casper FFG slot calibration. A verdict is only reported as robust when it survives the sensitivity sweep that varies the convention's governing parameter.
 
 Cross-protocol comparisons use *Pareto dominance*: protocol A dominates B when A is no worse on every metric and strictly better on at least one. A protocol is *non-dominated* when nothing dominates it. Chapter 5 applies this to test whether any family dominates the rest.
 
@@ -224,7 +224,7 @@ Cross-protocol `goodput` is the committed-transaction rate, not a raw decided-ev
 | `success_rate` | `0/1` per run (`1` iff an instance decided); a frequency after aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
 | safety (`fork_rate`) | `0` below threshold by construction; `> 0` only above `1/3` under equivocation | `0` below threshold; `> 0` only above `1/3` (a conflicting finalized checkpoint, not a reorg) | N/A — probabilistic safety, reported via `ε` against `(1 − α_c/K)^β` |
 
-The reliability metrics connect back to the §2.1 properties. A *safety violation* is an observed breach of Agreement — two honest validators commit conflicting values at one height — recorded in `fork_rate`. For the deterministic-finality protocols this is `0` below threshold by construction; it is only measured above it. A *liveness failure* is a breach of Termination: no honest validator commits within the window, measured by the complement of `success_rate`. Validity holds by construction and is not instrumented.
+The reliability metrics connect back to the §2.1 properties. A *safety violation* is an observed breach of Agreement (two honest validators commit conflicting values at one height), recorded in `fork_rate`. For the deterministic-finality protocols this is `0` below threshold by construction; it is only measured above it. A *liveness failure* is a breach of Termination: no honest validator commits within the window, measured by the complement of `success_rate`. Validity holds by construction and is not instrumented.
 
 Snowman is the exception. Its finality is probabilistic, so safety is reported via the analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate — the weakest safety guarantee of the three, a limitation taken up in §6.2.
 
