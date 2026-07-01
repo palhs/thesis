@@ -37,9 +37,9 @@ apart: delay inflates time-to-finality (RQ1, §4.3.1), loss erodes liveness (RQ4
 
 ### 4.3.1 Delay and time-to-finality
 
-Under moderate delay the three protocols separate by nearly an order of magnitude, governed by each protocol's round structure rather than the network (Figure 4.2). PBFT and Casper FFG are round-bounded: both stay near-flat in `n` and insensitive to tail shape, differing by at most three percent between the uniform and exponential timelines because a fixed count of rounds averages out the per-message delay. Both slow against their zero-delay baselines — PBFT roughly doubles (×1.9 at `n = 10`, near ×2.0 at `n = 25`) and Casper FFG rises modestly (×1.3) [[wiki/experiments/2026-06-10_delay-moderate]]. Snowman is the exception: it rises by a factor of twelve to fifteen over baseline, and its exponential-timeline latency exceeds its uniform-timeline latency (15.3 against 12.6 s at `n = 10`), because its `β = 15` sequential poll rounds each wait on the slowest of `K` sampled peers and the exponential tail pushes that slowest response higher across every round. Message counts, by contrast, hold within about two percent of their zero-delay values.
+Under moderate delay the three protocols separate by nearly an order of magnitude, governed by each protocol's round structure rather than the network (Figure 4.2). PBFT and Casper FFG are round-bounded: both stay near-flat in `n` and insensitive to tail shape, differing by at most three percent between the uniform and exponential timelines because a fixed count of rounds averages out the per-message delay. Both slow against their zero-delay baselines — PBFT roughly doubles (×1.9 at `n = 10`, near ×2.0 at `n = 25`) and Casper FFG rises modestly (×1.3) [[wiki/experiments/2026-06-10_delay-moderate]]. Snowman is the exception: it rises by a factor of twelve to fifteen over baseline, and its exponential-timeline latency exceeds its uniform-timeline latency (15.3 against 12.6 s at `n = 10`), because its `β = 15` sequential poll rounds each wait on the slowest of `K` sampled peers and the exponential tail pushes that slowest response higher across every round. Message counts, by contrast, stay near their zero-delay values for the round-bounded protocols (PBFT within a tenth of a percent, Snowman within about two percent), while Casper FFG's messages per committed unit fall by roughly twelve percent under delay.
 
-**Figure 4.2 — Commit latency under moderate delay.** Median per-validator
+**Figure 4.2 — Commit latency under moderate delay.** Mean per-validator
 `commit_latency_ms` under the two equal-mean moderate timelines (`delay-uniform` and
 `delay-exponential`), grouped by protocol and faceted by validator count; logarithmic
 vertical axis. Source: `results/delay/plots/moderate_latency.pdf`
@@ -91,8 +91,9 @@ peer but cannot complete a poll around an absent one (Figure 4.4c). PBFT shows a
 quorum cliff, finalizing with no goodput loss up to `φ = 0.33` and dying at
 `φ = 0.40` where the silent set drops the honest remainder below the `2f+1` quorum;
 Casper FFG degrades gracefully over the same range and still finalizes at `φ = 0.33`,
-its goodput decaying in proportion to the participating stake, ≈ `1 − φ` (Figure
-4.6); and Snowman cliffs earliest, at `φ = 0.10` for `n = 10` and `φ = 0.20` for `n = 25`. The ordering is therefore PBFT and
+its goodput decaying with the participating stake but somewhat faster than the `1 − φ`
+line, which it stays below because lost proposer slots forfeit whole finalization
+rounds (Figure 4.6); and Snowman cliffs earliest, at `φ = 0.10` for `n = 10` and `φ = 0.20` for `n = 25`. The ordering is therefore PBFT and
 Casper FFG ahead of Snowman.
 
 **Figure 4.4 — Liveness under delayed voting and silent non-participation.** Each row
@@ -133,7 +134,7 @@ safety invariant for equivocation. Source:
 | Adversarial strategy | PBFT | Casper FFG | Snowman | Robustness order |
 | :-- | :-- | :-- | :-- | :-- |
 | Delayed voting | success 1.0; finality 1.0× (immune, no view-changes) | success → 0.60 / 0.65; finality 1.0× (liveness dips) | success 1.0; finality ×62 / ×49 (full liveness, crawls) | PBFT ≈ Snowman ≫ FFG |
-| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
+| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput below `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
 Three qualifications bound the verdict: the leader-disruption surface is catalogued but not exercised, so PBFT's standing against the liveness adversaries holds only against an adversary that spares its view-0 primary (§6.2); Snowman's analytical `ε` is not empirically witnessed at the baseline depth (§4.4.3); and the latency-only network understates the detection and recovery cost borne by PBFT and Casper FFG (§6.2).
@@ -141,7 +142,7 @@ Three qualifications bound the verdict: the leader-disruption surface is catalog
 On the goodput axis, the same sweep answers
 **RQ2**: as the injected Byzantine fraction `φ` rises toward the fault threshold,
 sustained goodput degrades in three distinct modes (PBFT undegraded until its
-quorum cliff, Casper FFG decaying in proportion to the participating stake, ≈ `1 − φ`,
+quorum cliff, Casper FFG decaying with the participating stake but somewhat faster than `1 − φ`,
 and Snowman starving earliest), so the rate of decay is governed by each family's
 quorum structure rather than by `φ` alone (Figure 4.6).
 
