@@ -61,6 +61,9 @@ in both phases.
 Colours indicate the sender. Node 3 (faulty) receives `PRE-PREPARE` but emits
 nothing; the three honest nodes still reach `2f+1` in both phases.
 
+The implementation drops cryptographic signatures but keeps the full view-change
+and `NEW-VIEW` recovery path; §6.2 addresses generalizability.
+
 ### Casper FFG — checkpoint finality over epochs
 
 Blocks arrive continuously and are grouped into epochs. At each epoch boundary a
@@ -80,6 +83,9 @@ chain. Green = finalized, amber = justified, white = proposed. Solid arcs are
 confirmed supermajority links; the dashed arc shows the next link still
 accumulating votes. Validator dots show 5 of 7 attesting (grey = silent or late).
 
+The gadget runs without LMD-GHOST fork-choice, so the results cover the finality
+layer only, not a complete Gasper deployment (§6.2).
+
 ### Snowman — repeated random subsampling
 
 Each round, validator v picks K peers at random and asks which block they prefer.
@@ -97,6 +103,10 @@ validator v. Blue peers prefer the same block; red peers prefer a competing one.
 The counter grows each round the sample clears α_c, and resets if v switches
 preference.
 
+The simulator uses the linearized (no-DAG) variant with parameters rescaled for
+small validator sets; DAG routing and stake-weighted sampling are not modeled
+(§6.2).
+
 Table 3.1 summarises the three protocols side by side.
 
 **Table 3.1 — The three implemented protocols at a glance.**
@@ -110,47 +120,6 @@ Table 3.1 summarises the three protocols side by side.
 | Finality | deterministic | deterministic | probabilistic, `ε ≤ (1 − α_c/K)^β` |
 | Communication cost | `O(n²)` | `O(n)` aggregated | `O(K·β)` per validator |
 | Implemented as | classical PBFT, no signatures | FFG gadget standalone, no LMD-GHOST fork-choice | linearized Snowman, no DAG, no stake-weighted sampling |
-
-Three simplifications carry into the results and are stated once here, so a later
-finding can point back rather than re-argue.
-
-1. **PBFT** is the classical variant, which sits at the `O(n²)` worst case of its
-   family's message complexity, so the RQ3 overhead verdict is a verdict on classical
-   PBFT specifically, not on lighter descendants such as HotStuff (§6.2). No
-   cryptographic signatures are modeled, so the adversary catalogue has no
-   evidence-forgery capability; messages still carry an authenticated sender identity
-   and a content digest, so what classical PBFT lacks under equivocation is an
-   *accountability gadget*: a slashing layer that names the faulty replica, not the
-   harness's ability to attribute a vote. The same signature-free harness detects
-   Casper FFG's slashable offences (below), which fixes the gap as a protocol property
-   rather than a modeling artifact. The full three-phase protocol including view-change
-   and `NEW-VIEW` leader recovery is implemented; leader-disruption is a catalogued but
-   un-swept adversary surface (§6.2), not an absent mechanism.
-2. **Casper FFG** runs as a standalone finality gadget: its real LMD-GHOST
-   fork-choice and block-production layer (Ethereum's Gasper [8]) are removed, so the
-   measured latency, throughput, and liveness are properties of the gadget as modeled,
-   not of a full Gasper deployment. Its slot cadence is compressed (`slots_per_epoch =
-   2`, `slot_duration = 1 s`, against Ethereum's 32 and 12 s); `2` is the smallest
-   value that preserves FFG's epoch structure (a multi-block epoch plus the
-   two-epoch justify→finalize dependency, both of which collapse onto a single
-   block at `slots_per_epoch = 1`) [[wiki/concepts/metric-reconciliation]]. The
-   cadence is a configurable parameter, not a hard-coded constant, and a sensitivity sweep over
-   `slot_duration ∈ {0.5, 1, 2} s` confirms finality latency scales linearly with it,
-   so the resulting ≈ 5 s epoch-granularity finality is reported as a *finding* in §4.2:
-   a transparent function of the calibration, not an artifact absorbed into it.
-   Slashing is modeled as detection: the gadget identifies both double-vote and
-   surround-vote offences and reports the slashable stake fraction, then halts; the
-   economic penalty itself is out of scope (§1.4).
-3. **Snowman** is the linearized variant (no DAG), rescaled for thesis-scale validator
-   sets: `K = min(20, n−1)`, `α_c = ⌈0.8·K⌉`, `β = 15` held fixed. Holding the ratio
-   `α_c/K ≈ 0.8` preserves the *form* of Snowman's safety bound `ε ≤ (1 − α_c/K)^β`
-   rather than its production value. The `β`-round confidence accumulation itself is the
-   complete Snowball rule, not a reduced form. The rescaling degenerates at `n = 4` (where
-   `α_c = K` forces unanimity), so the `n = 4` Snowman row is excluded from the
-   comparative tables of Chapters 4–5 [[experiments/2026-05-27_snowman-baseline]]; at the
-   smaller sizes `K = n − 1` also makes each poll a near-complete canvass rather than a
-   sparse subsample, so Snowman's distinguishing subsampling is only fully exercised at
-   `n = 25` (§6.2).
 
 ## 3.4 Experiment design
 
