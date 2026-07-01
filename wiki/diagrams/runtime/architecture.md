@@ -18,6 +18,14 @@
 
 ## Diagram
 
+> **Render source (2026-07-01):** the thesis/LaTeX figure is now the
+> hand-authored `architecture.svg` in this directory, rendered to
+> `architecture.pdf` (via `cairosvg`) and copied to
+> `thesis-tex/.../figures/runtime-architecture.pdf`. The Mermaid block below
+> is retained as the textual **structural reference** — it is no longer the
+> render source, so edit `architecture.svg` for anything that must reach the
+> PDF, and keep the two in step (see Revisions 2026-07-01).
+
 ```mermaid
 flowchart LR
     CFG["<b>One run</b><br/>protocol · n validators · seed<br/>network timeline · adversary · workload"]
@@ -37,7 +45,7 @@ flowchart LR
 
     RED["<b>Normalise</b><br/>three decision types →<br/>one shared scale"]
     OUT["<b>One result row</b><br/>latency · throughput<br/>message overhead · reliability"]
-    AGG["<b>Aggregate</b><br/>N seeds →<br/>95% CI row"]
+    AGG["<b>Aggregate</b><br/>N seeds →<br/>aggregated mean row"]
 
     CFG --> HARNESS
     HARNESS --> RED
@@ -140,3 +148,22 @@ T36.3.
   edges, classes, and wording are otherwise unchanged. `chapter3.tex`
   switched the float from a dedicated page (`[p]`, `height=0.92\textheight`)
   to inline placement (`[tbp]`, plain `width=\linewidth`).
+
+- **2026-07-01 — replaced Mermaid render with a hand-authored SVG; dropped
+  the "95% CI" wording from the figure (content).** The rendered figure is
+  now `architecture.svg` → `architecture.pdf` (`cairosvg`, page 1080×780 pt,
+  aspect ~1.39:1) rather than a Mermaid render; it adds a title, a colour
+  legend, and three labelled zone containers (input / engine / output) but
+  keeps the same node set and pipeline. Per an explicit human decision, the
+  Aggregate box now reads **"N seeds → aggregated mean row"** (was "95% CI
+  row") and the final-table caption reads "each metric reported as the mean
+  across N seeds" (was "±95% confidence interval") — the aggregation step is
+  retained (it is real: `src/output/aggregate.py`), only the statistical-
+  reporting claim is dropped *from the diagram*. The CI method itself is
+  unchanged and still owned by §3.5 prose (Student-t for continuous, Wilson
+  for rate metrics) and relied on by Ch4 §4.4, so this is a figure-scoping
+  change, not a methodology change. The Mermaid AGG node above was aligned to
+  match. `chapter3.tex` include is unchanged (`[H]`, `width=\linewidth`);
+  the new landscape aspect sits inline without a height cap. Font-family
+  leads with `Arial Unicode MS` so `cairosvg` on macOS resolves the `→` and
+  `①②③` glyphs (DejaVu Sans, the design font, is not installed locally).
