@@ -139,6 +139,24 @@ so once the larger committee's margin is exhausted the `β` rounds compound into
 cliff. Casper FFG has neither, collapsing at the first 5% drop with no leader to
 rotate and no resampling to fall back on.
 
+This recovery is not free, and reading the communication metric under loss rather
+than on the clean baseline exposes its price (Figure A.3). PBFT's `total_msgs_per_acu`
+inflates on two fronts at once: the view-change retransmits enlarge the numerator while the
+collapsing finalized-instance count shrinks the denominator, so at `n = 25` the
+per-unit message cost climbs from about 50 on the loss-free control to about 85 at 5%
+loss, about 135 at 10%, and about 678 at 20%, a factor of roughly thirteen, with the
+worst individual seeds past 1300. The other two protocols degrade even faster on this
+axis, since their denominators collapse with no recovery path to spend messages on.
+Casper FFG, cheapest of the three on the clean control at about 26 messages per unit,
+craters to about 330 at 5% loss and about 1670 at 10% over the few seeds that still
+finalize, overtaking PBFT; Snowman's per-unit cost reaches about 5.0 × 10⁴ at 10% loss
+on the reduced eight-seed heavy cell. At 20% loss both finalize essentially nothing,
+leaving PBFT the only protocol still committing and, at about 678 messages per unit,
+the cheapest of the three at the deepest loss any survives. So the resilience the
+ranking credits to PBFT is bought with an order-of-magnitude rise in message overhead,
+and the clean-path cost ordering of §4.2 does not survive loss unchanged: PBFT
+overtakes Casper FFG on this axis while Snowman stays most expensive throughout.
+
 **Figure 4.3 — Packet-loss resilience.** Faceted by validator count, 95% confidence
 intervals. (a) Finalization rate against per-message drop probability, one curve per
 protocol. (b) Loss-resilience ranking by area under the finalization-rate curve
@@ -308,10 +326,11 @@ participating-stake invariant marked. Source:
 `results/adversary/plots/throughput_degradation_vs_phi.pdf`
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
 
-<!-- Appendix figures: the two detail figures below are referenced from §4.4.3 and
-§4.4.4 but rendered in Appendix A to keep the chapter's figure budget on the
-load-bearing results. On LaTeX export their figure environments live in appendixa.tex;
-the body keeps only the cross-references (Figure A.1, Figure A.2). -->
+<!-- Appendix figures: the three detail figures below are referenced from §4.3.2,
+§4.4.3, and §4.4.4 but rendered in Appendix A to keep the chapter's figure budget on
+the load-bearing results. On LaTeX export their figure environments live in
+appendixa.tex; the body keeps only the cross-references (Figure A.1, Figure A.2,
+Figure A.3). -->
 
 **Figure A.1 — Casper FFG slashable stake under equivocation.** Maximum slashable
 stake fraction against the equivocator fraction `φ`, faceted by validator count, with
@@ -324,3 +343,11 @@ protocol–strategy cells of Table 4.1 as an outcome map: cell colour encodes th
 outcome kind and each label its governing magnitude. Source:
 `results/adversary/plots/adversary_tradeoff_matrix.pdf`
 [[wiki/experiments/2026-06-19_adversary-comparison]].
+
+**Figure A.3 — Communication cost under packet loss.** `total_msgs_per_acu` for each
+protocol against per-message drop probability, faceted by validator count, on a
+logarithmic axis, with PBFT's mean view-change count annotated at each loss level.
+Shows the two compounding inflation fronts of §4.3.2 (view-change numerator, collapsing
+ACU denominator) and the clean-path cost order breaking under loss as Casper FFG
+crosses above PBFT. Source: `results/delay/plots/cost_of_survival.pdf`
+[[wiki/experiments/2026-06-13_delay-comparison]].

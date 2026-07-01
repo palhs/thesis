@@ -199,3 +199,32 @@ and no data change. Re-running `PYTHONPATH=src python3 -m output.delay_plots`
 now emits six figures; the five pre-existing PDFs were left untouched
 (re-rendered only on demand) to avoid churning their committed blobs. Cited as
 Figure 4.10 in [[drafts/ch4_results]] §4.3.2.
+
+### [2026-07-01] `msgs_per_acu`-under-loss finding surfaced in §4.3.2 (Figure A.3)
+
+Closes a gap flagged in a Ch4 read-through: the clean-path `total_msgs_per_acu`
+RQ3 result (§4.2) was never confronted with the loss sweep, even though the
+`cost_of_survival` figure (§Output artifacts #4) already plotted it. That figure
+had been cut from the Ch4 body during the W1 condensation wave and left
+unreferenced. It is now restored as **Figure A.3** (Appendix A) with a new
+§4.3.2 paragraph reporting the numbers. No new runs and no data change — the
+values are the committed `delay_heavy.csv` means (per-seed, `finalized_instances
+> 0` only), reproduced from `heavy_metric_means`:
+
+- **PBFT `total_msgs_per_acu` (n=25)** inflates 50.0 → 84.6 → 134.8 → 678.2 across
+  `p_drop ∈ {0, .05, .10, .20}` (≈13.5×; worst seed 1368), driven by two fronts:
+  view-change retransmits (numerator, mean vc 0 → 75) **and** the collapsing ACU
+  denominator (`finalized_instances` 993 → 55).
+- **The clean-path cost order does not survive loss.** Casper FFG, cheapest on
+  the control (25.5), craters to 328.5 (p05) / 1666.2 (p10) as its denominator
+  collapses with no recovery path, **overtaking PBFT**. Snowman reaches 5.0×10⁴
+  at p10 (n=25, 8-seed heavy cell). At p20 only PBFT still finalizes.
+- **RQ3 headline (Snowman ≫ deterministic) holds and widens**, but PBFT — not
+  Casper FFG — is the cheapest per committed unit at every loss level it clears.
+
+This is consistent with, and quantifies, the §Observations note that "only PBFT
+converts [latency] cost into tail survival": that survival is bought with an
+order-of-magnitude message-overhead rise. `results/delay/plots/cost_of_survival.pdf`
+regenerated (byte-refreshed, content identical) and copied into the tex repo's
+`figures/`. §6.2 unchanged: the residual caveat (permanent-loss, no
+retransmission → upper bound) already covers the overhead inflation.
