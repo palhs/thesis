@@ -86,8 +86,13 @@ governed by each protocol's round structure rather than the network (Figure 4.2)
 PBFT and Casper FFG are round-bounded: both stay near-flat in `n` and nearly
 tail-insensitive, differing by at most three percent between the uniform and
 exponential timelines because a fixed count of rounds or slots averages out the
-per-message delay (Casper FFG's modest ≈ 27% rise is slot-mediated, not
-network-driven). Snowman is the exception, acutely tail-sensitive: it rises by a
+per-message delay. Both nonetheless slow against their zero-delay baselines under
+the moderate timeline — PBFT roughly doubles (≈ 1000 ms → ≈ 1950 ms, ×1.9 at
+`n = 10`, near ×2.0 at `n = 25`) and Casper FFG rises modestly (≈ 27%, ×1.3), the
+latter slot-mediated rather than network-driven
+[[wiki/experiments/2026-06-10_delay-moderate]] — an increase bounded by round
+structure, not amplified by the tail. Snowman is the exception, acutely
+tail-sensitive: it rises by a
 factor of twelve to fifteen over baseline, and its exponential-timeline latency
 *exceeds* its uniform-timeline latency (15.3 against 12.6 s at `n = 10`), because its
 `β = 15` sequential poll rounds each wait on the slowest of `K` sampled peers and the

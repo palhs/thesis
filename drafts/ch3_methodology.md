@@ -72,21 +72,39 @@ finding can point back rather than re-argue.
    family's message complexity, so the RQ3 overhead verdict is a verdict on classical
    PBFT specifically, not on lighter descendants such as HotStuff (§6.2). No
    cryptographic signatures are modeled, so the adversary catalogue has no
-   evidence-forgery capability.
+   evidence-forgery capability; messages still carry an authenticated sender identity
+   and a content digest, so what classical PBFT lacks under equivocation is an
+   *accountability gadget* — a slashing layer that names the faulty replica — not the
+   harness's ability to attribute a vote. The same signature-free harness detects
+   Casper FFG's slashable offences (below), which fixes the gap as a protocol property
+   rather than a modeling artifact. The full three-phase protocol including view-change
+   and `NEW-VIEW` leader recovery is implemented; leader-disruption is a catalogued but
+   un-swept adversary surface (§6.2), not an absent mechanism.
 2. **Casper FFG** runs as a standalone finality gadget — its real LMD-GHOST
    fork-choice and block-production layer (Ethereum's Gasper [8]) are removed, so the
    measured latency, throughput, and liveness are properties of the gadget as modeled,
    not of a full Gasper deployment. Its slot cadence is compressed (`slots_per_epoch =
-   2`, `slot_duration = 1 s`, against Ethereum's 32 and 12 s); the resulting ≈ 5 s
-   epoch-granularity finality is reported as a *finding* in §4.2, not absorbed into the
-   calibration. Slashing is modeled as detection-and-halt, so the economic penalty is
-   out of scope (§1.4).
+   2`, `slot_duration = 1 s`, against Ethereum's 32 and 12 s); `2` is the smallest
+   value that preserves FFG's epoch structure (a multi-block epoch plus the
+   two-epoch justify→finalize dependency, both of which collapse onto a single
+   block at `slots_per_epoch = 1`) [[wiki/concepts/metric-reconciliation]]. The
+   cadence is a configurable parameter, not a hard-coded constant, and a sensitivity sweep over
+   `slot_duration ∈ {0.5, 1, 2} s` confirms finality latency scales linearly with it,
+   so the resulting ≈ 5 s epoch-granularity finality is reported as a *finding* in §4.2
+   — a transparent function of the calibration, not an artifact absorbed into it.
+   Slashing is modeled as detection: the gadget identifies both double-vote and
+   surround-vote offences and reports the slashable stake fraction, then halts — the
+   economic penalty itself is out of scope (§1.4).
 3. **Snowman** is the linearized variant (no DAG), rescaled for thesis-scale validator
    sets: `K = min(20, n−1)`, `α_c = ⌈0.8·K⌉`, `β = 15` held fixed. Holding the ratio
    `α_c/K ≈ 0.8` preserves the *form* of Snowman's safety bound `ε ≤ (1 − α_c/K)^β`
-   rather than its production value. The rescaling degenerates at `n = 4` (where
+   rather than its production value. The `β`-round confidence accumulation itself is the
+   complete Snowball rule, not a reduced form. The rescaling degenerates at `n = 4` (where
    `α_c = K` forces unanimity), so the `n = 4` Snowman row is excluded from the
-   comparative tables of Chapters 4–5 [[experiments/2026-05-27_snowman-baseline]].
+   comparative tables of Chapters 4–5 [[experiments/2026-05-27_snowman-baseline]]; at the
+   smaller sizes `K = n − 1` also makes each poll a near-complete canvass rather than a
+   sparse subsample, so Snowman's distinguishing subsampling is only fully exercised at
+   `n = 25` (§6.2).
 
 ## 3.4 Experiment design
 
@@ -144,7 +162,11 @@ finalized checkpoint for Casper FFG, one accepted block for Snowman. Every "per-
 metric is rewritten "per ACU", so one denominator serves all three. Because the ACU
 denominator, the Snowman rescaling, and the Casper FFG calibration are modeling
 conventions, a verdict is reported robust only when it survives the sensitivity sweep that
-varies the convention's governing knob.
+varies the convention's governing knob. Cross-protocol verdicts are read off this schema
+through *Pareto dominance*: one protocol dominates another when it is no worse on every
+axis of comparison and strictly better on at least one, and is *non-dominated* when no
+other protocol dominates it. Chapter 5 applies this relation across the metric axes to
+test whether any family dominates the rest.
 
 Two definitions are load-bearing. `commit_latency_ms` is the canonical time-to-finality
 axis: the `decided` event fires at each protocol's irreversibility milestone — PBFT's
@@ -162,7 +184,6 @@ and so not like-for-like.
 | `commit_latency_ms` | time to the first `decided` instance (`2f+1` `COMMIT`) | time to the first finalized checkpoint (justify→finalize, `≥ 2` epochs) | time to counter-`β` acceptance of the first block |
 | `goodput` | committed transactions per window | committed transactions per window over finalized epochs | committed transactions per window |
 | `total_msgs_per_acu` | all deliveries per ACU; evaluates to `(2n²−2)/n`, i.e. `O(n²)` traffic over an `n`-scaled denominator | `≈ 1.125n` (un-aggregated all-to-all votes; production BLS aggregation to `O(n)` not modeled) | `O(K·β)` query/response deliveries per validator, independent of `n` |
-| `bytes_per_acu` | wire bytes per ACU; payload-dominated | attestation + payload bytes; payload-dominated | `O(K·β)` query/response bytes plus payload; payload-dominated |
 | `success_rate` | `0/1` per run (`1` iff an instance decided); a frequency after aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
 | safety (`fork_rate`) | `0` below threshold by construction; `> 0` only above `1/3` under equivocation | `0` below threshold; `> 0` only above `1/3` (a conflicting finalized checkpoint, not a reorg) | N/A — probabilistic safety, reported via `ε` against `(1 − α_c/K)^β` |
 
@@ -174,7 +195,12 @@ Termination (no honest validator commits within the window), measured by the com
 `success_rate`. Validity holds by construction and is not instrumented. Snowman is the
 exception: its finality is probabilistic, so its safety is reported via the analytical
 bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate — the weakest-witnessed safety
-of the three, a limitation taken up with the others in §6.2.
+of the three, a limitation taken up with the others in §6.2. Across seeds, continuous
+metrics are aggregated with a 95% Student-t interval and rate metrics (`success_rate`,
+`fork_rate`) with a 95% Wilson score interval; the Wilson form stays honest at the
+boundary, so a zero-violation cell is reported as `0/n_runs`, bounding the true rate from
+above rather than collapsing to a degenerate point estimate, and near-threshold safety and
+liveness figures are read as bounds, not point values.
 
 The deliberate exclusions that bound these metrics — no compute or bandwidth cost, a
 synthetic open-loop workload, sub-production scale, and an uncovered leader-disruption

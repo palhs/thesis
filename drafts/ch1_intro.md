@@ -132,7 +132,7 @@ synthesizes it.
   This describes how each family approaches its fault bound, not only
   whether it reaches it.
 - **RQ3.** What is the relative communication overhead of each family,
-  measured in messages and bytes per agreed unit, under a fixed workload and
+  measured in messages per agreed unit, under a fixed workload and
   identical network assumptions? This quantifies the asymptotic scaling each
   family claims.
 - **RQ4.** Under which adversarial strategies — silent non-participation,

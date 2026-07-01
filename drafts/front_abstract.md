@@ -31,8 +31,8 @@ adversarial strategies: delayed voting, non-participation, and equivocation.
 No protocol dominates. Communication overhead grows linearly in the validator
 count for PBFT and Casper FFG, and is an order of magnitude higher for Snowman,
 which polls by repeated random subsampling. Under network delay Snowman is the
-most affected, its time to finality rising about twelve to thirteen times,
-while the others stay near baseline. Packet loss leaves PBFT the most resilient
+most affected, its time to finality rising about twelve to fifteen times,
+while PBFT only roughly doubles and Casper FFG barely moves. Packet loss leaves PBFT the most resilient
 and Casper FFG the most fragile. Under equivocation the failure modes diverge:
 past one third Byzantine, PBFT forks unaccountably, Casper FFG preserves safety and
 makes every offender slashable, and Snowman shows no fork. Rankings invert

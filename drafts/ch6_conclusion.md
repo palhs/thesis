@@ -17,7 +17,7 @@ evaluated.** Source: [[wiki/concepts/research-questions]], [[wiki/concepts/key-f
 
 | RQ | Question | Answer | Governing mechanism |
 | :-- | :-- | :-- | :-- |
-| RQ1 | latency under rising network-delay variance | flat in `n`; finality slows least for Casper FFG (×1.3, slot-bound), then PBFT (×1.9), then Snowman (×12–13) | round structure vs. `β` sequential polls |
+| RQ1 | latency under rising network-delay variance | flat in `n`; finality slows least for Casper FFG (×1.3, slot-bound), then PBFT (×1.9), then Snowman (×12–15) | round structure vs. `β` sequential polls |
 | RQ2 | sustained throughput as `φ` rises to the threshold | three modes: PBFT holds then cliffs, Casper FFG ≈ `1 − φ`, Snowman starves earliest | quorum structure |
 | RQ3 | communication overhead per committed unit | PBFT ≈ `2n`, Casper FFG ≈ `1.2n` (cheapest), Snowman ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | all-to-all / attestation vs. `K`-poll |
 | RQ4 | which adversary causes liveness or safety loss | no protocol robust to all three; only PBFT's fork is measured, Snowman's safety rests on an unwitnessed analytical bound, Casper FFG alone is accountable by construction | each structural defense is also an exposure; safety differs in kind, not rank |
@@ -31,7 +31,11 @@ introduced in Chapter 3 are collected here in full.
 - **Cost model.** The simulator charges network latency but no signature-verification,
   execution, or bandwidth cost. This flatters the cost and per-validator verdicts for
   the compute-bound equivocation handling of PBFT and Casper FFG; it does not bear on
-  the message-count, liveness, or safety results.
+  the message-count, liveness, or safety results. Communication overhead is reported as
+  message count per agreed unit only; the byte-per-unit figure the harness also computes
+  is payload-dominated at the synthetic workload — it tracks transaction payload
+  amortized over committed units rather than protocol message structure — so the
+  asymptotic-scaling contrast RQ3 examines is read from the message-count axis.
 - **Synthetic workload, no capacity model.** Goodput is reported against a Poisson
   stream of fixed-size transactions at a zero conflict rate, below saturation — so the
   flat-in-`n` goodput is a property of the unsaturated model rather than a claim about
