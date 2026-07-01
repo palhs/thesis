@@ -25,7 +25,7 @@ The findings hold within the following boundaries.
 - **Permanent-loss bound.** Packet loss is modeled as permanent per-message drop with no transport retransmission; the loss-resilience curves are upper bounds on fragility rather than models of a retransmitting transport.
 - **Leader-sparing coverage.** The sweep spares the view-0 primary; PBFT's liveness standing is established only against adversaries that leave its leader honest.
 
-## 6.3 Directions for further work
+## 6.3 Future Work
 
 ### 6.3.1 Production-optimized protocol variants
 

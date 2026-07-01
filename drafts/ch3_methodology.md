@@ -96,7 +96,8 @@ the block.
 No leader is involved. Each validator runs this loop on its own, touching only K
 peers per round, so the per-validator cost does not grow with network size. The
 price of dropping the quorum requirement is probabilistic finality:
-`ε ≤ (1 − α_c/K)^β`, shrinking exponentially in β.
+`ε ≤ (1 − α_c/K)^β`, shrinking exponentially in β. Figure 3.4 traces one such
+sequence of sampling rounds.
 
 **Figure 3.4 ([[diagrams/concepts/snowman-flow]]).** Snowman sampling rounds for
 validator v. Blue peers prefer the same block; red peers prefer a competing one.
@@ -118,7 +119,7 @@ Table 3.1 summarises the three protocols side by side.
 | Decides when | `2f+1` replicas commit a `(view, seq)` | a checkpoint and its child are both justified | a block's confidence counter reaches `β` |
 | Agreement | ~2/3 quorum, met twice (`prepare`, `commit`) | ~2/3 of stake, over two epochs | ~80% of a random `K`-peer sample, `β` rounds running |
 | Finality | deterministic | deterministic | probabilistic, `ε ≤ (1 − α_c/K)^β` |
-| Communication cost | `O(n²)` | `O(n)` aggregated | `O(K·β)` per validator |
+| Communication cost | `O(n²)` | `O(n²)` un-aggregated (prod. BLS → `O(n)` not modeled) | `O(K·β)` per validator |
 | Implemented as | classical PBFT, no signatures | FFG gadget standalone, no LMD-GHOST fork-choice | linearized Snowman, no DAG, no stake-weighted sampling |
 
 ## 3.4 Experiment design
@@ -172,7 +173,7 @@ fails liveness only if no honest validator commits within the measurement window
 
 ## 3.5 Metric schema
 
-Each metric has one definition, one unit, and one fixed instrumentation point. Protocol differences appear only as per-protocol formulas within the same column [[wiki/concepts/evaluation-metrics]]. The device that makes the three comparable is the *atomic commit unit* (ACU): the smallest set of transactions a protocol commits indivisibly, whether one block for PBFT, one finalized checkpoint for Casper FFG, or one accepted block for Snowman. Every "per-block" metric is recast as "per ACU", giving all three protocols the same denominator.
+Each metric has one definition, one unit, and one fixed instrumentation point. Protocol differences appear only as per-protocol formulas within the same column [[wiki/concepts/evaluation-metrics]]; Table 3.3 collects those formulas. The device that makes the three comparable is the *atomic commit unit* (ACU): the smallest set of transactions a protocol commits indivisibly, whether one block for PBFT, one finalized checkpoint for Casper FFG, or one accepted block for Snowman. Every "per-block" metric is recast as "per ACU", giving all three protocols the same denominator.
 
 Some of these denominators are modeling conventions: the ACU definition, the Snowman rescaling, the Casper FFG slot calibration. A verdict is only reported as robust when it survives the sensitivity sweep that varies the convention's governing parameter.
 
