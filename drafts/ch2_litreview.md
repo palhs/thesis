@@ -51,12 +51,7 @@ sample, repeated `β` times, for a small positive `ε`.
 
 The table's last row names each family's adversarial weak point within the §1.4
 taxonomy (silence, delayed voting, equivocation), measured directly in Chapter
-4. One has no counterpart in the literature: Amores-Sesar, Cachin and Schneider
-[10] show that an adversary swaying as few as two undecided validators can stall
-Snowman's confidence counter beyond any number of rounds polynomial in `β`, far
-worse than the original Avalanche analysis [9] implies. That result grounds
-Snowman's delay and silence fragility. The simulator-level treatment of each
-protocol is deferred to Chapter 3.
+4. The simulator-level treatment of each protocol is deferred to Chapter 3.
 
 **Table 2.1 — How one block becomes irreversible.** Protocol-native terms
 are in parentheses. Notation is defined below the table.
