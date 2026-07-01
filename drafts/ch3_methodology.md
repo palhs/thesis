@@ -12,36 +12,26 @@ of Gervais *et al.* [17] from Proof-of-Work to the three BFT families.
 
 ## 3.2 System model: one fair harness
 
-The three families differ in leadership, in what one decision commits, and in
-layering, and do not even produce the same *kind* of decision — so a fair comparison
-cannot be read off each family's own published numbers. The design answers this with
-one device: a single fixed engine that runs all three identically, with only the
-protocol logic swapped.
+The three families reach decisions in fundamentally different ways, so their
+published numbers cannot be placed side by side. The fix is one harness running all
+three identically, with only the protocol logic swapped.
 
-The harness builds the runtime machinery (scheduler, network, validators, logger)
-identically for every protocol; a run loop drives the simulation and a reducer turns
-the event stream into one comparable row per seed and per matrix cell (Figure 3.1).
-Ownership is split so that no protocol can reach the shared machinery: the scheduler
-owns virtual time and event delivery, the network owns transport (at-most-once,
-unordered, under configurable per-phase delay, loss, and partition), and the logger
-owns the record. Because every component but the protocol slot is identical across
-protocols, **any difference between two rows is attributable to the protocol logic
-alone** — the property the whole comparison rests on. An adversary is not a new
-component but a per-node interceptor that alters one validator's outgoing messages
-(§3.4).
+The harness builds the same infrastructure for every run: a scheduler for virtual
+time, a network that delivers messages under configurable delay and loss, and a
+logger. Only the protocol slot differs. Differences in output come from the protocol,
+not the infrastructure (Figure 3.1). An adversary is a per-node interceptor on one
+validator's outbound messages, not a separate harness component (§3.4).
 
-One further property is load-bearing: determinism. Every random draw derives from a
-single seed keyed by stream identity, so a configuration paired with a seed
-reproduces a byte-identical event stream and every reported number is exactly
-reproducible [[wiki/concepts/reproducibility]]; each output row carries its
-`commit_hash` and `seed`, so it can be regenerated from the record alone. Making the
-three protocols *comparable* is then a separate downstream step the metric schema
-performs (§3.5).
+The harness is also deterministic. Each random draw is keyed by stream identity, so
+a configuration paired with a seed always replays the same event sequence. Every
+output row records its `commit_hash` and `seed` for later verification. Converting
+those rows into a shared measurement unit is a separate step, handled by the metric
+schema in §3.5.
 
-**Figure 3.1 ([[diagrams/runtime/architecture]]).** Structural view: one fixed
-harness — scheduler, network, validators, logger — in which only the protocol-logic
-slot is swapped, turning one experiment-matrix cell and seed into one comparable
-per-trial row.
+**Figure 3.1 ([[diagrams/runtime/architecture]]).** Read left to right: one
+configuration enters the fixed harness, the protocol logic is the only part that
+changes between runs, and the output is one result row. The loop arrow shows this
+repeats for every seed and every experiment cell.
 
 ## 3.3 The three protocols
 
@@ -52,6 +42,62 @@ production form of its family. Table 3.1 distinguishes how the three decide; the
 mechanics belong to the defense presentation, so only the load-bearing behavior is
 given here. The *atomic commit unit* (ACU), the row that makes the three
 commensurable, is defined in §3.5.
+
+### PBFT — leader-driven two-phase voting
+
+Figure 3.2 shows four validators with Node 3 offline.
+
+A client sends a request to the primary (Node 0), which broadcasts `PRE-PREPARE`
+to all validators. Each honest validator then broadcasts `PREPARE` to every other.
+Once a validator sees `2f+1` matching `PREPARE` messages, it broadcasts `COMMIT`.
+At `2f+1` matching `COMMIT` messages, the block is decided and that validator
+replies to the client.
+
+Two all-to-all rounds, hence `O(n²)` messages per block. Node 3's silence cuts
+the available votes, but three honest nodes still clear the `2f+1 = 3` threshold
+in both phases.
+
+**Figure 3.2 ([[diagrams/concepts/pbft-flow]]).** PBFT message flow, n=4, f=1.
+Colours indicate the sender. Node 3 (faulty) receives `PRE-PREPARE` but emits
+nothing; the three honest nodes still reach `2f+1` in both phases.
+
+### Casper FFG — checkpoint finality over epochs
+
+Blocks arrive continuously and are grouped into epochs. At each epoch boundary a
+checkpoint is created. During an epoch, validators broadcast *attestations*
+(signed votes for the link from the previous checkpoint to the current one) to
+the entire validator set. The arrows in Figure 3.3 point at checkpoints as
+shorthand for "this vote targets that link"; the actual recipients are the other
+validators, not the checkpoint.
+
+When attestations worth ≥⅔ of total stake accumulate for a link, the target
+checkpoint is *justified*. It becomes *finalized* only once its child checkpoint
+is also justified. C3 in the figure is still pending — not enough attestations
+yet.
+
+**Figure 3.3 ([[diagrams/concepts/casper-ffg-flow]]).** Casper FFG checkpoint
+chain. Green = finalized, amber = justified, white = proposed. Solid arcs are
+confirmed supermajority links; the dashed arc shows the next link still
+accumulating votes. Validator dots show 5 of 7 attesting (grey = silent or late).
+
+### Snowman — repeated random subsampling
+
+Each round, validator v picks K peers at random and asks which block they prefer.
+If at least `α_c` of the replies agree, the confidence counter increments. The
+counter resets on a preference switch. At β consecutive agreeing rounds, v accepts
+the block.
+
+No leader is involved. Each validator runs this loop on its own, touching only K
+peers per round, so the per-validator cost does not grow with network size. The
+price of dropping the quorum requirement is probabilistic finality:
+`ε ≤ (1 − α_c/K)^β`, shrinking exponentially in β.
+
+**Figure 3.4 ([[diagrams/concepts/snowman-flow]]).** Snowman sampling rounds for
+validator v. Blue peers prefer the same block; red peers prefer a competing one.
+The counter grows each round the sample clears α_c, and resets if v switches
+preference.
+
+Table 3.1 summarises the three protocols side by side.
 
 **Table 3.1 — The three implemented protocols at a glance.**
 
@@ -108,12 +154,15 @@ finding can point back rather than re-argue.
 
 ## 3.4 Experiment design
 
-An experiment is one point in the product of validator-set size `n`, network timeline,
-adversary, workload, and seed. The sweep `n ∈ {4, 7, 10, 16, 25}` is `n = 3f + 1` at
-`f ∈ {1, 2, 3, 5, 8}`, a clean Byzantine-threshold instance at each size. Two fault
-symbols are kept distinct: `f` is the threshold a configuration tolerates; `φ` is the
-adversarial fraction injected in Family C, independent of the `3f+1` relation.
-Experiments group into three families, each fixing the other axes and sweeping one.
+The experiment space has five axes: validator-set size `n`, network timeline, adversary
+type, workload, and seed. Sweeping all five at once is impractical, so the runs are
+grouped into three families, each fixing four axes and varying one (Table 3.2).
+
+`n` takes values in `{4, 7, 10, 16, 25}`, each satisfying `n = 3f + 1` for
+`f ∈ {1, 2, 3, 5, 8}`, a clean Byzantine-threshold instance at every size. Two fault
+symbols stay distinct: `f` is the fault threshold a configuration tolerates; `φ` is the
+adversarial fraction actually injected in Family C, swept independently of the `3f+1`
+relation.
 
 **Table 3.2 — The three run families.**
 
@@ -123,58 +172,46 @@ Experiments group into three families, each fixing the other axes and sweeping o
 | B — Delay | network timeline | `{10, 25}` | RQ1 | baseline → `uniform` 100–500 ms → `heavy_tail` 1–5 s; with and without packet loss |
 | C — Adversarial | adversary | `{10, 25}` | RQ2, RQ4 | `φ ∈ {0, 0.10, 0.20, 0.30}`; `φ ∈ {0.40, 0.50}` above threshold for equivocation |
 
-`n = 10` is the shared anchor for Families B and C (small enough to afford many seeds);
-both also run at `n = 25` to amplify the delay and adversarial effects. Family B's
-timeline draws each phase from a fixed catalogue (`constant`, `uniform`, `normal`,
-`exponential`, `heavy_tail`) plus optional loss and partition; partial synchrony is the
-two-phase case that crosses the Global Stabilization Time. Family C fixes the network at
-baseline and sweeps the adversary — the per-node interceptor of §3.2 — exercising three
-Byzantine behaviors, each injected at fraction `φ` in the protocol's natural unit
-(replicas, validators, or stake):
+Family A sweeps `n` over an honest, clean-network baseline to isolate scaling effects.
+Families B and C fix `n ∈ {10, 25}`: `n = 10` keeps seed counts affordable; `n = 25`
+lets the delay and adversarial effects show up more clearly.
 
-- **delayed voting** — hold an outbound vote past the protocol's timing tolerance;
-- **silent non-participation** — a validator that still runs its state machine but emits
-  nothing (the crash-faulty case);
-- **equivocation** — sign two conflicting messages where one is expected; swept above the
-  `1/3` bound (`φ ∈ {0.40, 0.50}`) to expose the safety cliff. Snowman cannot fork below
-  threshold, so equivocation against it reduces to the silent case and is not swept above
-  threshold.
+Family B varies the network timeline. Message delays are drawn from a fixed catalogue
+(`constant`, `uniform`, `normal`, `exponential`, `heavy_tail`), with optional packet loss
+or partition. Partial synchrony is the two-phase case that crosses the Global
+Stabilization Time, the point after which message delivery stops being adversarially
+delayed.
 
-The workload is a Poisson stream of fixed 512-byte transactions at 100 tx/s, below
-saturation. Because the latency-only network makes block-commit time independent of
-block size, the model has no saturation point; sustained throughput is therefore
-measured as goodput at this fixed rate rather than a peak-capacity figure. All three
-protocols share the same seeds at every point and, because randomness is keyed by stream
-identity, draw the same network and arrival randomness — so the cross-protocol comparison
-is paired under common random numbers. Each cell runs over 20 seeds, raised to 30 at the
-near-threshold Family C points. Time-bounded runs use a buffer beyond the measurement
-window and clip out-of-window events, so reaching the deadline is not itself a liveness
-failure: a run fails liveness only if no honest validator commits within the window.
+Family C holds the network at baseline and sweeps the adversary, injecting Byzantine
+behavior at fraction `φ` of each protocol's natural unit (replicas, validators, or
+stake). Three behaviors are tested:
+
+- **Delayed voting** — hold an outbound vote past the protocol's timing tolerance.
+- **Silent non-participation** — run the state machine but send nothing; the crash-faulty
+  case.
+- **Equivocation** — sign two conflicting messages where one is expected. The sweep goes
+  above the `1/3` threshold (`φ ∈ {0.40, 0.50}`) to expose the safety cliff. Snowman
+  cannot fork below threshold, so equivocation against it collapses to the silent case
+  and is not swept above threshold.
+
+All three protocols share the same workload — a Poisson stream of 512-byte transactions
+at 100 tx/s, below saturation — and the same seeds at each experiment point. Because
+randomness is keyed by stream identity, all three see identical network delays and
+arrival patterns; cross-protocol comparisons are paired under common random numbers.
+Each cell runs for 20 seeds, raised to 30 at near-threshold Family C points. A run
+fails liveness only if no honest validator commits within the measurement window.
 
 ## 3.5 Metric schema
 
-The schema places every quantity on one axis: each metric has one definition, one unit,
-and one fixed instrumentation point, the family differences appearing only as
-per-protocol formulas for the same column [[wiki/concepts/evaluation-metrics]]. The
-device that makes the three commensurable is the *atomic commit unit* (ACU): the smallest
-contiguous set of transactions a protocol commits indivisibly — one block for PBFT, one
-finalized checkpoint for Casper FFG, one accepted block for Snowman. Every "per-block"
-metric is rewritten "per ACU", so one denominator serves all three. Because the ACU
-denominator, the Snowman rescaling, and the Casper FFG calibration are modeling
-conventions, a verdict is reported robust only when it survives the sensitivity sweep that
-varies the convention's governing knob. Cross-protocol verdicts are read off this schema
-through *Pareto dominance*: one protocol dominates another when it is no worse on every
-axis of comparison and strictly better on at least one, and is *non-dominated* when no
-other protocol dominates it. Chapter 5 applies this relation across the metric axes to
-test whether any family dominates the rest.
+Each metric has one definition, one unit, and one fixed instrumentation point. Protocol differences appear only as per-protocol formulas within the same column [[wiki/concepts/evaluation-metrics]]. The device that makes the three comparable is the *atomic commit unit* (ACU): the smallest set of transactions a protocol commits indivisibly — one block for PBFT, one finalized checkpoint for Casper FFG, one accepted block for Snowman. Every "per-block" metric is recast as "per ACU", giving all three protocols the same denominator.
 
-Two definitions are load-bearing. `commit_latency_ms` is the canonical time-to-finality
-axis: the `decided` event fires at each protocol's irreversibility milestone — PBFT's
-`2f+1` `COMMIT`, the finalized Casper FFG checkpoint, Snowman's counter-`β` acceptance —
-so every finality-latency claim is read from it. Cross-protocol throughput uses `goodput`,
-the committed-transaction rate, not a raw decided-event rate, whose granularity is
-protocol-dependent (per block for PBFT and Snowman, per finalized epoch for Casper FFG)
-and so not like-for-like.
+Some of these denominators are modeling conventions — the ACU definition, the Snowman rescaling, the Casper FFG slot calibration. A verdict is only reported as robust when it survives the sensitivity sweep that varies the convention's governing parameter.
+
+Cross-protocol comparisons use *Pareto dominance*: protocol A dominates B when A is no worse on every metric and strictly better on at least one. A protocol is *non-dominated* when nothing dominates it. Chapter 5 applies this to test whether any family dominates the rest.
+
+`commit_latency_ms` measures time to finality, recorded when each protocol hits its irreversibility point: `2f+1` `COMMIT` for PBFT, a finalized checkpoint for Casper FFG, and counter-`β` acceptance for Snowman.
+
+Cross-protocol `goodput` is the committed-transaction rate, not a raw decided-event rate. The raw rate is protocol-dependent in granularity — per block for PBFT and Snowman, per finalized epoch for Casper FFG — and is not like-for-like.
 
 **Table 3.3 — Per-protocol metric schema.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
@@ -187,23 +224,10 @@ and so not like-for-like.
 | `success_rate` | `0/1` per run (`1` iff an instance decided); a frequency after aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
 | safety (`fork_rate`) | `0` below threshold by construction; `> 0` only above `1/3` under equivocation | `0` below threshold; `> 0` only above `1/3` (a conflicting finalized checkpoint, not a reorg) | N/A — probabilistic safety, reported via `ε` against `(1 − α_c/K)^β` |
 
-The reliability metrics operationalize the §2.1 properties. A *safety violation* is an
-observed breach of Agreement (two honest validators commit conflicting values at one
-height), recorded in `fork_rate`; for the deterministic-finality families it is `0` below
-threshold by construction and measured only above it. A *liveness failure* is a breach of
-Termination (no honest validator commits within the window), measured by the complement of
-`success_rate`. Validity holds by construction and is not instrumented. Snowman is the
-exception: its finality is probabilistic, so its safety is reported via the analytical
-bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate — the weakest-witnessed safety
-of the three, a limitation taken up with the others in §6.2. Across seeds, continuous
-metrics are aggregated with a 95% Student-t interval and rate metrics (`success_rate`,
-`fork_rate`) with a 95% Wilson score interval; the Wilson form stays honest at the
-boundary, so a zero-violation cell is reported as `0/n_runs`, bounding the true rate from
-above rather than collapsing to a degenerate point estimate, and near-threshold safety and
-liveness figures are read as bounds, not point values.
+The reliability metrics connect back to the §2.1 properties. A *safety violation* is an observed breach of Agreement — two honest validators commit conflicting values at one height — recorded in `fork_rate`. For the deterministic-finality protocols this is `0` below threshold by construction; it is only measured above it. A *liveness failure* is a breach of Termination: no honest validator commits within the window, measured by the complement of `success_rate`. Validity holds by construction and is not instrumented.
 
-The deliberate exclusions that bound these metrics — no compute or bandwidth cost, a
-synthetic open-loop workload, sub-production scale, and an uncovered leader-disruption
-surface — are consolidated with the full reflective limitations in §6.2. Chapter 4 reports
-the baseline, delay, and adversarial sweeps the matrix prescribes and answers RQ1–RQ4
-against the schema fixed here.
+Snowman is the exception. Its finality is probabilistic, so safety is reported via the analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate — the weakest safety guarantee of the three, a limitation taken up in §6.2.
+
+Continuous metrics are aggregated with a 95% Student-t interval across seeds. Rate metrics (`success_rate`, `fork_rate`) use a 95% Wilson score interval, which handles zero-observation cells correctly: a run with no violations is reported as `0/n_runs` with an upper confidence bound rather than a flat 0%. Near-threshold safety and liveness figures are read as bounds, not exact values.
+
+The deliberate exclusions that bound these metrics — no compute or bandwidth cost, a synthetic open-loop workload, sub-production scale, and an uncovered leader-disruption surface — are consolidated with the full limitations in §6.2. Chapter 4 reports the baseline, delay, and adversarial sweeps and answers RQ1–RQ4 against this schema.

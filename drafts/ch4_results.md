@@ -209,10 +209,10 @@ When the adversarial validators go silent rather than slow, the result inverts t
 delayed-voting verdict for Snowman: the protocol that best tolerated slow peers is the
 least tolerant of silent ones, because a sampled supermajority can wait out a slow
 peer but cannot complete a poll around an absent one (Figure 4.4c). PBFT shows a clean
-quorum cliff, finalizing with no throughput loss up to `φ = 0.33` and dying at
+quorum cliff, finalizing with no goodput loss up to `φ = 0.33` and dying at
 `φ = 0.40` where the silent set drops the honest remainder below the `2f+1` quorum;
 Casper FFG degrades gracefully over the same range and still finalizes at `φ = 0.33`,
-its throughput decaying in proportion to the participating stake, ≈ `1 − φ` (Figure
+its goodput decaying in proportion to the participating stake, ≈ `1 − φ` (Figure
 4.6); and Snowman cliffs earliest and committee-size-dependent, surviving only to
 `φ = 0.10` at `n = 10` and `φ = 0.20` at `n = 25`. The ordering is therefore PBFT and
 Casper FFG ahead of Snowman.
@@ -279,7 +279,7 @@ safety invariant for equivocation. Source:
 | Adversarial strategy | PBFT | Casper FFG | Snowman | Robustness order |
 | :-- | :-- | :-- | :-- | :-- |
 | Delayed voting | success 1.0; finality 1.0× (immune, no view-changes) | success → 0.60 / 0.65; finality 1.0× (liveness dips) | success 1.0; finality ×62 / ×49 (full liveness, crawls) | PBFT ≈ Snowman ≫ FFG |
-| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (throughput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
+| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput ≈ `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
 Four qualifications, each fixed elsewhere, bound the verdict: the leader-disruption
@@ -290,9 +290,9 @@ success-rate columns carry all of it; Snowman's analytical `ε` is not empirical
 witnessed at the baseline depth (§4.4.3); and the latency-only network understates the
 detection and recovery cost borne by PBFT and Casper FFG (§6.2).
 
-Read on the throughput axis rather than the liveness one, the same sweep answers
+Read on the goodput axis rather than the liveness one, the same sweep answers
 **RQ2**: as the injected Byzantine fraction `φ` rises toward the fault threshold,
-sustained throughput degrades in three distinct modes (PBFT undegraded until its
+sustained goodput degrades in three distinct modes (PBFT undegraded until its
 quorum cliff, Casper FFG decaying in proportion to the participating stake, ≈ `1 − φ`,
 and Snowman starving earliest), so the rate of decay is governed by each family's
 quorum structure rather than by `φ` alone (Figure 4.6).
@@ -301,8 +301,8 @@ Whether any one family occupies a dominant position once the baseline, delay, an
 adversarial regimes are considered jointly — the Pareto-frontier synthesis of RQ5 — is
 taken up in Chapter 5.
 
-**Figure 4.6 — Throughput degradation versus adversarial fraction (silent
-non-participation).** Committed-unit throughput against the injected silent fraction
+**Figure 4.6 — Goodput degradation versus adversarial fraction (silent
+non-participation).** Committed-unit goodput against the injected silent fraction
 `φ` for each protocol, faceted by validator count, with the `y = 1 − φ`
 participating-stake invariant marked. Source:
 `results/adversary/plots/throughput_degradation_vs_phi.pdf`
