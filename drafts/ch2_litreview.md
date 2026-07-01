@@ -101,9 +101,9 @@ delay. Casper FFG says nothing about throughput. Avalanche's latency figure is
 only valid at one `K, β` setting: change the parameters and the number
 changes too.
 
-No shared unit exists for asking "which family is faster?" or "which is
-safer?" All three families have been studied extensively; the measurements
-just were not designed to sit next to each other.
+No shared unit exists for asking which family is faster, or which is safer. The
+measurements are plentiful; they simply were not designed to sit next to each
+other.
 
 ### 2.3.2 Prior surveys and the one quantitative precedent
 
@@ -125,8 +125,8 @@ protocols under matched conditions.
 The three families respond to the same impossibility and differ only in which
 assumption they relax, so they are commensurable as objects of comparison.
 Their per-family measurements, however abundant, do not support cross-family
-judgment. The obstacle is that the measurements were never designed to be compared, not
-any absence of data. The one methodological precedent for a matched evaluation is
+judgment. The obstacle is the design of those measurements, which were never
+meant to be compared, rather than any shortage of data. The one methodological precedent for a matched evaluation is
 Gervais *et al.* [17], which has been applied to Proof-of-Work only. Chapter 3
 responds with a unified discrete-event simulator, a shared metric schema
 instantiated identically for the three families, and an experiment matrix that

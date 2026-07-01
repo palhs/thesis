@@ -20,16 +20,16 @@ The findings hold within the following boundaries.
 
 - **Cost model and workload.** The simulator charges network latency but no compute or bandwidth cost; this flatters cost and per-validator verdicts for PBFT and Casper FFG and does not affect message-count, liveness, or safety results. Goodput is reported below saturation (Poisson stream, zero conflict rate), so the flat-in-`n` result is a property of the unsaturated model rather than a claim about peak capacity.
 - **Sub-production scale.** The sweep `n ∈ {4, …, 25}` is well below deployed scale; Snowman's rescaling (`K = min(20, n−1)`) collapses the subsampling mechanism at small `n`, so its measured performance may partly reflect a small-`n` artifact.
-- **Family-vs-protocol generalization.** Each verdict applies to one representative implementation; a family-mate with a different structural choice can invert it — HotStuff's threshold-signature pipeline drops PBFT's `O(n²)` overhead to `O(n)` [[wiki/algorithms/pbft#communication-complexity]].
+- **Family-vs-protocol generalization.** Each verdict applies to one representative implementation; a family-mate with a different structural choice can invert it: HotStuff's threshold-signature pipeline drops PBFT's `O(n²)` overhead to `O(n)` [[wiki/algorithms/pbft#communication-complexity]].
 - **Snowman safety witnessed by bound.** Safety is reported through the analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate; the `n = 25` loss-resilience tie with PBFT rests on overlapping confidence intervals at a reduced seed count.
 - **Permanent-loss bound.** Packet loss is modeled as permanent per-message drop with no transport retransmission; the loss-resilience curves are upper bounds on fragility rather than models of a retransmitting transport.
 - **Leader-sparing coverage.** The sweep spares the view-0 primary; PBFT's liveness standing is established only against adversaries that leave its leader honest.
 
-## 6.3 Future Work
+## 6.3 Future work
 
 ### 6.3.1 Production-optimized protocol variants
 
-The overhead comparison evaluates each protocol at its specification-level message granularity. Production aggregation — BLS signatures for Casper FFG [8], threshold-signature collection at the leader for HotStuff [5] — changes this picture; a faithful extension would hold the optimization level constant across families or report both regimes.
+The overhead comparison evaluates each protocol at its specification-level message granularity. Production aggregation (BLS signatures for Casper FFG [8], threshold-signature collection at the leader for HotStuff [5]) changes this picture; a faithful extension would hold the optimization level constant across families or report both regimes.
 
 ### 6.3.2 Further directions
 
@@ -37,4 +37,4 @@ Five directions remain open beyond §6.3.1: a saturation-throughput capacity mod
 
 ## 6.4 Concluding remarks
 
-This thesis contributes a controlled harness and the comparative reading it enables: not a winner, but a mechanism map of which structural commitment places each protocol on the performance–security frontier. No protocol dominates (§5.3); the same structural choice that holds one corner exposes another. The incidents that opened this study (§1.2) — Ethereum's May 2023 finality stall [21] and the Solana and Cosmos halts — are separable consequences of those choices, not interchangeable faults to be engineered away by one better protocol.
+This thesis contributes a controlled harness and the comparative reading it enables: not a winner, but a mechanism map of which structural commitment places each protocol on the performance–security frontier. No protocol dominates (§5.3); the same structural choice that holds one corner exposes another. The incidents that opened this study (§1.2), Ethereum's May 2023 finality stall [21] and the Solana and Cosmos halts, are separable consequences of those choices, not interchangeable faults to be engineered away by one better protocol.

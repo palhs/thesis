@@ -65,9 +65,9 @@ Under those combined conditions, performance and security cease to be
 independent. A protocol that only *slows* under load may also miss
 finality, fork, or admit conflicting commits across honest validators. This
 coupling is invisible to the benign-condition benchmarks each family publishes
-[14], [16] [[wiki/concepts/problem-statement#the-gap]]. This thesis is motivated by
-that coupling and by the absence of a unified harness in which it can be
-measured across the three families on matched assumptions.
+[14], [16] [[wiki/concepts/problem-statement#the-gap]]. The motivation for this
+thesis lies in that coupling, and in the absence of a unified harness in which
+it can be measured across the three families on matched assumptions.
 
 ## 1.3 Problem statement
 
@@ -75,19 +75,18 @@ This thesis investigates the comparative performance–security behavior of
 the three L1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
 PoS-finality [[wiki/algorithms/pos]], and Avalanche-style
 [[wiki/algorithms/avalanche]] — under controlled network delay and
-adversarial conditions, using a single
-discrete-event simulator. The contribution is not a benchmark of production
-systems but a reproducible cross-family evaluation framework in which the
-three are measured under matched assumptions. Performance is measured as
-commit latency, sustained throughput, and communication overhead. Security
-is measured as safety and liveness under adversarial pressure. The unified
-metric schema is defined in Chapter 3 [[wiki/concepts/evaluation-metrics]]. The
-approach extends the simulation-based, metrics-instrumented methodology of
-Gervais *et al.* [17], originally applied to Proof-of-Work, to the three implemented BFT
-families [[wiki/concepts/problem-statement#intended-contributions]]. The
-comparison is organized around the Pareto frontier each family traces under
-matched conditions, and the question of whether any family dominates across all
-operating regimes is answered from experimental data.
+adversarial conditions, using a single discrete-event simulator. The
+contribution is not a benchmark of production systems. It is a reproducible
+cross-family evaluation framework in which the three families are measured
+under matched assumptions. Performance is measured as commit latency,
+sustained throughput, and communication overhead; security, as safety and
+liveness under adversarial pressure. Chapter 3 defines the metric schema
+common to both [[wiki/concepts/evaluation-metrics]]. The framework extends the
+simulation-based, metrics-instrumented methodology of Gervais *et al.* [17],
+first applied to Proof-of-Work, to the three implemented BFT families
+[[wiki/concepts/problem-statement#intended-contributions]]. Each family traces
+a Pareto frontier under matched conditions; whether any family dominates across
+all operating regimes is answered from experimental data.
 
 ## 1.4 Scope and assumptions
 
@@ -117,6 +116,31 @@ cryptographic or economic modeling being left to future work; and published
 production figures are treated as order-of-magnitude sanity checks, not validation
 targets — the simulator's contribution is internal consistency across families
 under matched assumptions, not the reproduction of production throughput.
+
+The three protocols are representatives chosen to occupy separable regions of
+this design space. PBFT is the reference construction for the PBFT-style family:
+leader-driven quorum voting with deterministic single-slot finality, from which
+later partially synchronous protocols such as Tendermint and HotStuff inherit
+their two-thirds quorum structure [[wiki/algorithms/pbft]]. Casper FFG stands for
+the PoS-finality family, where a stake-weighted finality gadget finalizes epoch
+checkpoints rather than individual blocks and renders a safety violation
+attributable to specific validators through slashing [[wiki/algorithms/pos]].
+Snowman stands for the Avalanche-style family, reaching agreement by repeated
+random subsampling and offering probabilistic finality in place of a
+deterministic commit [[wiki/algorithms/avalanche]]. The three differ on exactly
+the axes the evaluation measures: the finality mechanism, the communication
+structure that sets message cost, and whether a safety failure is accountable.
+That separation is what makes the cross-family comparison informative, rather
+than a contrast between near-identical designs
+[[wiki/concepts/consensus-families]].
+
+Selecting one representative per family, rather than several protocols drawn
+from a single family, keeps every protocol inside one simulator and one metric
+schema while still spanning the range of finality guarantees from deterministic
+to probabilistic. A different representative of the same family would exercise
+the same design axes; substituting HotStuff or Tendermint for PBFT, for
+instance, would test the same deterministic quorum-voting regime and leave the
+family-level tradeoff under study unchanged.
 
 ## 1.5 Research questions
 
