@@ -17,13 +17,13 @@ three-family scope of the body; the deferred DAG family is not named here.
 Layer-1 blockchain consensus protocols are proven safe and live under their
 stated assumptions, yet deployed networks still halt, stall, and fork when
 those conditions are stretched. Performance and security are usually measured
-separately, on different harnesses, so the field lacks a like-for-like
+separately, on different harnesses, so the field lacks a direct
 comparison of protocol families under realistic stress. This thesis quantifies
 that performance-security tradeoff under matched network-delay and adversarial
 conditions.
 
-A single discrete-event simulator hosts simplified implementations of three
-protocols, one per family: PBFT, Casper FFG, and Snowman. The three share one
+A single discrete-event simulator implements three protocols in simplified
+form, one per family: PBFT, Casper FFG, and Snowman. The three share one
 metric schema for latency, throughput, communication overhead, and
 reliability, and run under controlled network delay, packet loss, and three
 adversarial strategies: delayed voting, non-participation, and equivocation.
@@ -31,7 +31,7 @@ adversarial strategies: delayed voting, non-participation, and equivocation.
 No protocol dominates. Communication overhead grows linearly in the validator
 count for PBFT and Casper FFG, and is an order of magnitude higher for Snowman,
 which polls by repeated random subsampling. Under network delay Snowman is the
-most affected, its time to finality rising about twelve to fifteen times,
+most affected: its time to finality rises about twelve to fifteen times,
 while PBFT only roughly doubles and Casper FFG barely moves. Packet loss leaves PBFT the most resilient
 and Casper FFG the most fragile. Under equivocation the failure modes diverge:
 past one third Byzantine, PBFT forks unaccountably, Casper FFG preserves safety and

@@ -12,17 +12,18 @@ of Gervais *et al.* [17] from Proof-of-Work to the three BFT families.
 
 ## 3.2 System model: one fair harness
 
-The three families reach decisions in fundamentally different ways, so their
-published numbers cannot be placed side by side. The fix is one harness running all
-three identically, with only the protocol logic swapped.
+The three families reach decisions in very different ways, so their published
+numbers cannot be placed side by side. A single harness that runs all three
+identically, with only the protocol logic swapped, removes that obstacle.
 
-The harness builds the same infrastructure for every run: a scheduler for virtual
+For every run the harness builds the same infrastructure: a scheduler for virtual
 time, a network that delivers messages under configurable delay and loss, and a
-logger. Only the protocol slot differs. Differences in output come from the protocol,
-not the infrastructure (Figure 3.1). An adversary is a per-node interceptor on one
-validator's outbound messages, not a separate harness component (§3.4).
+logger. The only part that varies between runs is the protocol slot, so any
+difference in output is attributable to the protocol rather than to the
+infrastructure (Figure 3.1). An adversary is not a separate harness component; it
+is a per-node interceptor placed on one validator's outbound messages (§3.4).
 
-The harness is also deterministic. Each random draw is keyed by stream identity, so
+The harness is also deterministic: each random draw is keyed by stream identity, so
 a configuration paired with a seed always replays the same event sequence. Every
 output row records its `commit_hash` and `seed` for later verification. Converting
 those rows into a shared measurement unit is a separate step, handled by the metric
@@ -145,6 +146,14 @@ relation.
 Family A sweeps `n` over an honest, clean-network baseline to isolate scaling effects.
 Families B and C fix `n ∈ {10, 25}`: `n = 10` keeps seed counts affordable; `n = 25`
 lets the delay and adversarial effects show up more clearly.
+
+The grid stops at `n = 25` rather than extending to production-scale validator
+sets. The comparison targets the relative scaling trend across families, not
+absolute latency at deployment scale, and that trend is already separated by
+`n = 25`. Past that size the `O(n²)` message growth of the leader-based family
+dominates simulation cost and raises the sweep's expense without
+changing the qualitative ordering, so behavior at several-hundred-node scale
+rests on the sensitivity argument rather than on direct measurement (§6.2).
 
 Family B varies the network timeline. Message delays are drawn from a fixed catalogue
 (`constant`, `uniform`, `normal`, `exponential`, `heavy_tail`), with optional packet loss

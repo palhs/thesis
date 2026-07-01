@@ -2,19 +2,20 @@
 
 ## 5.1 The joint reading
 
-Chapter 4 isolated one stress axis at a time and each produced a clear per-axis
-verdict but no joint reading. This chapter takes up **RQ5**: whether a consistent
-Pareto frontier of the performance–security tradeoff exists across the three protocols
-evaluated, and whether any one dominates the others across all regimes. It introduces
-no new measurements — it collates the per-axis results of Chapter 4 onto a single
-plane (Table 5.1, Figure 5.1) and reads the shape of the tradeoff off them, applying
-the Pareto-dominance definition and the conventions fixed in Chapter 3 (§3.5). The
-axes are the primary metrics of the four data-generating questions, not a set chosen
-to make the families differ, so a family that dominated would do so on the very
-quantities the evaluation was designed to measure. The verdicts are about the
-*implemented* protocol — classical `O(n²)` PBFT, the Casper FFG gadget without
-LMD-GHOST, and a linearized small-`n` Snowman — not the family in the abstract, since
-a family-mate can invert a verdict (§6.2).
+Chapter 4 examined one stress axis at a time. Each axis produced a clear per-axis
+verdict, but the axes were never read together. That joint reading is the work of this
+chapter, which takes up **RQ5**: whether a consistent Pareto frontier of the
+performance–security tradeoff exists across the three protocols evaluated, and whether
+any one dominates the others across all regimes. No new measurements are introduced
+here. The per-axis results of Chapter 4 are collated onto a single plane (Table 5.1,
+Figure 5.1), and the shape of the tradeoff is read off them under the Pareto-dominance
+definition and the conventions fixed in Chapter 3 (§3.5). The axes are the primary
+metrics of the four data-generating questions, not a set chosen to make the families
+differ; a family that dominated would therefore do so on the very quantities the
+evaluation was designed to measure. These verdicts concern the *implemented* protocol:
+classical `O(n²)` PBFT, the Casper FFG gadget without LMD-GHOST, and a linearized
+small-`n` Snowman. They do not concern the family in the abstract, because a
+family-mate can invert a verdict (§6.2).
 
 ## 5.2 The cross-regime frontier
 
@@ -64,29 +65,29 @@ Source: [[wiki/concepts/key-findings]],
 Three conclusions follow from the frontier of §5.2.
 
 **No family dominates.** Each family holds at least one axis no other matches, so none
-is dominated — a direct answer to RQ5. The claim is not equally strong for all three:
+is dominated. This is a direct answer to RQ5. The claim is not equally strong for all three:
 strip the two non-measured rows and PBFT and Casper FFG each hold two measured corners,
 but Snowman holds none; its non-domination rests on an analytical bound the simulator
 cannot confirm rather than a measured contest.
 
 **Every defense is also an exposure.** Each family sits at the outer ring on some axes
-and the center on others because the same structural choice drives both positions. The
-sharpest instance is Snowman: the `K`-peer subsampling that keeps it live (finalizing,
-only far slower) under slow peers is the same mechanism that makes it the least tolerant
-once those peers go silent — a poll that waits on the slowest sampled peer tolerates a
-slow answer but starves on no answer. That wait is also why Snowman pays the steepest
-finality slowdown under delay, ×12–15. PBFT shows the same inversion across the
-security boundary: the leader-based exact-quorum commit rule that carries it through
-delay, loss, and silence is the rule that, past the fault threshold, forks without
-leaving slashable evidence. Casper FFG completes the pattern: the slot-bound,
-epoch-paced finality that makes it cheapest in communication overhead and the least
-perturbed by network delay — its slot clock moving ×1.3 where PBFT nearly doubles and
-Snowman blows up by an order of magnitude — is the same conservatism that leaves it
-first to collapse under packet loss, even as it holds the accountable-failure corner
-only a slashing-based protocol can occupy. The pattern is consistent across all three:
-the same design parameter that creates resilience on one axis creates vulnerability on
-another — not by coincidence, but because the mechanisms that tolerate one failure mode
-are structurally incompatible with tolerating another.
+and at the center on others because the same structural choice drives both positions.
+Snowman is the sharpest instance. The `K`-peer subsampling that keeps it live
+(finalizing, only far slower) under slow peers is the same mechanism that makes it the
+least tolerant once those peers go silent: a poll that waits on the slowest sampled
+peer tolerates a slow answer but starves on no answer. That wait is also why Snowman
+pays the steepest finality slowdown under delay, ×12–15. PBFT shows the same inversion
+across the security boundary. The leader-based exact-quorum commit rule that carries it
+through delay, loss, and silence is the rule that, past the fault threshold, forks
+without leaving slashable evidence. Casper FFG completes the pattern. Its slot-bound,
+epoch-paced finality makes it cheapest in communication overhead and the least
+perturbed by network delay (the slot clock moves ×1.3, where PBFT nearly doubles and
+Snowman grows by an order of magnitude), and that same conservatism leaves it first to
+collapse under packet loss, even as it holds the accountable-failure corner only a
+slashing-based protocol can occupy. The pattern holds across all three families. The
+same design parameter that creates resilience on one axis creates vulnerability on
+another, because the mechanisms that tolerate one failure mode are structurally
+incompatible with tolerating another.
 
 **The cheap, fast, and resilient corner is empty.** Resilience under loss is bought
 with latency: the protocols that retain finalization deepest into packet loss are
@@ -97,9 +98,10 @@ that would be cheap, fast, and resilient at once is unoccupied.
 
 ## 5.4 Implications and hand-off
 
-The no-dominance result is a selection guide: match the dominant threat to the protocol
-that defends against it — attribution requirements to Casper FFG, liveness under
-turbulence to PBFT, equivocation resistance to Snowman. The incidents that opened this
-study (§1.2) fit the same map. A liveness halt under load and a multi-epoch finality
-stall look like two separate problems; each is a protocol hitting its structural limit.
-Chapter 6 draws where those limits hold and what the evaluation leaves open.
+The no-dominance result is a selection guide: the dominant threat is matched to the
+protocol that defends against it, with attribution requirements going to Casper FFG,
+liveness under turbulence to PBFT, and equivocation resistance to Snowman. The
+incidents that opened this study (§1.2) fit the same map. A liveness halt under load
+and a multi-epoch finality stall look like two separate problems; each is a protocol at
+its structural limit. Chapter 6 draws where those limits hold and what the evaluation
+leaves open.
