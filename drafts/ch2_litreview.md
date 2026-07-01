@@ -59,13 +59,13 @@ are in parentheses. Notation is defined below the table.
 | | PBFT-style | PoS-finality | Avalanche-style |
 |:--|:--|:--|:--|
 | Synchrony assumption | partial synchrony | partial synchrony | asynchronous / probabilistic |
-| Block proposer | one rotating leader (primary) | one leader per block (stake-weighted) | one leader per block (round-robin) |
-| Unit of agreement | a replica's vote (`PREPARE`/`COMMIT`) | an attestation, weighted by stake | a polled peer's preference (`QUERY-RESPONSE`) |
-| Agreement threshold | ~⅔ of all validators (`2f+1`) | ~⅔ of all stake | ~80% of a small random sample (`α_c` of `K`) |
-| Agreement rounds | twice (`prepare`, `commit`) | twice, ≥2 epochs apart (`justify`, `finalize`) | `β`≈15 sampling rounds in a row |
+| Block proposer | one node per block, rotating | one node per block, stake-weighted | one node per block, round-robin |
+| Unit of agreement | one vote per validator | one vote per validator, weighted by stake | one response per sampled peer |
+| Agreement threshold | ⅔ of all validators (`2f+1`) | ⅔ of total stake | 80% of a small random sample (`α_c` of `K`) |
+| Agreement rounds | two phases, sequential | two phases, epochs apart | `β`≈15 consecutive rounds |
 | Finality guarantee | deterministic, `ε = 0` | deterministic, `ε = 0` | probabilistic, `ε ≤ (1−α_c/K)^β` |
-| Communication cost | `O(n²)` | `O(n)`, BLS-aggregated to ~1 | `O(K·β)` per validator (aggregate `O(n·K·β)`) |
-| Adversarial pressure point | stall the leader (liveness); safety holds `<n/3` | stall finality; breaking safety burns ≥⅓ stake | stall the counter (liveness); safety statistical |
+| Communication cost | `O(n²)` | `O(n)`, aggregated to ~1 message | `O(K·β)` per validator |
+| Adversarial pressure point | leader failure (liveness); `n/3` threshold (safety) | checkpoint delay (liveness); ≥⅓ stake burn (safety) | counter stall (liveness); statistical bound (safety) |
 
 **Notation.**
 
@@ -83,57 +83,50 @@ The three families have all been measured, and the field has produced three
 taxonomic surveys plus one quantitative methodological precedent. None yields
 a cross-family comparison under matched conditions, for two distinct reasons.
 
-### 2.3.1 Each family reports in its own vocabulary
+### 2.3.1 Each family measures a different thing
 
-Each family's primary papers report what its design concedes, and little
-else. The PBFT and HotStuff papers report operations per second on a
-low-latency LAN with view-change cost as the disturbance metric [4], [5].
-Casper FFG reports time-to-finality in *epochs* (fixed batches of blocks, 32
-on Ethereum), a unit that becomes physical only after multiplying by the block
-time [7], [8]. Avalanche reports two
-figures absent elsewhere: the probabilistic safety bound `ε` and a
-per-transaction latency under one `K, α, β` parameterization [9], [10]. Table
-2.2 collects the headline numbers.
+The papers each family publishes measure what that family's design is trying
+to prove.
 
-**Table 2.2 — Reported metric vocabulary across families.** Headline numbers
-from the cited primary sources. The columns are not directly comparable.
+PBFT and HotStuff were replacing slow replicated databases, so their papers
+report throughput: thousands of operations per second on a low-latency local
+network [4], [5]. Casper FFG was grafted onto Ethereum's existing block stream
+to add irreversibility — it reports finality delay in epochs, two of them,
+about twelve minutes on mainnet [7], [8]. Avalanche skips quorum entirely and
+reports safety probability `ε` and per-transaction latency for one fixed
+parameter set [9], [10].
 
-| Family | Throughput (reported) | Latency (reported) | Fault threshold | Source |
-| :---- | :---- | :---- | :---- | :---- |
-| PBFT (LAN) | Thousands of ops/s | Sub-10 ms | `< n/3` | [4] |
-| HotStuff | Linear in `n` after optimizations | 3-round commit | `< n/3` | [5] |
-| PoS-finality (Casper FFG / Gasper) | Block-proposal rate of underlying chain | Two-epoch finality (≤12.8 min on Ethereum) | `< 1/3` of stake | [7], [8] |
-| Avalanche | ~3.4 ktps (testnet) | ~1.35 s | Parameter-dependent (no fixed fraction) | [9], [10] |
+None of them covers all three dimensions. PBFT says nothing about finality
+delay. Casper FFG says nothing about throughput. Avalanche's latency figure is
+only valid at one `K, β` setting — change the parameters and the number
+changes too.
 
-Hardware, workload, batching, topology, and adversarial assumption differ
-between every pair of rows. The table cannot answer whether PBFT's thousands
-of ops/s on a LAN reflects a family advantage or a more permissive harness. Nor
-can it answer whether Avalanche's 1.35 s confirmation is structural or an
-artifact of one `K, β` choice. The comparative question cannot even be posed in
-a shared vocabulary, let alone answered.
+No shared unit exists for asking "which family is faster?" or "which is
+safer?" All three families have been studied extensively; the measurements
+just were not designed to sit next to each other.
 
-### 2.3.2 The surveys measure nothing, and the one precedent targets PoW
+### 2.3.2 Prior surveys and the one quantitative precedent
 
-Three taxonomic surveys place the families in qualitative terms — Bano *et al.*
-[14] supply the canonical Systematization of Knowledge this chapter's taxonomy
-reuses, Xiao *et al.* [15] aggregate reported throughput, latency, and
-fault-tolerance ranges while flagging the cross-harness incomparability, and Cachin
-and Vukolić [16] critique vendor-published permissioned-chain BFT numbers — but none
-measures the families, and the two that aggregate numbers do so under the caveat that
-the harnesses are not matched. The single quantitative precedent is Gervais *et al.*
-[17], whose unified Proof-of-Work simulator — one metric schema, swept over block
-size and propagation delay — is structurally the evaluation the BFT families have not
-received; its limitation here is its target, Proof-of-Work. No equivalent
-unified-harness study exists for PBFT-style, PoS-finality, and Avalanche-style
-protocols evaluated jointly.
+Comparative surveys of the three families exist [14], [15], [16], but none runs
+its own measurements. The two that aggregate reported numbers include their own
+disclaimer: harnesses are not matched, so the figures sit next to each other
+without being comparable. They map the problem well enough; filling it is
+another matter.
+
+One study comes close. Gervais *et al.* [17] built a unified Proof-of-Work
+simulator with a single metric schema, swept across block sizes and propagation
+delays — the kind of controlled cross-condition evaluation the three BFT
+families have never received. The limitation is the target: Proof-of-Work only.
+No equivalent study covers PBFT-style, PoS-finality, and Avalanche-style
+protocols under matched conditions.
 
 ## 2.4 The gap
 
 The three families respond to the same impossibility and differ only in which
 assumption they relax, so they are commensurable as objects of comparison.
 Their per-family measurements, however abundant, do not support cross-family
-judgment. The obstacle is the reporting vocabulary itself, not any absence of
-measurement. The one methodological precedent for a matched evaluation is
+judgment. The obstacle is that the measurements were never designed to be compared, not
+any absence of data. The one methodological precedent for a matched evaluation is
 Gervais *et al.* [17], which has been applied to Proof-of-Work only. Chapter 3
 responds with a unified discrete-event simulator, a shared metric schema
 instantiated identically for the three families, and an experiment matrix that
