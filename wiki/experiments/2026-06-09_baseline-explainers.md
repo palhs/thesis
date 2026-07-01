@@ -28,7 +28,7 @@ untested, matching the `plots.py` convention.
    19.1 (0.6×), Snowman 450.9 (**14.1× PBFT**). The order-of-magnitude gap a
    log-line plot buries is unmissable here.
 2. **`theory_vs_measured`** — measured `total_msgs_per_acu` markers over each
-   protocol's *predicted* slope (dashed): PBFT `2n`, Casper `1.2n`, Snowman
+   protocol's *predicted* slope (dashed): PBFT `2n`, Casper `1.125n`, Snowman
    `2·K·β` with `K=min(20,n−1), β≈15`. Markers sit on the dashed lines →
    visual check the simulator tracks published complexity (largest gaps
    ≈6–7% at n=4; see [[experiments/2026-06-08_baseline-cis]])
@@ -86,7 +86,7 @@ The charts inherit the T44 caveats so a reader cannot misread them:
 | protocol | predicted per-unit cost | measured (n=16) | match |
 | :-- | :-- | :-- | :-- |
 | PBFT | `2n` (O(n²)/instance ÷ n decisions) | 31.9 ≈ 2·16 | ✓ |
-| Casper FFG | `≈1.2n` (one attestation round) | 19.1 ≈ 1.2·16 | ✓ |
+| Casper FFG | `1.125n` (un-aggregated all-to-all) | 19.1 (fit `1.145·16+0.7 ≈ 19.0`) | ✓ (≈2% over analytical) |
 | Snowman | `2·K·β`, `K=min(20,n−1)`, `β≈15` | 450.9 ≈ 2·15·15 | ✓ (ratio 1.00) |
 
 Snowman's growth across `n∈{7…25}` is **K-rescaling** (`K` tracks `n−1` below

@@ -59,7 +59,7 @@ exercise therefore (a) confirms determinism and (b) bounds workload noise.
 | protocol | theory | measured | verdict |
 | :-- | :-- | :-- | :-- |
 | **PBFT** | `O(n²)` msgs/block; 3-round latency [[algorithms/pbft#communication-complexity]] | `total_msgs/acu → 2n` (per-n 1.875→1.997); commit flat ≈1000 ms | ✓ per-instance is `O(n²)`; the ACU denominator (n decisions/instance) absorbs one factor of n → `O(n)` per-ACU |
-| **Casper FFG** | `O(n)` aggregated/epoch; 2-epoch finality [[algorithms/pos#communication-complexity]] | `msgs/acu ≈ 1.2n`; commit flat ≈5000 ms | ✓ one attestation round (cheaper slope than PBFT's two broadcast phases); ≈5 s ≈ 2.5 epochs at `slot=1 s, slots/epoch=2` |
+| **Casper FFG** | `O(n)` aggregated/epoch; 2-epoch finality [[algorithms/pos#communication-complexity]] | `msgs/acu ≈ 1.15n` measured (analytical `1.125n`); commit flat ≈5000 ms | ✓ one attestation round (cheaper slope than PBFT's two broadcast phases); ≈5 s ≈ 2.5 epochs at `slot=1 s, slots/epoch=2` |
 | **Snowman** | per-validator `O(K·β)`, latency invariant to `n` [[algorithms/avalanche#parameters-and-communication-complexity]] | `total_msgs/acu ≈ 2·K·β` (ratio 1.002–1.005); commit flat ≈1000 ms | ✓ near-exact: the ×2 is query+response; growth over `n` is the **K-rescaling** `K=min(20,n−1)`, not an `n`-dependence — the `n`-independence is masked below `n≈21` where `K` still tracks `n−1` |
 
 **Headline contrast (RQ3).** Per committed unit, Snowman costs an order of
@@ -90,7 +90,8 @@ theory as "`O(n)` aggregated/epoch." This is the *Ethereum production*
 individually signed and counted with no aggregation (arXiv:1710.09437,
 Table 1). The simulator follows the paper: every validator broadcasts its own
 signed `ATTESTATION` all-to-all, so the attestation phase is `O(n²)` (measured
-`9·n(n−1)` deliveries/window) and the measured `≈1.2n` per-ACU validates that
+`9·n(n−1)` deliveries/window) and the measured `≈1.15n` per-ACU (least-squares
+fit `1.145n + 0.7`, ≈2% above the analytical `1.125n`) validates that
 *un-aggregated* model — not an aggregated `O(n)` one. The slope sits below
 PBFT's because of the rounds-to-decisions ratio (one attestation phase, more
 decisions per round), not aggregation. See

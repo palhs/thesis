@@ -14,7 +14,7 @@ figures), this module renders the *interpretation*:
      out. A bar chart makes the ≈14x (Snowman/PBFT) gap obvious where a
      log-line buries it.
   2. theory_vs_measured   — measured msgs/acu points overlaid on each
-     protocol's *predicted* slope (PBFT 2n, Casper 1.2n, Snowman 2*K*beta).
+     protocol's *predicted* slope (PBFT 2n, Casper 1.125n, Snowman 2*K*beta).
      Visual check that the simulator tracks published theory (markers sit on
      the lines; the largest gaps, ~6-7%, are at n=4 — see the cis report).
      Promoted to a thesis figure (Ch4 Figure 4.7): also rendered as a tracked
@@ -177,7 +177,8 @@ def _theory_line(proto, n):
     if proto == "pbft":
         return 2 * n                       # O(n^2)/instance / n decisions -> 2n/acu
     if proto == "casper-ffg":
-        return 1.2 * n                     # one aggregated attestation round
+        return 1.125 * n                   # un-aggregated all-to-all votes, analytical per-ACU
+                                           # (measured slope ≈1.145n; see key-findings#Revisions)
     if proto == "snowman":
         k = min(20, n - 1)                 # K = min(20, n-1)
         return 2 * k * 15.0                # 2 (query+response) * K * beta, beta~=15
@@ -208,7 +209,7 @@ def theory_vs_measured(agg):
     ax.legend(frameon=False, fontsize=9)
     fig.text(0.5, 0.01,
              "markers = simulator;  dashed = theory "
-             "(PBFT 2n,  Casper 1.2n,  Snowman 2·K·β, K=min(20,n−1))",
+             "(PBFT 2n,  Casper 1.125n,  Snowman 2·K·β, K=min(20,n−1))",
              ha="center", fontsize=8, style="italic")
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     # Promoted to Chapter-4 Figure 4.7: also emit a tracked vector PDF beside
