@@ -31,8 +31,7 @@ deficit collapses to one inner-ring point), so the evidence is the table.
 **Figure 5.1 — Cross-family performance–security frontier (illustrative, ordinal
 only).** The three families scored on the eight cross-regime axes of Table 5.1,
 normalized by ordinal rank per axis: the outer ring marks the strict best on an axis,
-the center the worst, ties shared. No polygon encloses another; each reaches the outer
-ring on at least one axis the others do not, so no family dominates. Source:
+the center the worst, ties shared. Source:
 [[wiki/concepts/key-findings]], [[wiki/experiments/2026-06-13_delay-comparison]],
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
@@ -52,11 +51,11 @@ Source: [[wiki/concepts/key-findings]],
 | Axis (regime) | PBFT | Casper FFG | Snowman | Best |
 | :-- | :-- | :-- | :-- | :-- |
 | Baseline commit latency | ≈ 1 s | ≈ 5 s | ≈ 1 s | PBFT ≈ Snowman |
-| Communication overhead per unit | ≈ `2n` | ≈ `1.2n` | ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | Casper FFG |
+| Communication overhead per unit | ≈ `2n` | ≈ `1.15n` | ≈ `2Kβ` (≈ 14× PBFT at `n = 16`) | Casper FFG |
 | Finality slowdown under delay (× baseline) | ×1.9 | ×1.3 | ×12–15 | Casper FFG |
 | Loss resilience (AURC; survival depth) | first; alive at 20% loss | last | AURC tie at `n = 25`; cliffs by 10% loss | PBFT |
 | Liveness under delayed voting | immune (1.0×) | dips (success → 0.60) | survives at ×62 finality | PBFT |
-| Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | cliff at `φ = 0.20` (`n = 10`) / `φ = 0.33` (`n = 25`) | PBFT ≈ FFG |
+| Liveness under silence | clean to `φ = 0.33`, cliff at `φ = 0.40` | graceful to `φ = 0.33` | survival depth `φ* = 0.10` (`n = 10`) / `0.20` (`n = 25`, starved) | PBFT ≈ FFG |
 | Safety under equivocation | deterministic fork at `φ = 0.40` | accountable, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵` / `3 × 10⁻¹¹` | Snowman |
 | Accountable safety | none (unattributable fork) | slashable ≥ ⅓ stake | not applicable (probabilistic) | Casper FFG |
 
@@ -70,9 +69,9 @@ strip the two non-measured rows and PBFT and Casper FFG each hold two measured c
 but Snowman holds none; its non-domination rests on an analytical bound the simulator
 cannot confirm rather than a measured contest.
 
-**Every defense is also an exposure.** Each family sits at the outer ring on some axes
-and at the center on others because the same structural choice drives both positions.
-Snowman is the sharpest instance. The `K`-peer subsampling that keeps it live
+**Each family's best and worst axes trace to one mechanism.** In Table 5.1 every family
+sits at the outer ring on some axes and at the center on others, and the same structural
+choice drives both positions. Snowman is the sharpest instance. The `K`-peer subsampling that keeps it live
 (finalizing, only far slower) under slow peers is the same mechanism that makes it the
 least tolerant once those peers go silent: a poll that waits on the slowest sampled
 peer tolerates a slow answer but starves on no answer. That wait is also why Snowman
@@ -89,12 +88,13 @@ same design parameter that creates resilience on one axis creates vulnerability 
 another, because the mechanisms that tolerate one failure mode are structurally
 incompatible with tolerating another.
 
-**The cheap, fast, and resilient corner is empty.** Resilience under loss is bought
-with latency: the protocols that retain finalization deepest into packet loss are
-exactly the ones that pay the most in time-to-finality, while the family that refuses
-the trade and stays near unit latency dies first (§4.3.3). No measured configuration
-escapes the purchase, so the frontier carries a gap rather than a point: the corner
-that would be cheap, fast, and resilient at once is unoccupied.
+**No measured configuration is cheap, fast, and loss-resilient at once.** Resilience
+under loss came with latency across the runs in Table 5.1: the protocols that retain
+finalization deepest into packet loss (PBFT, alive at 20% loss) are the same ones that
+pay the most in time-to-finality, while the family that stays near unit latency
+(Snowman, ≈ 1 s baseline) cliffs by 10% loss (§4.3.3). No run in the sweep escapes the
+tradeoff, so the frontier carries a gap rather than a point: that corner stays
+unoccupied.
 
 ## 5.4 Implications and hand-off
 

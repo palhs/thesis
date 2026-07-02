@@ -175,8 +175,11 @@ no aggregation, and does not analyse message complexity. **The simulator
 follows the paper, not production:** `src/pos/node.py::_attest` has every
 validator broadcast its own signed `ATTESTATION` to every peer, so the
 measured per-epoch attestation cost is `O(n²)` deliveries (empirically
-`9·n(n−1)` over the baseline window), giving `total_msgs_per_acu ≈ 1.125n`
-after dividing by the per-epoch decisions. BLS aggregation — which would
+`9·n(n−1)` over the baseline window), giving an analytical
+`total_msgs_per_acu ≈ 1.125n` after dividing by the per-epoch decisions; a
+least-squares fit of the baseline CSV gives a measured slope `≈ 1.145n`
+(`1.145n + 0.7`), within two percent of that prediction
+([[concepts/key-findings#Revisions]]). BLS aggregation — which would
 collapse this to `O(n)` and is the enabling mechanism for the large
 validator sets PBFT-family protocols cannot reach — is **not modelled**;
 adding it is recorded as future work

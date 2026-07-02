@@ -396,7 +396,7 @@ axis must use `goodput`, never `tps`.** See §Revisions [2026-06-14]. [7], [8]
 
 | Metric | PBFT | Casper FFG | Snowman | Narwhal+Tusk |
 | :---- | :---- | :---- | :---- | :---- |
-| `consensus_msgs_per_acu` | per-instance `2(n²−1)` deliveries — all-to-all PREPARE + COMMIT `2n(n−1)` plus PRE-PREPARE + client `REPLY` `2(n−1)`, primary self-excluded; per-ACU `(2n²−2)/n = 2n − 2/n` after dividing by the `I·n` decided events (CSV-exact: 7.5 / 13.71 / 19.8 / 31.88 / 49.92 at `n = 4/7/10/16/25`). Traffic is `O(n²)` *per committed instance*; the `≈2n` per-ACU figure is that quadratic traffic normalised by an `n`-scaled decided-event denominator, **not** linear scaling — see §Revisions [2026-06-14] [4] | simulator (per FFG paper [1]): `O(n²)` — `n` individually-signed votes broadcast all-to-all per epoch; measured `≈1.125n` per-ACU. Production (BLS-aggregated): `O(n)`. Aggregation not modelled — see [[algorithms/pos#communication-complexity]] | `O(K·β)` per validator (queries + replies); independent of `n` [9], [ava-docs] | `0` (Tusk derives order from existing DAG references) [11] |
+| `consensus_msgs_per_acu` | per-instance `2(n²−1)` deliveries — all-to-all PREPARE + COMMIT `2n(n−1)` plus PRE-PREPARE + client `REPLY` `2(n−1)`, primary self-excluded; per-ACU `(2n²−2)/n = 2n − 2/n` after dividing by the `I·n` decided events (CSV-exact: 7.5 / 13.71 / 19.8 / 31.88 / 49.92 at `n = 4/7/10/16/25`). Traffic is `O(n²)` *per committed instance*; the `≈2n` per-ACU figure is that quadratic traffic normalised by an `n`-scaled decided-event denominator, **not** linear scaling — see §Revisions [2026-06-14] [4] | simulator (per FFG paper [1]): `O(n²)` — `n` individually-signed votes broadcast all-to-all per epoch; analytical `≈1.125n` per-ACU, measured slope `≈1.15n` (fit `1.145n + 0.7`; see §Revisions [2026-07-02]). Production (BLS-aggregated): `O(n)`. Aggregation not modelled — see [[algorithms/pos#communication-complexity]] | `O(K·β)` per validator (queries + replies); independent of `n` [9], [ava-docs] | `0` (Tusk derives order from existing DAG references) [11] |
 | `mempool_msgs_per_acu` | `0` (no separate mempool layer) | `0` (block-proposal layer carries payload; not a separate mempool) | `0` | `O(r · n²)` over `r` rounds × `n` certificates × `2f+1` signatures [11] |
 | `bytes_per_block` | dominated by signatures × `O(n²)` | simulator: per-validator (un-aggregated) attestation + payload per slot, `O(n²)`; production BLS would amortise to one aggregate per committee | `O(K·β)` query/reply bytes per validator | dominated by mempool payload bytes; consensus layer adds none |
 | `per_validator_state` | vote caches + view-change log; `O(n)` per recent block | attestation buffers per slot + finalised-checkpoint chain | Snowball preference + counter per pending block; independent of `n` | full DAG retention until pruned at anchor commit — **largest of the four** |
@@ -671,3 +671,16 @@ re-run; the data already reflects `2`/`1 s`.** The alternative resolution
 (treat `4`/`100 ms` as the intended pin and re-run the entire dataset at
 that calibration) was rejected: it would contradict an existing Chapter 4
 finding and invalidate every committed result.
+
+**2026-07-02 — Casper FFG `total_msgs_per_acu` relabelled: analytical `≈1.125n`,
+measured `≈1.15n`.** The §Overhead table (`total_msgs_per_acu` row) previously
+called `≈1.125n` the *measured* value; it is the *analytical* prediction. A
+least-squares fit of `results/baseline/aggregated.csv` gives the measured slope
+`1.145n + 0.7` (≈ `1.15n`, within two percent of the prediction); the per-`n`
+ratio is 1.29 → 1.17 over `n = 4 → 25` as the fixed additive term (block
+proposals + finite-window boundary epochs) dilutes. The row now states both
+values. This also corrected the opposite over-round in [[concepts/key-findings]]
+(which reported `≈1.2n`); drafts Ch4/Ch5/Ch6 and the `theory_vs_measured` figure
+theory line (`src/output/explain.py::_theory_line`, previously `1.2·n`, now the
+analytical `1.125·n`) were aligned the same day. No CSV or re-run — the data was
+always correct; only the labels were.

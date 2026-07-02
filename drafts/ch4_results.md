@@ -15,12 +15,12 @@ The baseline sweeps validator-set size `n ∈ {4, 7, 10, 16, 25}` under a clean 
 
 On the honest path all three protocols are correct at every validator count — success rate 1.0, fork rate 0.0 — and both latency and goodput are flat in `n`: without network delay, timing is governed by each protocol's round structure, not validator-set size. PBFT and Snowman commit the first unit at ≈ 1000 ms; Casper FFG at ≈ 5000 ms, a consequence of its epoch-granularity finality (§3.3). Goodput is ≈ 95 tx/s for the per-block protocols and ≈ 80 tx/s for Casper FFG, whose shortfall is a fixed end-of-window epoch left uncommitted.
 
-Communication overhead is where the protocols separate most sharply, answering **RQ3**. Messages per committed unit grow with `n` for all three, but the slopes differ by an order of magnitude: PBFT approaches `2n`, Casper FFG `1.2n`, and Snowman `2·K·β`. Each measured trend matches the protocol's published asymptotic cost (Table 3.3, §3.5). Two readings must be kept apart: per committed unit Snowman is the most expensive by an order of magnitude (≈ 24 messages per validator against PBFT's two), the price of repeated subsampling; yet Avalanche's claim, that its *per-validator* cost is independent of `n`, is a statement about per-validator work, not the network aggregate plotted here. At `n = 25` the overhead gap reaches an order of magnitude: ≈ 50 messages per unit for PBFT, ≈ 29 for Casper FFG, and ≈ 601 for Snowman. Casper FFG's measured ≈ `1.2n` slope sits just above its ≈ `1.125n` un-aggregated analytical prediction (Table 3.3): both describe the same un-aggregated all-to-all cost, the small excess being attestation-scheduling overhead.
+Communication overhead is where the protocols separate most sharply, answering **RQ3**. Messages per committed unit grow with `n` for all three, but the slopes differ by an order of magnitude: PBFT approaches `2n`, Casper FFG ≈ `1.15n`, and Snowman `2·K·β`. Each measured trend follows its published asymptotic cost (Table 3.3, §3.5): PBFT and Snowman sit essentially on their predictions, and Casper FFG a little above its `1.125n` line. Two readings must be kept apart: per committed unit Snowman is the most expensive by an order of magnitude (≈ 24 messages per validator against PBFT's two), the price of repeated subsampling; yet Avalanche's claim, that its *per-validator* cost is independent of `n`, is a statement about per-validator work, not the network aggregate plotted here. At `n = 25` the overhead gap reaches an order of magnitude: ≈ 50 messages per unit for PBFT, ≈ 29 for Casper FFG, and ≈ 601 for Snowman. Casper FFG's small excess over the `1.125n` line is a fixed per-unit overhead (block proposals and the un-amortized boundary epochs of a finite run) that does not scale with the validator count. Snowman carries an overhead of the same kind, but against its far larger message base it is negligible; on Casper FFG's much smaller base the same fixed cost is no longer hidden, so its slope reads a little above the prediction where the other two sit on theirs. The effect follows from Casper FFG being the cheapest protocol; the un-aggregated all-to-all message law itself is unchanged.
 
 **Figure 4.1 — Communication overhead: measured against predicted asymptotic cost.**
 `total_msgs_per_acu` for each protocol across the sweep, logarithmic vertical axis;
 markers are measured values, dashed lines the per-protocol predictions PBFT `2n`,
-Casper FFG `1.2n`, and Snowman `2·K·β` with `K = min(20, n−1)`. Source:
+Casper FFG `1.125n`, and Snowman `2·K·β` with `K = min(20, n−1)`. Source:
 `results/baseline/plots/theory_vs_measured.pdf`
 [[wiki/experiments/2026-06-09_baseline-explainers]].
 
@@ -93,8 +93,13 @@ quorum cliff: it finalizes with no goodput loss up to `φ = 0.33` and dies at
 Casper FFG degrades gracefully over the same range and still finalizes at `φ = 0.33`,
 its goodput falling with the participating stake but somewhat faster than the `1 − φ`
 line, which it stays below because lost proposer slots forfeit whole finalization
-rounds (Figure 4.6). Snowman cliffs earliest, at `φ = 0.10` for `n = 10` and `φ = 0.20` for `n = 25`. The ordering is therefore PBFT and
-Casper FFG ahead of Snowman.
+rounds (Figure 4.6). Under silence, two numbers are easy to mix up. The *survival
+depth* `φ*` is the largest silent fraction at which a protocol still finalizes
+(`success_rate ≈ 1`); the *liveness cliff* is the next step up, where the success rate
+drops to ≈ 0. Snowman's survival depth is the lowest of the three: `φ* = 0.10` at
+`n = 10` and `φ* = 0.20` at `n = 25`, and even at `n = 25` it finalizes at only 0.4% of
+baseline goodput (alive but starved). Its cliff comes one step later, at `φ = 0.20` and
+`φ = 0.33`. PBFT and Casper FFG therefore rank ahead of Snowman here.
 
 **Figure 4.4 — Liveness under delayed voting and silent non-participation.** Each row
 faceted by validator count, against the injected adversarial fraction `φ` with 95%
@@ -134,7 +139,7 @@ safety invariant for equivocation. Source:
 | Adversarial strategy | PBFT | Casper FFG | Snowman | Robustness order |
 | :-- | :-- | :-- | :-- | :-- |
 | Delayed voting | success 1.0; finality 1.0× (immune, no view-changes) | success → 0.60 / 0.65; finality 1.0× (liveness dips) | success 1.0; finality ×62 / ×49 (full liveness, crawls) | PBFT ≈ Snowman ≫ FFG |
-| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput below `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
+| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput below `1 − φ`) | survival depth `φ* = 0.10 / 0.20` (`n = 25` starved, ≈ 0.4% goodput); cliff one step later | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
 Three qualifications bound the verdict: the leader-disruption surface is catalogued but not exercised, so PBFT's standing against the liveness adversaries holds only against an adversary that spares its view-0 primary (§6.2); Snowman's analytical `ε` is not empirically witnessed at the baseline depth (§4.4.3); and the latency-only network understates the detection and recovery cost borne by PBFT and Casper FFG (§6.2).
@@ -178,7 +183,5 @@ outcome kind and each label its governing magnitude. Source:
 **Figure A.3 — Communication cost under packet loss.** `total_msgs_per_acu` for each
 protocol against per-message drop probability, faceted by validator count, on a
 logarithmic axis, with PBFT's mean view-change count annotated at each loss level.
-Shows the two compounding inflation fronts of §4.3.2 (view-change numerator, collapsing
-ACU denominator) and the clean-path cost order breaking under loss as Casper FFG
-crosses above PBFT. Source: `results/delay/plots/cost_of_survival.pdf`
+Source: `results/delay/plots/cost_of_survival.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].

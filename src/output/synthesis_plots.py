@@ -54,7 +54,7 @@ AXES = (
 # a re-derivation from raw data. Per-axis provenance (index -> Table 5.1 row):
 #   0 baseline latency      PBFT ~1s ~= Snowman ~1s > Casper FFG ~5s
 #                           [[experiments/2026-06-03_scaling-baseline]]
-#   1 comm. overhead        Casper FFG ~1.2n < PBFT ~2n < Snowman ~2Kbeta (~14x)
+#   1 comm. overhead        Casper FFG ~1.15n < PBFT ~2n < Snowman ~2Kbeta (~14x)
 #                           [[experiments/2026-06-08_baseline-cis]]
 #   2 delay slowdown        Casper FFG x1.3 (slot-bound, least) < PBFT x1.9
 #                           < Snowman x12-13 (relative finality slowdown vs

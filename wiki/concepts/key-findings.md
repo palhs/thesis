@@ -36,9 +36,9 @@ Every finding is stated against the conventions fixed in
 ### Family A — honest scaling baseline
 
 **F1 (RQ3) — Communication overhead splits into two scaling regimes.**
-PBFT (≈ `2n`) and Casper FFG (≈ `1.2n`) both grow linearly in messages per
-ACU, because each protocol's `O(n²)` per-instance all-to-all cost is divided
-by `n` decisions per instance; Snowman sits an order of magnitude above both
+PBFT (≈ `2n`) and Casper FFG (≈ `1.15n` measured, ≈ `1.125n` analytical) both
+grow linearly in messages per ACU, because each protocol's `O(n²)` per-instance
+all-to-all cost is divided by `n` decisions per instance; Snowman sits an order of magnitude above both
 at ≈ `2·K·β`. Measured total messages per ACU run PBFT 7.5 → 49.9 (per-n ratio
 1.875 → 1.997) and Casper FFG 5.2 → 29.3 over `n = 4 → 25`, against Snowman
 180.9 → 601.0 over `n = 7 → 25`
@@ -49,8 +49,10 @@ is `K`-rescaling (`K = min(20, n−1)`) masking the published per-validator
 `O(K·β)` `n`-independence, which only emerges once `K` caps above `n ≈ 21`
 [[experiments/2026-06-08_baseline-cis]].
 *Caveat:* zero-delay honest baseline; Casper FFG uses individually-signed
-attestations (the paper protocol), not BLS aggregation, so the ≈ `1.2n`
-slope is un-aggregated all-to-all, not an aggregated `O(n)` deployment.
+attestations (the paper protocol), not BLS aggregation, so the ≈ `1.15n`
+slope is un-aggregated all-to-all, not an aggregated `O(n)` deployment. A
+least-squares fit of the CSV gives `1.145n + 0.7`; the per-`n` ratio runs
+1.29 → 1.17 over `n = 4 → 25` as the fixed additive term dilutes.
 
 **F2 (RQ1, RQ3) — Latency and throughput are flat in `n`, and the baseline
 is deterministic except goodput.** Commit latency holds at ≈ 1000 ms (PBFT,
@@ -202,4 +204,22 @@ RQ5 is foreshadowed here and owed by Chapter 5.
 
 ## Revisions
 
-None.
+**2026-07-02 — Casper FFG overhead slope corrected from ≈ `1.2n` to ≈ `1.15n`
+(measured).** F1 previously reported the Casper FFG per-ACU message slope as
+≈ `1.2n`. A least-squares fit of `results/baseline/aggregated.csv`
+(`total_msgs_per_acu_mean`) gives `1.145n + 0.7` (residual < 0.14 at every `n`),
+i.e. a measured slope of ≈ `1.15n`, within two percent of the ≈ `1.125n`
+un-aggregated analytical prediction. The earlier `1.2n` was an over-round of the
+small-`n` per-validator ratio (1.29 at `n = 4`, falling to 1.17 at `n = 25` as
+the fixed additive term dilutes), which overstated the analytical gap. Drafts
+(Ch4/Ch5/Ch6), the `theory_vs_measured` figure theory line, and
+[[concepts/metric-reconciliation]] were aligned the same day.
+
+Cross-protocol context (measured − analytical, `results/baseline/aggregated.csv`):
+PBFT is exact (0.00% at every `n`, its `(2n²−2)/n` law is closed-form); Snowman
+runs +0.16%–0.48% above `2Kβ`, a near-constant additive of ≈ +0.9 messages per
+unit; Casper FFG's residual is the same absolute size (+0.66 → +1.16 messages,
+`n = 4 → 25`) but sits on a base of only 5–29 messages, so the identical finite-run
+overhead (block proposals + boundary epochs) shows as +4% (n=25) to +14.6% (n=4).
+Casper FFG's larger *percentage* gap is thus a small-base artifact of its being the
+cheapest protocol, not a break from the all-to-all message law.
