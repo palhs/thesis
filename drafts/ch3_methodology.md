@@ -39,10 +39,9 @@ repeats for every seed and every experiment cell.
 Each family of Chapter 2 is represented by one protocol — PBFT for PBFT-style
 [[wiki/algorithms/pbft]], Casper FFG for PoS-finality [[wiki/algorithms/pos]], and
 Snowman for Avalanche-style [[wiki/algorithms/avalanche]] — each the canonical or
-production form of its family. Table 3.1 distinguishes how the three decide; the full
-mechanics belong to the defense presentation, so only the load-bearing behavior is
-given here. The *atomic commit unit* (ACU), the row that makes the three
-commensurable, is defined in §3.5.
+production form of its family. Table 3.1 distinguishes how the three decide; only the
+load-bearing behavior is given here. The *atomic commit unit* (ACU), the row that
+makes the three commensurable, is defined in §3.5.
 
 ### PBFT — leader-driven two-phase voting
 
