@@ -183,7 +183,5 @@ outcome kind and each label its governing magnitude. Source:
 **Figure A.3 — Communication cost under packet loss.** `total_msgs_per_acu` for each
 protocol against per-message drop probability, faceted by validator count, on a
 logarithmic axis, with PBFT's mean view-change count annotated at each loss level.
-Shows the two compounding inflation fronts of §4.3.2 (view-change numerator, collapsing
-ACU denominator) and the clean-path cost order breaking under loss as Casper FFG
-crosses above PBFT. Source: `results/delay/plots/cost_of_survival.pdf`
+Source: `results/delay/plots/cost_of_survival.pdf`
 [[wiki/experiments/2026-06-13_delay-comparison]].

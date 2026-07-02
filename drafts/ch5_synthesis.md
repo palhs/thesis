@@ -31,8 +31,7 @@ deficit collapses to one inner-ring point), so the evidence is the table.
 **Figure 5.1 — Cross-family performance–security frontier (illustrative, ordinal
 only).** The three families scored on the eight cross-regime axes of Table 5.1,
 normalized by ordinal rank per axis: the outer ring marks the strict best on an axis,
-the center the worst, ties shared. No polygon encloses another; each reaches the outer
-ring on at least one axis the others do not, so no family dominates. Source:
+the center the worst, ties shared. Source:
 [[wiki/concepts/key-findings]], [[wiki/experiments/2026-06-13_delay-comparison]],
 [[wiki/experiments/2026-06-19_adversary-comparison]],
 [[wiki/experiments/2026-06-19_adversarial-degradation]].
