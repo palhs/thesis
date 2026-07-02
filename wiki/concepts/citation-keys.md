@@ -62,12 +62,12 @@ them.
 | [8]  | `buterin2020gasper`       | `@online`        | [[sources/2026-04-21_buterin-gasper-2020]] |
 | [9]  | `teamrocket2019avalanche` | `@online`        | [[sources/2026-04-21_team-rocket-avalanche-2019]] |
 | [10] | `amoressesar2024avalanche`| `@online`        | [[sources/2026-04-21_amores-sesar-avalanche-analysis-2024]] |
-| [11] | `danezis2022narwhal`      | `@inproceedings` | [[sources/2026-04-21_danezis-narwhal-tusk-2022]] |
-| [12] | `spiegelman2022bullshark` | `@inproceedings` | [[sources/2026-04-21_spiegelman-bullshark-2022]] |
-| [13] | `babel2023mysticeti`      | `@online`        | [[sources/2026-04-21_babel-mysticeti-2023]] |
-| [14] | `bano2019sok`             | `@inproceedings` | [[sources/2026-04-21_bano-sok-consensus-2019]] |
-| [15] | `xiao2020survey`          | `@article`       | [[sources/2026-04-21_xiao-survey-2020]] |
-| [16] | `cachin2017wild`          | `@online`        | [[sources/2026-04-21_cachin-vukolic-blockchain-wild-2017]] |
+| [11] | `danezis2022narwhal` †    | `@inproceedings` | [[sources/2026-04-21_danezis-narwhal-tusk-2022]] |
+| [12] | `spiegelman2022bullshark` † | `@inproceedings` | [[sources/2026-04-21_spiegelman-bullshark-2022]] |
+| [13] | `babel2023mysticeti` †    | `@online`        | [[sources/2026-04-21_babel-mysticeti-2023]] |
+| [14] | `bano2019sok` †           | `@inproceedings` | [[sources/2026-04-21_bano-sok-consensus-2019]] |
+| [15] | `xiao2020survey` †        | `@article`       | [[sources/2026-04-21_xiao-survey-2020]] |
+| [16] | `cachin2017wild` †        | `@online`        | [[sources/2026-04-21_cachin-vukolic-blockchain-wild-2017]] |
 | [17] | `gervais2016powsecurity`  | `@inproceedings` | [[sources/2026-04-21_gervais-pow-security-2016]] |
 | [18] | `gilbert2002cap`          | `@article`       | [[sources/2026-05-06_gilbert-lynch-cap-2002]] |
 | [19] | `helius2024solanaoutages` | `@online`        | _pending — Backlog (incident postmortems)_ |
@@ -75,6 +75,14 @@ them.
 | [21] | `offchainlabs2023finality`| `@online`        | _pending — Backlog (incident postmortems)_ |
 | [22] | `cosmos2024v17halt`       | `@online`        | _pending — Backlog (incident postmortems)_ |
 | [23] | `sui2024outage`           | `@online`        | _pending — Backlog (incident postmortems)_ |
+
+**†** — key retained in this ledger (the `[N]` label and `wiki/sources/`
+page are permanent per the append-only policy) but **not present in
+`references.bib`**: the 2026-07-02 pre-submission pass pruned the six
+DAG-family and survey entries `[11]–[16]` from the `.bib` because no
+`drafts/ch*.md` (hence no `.tex`) chapter cites them. If a later chapter
+cites one, re-add its `.bib` record and drop the dagger — the bibkey and
+`[N]` are unchanged. See Revisions.
 
 `[19]–[23]` are production-incident postmortems cited in Chapter 1 §1.2
 (the motivation). They are web sources (vendor blogs, foundation forums,
@@ -99,8 +107,28 @@ this mapping are added now so Chapter 1 compiles with resolved citations.
 
 ## Maintenance
 
-This is the initial 18-entry build. As later chapters cite more sources,
-the workflow is: ingest the source into `wiki/sources/`, append it to
-[[concepts/annotated-bibliography]] with the next `[N]`, mint a bibkey by
+This ledger holds the 18 canonical entries `[1]–[18]` plus the five
+Chapter 1 incident postmortems `[19]–[23]`. As later chapters cite more
+sources, the workflow is: ingest the source into `wiki/sources/`, append it
+to [[concepts/annotated-bibliography]] with the next `[N]`, mint a bibkey by
 the convention above, add the `.bib` record, and append a row here. Keep
-this table, the `.bib`, and the annotated bibliography in lockstep.
+this table, the `.bib`, and the annotated bibliography in lockstep — noting
+that `references.bib` carries only the *cited* subset (the dagger-marked
+keys are ledger-only; see the table footnote and Revisions).
+
+## Revisions
+
+- **2026-07-02** — Pre-submission `.bib` prune. `references.bib` was
+  reduced from 23 to 17 entries by removing the six keys never cited in the
+  LaTeX thesis: `danezis2022narwhal` [11], `spiegelman2022bullshark` [12],
+  `babel2023mysticeti` [13], `bano2019sok` [14], `xiao2020survey` [15],
+  `cachin2017wild` [16] (DAG-family protocols + the survey trio). Their
+  `[N]` labels, bibkeys, `wiki/sources/` pages, and
+  [[concepts/annotated-bibliography]] entries are retained (append-only
+  policy); they are marked "†" above to record that they are no longer in
+  `references.bib`. A parallel web-search verification pass confirmed all
+  17 remaining entries are real (correct titles/authors/venues; arXiv IDs
+  resolve), and corrected three `@online` author/title fields in the `.bib`
+  (`sui2024outage` → Sui Foundation, `cosmos2024v17halt` → Informal
+  Systems, `helius2024solanaoutages` title tail); those postmortem entries
+  have no wiki `sources/` page yet, so no wiki change was needed for them.
