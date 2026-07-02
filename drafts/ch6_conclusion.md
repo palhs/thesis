@@ -33,7 +33,7 @@ The overhead comparison evaluates each protocol at its specification-level messa
 
 ### 6.3.2 Further directions
 
-Five directions remain open beyond §6.3.1: a saturation-throughput capacity model driving each protocol to a measured ceiling; an adaptive-timeout enhancement with exponential backoff calibrated to observed round-trip time, evaluated in a timeout-stressing regime; an empirical witness of Snowman's analytical safety bound at weakened confidence depth; extension to a DAG-based family (Narwhal+Tusk) and its data-availability-withholding adversary; and repetition at larger validator sets with bandwidth and retransmission modeled.
+Several directions remain open beyond §6.3.1. Two would push the measurement itself further: a saturation-throughput capacity model that drives each protocol to a measured ceiling, and repetition at larger validator sets with bandwidth and retransmission modeled. A third tests a protocol change rather than the protocols as they stand, adding an adaptive-timeout enhancement with exponential backoff calibrated to observed round-trip time and evaluating it in a timeout-stressing regime. Snowman's analytical safety bound, reported here but never observed, calls for an empirical witness at weakened confidence depth. The harness could also be extended to a DAG-based family such as Narwhal+Tusk, together with its data-availability-withholding adversary.
 
 ## 6.4 Concluding remarks
 

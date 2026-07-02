@@ -71,22 +71,21 @@ cannot confirm rather than a measured contest.
 
 **Each family's best and worst axes trace to one mechanism.** In Table 5.1 every family
 sits at the outer ring on some axes and at the center on others, and the same structural
-choice drives both positions. Snowman is the sharpest instance. The `K`-peer subsampling that keeps it live
-(finalizing, only far slower) under slow peers is the same mechanism that makes it the
-least tolerant once those peers go silent: a poll that waits on the slowest sampled
-peer tolerates a slow answer but starves on no answer. That wait is also why Snowman
-pays the steepest finality slowdown under delay, ×12–15. PBFT shows the same inversion
-across the security boundary. The leader-based exact-quorum commit rule that carries it
-through delay, loss, and silence is the rule that, past the fault threshold, forks
-without leaving slashable evidence. Casper FFG completes the pattern. Its slot-bound,
-epoch-paced finality makes it cheapest in communication overhead and the least
-perturbed by network delay (the slot clock moves ×1.3, where PBFT nearly doubles and
-Snowman grows by an order of magnitude), and that same conservatism leaves it first to
-collapse under packet loss, even as it holds the accountable-failure corner only a
-slashing-based protocol can occupy. The pattern holds across all three families. The
-same design parameter that creates resilience on one axis creates vulnerability on
-another, because the mechanisms that tolerate one failure mode are structurally
-incompatible with tolerating another.
+choice drives both positions. Snowman shows this most sharply: the `K`-peer subsampling
+that keeps it live (finalizing, only far slower) under slow peers is the same mechanism
+that makes it the least tolerant once those peers go silent, since a poll that waits on
+the slowest sampled peer tolerates a slow answer but starves on no answer. That same
+wait is why it pays the steepest finality slowdown under delay, ×12–15. The inversion
+recurs across the security boundary for PBFT, whose leader-based exact-quorum commit
+rule carries it through delay, loss, and silence yet, past the fault threshold, forks
+without leaving slashable evidence. Casper FFG runs the same logic from the opposite
+corner: its slot-bound, epoch-paced finality makes it cheapest in communication overhead
+and the least perturbed by network delay (the slot clock moves ×1.3, where PBFT nearly
+doubles and Snowman grows by an order of magnitude), and that same conservatism leaves
+it first to collapse under packet loss, even as it holds the accountable-failure corner
+only a slashing-based protocol can occupy. In every case the same design parameter that
+creates resilience on one axis creates vulnerability on another, because the mechanisms
+that tolerate one failure mode are structurally incompatible with tolerating another.
 
 **No measured configuration is cheap, fast, and loss-resilient at once.** Resilience
 under loss came with latency across the runs in Table 5.1: the protocols that retain

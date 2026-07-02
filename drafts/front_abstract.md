@@ -25,15 +25,15 @@ family: PBFT, Casper FFG, and Snowman. All three share a metric schema and run
 under controlled network delay, packet loss, and three adversaries: delayed
 voting, non-participation, and equivocation.
 
-No protocol dominates. Communication overhead is linear in validator count for
-PBFT and Casper FFG, and an order of magnitude higher for Snowman. Network delay
-hurts Snowman most: its time to finality rises twelve to fifteen times, while
-PBFT roughly doubles and Casper FFG barely moves. Packet loss leaves PBFT the
-most resilient and Casper FFG the most fragile. Past one third Byzantine, PBFT
-forks unaccountably, Casper FFG stays safe and slashes offenders, and Snowman
-shows no fork.
+No protocol dominates. For PBFT and Casper FFG communication overhead grows
+linearly with validator count, whereas for Snowman it runs an order of magnitude
+higher. Network delay hurts Snowman most, raising its time to finality twelve to
+fifteen times where PBFT roughly doubles and Casper FFG barely moves. Under packet
+loss, PBFT proves the most resilient and Casper FFG the most fragile. Past one
+third Byzantine, PBFT forks unaccountably, Casper FFG stays safe and slashes
+offenders, and Snowman shows no fork.
 
 These are simplified, one-per-family implementations, not a production benchmark,
 so protocol choice should follow the expected deployment condition rather than a
-single ranking. The thesis contributes a reproducible simulator, its dataset, and
-a map from each design choice to the failure it produces.
+single ranking. The thesis contributes a reproducible simulator with its dataset,
+and a map from each design choice to the failure it produces.

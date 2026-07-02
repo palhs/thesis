@@ -22,14 +22,14 @@ that space [[wiki/concepts/consensus-families]], each trading a different
 cost for its guarantees:
 
 - **PBFT-style** [4] [[wiki/algorithms/pbft]]: leader-driven multi-phase
-  voting; deterministic finality at commit; cost: `O(n²)` messages, which
-  bounds the validator-set size.
+  voting with deterministic finality at commit, paid for in `O(n²)` messages
+  that bound the validator-set size.
 - **PoS-finality** [7], [8] [[wiki/algorithms/pos]]: a stake-weighted finality
-  gadget over epoch checkpoints; deterministic finality; cost: finality
-  latency on the order of minutes.
+  gadget over epoch checkpoints, also deterministic, but reaching finality
+  only on the order of minutes.
 - **Avalanche-style** [9] [[wiki/algorithms/avalanche]]: repeated random
-  subsampling; probabilistic finality with tunable confidence; cost: no
-  deterministic safety.
+  subsampling giving probabilistic finality with tunable confidence, at the
+  price of deterministic safety.
 
 How these mechanisms differ in operation is developed in Chapters 2 and 3;
 quantifying the cost differences is the task of this thesis.
@@ -106,28 +106,29 @@ incentive design, and the performance of cryptographic primitives.
 Simulation is chosen over testnet or live-network measurement for
 reproducibility of seeded runs, controlled isolation of one variable at a time,
 and a matched harness across the three families. The choice carries four framing
-assumptions [[wiki/concepts/problem-statement#assumptions-and-limitations]]: each
-family is a deliberately simplified implementation (the aim is fair like-for-like
-comparison, not reproduction of a production codebase's throughput); the network is
-idealized (delay and loss are configurable, but TCP congestion control, kernel
-scheduling, and physical-layer jitter are not modeled); the adversarial strategies
-are those most discussed in the primary literature, attacks needing specialized
-cryptographic or economic modeling being left to future work; and published
-production figures are treated as order-of-magnitude sanity checks, not validation
-targets: the simulator's contribution is internal consistency across families
-under matched assumptions, not the reproduction of production throughput.
+assumptions [[wiki/concepts/problem-statement#assumptions-and-limitations]]. Each
+family is a deliberately simplified implementation, since the aim is fair
+like-for-like comparison rather than reproduction of a production codebase's
+throughput. The network is idealized: delay and loss are configurable, but TCP
+congestion control, kernel scheduling, and physical-layer jitter are not modeled.
+For the adversary, only the strategies most discussed in the primary literature are
+exercised, and attacks needing specialized cryptographic or economic modeling are
+left to future work. Finally, published production figures serve as
+order-of-magnitude sanity checks rather than validation targets, because the
+simulator's contribution is internal consistency across families under matched
+assumptions, not the reproduction of production throughput.
 
 The three protocols are representatives chosen to occupy separable regions of
 this design space. PBFT is the reference construction for the PBFT-style family:
 leader-driven quorum voting with deterministic single-slot finality, from which
 later partially synchronous protocols such as Tendermint and HotStuff inherit
-their two-thirds quorum structure [[wiki/algorithms/pbft]]. Casper FFG stands for
-the PoS-finality family, where a stake-weighted finality gadget finalizes epoch
-checkpoints rather than individual blocks and renders a safety violation
+their two-thirds quorum structure [[wiki/algorithms/pbft]]. The PoS-finality
+family is represented by Casper FFG, whose stake-weighted finality gadget finalizes
+epoch checkpoints rather than individual blocks and makes a safety violation
 attributable to specific validators through slashing [[wiki/algorithms/pos]].
-Snowman stands for the Avalanche-style family, reaching agreement by repeated
-random subsampling and offering probabilistic finality in place of a
-deterministic commit [[wiki/algorithms/avalanche]]. The three differ on exactly
+Snowman, in turn, reaches agreement for the Avalanche-style family by repeated
+random subsampling, offering probabilistic finality in place of a deterministic
+commit [[wiki/algorithms/avalanche]]. The three differ on exactly
 the axes the evaluation measures: the finality mechanism, the communication
 structure that sets message cost, and whether a safety failure is accountable.
 That separation is what makes the cross-family comparison informative, rather
@@ -150,22 +151,22 @@ synthesizes it.
 
 - **RQ1.** How does end-to-end commit latency scale, for each family, as
   the variance of the network-delay distribution increases from nominal to
-  heavy-tailed? This tests the synchrony assumption each family makes.
+  heavy-tailed? The answer probes the synchrony assumption each family makes.
 - **RQ2.** How does sustained throughput degrade, for each family, as the
   Byzantine fraction approaches the theoretical fault threshold from below?
-  This describes how each family approaches its fault bound, not only
-  whether it reaches it.
+  What matters here is how throughput behaves as that bound is approached,
+  before it is reached.
 - **RQ3.** What is the relative communication overhead of each family,
   measured in messages per agreed unit, under a fixed workload and
-  identical network assumptions? This quantifies the asymptotic scaling each
-  family claims.
+  identical network assumptions? Measured message counts can then be set
+  against the asymptotic scaling each family claims.
 - **RQ4.** Under which adversarial strategies (silent non-participation,
   delayed voting, equivocation) does each family show liveness
-  degradation, safety violation, or neither? This maps each adversary onto
-  the property each family claims to preserve.
+  degradation, safety violation, or neither? This pairs each adversary with
+  the property a family claims to preserve.
 - **RQ5.** Does a consistent Pareto frontier of the performance–security
   tradeoff exist across the three families evaluated, and does any family
-  dominate across all operating regimes? This is the comparative synthesis
+  dominate across all operating regimes? RQ5 is the comparative synthesis
   and the primary contribution.
 
 Each question is paired with a defined subset of the metric schema

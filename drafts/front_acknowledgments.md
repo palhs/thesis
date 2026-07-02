@@ -13,9 +13,9 @@ stage, and his patience with my many questions and false starts made the work
 better than I could have managed alone. I am thankful for the time and care he
 gave to reading each draft.
 
-I also thank the faculty and staff of the Department of Information and
-Communication Technology at the University of Science and Technology of Hanoi.
-What I learned over the course of my degree gave me the grounding in
+The faculty and staff of the Department of Information and Communication
+Technology at the University of Science and Technology of Hanoi also have my
+thanks. What I learned over the course of my degree gave me the grounding in
 distributed systems and networking that this thesis depends on, and the
 department's support helped me see the work through.
 
