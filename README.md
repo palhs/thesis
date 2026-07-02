@@ -25,9 +25,10 @@ Claude (Anthropic).
 
 Prerequisites:
 
-- **Python 3.10 or newer** (developed on 3.13). Running the simulator and the
-  test suite needs nothing else — the simulator is stdlib-only and
-  `requirements.txt` is empty.
+- **Python 3.10 or newer** (developed on 3.13).
+- **Runtime dependency**: `PyYAML` (the config loader). It is the only thing
+  the simulator and the test suite need — install it with
+  `pip install -r requirements.txt`.
 - **Dev dependencies** (`make install`): `coverage` for `make coverage`, and
   `matplotlib` for figure rendering (`make preview`, `output.plots`). Neither
   is needed to run a simulation.
@@ -36,7 +37,9 @@ Prerequisites:
   Skip it if you are not previewing chapters.
 
 ```sh
-make install       # == pip install -r requirements-dev.txt
+python3 -m venv .venv && source .venv/bin/activate   # optional but recommended
+pip install -r requirements.txt                       # runtime deps (PyYAML)
+make install                                          # dev deps; == pip install -r requirements-dev.txt
 ```
 
 ## Test
