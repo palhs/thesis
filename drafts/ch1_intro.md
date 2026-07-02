@@ -21,13 +21,13 @@ Three families occupy distinct points in
 that space [[wiki/concepts/consensus-families]], each trading a different
 cost for its guarantees:
 
-- **PBFT-style** [4] [[wiki/algorithms/pbft]] — leader-driven multi-phase
+- **PBFT-style** [4] [[wiki/algorithms/pbft]]: leader-driven multi-phase
   voting; deterministic finality at commit; cost: `O(n²)` messages, which
   bounds the validator-set size.
-- **PoS-finality** [7], [8] [[wiki/algorithms/pos]] — a stake-weighted finality
+- **PoS-finality** [7], [8] [[wiki/algorithms/pos]]: a stake-weighted finality
   gadget over epoch checkpoints; deterministic finality; cost: finality
   latency on the order of minutes.
-- **Avalanche-style** [9] [[wiki/algorithms/avalanche]] — repeated random
+- **Avalanche-style** [9] [[wiki/algorithms/avalanche]]: repeated random
   subsampling; probabilistic finality with tunable confidence; cost: no
   deterministic safety.
 
@@ -72,9 +72,9 @@ it can be measured across the three families on matched assumptions.
 ## 1.3 Problem statement
 
 This thesis investigates the comparative performance–security behavior of
-the three L1 consensus families — PBFT-style [[wiki/algorithms/pbft]],
+the three L1 consensus families (PBFT-style [[wiki/algorithms/pbft]],
 PoS-finality [[wiki/algorithms/pos]], and Avalanche-style
-[[wiki/algorithms/avalanche]] — under controlled network delay and
+[[wiki/algorithms/avalanche]]) under controlled network delay and
 adversarial conditions, using a single discrete-event simulator. The
 contribution is not a benchmark of production systems. It is a reproducible
 cross-family evaluation framework in which the three families are measured
@@ -94,8 +94,8 @@ Evaluation is conducted at the message-passing level inside a
 discrete-event simulator [[wiki/concepts/problem-statement#scope]]. In scope
 are configurable network delay (constant, uniform, normal, exponential,
 heavy-tailed), configurable packet loss, three Byzantine validator
-behaviors drawn from the primary literature — silent non-participation,
-delayed voting, and equivocation [[wiki/concepts/adversary-model]] — and
+behaviors drawn from the primary literature (silent non-participation,
+delayed voting, and equivocation [[wiki/concepts/adversary-model]]), and
 validator sets of n ∈ {4, 7, 10, 16, 25} nodes. Extrapolation to the
 several-hundred-node production scale rests on the sensitivity sweeps rather
 than on direct measurement at that scale. Out of scope are Proof-of-Work
@@ -114,7 +114,7 @@ scheduling, and physical-layer jitter are not modeled); the adversarial strategi
 are those most discussed in the primary literature, attacks needing specialized
 cryptographic or economic modeling being left to future work; and published
 production figures are treated as order-of-magnitude sanity checks, not validation
-targets — the simulator's contribution is internal consistency across families
+targets: the simulator's contribution is internal consistency across families
 under matched assumptions, not the reproduction of production throughput.
 
 The three protocols are representatives chosen to occupy separable regions of
@@ -159,8 +159,8 @@ synthesizes it.
   measured in messages per agreed unit, under a fixed workload and
   identical network assumptions? This quantifies the asymptotic scaling each
   family claims.
-- **RQ4.** Under which adversarial strategies — silent non-participation,
-  delayed voting, equivocation — does each family show liveness
+- **RQ4.** Under which adversarial strategies (silent non-participation,
+  delayed voting, equivocation) does each family show liveness
   degradation, safety violation, or neither? This maps each adversary onto
   the property each family claims to preserve.
 - **RQ5.** Does a consistent Pareto frontier of the performance–security
@@ -182,7 +182,7 @@ The thesis makes four contributions
    shared metric schema and a pluggable protocol interface.
 2. **Implementations.** Simplified reference implementations of one
    representative protocol from each of the three families within a single
-   harness — PBFT-style, PoS-finality, and Avalanche-style — enabling
+   harness (PBFT-style, PoS-finality, and Avalanche-style), enabling
    reproducible like-for-like comparison.
 3. **Dataset and analysis.** An experimental dataset and comparative
    analysis quantifying the performance–security tradeoff across the three

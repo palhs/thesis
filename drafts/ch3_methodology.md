@@ -36,10 +36,10 @@ repeats for every seed and every experiment cell.
 
 ## 3.3 The three protocols
 
-Each family of Chapter 2 is represented by one protocol — PBFT for PBFT-style
-[[wiki/algorithms/pbft]], Casper FFG for PoS-finality [[wiki/algorithms/pos]], and
-Snowman for Avalanche-style [[wiki/algorithms/avalanche]] — each the canonical or
-production form of its family. Table 3.1 distinguishes how the three decide; only the
+Each family of Chapter 2 is represented by one protocol, each the canonical or
+production form of its family: PBFT for PBFT-style [[wiki/algorithms/pbft]], Casper
+FFG for PoS-finality [[wiki/algorithms/pos]], and Snowman for Avalanche-style
+[[wiki/algorithms/avalanche]]. Table 3.1 distinguishes how the three decide; only the
 load-bearing behavior is given here. The *atomic commit unit* (ACU), the row that
 makes the three commensurable, is defined in §3.5.
 
@@ -164,16 +164,16 @@ Family C holds the network at baseline and sweeps the adversary, injecting Byzan
 behavior at fraction `φ` of each protocol's natural unit (replicas, validators, or
 stake). Three behaviors are tested:
 
-- **Delayed voting** — hold an outbound vote past the protocol's timing tolerance.
-- **Silent non-participation** — run the state machine but send nothing; the crash-faulty
+- **Delayed voting**: hold an outbound vote past the protocol's timing tolerance.
+- **Silent non-participation**: run the state machine but send nothing; the crash-faulty
   case.
-- **Equivocation** — sign two conflicting messages where one is expected. The sweep goes
+- **Equivocation**: sign two conflicting messages where one is expected. The sweep goes
   above the `1/3` threshold (`φ ∈ {0.40, 0.50}`) to expose the safety cliff. Snowman
   cannot fork below threshold, so equivocation against it collapses to the silent case
   and is not swept above threshold.
 
-All three protocols share the same workload — a Poisson stream of 512-byte transactions
-at 100 tx/s, below saturation — and the same seeds at each experiment point. Because
+All three protocols share the same workload (a Poisson stream of 512-byte transactions
+at 100 tx/s, below saturation) and the same seeds at each experiment point. Because
 randomness is keyed by stream identity, all three see identical network delays and
 arrival patterns; cross-protocol comparisons are paired under common random numbers.
 Each cell runs for 20 seeds, raised to 30 at near-threshold Family C points. A run
@@ -189,7 +189,7 @@ Cross-protocol comparisons use *Pareto dominance*: protocol A dominates B when A
 
 `commit_latency_ms` measures time to finality, recorded when each protocol hits its irreversibility point: `2f+1` `COMMIT` for PBFT, a finalized checkpoint for Casper FFG, and counter-`β` acceptance for Snowman.
 
-Cross-protocol `goodput` is the committed-transaction rate, not a raw decided-event rate. The raw rate is protocol-dependent in granularity — per block for PBFT and Snowman, per finalized epoch for Casper FFG — and is not like-for-like.
+Cross-protocol `goodput` is the committed-transaction rate, not a raw decided-event rate. The raw rate is protocol-dependent in granularity (per block for PBFT and Snowman, per finalized epoch for Casper FFG) and is not like-for-like.
 
 **Table 3.3 — Per-protocol metric schema.** Adapted from
 [[wiki/concepts/metric-reconciliation]].
@@ -200,12 +200,12 @@ Cross-protocol `goodput` is the committed-transaction rate, not a raw decided-ev
 | `goodput` | committed transactions per window | committed transactions per window over finalized epochs | committed transactions per window |
 | `total_msgs_per_acu` | all deliveries per ACU; evaluates to `(2n²−2)/n`, i.e. `O(n²)` traffic over an `n`-scaled denominator | `≈ 1.125n` (un-aggregated all-to-all votes; production BLS aggregation to `O(n)` not modeled) | `O(K·β)` query/response deliveries per validator, independent of `n` |
 | `success_rate` | `0/1` per run (`1` iff an instance decided); a frequency after aggregation | `0/1` per run (iff an epoch finalized) | `0/1` per run (iff a block reaches counter `β`) |
-| safety (`fork_rate`) | `0` below threshold by construction; `> 0` only above `1/3` under equivocation | `0` below threshold; `> 0` only above `1/3` (a conflicting finalized checkpoint, not a reorg) | N/A — probabilistic safety, reported via `ε` against `(1 − α_c/K)^β` |
+| safety (`fork_rate`) | `0` below threshold by construction; `> 0` only above `1/3` under equivocation | `0` below threshold; `> 0` only above `1/3` (a conflicting finalized checkpoint, not a reorg) | N/A: probabilistic safety, reported via `ε` against `(1 − α_c/K)^β` |
 
 The reliability metrics connect back to the §2.1 properties. A *safety violation* is an observed breach of Agreement (two honest validators commit conflicting values at one height), recorded in `fork_rate`. For the deterministic-finality protocols this is `0` below threshold by construction; it is only measured above it. A *liveness failure* is a breach of Termination: no honest validator commits within the window, measured by the complement of `success_rate`. Validity holds by construction and is not instrumented.
 
-Snowman is the exception. Its finality is probabilistic, so safety is reported via the analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate — the weakest safety guarantee of the three, a limitation taken up in §6.2.
+Snowman is the exception. Its finality is probabilistic, so safety is reported via the analytical bound `ε ≤ (1 − α_c/K)^β` rather than a measured fork rate, the weakest safety guarantee of the three, a limitation taken up in §6.2.
 
 Continuous metrics are aggregated with a 95% Student-t interval across seeds. Rate metrics (`success_rate`, `fork_rate`) use a 95% Wilson score interval, which handles zero-observation cells correctly: a run with no violations is reported as `0/n_runs` with an upper confidence bound rather than a flat 0%. Near-threshold safety and liveness figures are read as bounds, not exact values.
 
-The deliberate exclusions that bound these metrics — no compute or bandwidth cost, a synthetic open-loop workload, sub-production scale, and an uncovered leader-disruption surface — are consolidated with the full limitations in §6.2. Chapter 4 reports the baseline, delay, and adversarial sweeps and answers RQ1–RQ4 against this schema.
+The deliberate exclusions that bound these metrics (no compute or bandwidth cost, a synthetic open-loop workload, sub-production scale, and an uncovered leader-disruption surface) are consolidated with the full limitations in §6.2. Chapter 4 reports the baseline, delay, and adversarial sweeps and answers RQ1–RQ4 against this schema.
