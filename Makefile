@@ -6,6 +6,7 @@
 # The static pattern rule below runs one suite at a time with that suite's
 # directory on PYTHONPATH alongside src/.
 #
+#   make install              # install dev dependencies (coverage + matplotlib)
 #   make test                 # every suite
 #   make test-pbft            # one suite (also: scheduler nodes network event_log config pos integration)
 #   make coverage             # branch coverage across all suites (report-only)
@@ -17,7 +18,12 @@ SUITES        = scheduler nodes network event_log config common pbft pos snowman
 SUITE_TARGETS = $(addprefix test-,$(SUITES))
 FILE          = drafts/ch4_results.md
 
-.PHONY: test coverage preview clean $(SUITE_TARGETS)
+.PHONY: install test coverage preview clean $(SUITE_TARGETS)
+
+# Install the development dependencies (coverage + matplotlib). The simulator
+# itself is stdlib-only; requirements.txt is empty.
+install:
+	$(PY) -m pip install -r requirements-dev.txt
 
 test: $(SUITE_TARGETS)
 
