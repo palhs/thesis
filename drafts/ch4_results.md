@@ -93,8 +93,13 @@ quorum cliff: it finalizes with no goodput loss up to `φ = 0.33` and dies at
 Casper FFG degrades gracefully over the same range and still finalizes at `φ = 0.33`,
 its goodput falling with the participating stake but somewhat faster than the `1 − φ`
 line, which it stays below because lost proposer slots forfeit whole finalization
-rounds (Figure 4.6). Snowman cliffs earliest, at `φ = 0.10` for `n = 10` and `φ = 0.20` for `n = 25`. The ordering is therefore PBFT and
-Casper FFG ahead of Snowman.
+rounds (Figure 4.6). Under silence, two numbers are easy to mix up. The *survival
+depth* `φ*` is the largest silent fraction at which a protocol still finalizes
+(`success_rate ≈ 1`); the *liveness cliff* is the next step up, where the success rate
+drops to ≈ 0. Snowman's survival depth is the lowest of the three: `φ* = 0.10` at
+`n = 10` and `φ* = 0.20` at `n = 25`, and even at `n = 25` it finalizes at only 0.4% of
+baseline goodput (alive but starved). Its cliff comes one step later, at `φ = 0.20` and
+`φ = 0.33`. PBFT and Casper FFG therefore rank ahead of Snowman here.
 
 **Figure 4.4 — Liveness under delayed voting and silent non-participation.** Each row
 faceted by validator count, against the injected adversarial fraction `φ` with 95%
@@ -134,7 +139,7 @@ safety invariant for equivocation. Source:
 | Adversarial strategy | PBFT | Casper FFG | Snowman | Robustness order |
 | :-- | :-- | :-- | :-- | :-- |
 | Delayed voting | success 1.0; finality 1.0× (immune, no view-changes) | success → 0.60 / 0.65; finality 1.0× (liveness dips) | success 1.0; finality ×62 / ×49 (full liveness, crawls) | PBFT ≈ Snowman ≫ FFG |
-| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput below `1 − φ`) | early cliff at `φ = 0.10 / 0.20`; starves | PBFT ≈ FFG > Snowman |
+| Silent non-participation | clean quorum cliff at `φ = 0.40`; no decay below it | graceful decay, survives to `φ = 0.33` (goodput below `1 − φ`) | survival depth `φ* = 0.10 / 0.20` (`n = 25` starved, ≈ 0.4% goodput); cliff one step later | PBFT ≈ FFG > Snowman |
 | Equivocation | deterministic unaccountable fork at `φ = 0.40` (229 conflicts) | accountable: ≥ ⅓ stake slashable at `φ = 0.40`, no fork | no fork surface; `ε ≈ 5 × 10⁻¹⁵ / 3 × 10⁻¹¹` | Snowman > FFG > PBFT |
 
 Three qualifications bound the verdict: the leader-disruption surface is catalogued but not exercised, so PBFT's standing against the liveness adversaries holds only against an adversary that spares its view-0 primary (§6.2); Snowman's analytical `ε` is not empirically witnessed at the baseline depth (§4.4.3); and the latency-only network understates the detection and recovery cost borne by PBFT and Casper FFG (§6.2).

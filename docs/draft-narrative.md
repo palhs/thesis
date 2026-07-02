@@ -200,6 +200,13 @@ wiki page that authorizes the deviation.
   confirmation of it.
 - A **`deadline` stop is not a liveness failure**; only a run in which no honest
   validator commits within the window is.
+- **Silence liveness has two separate numbers; do not call both "cliff":** the
+  *survival depth* `φ*` is the largest injected fraction still finalizing
+  (`success_rate ≈ 1`); the *liveness cliff* is the next step up, where the success
+  rate drops to ≈ 0. Tables report survival depth `φ*` (Snowman: `0.10` at `n = 10`,
+  `0.20` at `n = 25`, the latter already starved to ≈ 0.4% goodput); the cliff
+  (`0.20 / 0.33`) is prose detail only. Source columns:
+  `results/adversary/degradation_ranking.csv` (last-alive vs first-dead).
 - **Three families evaluated; the DAG family is future work only** — as of T73
   (2026-06-24) the Narwhal+Tusk / DAG-based scaffolding is stripped from the body
   (see §3). The thesis presents and evaluates three families — PBFT, Casper FFG,
