@@ -3,6 +3,7 @@
 Single-source workspace for a Layer-1 consensus evaluation thesis. Holds raw
 sources, an LLM-maintained wiki, simulator code, experiment results, and
 thesis drafts. Agents operate one task at a time; humans review every merge.
+Always use 'auggie' mcp to search and index codebase.
 
 ## Repo map
 
