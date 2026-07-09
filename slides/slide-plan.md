@@ -190,8 +190,9 @@ from the axis, lines draw in, using the same timing tokens).
   insensitive to tail shape; Snowman sharply sensitive.
 - **Tab B — Loss** — drafts/ch4 §4.3.2–4.3.3: resilience ranking **PBFT >
   Snowman > FFG**. PBFT the only protocol still finalizing at 20% loss (has a
-  recovery path: view-change rotates the leader); Snowman plateau-then-cliff by
-  10% (in-round redundancy, no cross-round recovery); FFG collapses at the
+  recovery path: view-change rotates the leader); Snowman holds partially at 5%
+  and cliffs by 10% at n=10 — the clear plateau-then-cliff shape is an n=25
+  result (ch4 §4.3.2: "absent at n = 10"); FFG collapses at the
   first 5% step (neither). No protocol forks — loss erodes liveness, not
   safety. Survivors pay in latency (×2–3.5).
 - **Tab C — Adversarial (RQ2+RQ4)** — drafts/ch4 §4.4, Table 4.1: 3×3 outcome

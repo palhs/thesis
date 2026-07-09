@@ -200,7 +200,8 @@ riêng, lưu file khác — không nằm ở đây.
 - `▶` ba hành vi: delayed-voting · silent · equivocation
 - `▶` → **RQ2 · RQ4**
 - (footer, đọc nhanh) mọi cell chung: Poisson **100 tx/s** · tx **512 byte** ·
-  **20 seed**/cell · common random numbers → so sánh theo cặp
+  **20 seed**/cell (**30** ở các điểm sát ngưỡng của family C) · common random
+  numbers → so sánh theo cặp
 
 **NEO CHUYỂN:**
 > "Đó là cách đo. Giờ đến phần chính — kết quả."

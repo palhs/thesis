@@ -1038,8 +1038,8 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text class="ts" x="368" y="418">pinned: honest set (φ = 0)</text>
         </g>
         <g class="bdg stf" data-t="1300">
-          <rect x="1380" y="248" width="120" height="52" style="stroke:var(--ink-dim)"/>
-          <text x="1440" y="281" text-anchor="middle">→ RQ1</text>
+          <rect x="1380" y="236" width="120" height="52" style="stroke:var(--ink-dim)"/>
+          <text x="1440" y="269" text-anchor="middle">→ RQ1</text>
         </g>
       </g>
 
@@ -1068,7 +1068,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
     </svg>
 
     <div class="cap" style="margin-top:2px">
-      Constant across all cells: <b>Poisson 100 tx/s · 512-byte tx · 20 seeds/cell</b> · common random numbers → paired comparisons.
+      Shared across all cells: <b>Poisson 100 tx/s · 512-byte tx · 20 seeds/cell</b> (30 near-threshold C) · common random numbers → paired comparisons.
     </div>
   </div>
   <div class="src">report §3.4 · Table 3.2</div>
@@ -1163,8 +1163,8 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text x="457" y="315">round-bounded — near ×2.0 at n = 25</text>
         </g>
         <g class="bdg stf" data-t="1900">
-          <rect x="790" y="310" width="640" height="52" style="stroke:var(--c-snowman)"/>
-          <text class="tm" x="1110" y="343" text-anchor="middle">each round waits on the <tspan fill="var(--ink)">slowest of K sampled peers</tspan></text>
+          <rect x="830" y="310" width="640" height="52" style="stroke:var(--c-snowman)"/>
+          <text class="tm" x="1150" y="343" text-anchor="middle">each round waits on the <tspan fill="var(--ink)">slowest of K sampled peers</tspan></text>
         </g>
       </svg>
       <div class="take st" data-t="2100"><b>Round-bounded protocols shrug; sampling pays.</b> Snowman's exponential-tail latency exceeds its uniform-tail latency
@@ -1205,7 +1205,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         </g>
       </svg>
       <div class="take st" data-t="2100"><b>Only PBFT still finalizes at 20% loss</b> — it alone has a recovery path (view-change rotates the leader).
-        Snowman: in-round redundancy, no cross-round recovery → plateau-then-cliff by 10%. FFG: neither → collapses at the first 5% step.
+        Snowman: in-round redundancy, no cross-round recovery → holds partially at 5%, cliffs by 10% (a clear plateau-then-cliff at n = 25). FFG: neither → collapses at the first 5% step.
         <b>No protocol forks</b> — loss erodes liveness, not safety; survivors pay ×2–3.5 latency. <span style="color:var(--ink-faint)">§4.3.2–4.3.3</span></div>
     </div>
 
