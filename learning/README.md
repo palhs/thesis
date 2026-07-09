@@ -91,17 +91,17 @@ tới buổi đó. Cập nhật trạng thái học trong `progress.md`.
 |------|-------|---------------|-----------|
 | `00-architecture.md`     | 0 · Bản đồ | (chỉ wiki + sơ đồ) | ✅ |
 | `01-scheduler.md`        | 1 · Lõi | `scheduler/` | ✅ |
-| `02-nodes.md`            | 1 · Lõi | `nodes/` | ⏳ |
-| `03-network.md`          | 1 · Lõi | `network/` | ⏳ |
-| `04-event-log.md`        | 1 · Lõi | `event_log/` | ⏳ |
-| `05-config.md`           | 1 · Lõi | `config/` | ⏳ |
-| `06-trace-end-to-end.md` | ★ Trace | xuyên tầng lõi (ping-pong) | ⏳ |
-| `07-pbft.md`             | 2 · Giao thức | `pbft/` | ⏳ |
-| `08-casper-ffg.md`       | 3 · Giao thức | `pos/` | ⏳ |
-| `09-snowman.md`          | 3 · Giao thức | `snowman/` | ⏳ |
-| `10-runner-sweep.md`     | 4 · Chạy | `common/`, `workload/` | ⏳ |
-| `11-delay-family-b.md`   | 5 · Thí nghiệm | `delay/` | ⏳ |
-| `12-adversary-family-c.md` | 5 · Thí nghiệm | `adversary/` | ⏳ |
+| `02-nodes.md`            | 1 · Lõi | `nodes/` | ✅ |
+| `03-network.md`          | 1 · Lõi | `network/` | ✅ |
+| `04-event-log.md`        | 1 · Lõi | `event_log/` | ✅ |
+| `05-config.md`           | 1 · Lõi | `config/` | ✅ |
+| `06-trace-end-to-end.md` | ★ Trace | xuyên tầng lõi (ping-pong) | ✅ |
+| `07-pbft.md`             | 2 · Giao thức | `pbft/` | ✅ |
+| `08-casper-ffg.md`       | 3 · Giao thức | `pos/` | ✅ |
+| `09-snowman.md`          | 3 · Giao thức | `snowman/` | ✅ |
+| `10-runner-sweep.md`     | 4 · Chạy | `common/`, `workload/` | ✅ |
+| `11-delay-family-b.md`   | 5 · Thí nghiệm | `delay/` | ✅ |
+| `12-adversary-family-c.md` | 5 · Thí nghiệm | `adversary/` | ✅ |
 | `13-output-analysis.md`  | 6 · Phân tích | `output/` | ⏳ |
 | `14-mock-defense.md`     | ★ Tổng | quay lại toàn bộ (mock defense) | ⏳ |
 
