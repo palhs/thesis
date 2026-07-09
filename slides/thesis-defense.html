@@ -1465,6 +1465,110 @@ function playSeq(root) {
 }
 
 /* ===========================================
+   STEP ENGINE — presenter mode: one Space = one script beat.
+   STEPS[key] = ascending data-t thresholds. Entry shows t < T[0];
+   press k reveals T[k-1] <= t < T[k] (internal pacing preserved).
+   When the active pane runs out of steps, Space advances to the
+   next chip/tab in script order, then to the next slide.
+   Script: slides/defense-script.md — beats match presses 1:1.
+   =========================================== */
+const STEPS = {
+  's2':          [500, 950, 1350, 1900, 2400, Infinity],
+  's3':          [350, 600, 850, 1300, Infinity],
+  's4':          [500, 700, 900, 1100, 1300, Infinity],
+  'dia-pbft':    [400, 1400, 2200, 3200, Infinity],
+  'dia-ffg':     [700, 2400, 2900, 3300, Infinity],
+  'dia-snowman': [380, 1380, 2800, 3800, Infinity],
+  's6':          [600, 1300, 1700, 2400, 2900, 3300, Infinity],
+  'fam-A':       [200, 1100, 1300, Infinity],
+  'fam-B':       [200, 1100, 1300, Infinity],
+  'fam-C':       [200, 1150, 1300, Infinity],
+  'tab-a':       [200, 1500, 1900, Infinity],
+  'tab-bd':      [200, 1400, 2100, Infinity],
+  'tab-bl':      [300, 1900, 2100, Infinity],
+  'tab-c':       [300, 600, 900, 1200, Infinity],
+  's9':          [300, 1600, 1800, 2100, 2400, Infinity],
+  's10':         [350, 600, 850, 1200, 1500, Infinity],
+  's11':         [350, 700, 1200, Infinity],
+};
+function stepKey(root) {
+  return root.dataset && root.dataset.tab ? 'tab-' + root.dataset.tab : root.id;
+}
+function instantTo(root, bound) {
+  clearSeq(root);
+  const els = [...root.querySelectorAll('[data-t]')].filter(el => +el.dataset.t < bound);
+  const lastX = {};
+  els.forEach(el => { if (el.dataset.x) lastX[el.dataset.x] = el; });
+  els.forEach(el => { if (!el.dataset.x || lastX[el.dataset.x] === el) el.classList.add('on'); });
+}
+function playRange(root, lo, hi) {
+  const els = [...root.querySelectorAll('[data-t]')].filter(el => {
+    const t = +el.dataset.t; return t >= lo && t < hi;
+  });
+  if (!els.length) return;
+  const base = Math.min(...els.map(el => +el.dataset.t));
+  root._timers = root._timers || [];
+  els.forEach(el => {
+    const turnOn = () => {
+      if (el.dataset.x) root.querySelectorAll(`[data-x="${el.dataset.x}"].on`).forEach(o => o.classList.remove('on'));
+      el.classList.add('on');
+    };
+    root._timers.push(setTimeout(turnOn, +el.dataset.t - base));
+  });
+}
+function renderEntry(root) {
+  const T = STEPS[stepKey(root)];
+  clearSeq(root);
+  root._stepIdx = 0;
+  if (!T) { playSeq(root); return; } // unmapped roots (s1, s12) keep autoplay
+  if (REDUCED) { instantTo(root, Infinity); root._stepIdx = T.length - 1; return; }
+  playRange(root, -1, T[0]);
+}
+function fullReveal(root) {
+  const T = STEPS[stepKey(root)];
+  instantTo(root, Infinity);
+  root._stepIdx = T ? T.length - 1 : 0;
+}
+function stepForward(root) {
+  const T = STEPS[stepKey(root)];
+  const k = root._stepIdx || 0;
+  if (!T || k >= T.length - 1) return false;
+  instantTo(root, T[k]); // fast-forward: settle lagging reveals so quick presses can't reorder
+  playRange(root, T[k], T[k + 1]);
+  root._stepIdx = k + 1;
+  return true;
+}
+function stepBack(root) {
+  const T = STEPS[stepKey(root)];
+  const k = root._stepIdx || 0;
+  if (!T || k <= 0) return false;
+  root._stepIdx = k - 1;
+  instantTo(root, T[root._stepIdx]);
+  return true;
+}
+const PANES = {
+  s5: { order: ['pbft', 'ffg', 'snowman'], get: () => s5cur, show: p => showProto(p),
+        root: k => document.getElementById('dia-' + k) },
+  s7: { order: ['A', 'B', 'C'], get: () => s7cur, show: f => showFam(f),
+        root: k => document.getElementById('fam-' + k) },
+  s8: { order: ['a', 'bd', 'bl', 'c'], get: () => s8cur, show: t => showTab(t),
+        root: k => document.querySelector('#s8 .tabpane[data-tab="' + k + '"]') },
+};
+function paneShift(slideId, dir) {
+  const p = PANES[slideId];
+  if (!p) return false;
+  const j = p.order.indexOf(p.get()) + dir;
+  if (j < 0 || j >= p.order.length) return false;
+  p.show(p.order[j]);
+  if (dir < 0) fullReveal(p.root(p.order[j])); // arriving backwards: land fully revealed
+  return true;
+}
+function activeRoot(slide) {
+  const p = PANES[slide.id];
+  return p ? p.root(p.get()) : slide;
+}
+
+/* ===========================================
    S5 — protocol chips
    =========================================== */
 const s5 = document.getElementById('s5');
@@ -1474,7 +1578,7 @@ function showProto(p) {
   s5.querySelectorAll('#s5chips .chip').forEach(c => c.classList.toggle('act', c.dataset.c === p));
   s5.querySelectorAll('.dia').forEach(d => { d.classList.toggle('actv', d.id === 'dia-' + p); clearSeq(d); });
   s5.querySelectorAll('.cappane').forEach(c => c.classList.toggle('actv', c.dataset.p === p));
-  playSeq(document.getElementById('dia-' + p));
+  renderEntry(document.getElementById('dia-' + p));
 }
 s5.querySelectorAll('#s5chips .chip').forEach(c =>
   c.addEventListener('click', () => { showProto(c.dataset.c); c.blur(); }));
@@ -1488,7 +1592,7 @@ const SLOT = [
 ];
 let slotTimer = null, slotIdx = 0;
 function playS6() {
-  playSeq(s6svg);
+  renderEntry(document.getElementById('s6'));
   clearInterval(slotTimer);
   slotIdx = 0;
   applySlot();
@@ -1509,7 +1613,7 @@ function showFam(f) {
   s7cur = f;
   s7.querySelectorAll('#s7chips .chip').forEach(c => c.classList.toggle('act', c.dataset.f === f));
   s7.querySelectorAll('.dia').forEach(d => { d.classList.toggle('actv', d.id === 'fam-' + f); clearSeq(d); });
-  playSeq(document.getElementById('fam-' + f));
+  renderEntry(document.getElementById('fam-' + f));
 }
 s7.querySelectorAll('#s7chips .chip').forEach(c =>
   c.addEventListener('click', () => { showFam(c.dataset.f); c.blur(); }));
@@ -1523,15 +1627,17 @@ function showTab(t) {
   s8cur = t;
   s8.querySelectorAll('#s8tabs .chip').forEach(c => c.classList.toggle('act', c.dataset.tab === t));
   s8.querySelectorAll('.tabpane').forEach(p => { p.classList.toggle('actv', p.dataset.tab === t); clearSeq(p); });
-  playSeq(s8.querySelector(`.tabpane[data-tab="${t}"]`));
+  renderEntry(s8.querySelector(`.tabpane[data-tab="${t}"]`));
 }
 s8.querySelectorAll('#s8tabs .chip').forEach(c =>
   c.addEventListener('click', () => { showTab(c.dataset.tab); c.blur(); }));
 
 /* ===========================================
    SLIDE CONTROLLER — fixed 16:9 stage
-   Arrow keys / Space / PgUp / PgDn / Home / End.
-   Chips are mouse-only by design.
+   Space/ArrowRight/PgDn = next beat, then next chip/tab,
+   then next slide. Shift+Space/ArrowLeft/PgUp = back.
+   ArrowDown/ArrowUp = whole-slide jump (Q&A).
+   Chips/tabs stay mouse-clickable for Q&A jumps.
    =========================================== */
 class SlidePresentation {
   constructor() {
@@ -1561,9 +1667,11 @@ class SlidePresentation {
       if (e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return; // don't hijack chip focus
       if (e.target.isContentEditable) return;
       switch (e.key) {
-        case 'ArrowRight': case 'PageDown': this.show(this.current + 1); break;
-        case ' ': e.preventDefault(); this.show(this.current + (e.shiftKey ? -1 : 1)); break;
-        case 'ArrowLeft': case 'PageUp': this.show(this.current - 1); break;
+        case 'ArrowRight': case 'PageDown': this.next(); break;
+        case ' ': e.preventDefault(); e.shiftKey ? this.prev() : this.next(); break;
+        case 'ArrowLeft': case 'PageUp': this.prev(); break;
+        case 'ArrowDown': this.show(this.current + 1); break;
+        case 'ArrowUp': this.show(this.current - 1); break;
         case 'Home': this.show(0); break;
         case 'End': this.show(this.slides.length - 1); break;
       }
@@ -1588,9 +1696,22 @@ class SlidePresentation {
       x0 = null;
     }, { passive: true });
   }
+  next() {
+    const slide = this.slides[this.current];
+    if (stepForward(activeRoot(slide))) return;
+    if (paneShift(slide.id, 1)) return;
+    this.show(this.current + 1);
+  }
+  prev() {
+    const slide = this.slides[this.current];
+    if (stepBack(activeRoot(slide))) return;
+    if (paneShift(slide.id, -1)) return;
+    this.show(this.current - 1);
+  }
   show(i) {
     const n = Math.max(0, Math.min(i, this.slides.length - 1));
     // stop any running sequences on the outgoing slide
+    clearSeq(this.slides[this.current]);
     this.slides[this.current].querySelectorAll('svg, .tabpane, .dia').forEach(clearSeq);
     this.current = n;
     this.slides.forEach((s, k) => {
@@ -1607,12 +1728,12 @@ class SlidePresentation {
       case 's7': showFam(s7cur); break;
       case 's8': showTab(s8cur); break;
       default:
-        // generic: play every [data-t] under the slide (svg + html reveals)
-        playSeq(slide);
+        // generic: reveal the slide's entry state; Space steps the rest
+        renderEntry(slide);
     }
     // slides with chip stages still need their HTML .st chrome revealed
     if (['s5', 's6', 's7', 's8'].includes(slide.id)) {
-      slide.querySelectorAll(':scope > .wrap > .st, :scope > .wrap > * > .st').forEach(el => el.classList.add('on'));
+      slide.querySelectorAll(':scope > .wrap > .st:not([data-t]), :scope > .wrap > * > .st:not([data-t])').forEach(el => el.classList.add('on'));
     }
   }
 }

@@ -11,6 +11,11 @@ all chip/tab states visually QA'd at 1920×1080. Fonts (Fraunces + Azeret Mono)
 are inlined as base64 woff2 — the deck is fully offline; no network needed at
 the defense. Remaining: author rehearsal pass + wording tweaks.
 
+2026-07-09: speaking script added at `slides/defense-script.md` (Vietnamese,
+anchor-and-beats structure, 14-min core + cut-safe beats). The deck now runs
+in **presenter step mode**: one Space = one script beat (see updated
+interaction inventory below); beats in the script match presses 1:1.
+
 ## How to resume in a new session
 
 1. Invoke `Skill: frontend-slides` (this deck is built with it; fixed 1920×1080
@@ -27,8 +32,8 @@ the defense. Remaining: author rehearsal pass + wording tweaks.
    **Adapt, don't copy wholesale:** the deck already has one theme and a fixed
    stage, so SKIP html-diagram's dark-mode toggle, localStorage, and pan/zoom.
    Style SVG via CSS variables of the chosen deck theme. Switch buttons on
-   slides must be mouse-clickable chips; do NOT bind arrow keys (reserved for
-   slide navigation).
+   slides must be mouse-clickable chips; keys are owned by the presenter step
+   mode (see interaction inventory) — never bind extra keys on a slide.
 4. Content discipline: every displayed number/claim comes from `drafts/`
    (sources cited per slide below). Do not invent numbers. Wiki is background
    only, never displayed.
@@ -238,9 +243,22 @@ S10 0.75 · S11 1 → ≈ 15.5 min (trim in rehearsal; S8 tabs are the flex zone
 
 ## Interaction inventory (for build QA)
 
-- S5: 3 protocol chips, replay animation per selection.
-- S7: 3 family chips, sweep animation per selection.
-- S8: 4 result tabs.
-- S6: auto-play (or click-to-replay) pipeline motion; no chips.
-- All chips mouse-only; arrow keys/Space stay reserved for deck navigation.
-- `prefers-reduced-motion`: animations degrade to static final state.
+Presenter **step mode** (2026-07-09, replaces autoplay): every animated slide
+is split into steps whose boundaries are the beats of
+`slides/defense-script.md` — one Space press = one beat.
+
+- Space / → / PgDn: next step; when the active pane is out of steps, advances
+  to the next chip/tab in script order (S5 pbft→ffg→snowman, S7 A→B→C,
+  S8 a→bd→bl→c), then to the next slide. Rapid presses fast-forward cleanly
+  (pending reveals settle instantly before the next step plays).
+- Shift+Space / ← / PgUp: step back; at step 0 goes to the previous pane
+  (fully revealed), then the previous slide.
+- ↓ / ↑: whole-slide jump (for Q&A). Home/End unchanged.
+- S5: 3 protocol chips · S7: 3 family chips · S8: 4 result tabs — all still
+  mouse-clickable for Q&A jumps; clicking one resets that pane to its entry
+  step. S6 svg click replays from entry.
+- Step boundaries live in the `STEPS` map (deck JS), keyed by root id /
+  `tab-<key>`; thresholds are `data-t` values. Editing a diagram's timings
+  may require updating its `STEPS` row + the matching script beats.
+- `prefers-reduced-motion`: each root renders fully revealed; keys just
+  navigate panes/slides.
