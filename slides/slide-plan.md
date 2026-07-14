@@ -16,7 +16,30 @@ anchor-and-beats structure, 14-min core + cut-safe beats). The deck now runs
 in **presenter step mode**: one Space = one script beat (see updated
 interaction inventory below); beats in the script match presses 1:1.
 
+2026-07-14: **detail layer pass** (supervisor feedback: slides too sparse).
+Structure unchanged (still 12 slides; the 16–18-slide unfold of S5/S8 panes
+is deferred until after a rehearsal pass). Added, all sourced from drafts/:
+S5 spec strips per protocol (Table 2.1 fields: synchrony · proposer · quorum
+· finality · pressure point); S6 seed note (30 near-threshold) + CI sentence
+(95% Student-t / Wilson, ch3 §3.5); S8 tab A stat box (latency ≈1 s/≈5 s,
+goodput 95·95·80 tx/s, ch4 §4.2) · tab B-delay timeline subtitle + msg-cost
+badge (±0.1% / +2% / −12%, ch4 §4.3.1) · tab B-loss n=25 AURC-tie note
+(0.351 vs 0.369, ch5 Table 5.1) + FFG +3–10% detail · tab C legend params;
+S9 best-per-axis line (Table 5.1 Best column) + stat line per insight mini.
+**STEPS map and script beat counts unchanged** — new elements are static or
+reuse existing data-t thresholds. Script updated with 📎 notes only. QA'd
+at 1920×1080 via Playwright: all panes/tabs full-reveal + 85-press Space
+walkthrough, no JS errors.
+
 ## How to resume in a new session
+
+0. **Preview server quirk (2026-07-14):** the in-app preview helper cannot
+   read under `~/Desktop` (macOS permission), so `.claude/launch.json`
+   serves a COPY of the deck from `~/.cache/thesis-slide-previews/` on
+   port 4173. After editing `slides/thesis-defense.html`, re-sync before
+   previewing: `cp slides/thesis-defense.html ~/.cache/thesis-slide-previews/`.
+   (Playwright/one-off QA can instead serve `slides/` directly from a
+   normal shell, which does have Desktop access.)
 
 1. Invoke `Skill: frontend-slides` (this deck is built with it; fixed 1920×1080
    stage, single self-contained HTML, arrow-key navigation).

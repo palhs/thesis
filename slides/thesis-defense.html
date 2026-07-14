@@ -352,6 +352,13 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 .cap b { color:var(--ink); font-weight:500; }
 .cappane { display:none; }
 .cappane.actv { display:block; }
+/* spec strip — Table 2.1 fields not carried by the diagram (reading layer, no steps) */
+.spec { display:flex; gap:10px; margin-top:8px; }
+.spec span {
+  font-size:15px; letter-spacing:.02em; color:var(--ink-dim); white-space:nowrap;
+  border:1px solid var(--line); border-radius:8px; padding:5px 12px;
+}
+.spec span b { color:var(--ink); font-weight:500; }
 
 /* S8 tabs */
 .tabpane { display:none; }
@@ -383,6 +390,7 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 #s9 .mini { border-left:3px solid; padding:6px 0 6px 22px; margin-bottom:22px; font-size:20px; line-height:1.55; color:var(--ink-dim); width:760px; }
 #s9 .mini b { color:var(--ink); font-weight:500; }
 #s9 .mini .nm { font-size:21px; font-weight:500; display:block; margin-bottom:4px; }
+#s9 .mini .stat { display:block; margin-top:7px; font-size:17px; color:var(--ink-faint); letter-spacing:.02em; }
 #s9 .note { font-size:16px; color:var(--ink-faint); margin-top:4px; }
 
 /* ===========================================
@@ -864,12 +872,33 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
 
     <div class="cappane actv" data-p="pbft">
       <div class="cap"><b>Leader-driven</b> · two all-to-all vote phases · deterministic finality · <b>O(n²) messages</b>. Decided once 2f+1 matching votes arrive in each phase — here 3 of 4, with one replica down.</div>
+      <div class="spec">
+        <span>synchrony <b>partial</b></span>
+        <span>proposer <b>rotating leader</b></span>
+        <span>quorum <b>⅔ of n (2f+1)</b></span>
+        <span>finality <b>ε = 0</b></span>
+        <span>pressure point <b>leader failure</b> (liveness) · <b>n/3</b> (safety)</span>
+      </div>
     </div>
     <div class="cappane" data-p="ffg">
       <div class="cap"><b>Stake-weighted checkpoint finality</b> over epochs · deterministic · <b>~1.15n messages</b> · slashing makes a safety failure attributable to the validators who signed it.</div>
+      <div class="spec">
+        <span>synchrony <b>partial</b></span>
+        <span>proposer <b>stake-weighted</b></span>
+        <span>quorum <b>⅔ of total stake</b></span>
+        <span>finality <b>ε = 0</b></span>
+        <span>pressure point <b>checkpoint delay</b> (liveness) · <b>⅓ stake burn</b> (safety)</span>
+      </div>
     </div>
     <div class="cappane" data-p="snowman">
       <div class="cap"><b>Leaderless subsampling</b> · probabilistic finality ε ≤ (1−α_c/K)^β · <b>per-validator cost independent of n</b> — each validator only ever talks to K sampled peers per round.</div>
+      <div class="spec">
+        <span>synchrony <b>asynchronous</b></span>
+        <span>proposer <b>round-robin</b></span>
+        <span>quorum <b>α_c ≈ 80% of K sample</b></span>
+        <span>finality <b>ε &gt; 0, bounded</b></span>
+        <span>pressure point <b>counter stall</b> (liveness) · <b>ε bound</b> (safety)</span>
+      </div>
     </div>
   </div>
   <div class="src">report §3.3 · Table 2.1</div>
@@ -933,7 +962,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <!-- loop arrow -->
       <path class="msg std march" data-t="2400" style="--len:1900;stroke:var(--ink-faint)" marker-end="url(#m-i)"
             d="M1349,404 L1349,560 L225,560 L225,468"/>
-      <text class="tm stf" data-t="2500" x="787" y="548" text-anchor="middle">repeat — per seed (×20) · per cell of every run family</text>
+      <text class="tm stf" data-t="2500" x="787" y="548" text-anchor="middle">repeat — per seed (×20 · 30 at near-threshold points) · per cell of every run family</text>
       <!-- attribution label -->
       <g class="bdg stf" data-t="2900">
         <rect x="350" y="588" width="904" height="44" style="stroke:var(--ink-dim)"/>
@@ -943,6 +972,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
 
     <div class="cap st" data-t="3300" style="margin-top:8px">
       Shared denominator — <b>ACU, atomic commit unit</b>: 1 PBFT block ≡ 1 FFG finalized checkpoint ≡ 1 Snowman accepted block.
+      Aggregation across seeds: <b>95% Student-t</b> (continuous) · <b>95% Wilson</b> (rates).
       <span style="color:var(--ink-faint)">&nbsp;(click diagram to replay)</span>
     </div>
   </div>
@@ -1127,15 +1157,22 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text x="1375" y="228" text-anchor="middle" fill="var(--c-snowman)">order-of-magnitude gap</text>
           <text class="tm" x="1375" y="252" text-anchor="middle">the price of subsampling</text>
         </g>
+        <g class="bdg stf" data-t="1900">
+          <rect x="1188" y="300" width="332" height="118" style="stroke:var(--ink-dim)"/>
+          <text x="1354" y="332" text-anchor="middle" style="font-size:16px" fill="var(--ink)">latency &amp; goodput flat in n</text>
+          <text x="1354" y="360" text-anchor="middle" style="font-size:15px;font-weight:400" fill="var(--ink-dim)"><tspan fill="var(--c-pbft)">PBFT</tspan> · <tspan fill="var(--c-snowman)">SNW</tspan> ≈ 1 s — <tspan fill="var(--c-ffg)">FFG</tspan> ≈ 5 s</text>
+          <text x="1354" y="388" text-anchor="middle" style="font-size:15px;font-weight:400" fill="var(--ink-dim)">goodput ≈ 95 · 95 · 80 tx/s</text>
+        </g>
       </svg>
       <div class="take st" data-t="1900"><b>Cheapest: Casper FFG.</b> Measured trends match published asymptotics (2n · 1.15n · 2Kβ).
-        Secondary: latency is flat in n — PBFT &amp; Snowman ≈ 1 s, FFG ≈ 5 s (epoch-granularity finality). <span style="color:var(--ink-faint)">§4.2</span></div>
+        Secondary: latency is flat in n — PBFT &amp; Snowman ≈ 1 s, FFG ≈ 5 s (epoch-granularity finality); goodput ≈ 95 vs ≈ 80 tx/s. <span style="color:var(--ink-faint)">§4.2</span></div>
     </div>
 
     <!-- ── Tab B: delay slowdown (RQ1) ── -->
     <div class="tabpane" data-tab="bd">
       <svg width="1728" height="600" viewBox="0 0 1560 542" aria-label="Finality slowdown under delay vs zero-delay baseline">
         <text class="tl" x="60" y="46">finality slowdown under moderate delay <tspan class="ts">(× zero-delay baseline)</tspan></text>
+        <text class="ts" x="60" y="78">timelines: uniform 100–500 ms · heavy-tail (exponential) 1–5 s · n ∈ {10, 25}</text>
         <g>
           <line class="gridl" x1="370"  y1="80" x2="370"  y2="470"/><text class="ts" x="370"  y="500" text-anchor="middle">×1</text>
           <line class="gridl" x1="650"  y1="80" x2="650"  y2="470"/><text class="ts" x="650"  y="500" text-anchor="middle">×5</text>
@@ -1166,9 +1203,14 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <rect x="830" y="310" width="640" height="52" style="stroke:var(--c-snowman)"/>
           <text class="tm" x="1150" y="343" text-anchor="middle">each round waits on the <tspan fill="var(--ink)">slowest of K sampled peers</tspan></text>
         </g>
+        <g class="bdg stf" data-t="2100">
+          <rect x="830" y="150" width="640" height="82" style="stroke:var(--ink-dim)"/>
+          <text class="tm" x="1150" y="184" text-anchor="middle" fill="var(--ink)">delay inflates time-to-finality, not message cost</text>
+          <text class="ts" x="1150" y="212" text-anchor="middle">msgs/unit: <tspan fill="var(--c-pbft)">PBFT</tspan> ±0.1% · <tspan fill="var(--c-snowman)">SNW</tspan> +2% · <tspan fill="var(--c-ffg)">FFG</tspan> −12%</text>
+        </g>
       </svg>
       <div class="take st" data-t="2100"><b>Round-bounded protocols shrug; sampling pays.</b> Snowman's exponential-tail latency exceeds its uniform-tail latency
-        (15.3 s vs 12.6 s, n = 10) — the tail hits every round. <span style="color:var(--ink-faint)">§4.3.1</span></div>
+        (15.3 s vs 12.6 s, n = 10) — the tail hits every round. Round-bounded pair: ≤ 3% apart across tail shapes. <span style="color:var(--ink-faint)">§4.3.1</span></div>
     </div>
 
     <!-- ── Tab B: packet loss (resilience) ── -->
@@ -1203,10 +1245,11 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <rect x="480" y="120" width="540" height="52" style="stroke:var(--ink-dim)"/>
           <text class="tm" x="750" y="153" text-anchor="middle">resilience ranking: <tspan fill="var(--c-pbft)">PBFT</tspan> &gt; <tspan fill="var(--c-snowman)">Snowman</tspan> &gt; <tspan fill="var(--c-ffg)">FFG</tspan></text>
         </g>
+        <text class="ts stf" data-t="1900" x="1455" y="230" text-anchor="end">at n = 25: PBFT ≈ Snowman — AURC tie (0.351 vs 0.369)</text>
       </svg>
       <div class="take st" data-t="2100"><b>Only PBFT still finalizes at 20% loss</b> — it alone has a recovery path (view-change rotates the leader).
         Snowman: in-round redundancy, no cross-round recovery → holds partially at 5%, cliffs by 10% (a clear plateau-then-cliff at n = 25). FFG: neither → collapses at the first 5% step.
-        <b>No protocol forks</b> — loss erodes liveness, not safety; survivors pay ×2–3.5 latency. <span style="color:var(--ink-faint)">§4.3.2–4.3.3</span></div>
+        <b>No protocol forks</b> — loss erodes liveness, not safety; survivors pay ×2–3.5 latency (FFG: only +3–10%, over the few seeds that still finalize). <span style="color:var(--ink-faint)">§4.3.2–4.3.3</span></div>
     </div>
 
     <!-- ── Tab C: adversarial outcome matrix (RQ2+RQ4) ── -->
@@ -1234,7 +1277,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <span><span class="sw" style="background:var(--good)"></span>holds / clean</span>
         <span><span class="sw" style="background:var(--warn)"></span>degrades</span>
         <span><span class="sw" style="background:var(--bad)"></span>breaks</span>
-        <span style="color:var(--ink-faint)">— outcome kind per strategy × protocol · §4.4, Table 4.1</span>
+        <span style="color:var(--ink-faint)">— outcome per strategy × protocol · φ ∈ {0…0.30} (+0.40/0.50 equiv.) · n ∈ {10, 25} · 20–30 seeds · §4.4, Table 4.1</span>
       </div>
     </div>
   </div>
@@ -1292,20 +1335,24 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           </g>
         </svg>
         <div class="note">8 axes of Table 5.1 · ordinal rank, outer ring = best, ties shared — <b>illustrative; the table is the evidence</b> (§5.2)</div>
+        <div class="note">best per axis — latency <b style="color:var(--c-pbft)">PBFT</b>·<b style="color:var(--c-snowman)">SNW</b> · overhead <b style="color:var(--c-ffg)">FFG</b> · delay <b style="color:var(--c-ffg)">FFG</b> · loss <b style="color:var(--c-pbft)">PBFT</b> (n=10) · delayed-voting <b style="color:var(--c-pbft)">PBFT</b> · silence <b style="color:var(--c-pbft)">PBFT</b>·<b style="color:var(--c-ffg)">FFG</b> · equivocation <b style="color:var(--c-snowman)">SNW</b> · accountable <b style="color:var(--c-ffg)">FFG</b></div>
       </div>
       <div class="insight">
         <h3 class="st" data-t="1600">The same design choice creates<br>both the strength and the weakness</h3>
         <div class="mini st" data-t="1800" style="border-color:var(--c-snowman)">
           <span class="nm" style="color:var(--c-snowman)">Snowman — K-peer subsampling</span>
           keeps it <b>live under slow peers</b>, yet <b>starves it under silent ones</b> — the sample finds no quorum to talk to.
+          <span class="stat">delay ×12–15 yet live · silence φ* = 0.10 / 0.20 · ε ≈ 5×10⁻¹⁵ / 3×10⁻¹¹</span>
         </div>
         <div class="mini st" data-t="2100" style="border-color:var(--c-pbft)">
           <span class="nm" style="color:var(--c-pbft)">PBFT — leader-quorum commit</span>
           carries it through <b>delay, loss and silence</b>, yet <b>forks unaccountably</b> once equivocation passes the threshold.
+          <span class="stat">alive at 20% loss · delayed-voting success 1.0 · deterministic fork at φ = 0.40</span>
         </div>
         <div class="mini st" data-t="2400" style="border-color:var(--c-ffg)">
           <span class="nm" style="color:var(--c-ffg)">Casper FFG — epoch-paced finality</span>
           is <b>cheapest and least delay-sensitive</b>, yet <b>first to collapse under loss</b> — while alone holding accountable safety.
+          <span class="stat">≈ 1.15n msgs/unit · delay ×1.3 · collapses at 5% loss · ≥ ⅓ stake slashable</span>
         </div>
       </div>
     </div>

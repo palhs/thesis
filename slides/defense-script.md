@@ -1,339 +1,395 @@
-# Script nói — bảo vệ khóa luận (15 phút)
+# Speaking script — thesis defense (15 minutes)
 
-Deck: `slides/thesis-defense.html` · 12 slide · lõi **14:00** + ~1:30 beat phụ.
-Bản này là script để HỌC THUỘC theo cấu trúc xương neo. Q&A prep làm buổi
-riêng, lưu file khác — không nằm ở đây.
+Deck: `slides/thesis-defense.html` · 12 slides · core **14:00** + ~1:30 optional beats.
+This is the script to MEMORIZE via the anchor-skeleton structure. Q&A prep is a
+separate session, kept in a separate file — not here.
 
-## Cách dùng
+2026-07-14 — **detail layer** (advisor feedback "slides carry too little
+information"): the deck gained a spec strip (S5), secondary numbers in
+badges/captions (S6, S8), and a best-per-axis line + stat line (S9). **Beat
+count and Space order are UNCHANGED** — every new annotation is either
+static or reveals with an existing beat. Speaking rule: the detail layer is
+FOR THE COMMITTEE TO READ, not to be read aloud; only point at it when asked.
+The `📎` note under each slide lists what newly appears.
 
-- **NEO** (trích trong ngoặc kép) = học thuộc **nguyên văn**. Mỗi slide có
-  neo mở và neo chuyển — đó là chỗ dễ bí nhất; phần giữa nói tự do theo beat.
-- **Beat** (gạch đầu dòng) = ý nói tự do, 5–10 từ gợi ý, đúng register nói:
-  khung tiếng Việt, thuật ngữ tiếng Anh giữ nguyên khớp chữ trên slide.
-  **Mọi con số in đậm — nói đúng tuyệt đối, không xê dịch.**
-- `▶` = **một lần bấm Space**. Deck đã sửa sang chế độ bước: mỗi Space bung
-  đúng một beat; hết bước thì Space tự chuyển chip/tab kế tiếp, hết chip/tab
-  thì sang slide. **Toàn bộ bài chỉ dùng một phím.** Chuột chỉ cần khi Q&A
-  muốn nhảy tự do giữa các chip/tab.
-  - Space / → / PageDown = bước tiếp · Shift+Space / ← / PageUp = lùi bước
-  - ↓ / ↑ = nhảy nguyên slide (dùng khi Q&A)
-- `(cắt được)` = beat phụ. **Quy tắc cắt duy nhất: vào S8 muộn hơn 8:00 →
-  bỏ toàn bộ beat (cắt được) từ đó về sau.** Không có quyết định nào khác.
-- Đồng hồ ghi ở đầu mỗi slide: `vào · nói · rời`. Liếc một lần lúc chuyển slide.
+## How to use
+
+- **ANCHOR** (quoted text) = memorize **verbatim**. Each slide has an opening
+  anchor and a transition anchor — those are where you're most likely to
+  freeze; the middle is spoken freely following the beats.
+- **Beat** (bullet) = free-form talking point, 5–10 cue words, in spoken
+  register: English phrasing matching the exact wording on the slide.
+  **Every bold number — say it exactly, no rounding or drifting.**
+- `▶` = **one Space press**. The deck runs in step mode: each Space reveals
+  exactly one beat; when a pane runs out of steps, Space auto-advances to the
+  next chip/tab, and when chips/tabs run out, to the next slide. **The whole
+  talk uses a single key.** The mouse is only needed in Q&A to jump freely
+  between chips/tabs.
+  - Space / → / PageDown = next step · Shift+Space / ← / PageUp = step back
+  - ↓ / ↑ = jump whole slides (use in Q&A)
+- `(cuttable)` = optional beat. **The single cut rule: if you enter S8 later
+  than 8:00 → drop every `(cuttable)` beat from there on.** No other
+  decisions exist.
+- Timing is written at the top of each slide: `enter · speak · leave`. Glance
+  once at each slide transition.
 
 ---
 
-## S1 · Title — vào 0:00 · nói 0:30 · rời 0:30
+## S1 · Title — enter 0:00 · speak 0:30 · leave 0:30
 
-*(slide tự chạy hết animation, không cần Space giữa chừng)*
+*(slide auto-plays its full animation, no Space needed mid-slide)*
 
-**NEO MỞ:**
-> "Kính thưa hội đồng, em là Lê Ngọc Phan Anh, mã sinh viên BI12-010. Đề tài
-> của em là *Performance–Security Evaluation of Layer-1 Consensus under Delay
-> and Adversarial Conditions* — một nghiên cứu so sánh bằng mô phỏng, thực
-> hiện dưới sự hướng dẫn của Tiến sĩ Giang Anh Tuấn."
+**OPENING ANCHOR:**
+> "Dear committee members, my name is Le Ngoc Phan Anh, student ID BI12-010.
+> My thesis is *Performance–Security Evaluation of Layer-1 Consensus under
+> Delay and Adversarial Conditions* — a simulation-based comparative study,
+> carried out under the supervision of Dr. Giang Anh Tuan."
 
-- ba protocol — **PBFT** (vàng) · **Casper FFG** (tím) · **Snowman** (xanh) —
-  ba màu này theo suốt mọi slide
+- three protocols — **PBFT** (yellow) · **Casper FFG** (purple) · **Snowman**
+  (green) — these three colors persist across every slide
 
-**NEO CHUYỂN:**
-> "Em xin bắt đầu bằng lý do đề tài này tồn tại."
+**TRANSITION ANCHOR:**
+> "Let me begin with why this thesis exists."
 
 `▶ → S2`
 
 ---
 
-## S2 · Proven safe. Still halting. — vào 0:30 · nói 1:30 · rời 2:00
+## S2 · Proven safe. Still halting. — enter 0:30 · speak 1:30 · leave 2:00
 
-**NEO MỞ:**
-> "Các giao thức đồng thuận Layer-1 đều có chứng minh an toàn — proven safe.
-> Nhưng đây là bốn năm vận hành thực tế."
+**OPENING ANCHOR:**
+> "Layer-1 consensus protocols all come with safety proofs — proven safe.
+> But here are four years of real-world operation."
 
-- `▶` Solana — halt toàn mạng **17 giờ, 09/2021** — rồi lặp lại
-  **04/2022 · 02/2023 · 02/2024**
-- `▶` Ethereum — reorg **7 block, 05/2022** · stall finality nhiều epoch
-  **05/2023**
-- `▶` Cosmos Hub halt **06/2024** · Sui validator crash-loop **11/2024**
-- `▶` (khung chữ) — các proof KHÔNG sai; cái bị phá là **điều kiện** của
-  proof: bounded delay, đủ honest validator — bị vượt thường xuyên khi
-  deploy; mạng thật trộn nhiều disturbance cùng lúc → không cô lập được
-  điều kiện nào gây sự cố nào
+- `▶` Solana — network-wide halt **17 hours, Sep 2021** — then again
+  **Apr 2022 · Feb 2023 · Feb 2024**
+- `▶` Ethereum — **7-block** reorg, **May 2022** · finality stall across
+  multiple epochs **May 2023**
+- `▶` Cosmos Hub halt **Jun 2024** · Sui validator crash-loop **Nov 2024**
+- `▶` (text box) — the proofs are NOT wrong; what breaks are the proofs'
+  **assumptions**: bounded delay, enough honest validators — routinely
+  violated in deployment; real networks mix multiple disturbances at once →
+  impossible to isolate which condition caused which incident
 
-`▶` (câu hỏi lớn hiện) — **NEO CHUYỂN:**
-> "Vậy: điều kiện nào phá protocol nào? Muốn trả lời cần một harness duy
-> nhất, stress cả ba family theo đúng một cách. Đó là việc khóa luận này làm."
+`▶` (big question appears) — **TRANSITION ANCHOR:**
+> "So: which condition breaks which protocol? Answering that requires a
+> single harness, stressing all three families in exactly the same way.
+> That is what this thesis does."
 
 `▶ → S3`
 
 ---
 
-## S3 · Ba thước đo không đặt cạnh nhau được — vào 2:00 · nói 0:45 · rời 2:45
+## S3 · Three yardsticks that can't be placed side by side — enter 2:00 · speak 0:45 · leave 2:45
 
-**NEO MỞ:**
-> "Chưa ai trả lời được câu đó, vì hôm nay ba family được đo bằng ba thước
-> khác nhau."
+**OPENING ANCHOR:**
+> "No one has answered that question, because today the three families are
+> measured with three different yardsticks."
 
-- `▶` PBFT-style báo **throughput** — ops/s trên LAN latency thấp — không
-  nói gì về finality delay
-- `▶` PoS finality báo **finality delay** — **~12 phút, 2 epoch** — không
-  nói gì về throughput
-- `▶` Avalanche-style báo **xác suất an toàn ε** — tại MỘT bộ (K, β) cố
-  định — đổi tham số là số đổi
-- `▶` (punchline) — số đo rất nhiều nhưng thiết kế để không bao giờ so được;
-  survey chỉ xếp số của người khác cạnh nhau; matched-harness duy nhất
-  trước đây — **Gervais et al.** — chỉ cho Proof-of-Work
+- `▶` PBFT-style reports **throughput** — ops/s on low-latency LANs — says
+  nothing about finality delay
+- `▶` PoS finality reports **finality delay** — **~12 minutes, 2 epochs** —
+  says nothing about throughput
+- `▶` Avalanche-style reports a **safety-failure probability ε** — at ONE
+  fixed (K, β) setting — change the parameters and the number changes
+- `▶` (punchline) — plenty of numbers, but designed to never be comparable;
+  surveys only place other people's numbers side by side; the only prior
+  matched harness — **Gervais et al.** — covers Proof-of-Work only
 
-**NEO CHUYỂN:**
-> "Không tồn tại bức tranh chung — nên em xây một cái."
+**TRANSITION ANCHOR:**
+> "No unified picture exists — so I built one."
 
 `▶ → S4`
 
 ---
 
-## S4 · The goal — 5 câu hỏi — vào 2:45 · nói 0:45 · rời 3:30
+## S4 · The goal — 5 questions — enter 2:45 · speak 0:45 · leave 3:30
 
-**NEO MỞ:**
-> "Mục tiêu gói trong một dòng: một simulator, ba protocol, cùng một bộ
-> giả định."
+**OPENING ANCHOR:**
+> "The goal fits in one line: one simulator, three protocols, one shared set
+> of assumptions."
 
-- `▶` **WHEN** — mạng chậm thì finality chậm bao nhiêu → RQ1
-- `▶` **WHAT** — throughput ra sao khi tỉ lệ Byzantine tăng → RQ2
-- `▶` **HOW MUCH** — mỗi đơn vị commit tốn bao nhiêu message → RQ3
-- `▶` **WHO** — adversary nào phá protocol nào, ở property nào → RQ4
-- `▶` **WHICH** — có protocol nào thắng toàn diện không → RQ5
+- `▶` **WHEN** — when the network slows down, how much does finality slow → RQ1
+- `▶` **WHAT** — what happens to throughput as the Byzantine fraction rises → RQ2
+- `▶` **HOW MUCH** — how many messages does each unit of commit cost → RQ3
+- `▶` **WHO** — which adversary breaks which protocol, on which property → RQ4
+- `▶` **WHICH** — does any protocol win across the board → RQ5
 
-**NEO CHUYỂN:**
-> "Trước khi đo, cần thấy ba protocol này vận hành khác nhau đến mức nào."
+**TRANSITION ANCHOR:**
+> "Before measuring, we need to see just how differently these three
+> protocols operate."
 
 `▶ → S5`
 
 ---
 
-## S5 · Ba family, ba protocol — vào 3:30 · nói 2:00 · rời 5:30
+## S5 · Three families, three protocols — enter 3:30 · speak 2:00 · leave 5:30
 
-*(mở vào diagram PBFT: 4 node đã hiện sẵn)*
+*(opens on the PBFT diagram: 4 nodes already visible)*
 
-**NEO MỞ:**
-> "Mỗi family em chọn một đại diện. Thứ nhất — PBFT, family cổ điển
-> leader-driven."
+**OPENING ANCHOR:**
+> "For each family I picked one representative. First — PBFT, the classic
+> leader-driven family."
 
 **PBFT** — n=4, node 3 offline (f=1):
-- `▶` client gửi request cho **primary** → primary broadcast **PRE-PREPARE**
-- `▶` **PREPARE all-to-all** — mọi node gửi mọi node → đây là nguồn chi phí
-  **O(n²)**
-- `▶` **COMMIT all-to-all** — vòng hai, y hệt
-- `▶` decided khi mỗi pha đủ quorum **2f+1** — tức **3 trên 4** node khớp
-  phiếu, dù 1 node chết; finality **deterministic** — đã chốt là vĩnh viễn
+- `▶` client sends a request to the **primary** → primary broadcasts
+  **PRE-PREPARE**
+- `▶` **PREPARE all-to-all** — every node messages every node → this is the
+  source of the **O(n²)** cost
+- `▶` **COMMIT all-to-all** — a second round, identical
+- `▶` decided when each phase reaches quorum **2f+1** — that is **3 of 4**
+  nodes with matching votes, even with 1 node dead; finality is
+  **deterministic** — once committed, permanent
 
-`▶` (deck tự chuyển chip **Casper FFG**):
-> "Thứ hai — Casper FFG, lớp finality của Ethereum."
-- `▶` validator (theo **stake**) gửi attestation tích lũy trên link giữa hai
-  checkpoint; đủ **⅔ stake**...
-- `▶` ...checkpoint **justified**
-- `▶` con justified ⇒ cha **finalized** — chốt hai bước
-- `▶` checkpoint mới nhất luôn pending — finality đi **sau** chain tip;
-  chi phí chỉ **~1.15n** message; **slashing** → vi phạm an toàn quy được
-  trách nhiệm
+`▶` (deck auto-switches to the **Casper FFG** chip):
+> "Second — Casper FFG, Ethereum's finality layer."
+- `▶` validators (weighted by **stake**) send attestations that accumulate on
+  the link between two checkpoints; once **⅔ of stake**...
+- `▶` ...the checkpoint is **justified**
+- `▶` a justified child ⇒ the parent is **finalized** — a two-step commit
+- `▶` the newest checkpoint is always pending — finality trails **behind**
+  the chain tip; cost is only **~1.15n** messages; **slashing** → safety
+  violations become attributable
 
-`▶` (deck tự chuyển chip **Snowman**):
-> "Thứ ba — Snowman của Avalanche. Không có leader nào cả."
-- `▶` mỗi round: poll **K peer ngẫu nhiên**; nếu ≥ **α_c** trả lời trùng →
+`▶` (deck auto-switches to the **Snowman** chip):
+> "Third — Snowman from Avalanche. There is no leader at all."
+- `▶` each round: poll **K random peers**; if ≥ **α_c** reply identically →
   confidence counter **1/15**
-- `▶` round sau — sample MỚI hoàn toàn → **2/15**
-- `▶` đổi preference giữa chừng → counter **reset về 0** — đây là chỗ trả giá
-- `▶` đủ **β = 15** round liên tiếp → **ACCEPTED**; finality **xác suất**:
-  ε ≤ (1−α_c/K)^β; chi phí mỗi validator **không phụ thuộc n**
+- `▶` next round — an entirely FRESH sample → **2/15**
+- `▶` switching preference midway → counter **resets to 0** — this is where
+  the price is paid
+- `▶` after **β = 15** consecutive rounds → **ACCEPTED**; finality is
+  **probabilistic**: ε ≤ (1−α_c/K)^β; per-validator cost is **independent
+  of n**
 
-**NEO CHUYỂN:**
-> "Ba cơ chế khác nhau đến mức số đo gốc của chúng không so sánh được. Muốn
-> so công bằng thì mọi thứ xung quanh protocol phải giống hệt nhau — đó là
-> vai trò của harness."
+**TRANSITION ANCHOR:**
+> "Three mechanisms so different that their native metrics cannot be
+> compared. For a fair comparison, everything around the protocol must be
+> identical — that is the harness's job."
 
 `▶ → S6`
 
+📎 *New on the slide (pre-rendered per pane, no need to read aloud): a spec
+strip under the caption — synchrony · proposer · quorum · finality ·
+pressure point (from Table 2.1). If the committee asks "how else do they
+differ," point here.*
+
 ---
 
-## S6 · One harness — vào 5:30 · nói 1:15 · rời 6:45
+## S6 · One harness — enter 5:30 · speak 1:15 · leave 6:45
 
-*(mở vào: hộp config đã hiện)*
+*(opens with the config box already visible)*
 
-**NEO MỞ:**
-> "Toàn bộ thí nghiệm chạy qua đúng một pipeline."
+**OPENING ANCHOR:**
+> "Every experiment runs through exactly one pipeline."
 
-- (đang hiện) config gồm 5 thứ: protocol · n · timeline · adversary · seed
-- `▶` hạ tầng **cố định**: scheduler chạy virtual time — deterministic ·
-  network delay/loss cấu hình được · logger
-- `▶` đúng MỘT chỗ swap được: **protocol slot**
-- `▶` mỗi run → **một dòng kết quả**, kèm **commit_hash + seed** → tái lập
-  được từng dòng
-- `▶` lặp **×20 seed** mỗi cell, cho mọi run family
-- `▶` hạ tầng giống hệt ⇒ khác biệt đầu ra **quy được cho protocol**
-- `▶` mẫu số chung — **ACU, atomic commit unit**: 1 block PBFT ≡ 1 checkpoint
-  FFG finalized ≡ 1 block Snowman accepted — mọi chi phí, mọi latency đo
-  trên cùng đơn vị này
+- (already visible) the config has 5 parts: protocol · n · timeline ·
+  adversary · seed
+- `▶` **fixed** infrastructure: a virtual-time scheduler — deterministic ·
+  configurable network delay/loss · logger
+- `▶` exactly ONE swappable spot: the **protocol slot**
+- `▶` each run → **one result row**, with **commit_hash + seed** → every row
+  is reproducible
+- `▶` repeated **×20 seeds** per cell, for every run family *(slide also
+  notes: 30 seeds at near-threshold points — no need to read aloud)*
+- `▶` identical infrastructure ⇒ output differences are **attributable to
+  the protocol**
+- `▶` the common denominator — **ACU, atomic commit unit**: 1 PBFT block ≡
+  1 finalized FFG checkpoint ≡ 1 accepted Snowman block — every cost, every
+  latency is measured in this unit
 
-**NEO CHUYỂN:**
-> "Trên harness đó, em thiết kế ba họ thí nghiệm — mỗi họ quét đúng một trục."
+📎 *New on the slide: the ACU caption gained an aggregation sentence — 95%
+Student-t (continuous metrics) · 95% Wilson (proportion metrics). Point at
+it only if asked about statistical confidence.*
+
+**TRANSITION ANCHOR:**
+> "On that harness, I designed three experiment families — each sweeping
+> exactly one axis."
 
 `▶ → S7`
 
 ---
 
-## S7 · Ba run family — vào 6:45 · nói 0:45 · rời 7:30
+## S7 · Three run families — enter 6:45 · speak 0:45 · leave 7:30
 
-**NEO MỞ:**
-> "Ba run family — mỗi family quét một trục, các trục còn lại ghim cố định."
+**OPENING ANCHOR:**
+> "Three run families — each sweeps one axis while the other axes stay
+> pinned."
 
-**A — Scaling** (đang mở):
-- `▶` quét **n = 4 → 25**
-- `▶` ghim: mạng sạch, toàn honest
-- `▶` → trả lời **RQ3**
+**A — Scaling** (open by default):
+- `▶` sweeps **n = 4 → 25**
+- `▶` pinned: clean network, all honest
+- `▶` → answers **RQ3**
 
-`▶` (chuyển chip **B — Delay**):
-- `▶` quét timeline: baseline → uniform **100–500 ms** → heavy-tail **1–5 s**,
-  thêm loss **5/10/20%**
-- `▶` ghim: n ∈ {10, 25}, toàn honest
+`▶` (switch to chip **B — Delay**):
+- `▶` sweeps timelines: baseline → uniform **100–500 ms** → heavy-tail
+  **1–5 s**, plus loss **5/10/20%**
+- `▶` pinned: n ∈ {10, 25}, all honest
 - `▶` → **RQ1**
 
-`▶` (chuyển chip **C — Adversarial**):
-- `▶` quét tỉ lệ adversary **φ = 0 → 0.30** (equivocation thêm **0.40/0.50**)
-- `▶` ba hành vi: delayed-voting · silent · equivocation
+`▶` (switch to chip **C — Adversarial**):
+- `▶` sweeps the adversary fraction **φ = 0 → 0.30** (equivocation adds
+  **0.40/0.50**)
+- `▶` three behaviors: delayed-voting · silent · equivocation
 - `▶` → **RQ2 · RQ4**
-- (footer, đọc nhanh) mọi cell chung: Poisson **100 tx/s** · tx **512 byte** ·
-  **20 seed**/cell (**30** ở các điểm sát ngưỡng của family C) · common random
-  numbers → so sánh theo cặp
+- (footer, read quickly) shared across all cells: Poisson **100 tx/s** · tx
+  **512 bytes** · **20 seeds**/cell (**30** at family C's near-threshold
+  points) · common random numbers → paired comparisons
 
-**NEO CHUYỂN:**
-> "Đó là cách đo. Giờ đến phần chính — kết quả."
+**TRANSITION ANCHOR:**
+> "That is how we measure. Now the main part — the results."
 
 `▶ → S8`
 
 ---
 
-## S8 · Results — 4 tab — vào 7:30 · nói 4:00 (+1:30 phụ) · rời 11:30
+## S8 · Results — 4 tabs — enter 7:30 · speak 4:00 (+1:30 optional) · leave 11:30
 
-**⏱ ĐIỂM QUYẾT ĐỊNH DUY NHẤT: nhìn đồng hồ khi vào slide này. Muộn hơn
-8:00 → bỏ mọi beat `(cắt được)` từ đây về sau.**
+**⏱ THE ONLY DECISION POINT: check the clock when entering this slide.
+Later than 8:00 → drop every `(cuttable)` beat from here on.**
 
-**NEO MỞ:**
-> "Kết quả nằm trong bốn tab, theo đúng thứ tự ba run family."
+**OPENING ANCHOR:**
+> "The results sit in four tabs, in the same order as the three run
+> families."
 
-**Tab A — Scaling (RQ3)** (đang mở):
-- `▶` message trên mỗi ACU, **n = 25**, trục log: Casper FFG **≈29** ·
+**Tab A — Scaling (RQ3)** (open by default):
+- `▶` messages per ACU at **n = 25**, log axis: Casper FFG **≈29** ·
   PBFT **≈50** · Snowman **≈601**
-- `▶` trend đo được khớp lý thuyết **1.15n · 2n · 2Kβ** — khoảng cách **một
-  bậc độ lớn** là giá của subsampling
-- `▶` (cắt được) latency phẳng theo n — PBFT & Snowman **≈1 s**, FFG **≈5 s**
-  vì finality theo granularity epoch
+- `▶` measured trends match the theory — **1.15n · 2n · 2Kβ** — the
+  **order-of-magnitude** gap is the price of subsampling
+- `▶` (cuttable) latency is flat in n — PBFT & Snowman **≈1 s**, FFG
+  **≈5 s** due to epoch-granularity finality; goodput **≈95 · 95 · 80 tx/s**
+  out of 100 offered *(this beat now also reveals the stat box on the
+  right — skimming it is enough)*
 
-`▶` (chuyển tab **B — Delay, RQ1**):
-- `▶` slowdown so với baseline zero-delay: FFG **×1.3** · PBFT **×1.9** —
-  round-bounded, trơ với hình dạng tail
-- `▶` Snowman **×12–15** — mỗi round đợi peer CHẬM NHẤT trong K peer sample
-- `▶` (cắt được) tail đánh vào mọi round: exponential-tail **15.3 s** vs
-  uniform **12.6 s** ở n=10
+`▶` (switch to tab **B — Delay, RQ1**):
+- `▶` slowdown vs. the zero-delay baseline: FFG **×1.3** · PBFT **×1.9** —
+  round-bounded, insensitive to tail shape
+- `▶` Snowman **×12–15** — each round waits for the SLOWEST peer in the
+  K-peer sample
+- `▶` (cuttable) the tail hits every round: exponential-tail **15.3 s** vs
+  uniform **12.6 s** at n=10 *(this beat now also reveals a badge: delay
+  slows down TIME, it does not cost extra messages — PBFT ±0.1% · SNW +2% ·
+  FFG −12%)*
 
-`▶` (chuyển tab **B — Loss**):
-- `▶` ba đường finalization rate theo loss **0 → 20%**
-- `▶` ranking **PBFT > Snowman > FFG** — PBFT duy nhất còn finalize ở
-  **20%** nhờ recovery path (**view-change** xoay leader); Snowman
-  plateau-rồi-cliff ở **10%** (dư thừa trong round, không recovery giữa
-  round); FFG sập ngay bậc **5%** (không có cả hai)
-- `▶` không protocol nào fork — loss ăn **liveness**, không ăn **safety**;
-  (cắt được) kẻ sống trả giá **×2–3.5** latency
+`▶` (switch to tab **B — Loss**):
+- `▶` three finalization-rate curves across loss **0 → 20%**
+- `▶` ranking **PBFT > Snowman > FFG** — PBFT is the only one still
+  finalizing at **20%** thanks to a recovery path (**view-change** rotates
+  the leader); Snowman plateaus-then-cliffs at **10%** (in-round redundancy,
+  no cross-round recovery); FFG collapses at the first **5%** step (has
+  neither) *(slide also notes: at n=25 PBFT ≈ Snowman — AURC tie 0.351 vs
+  0.369; if the committee asks whether the ranking is stable in n, point at
+  this line)*
+- `▶` no protocol forks — loss consumes **liveness**, not **safety**;
+  (cuttable) the survivors pay **×2–3.5** latency
 
-`▶` (chuyển tab **C — Adversarial, RQ2+RQ4** — ma trận 3×3):
-- `▶` **delayed voting**: PBFT immune, success **1.0** · FFG tụt
-  **0.60–0.65** — proposer xoay vòng bị stall · Snowman sống nhưng bò —
-  **×62 / ×49** chậm hơn
-- `▶` **silent**: PBFT sạch tới **φ = 0.33**, cliff quorum ở **0.40** ·
-  FFG decay dần tới **0.33** · Snowman đói sớm nhất — survival depth
-  **φ\* = 0.10 / 0.20**
-- `▶` **equivocation** (quá ⅓): PBFT **fork** deterministic ở **0.40** —
-  KHÔNG quy được trách nhiệm · FFG không fork — **≥⅓ stake slashable**,
-  accountable · Snowman không có fork surface — bound **ε ≈ 5×10⁻¹⁵ /
-  3×10⁻¹¹**
-- `▶` (legend hiện — chỉ vào màu) xanh giữ vững · vàng suy giảm · đỏ vỡ
+`▶` (switch to tab **C — Adversarial, RQ2+RQ4** — 3×3 matrix):
+- `▶` **delayed voting**: PBFT immune, success **1.0** · FFG drops to
+  **0.60–0.65** — the rotating proposer gets stalled · Snowman survives but
+  crawls — **×62 / ×49** slower
+- `▶` **silent**: PBFT clean up to **φ = 0.33**, quorum cliff at **0.40** ·
+  FFG decays gradually toward **0.33** · Snowman starves first — survival
+  depth **φ\* = 0.10 / 0.20**
+- `▶` **equivocation** (beyond ⅓): PBFT **forks** deterministically at
+  **0.40** — NOT attributable · FFG does not fork — **≥⅓ of stake is
+  slashable**, accountable · Snowman has no fork surface — bound
+  **ε ≈ 5×10⁻¹⁵ / 3×10⁻¹¹**
+- `▶` (legend appears — point at the colors) green holds · yellow degrades ·
+  red breaks
 
-**NEO CHUYỂN:**
-> "Bốn tab — không protocol nào thắng cả bốn. Đó chính là câu trả lời RQ5."
+**TRANSITION ANCHOR:**
+> "Four tabs — no protocol wins all four. That is precisely the answer to
+> RQ5."
 
 `▶ → S9`
 
 ---
 
-## S9 · RQ5 — không ai dominate — vào 11:30 · nói 1:00 · rời 12:30
+## S9 · RQ5 — no one dominates — enter 11:30 · speak 1:00 · leave 12:30
 
-- `▶` radar **8 trục** từ bảng 5.1 — xếp hạng ordinal, chỉ minh họa; bảng
-  trong báo cáo mới là bằng chứng
+- `▶` an **8-axis** radar from Table 5.1 — ordinal ranking, illustrative
+  only; the table in the report is the evidence *(below the radar there is
+  now a "best per axis" line — Table 5.1's Best column colored by protocol;
+  each insight block on the right gained a stat line. Both are for the
+  committee to read.)*
 
-`▶` — **NEO Ý LÕI (thuộc nguyên văn):**
-> "Phát hiện trung tâm: cùng MỘT lựa chọn thiết kế sinh ra cả điểm mạnh lẫn
-> điểm yếu của mỗi protocol."
+`▶` — **CORE-IDEA ANCHOR (memorize verbatim):**
+> "The central finding: the SAME design choice produces both each
+> protocol's strength and its weakness."
 
-- `▶` **Snowman** — K-peer subsampling: sống khỏe khi peer CHẬM, nhưng chết
-  đói khi peer IM LẶNG — sample không tìm ra ai để hỏi
-- `▶` **PBFT** — leader-quorum commit: vượt delay, loss, silence — nhưng
-  quá ngưỡng equivocation thì fork không quy được trách nhiệm
-- `▶` **Casper FFG** — finality theo nhịp epoch: rẻ nhất, ít nhạy delay
-  nhất — nhưng sập đầu tiên dưới loss; bù lại DUY NHẤT có accountable safety
+- `▶` **Snowman** — K-peer subsampling: thrives when peers are SLOW, but
+  starves when peers are SILENT — the sample can't find anyone to ask
+- `▶` **PBFT** — leader-quorum commit: rides out delay, loss, silence — but
+  past the equivocation threshold it forks with no attribution
+- `▶` **Casper FFG** — epoch-paced finality: cheapest, least
+  delay-sensitive — but first to collapse under loss; in exchange, the ONLY
+  one with accountable safety
 
-**NEO CHUYỂN:**
-> "Không có người thắng — vậy dùng kết quả này thế nào? Như một bản đồ chọn."
+**TRANSITION ANCHOR:**
+> "No winner — so how do you use these results? As a selection map."
 
 `▶ → S10`
 
 ---
 
-## S10 · Selection map — vào 12:30 · nói 0:40 · rời 13:10
+## S10 · Selection map — enter 12:30 · speak 0:40 · leave 13:10
 
-- `▶` mối đe dọa chính là cần **quy trách nhiệm** → **Casper FFG** — slashing
-  làm vi phạm an toàn có giá ≥⅓ stake
-- `▶` cần **sống qua nhiễu mạng** → **PBFT** — duy nhất có recovery path
-- `▶` cần **chống equivocation** → **Snowman** — không có fork surface để tấn công
-- `▶` (callback) mỗi sự cố ở slide mở đầu chính là một protocol chạm
-  **structural limit** của nó
-- `▶` đóng góp: simulator · **3** implementation · dataset + analysis ·
-  methodology — mở rộng Gervais et al. từ PoW sang các family BFT
+- `▶` if the main threat requires **accountability** → **Casper FFG** —
+  slashing prices a safety violation at ≥⅓ of stake
+- `▶` need to **survive network disturbance** → **PBFT** — the only one with
+  a recovery path
+- `▶` need **equivocation resistance** → **Snowman** — no fork surface to
+  attack
+- `▶` (callback) each incident on the opening slide is exactly one protocol
+  hitting its **structural limit**
+- `▶` contributions: simulator · **3** implementations · dataset + analysis ·
+  methodology — extending Gervais et al. from PoW to the BFT families
 
-**NEO CHUYỂN:**
-> "Kết quả này đúng trong phạm vi nào — em xin nói rõ giới hạn."
+**TRANSITION ANCHOR:**
+> "Within what scope do these results hold — let me state the limitations
+> explicitly."
 
 `▶ → S11`
 
 ---
 
-## S11 · Limitations & future work — vào 13:10 · nói 0:50 · rời 14:00
+## S11 · Limitations & future work — enter 13:10 · speak 0:50 · leave 14:00
 
-- `▶` **giới hạn**: cài đặt rút gọn, một đại diện mỗi family — kết luận về
-  CÁC protocol này, không phải family trừu tượng · **n ≤ 25**, xa hơn là
-  lập luận sensitivity · Snowman safety là analytical bound, chưa witness
-  thực nghiệm · adversary chừa leader view-0 · chưa mô hình compute/bandwidth
-- `▶` **hướng tiếp**: threshold signature kiểu BLS/HotStuff · mô hình
-  saturation-throughput · adaptive timeout trong regime stress timeout ·
-  witness thực nghiệm cho ε · mở rộng harness sang DAG family (Narwhal+Tusk)
+- `▶` **limitations**: simplified implementations, one representative per
+  family — conclusions are about THESE protocols, not abstract families ·
+  **n ≤ 25**, beyond that is a sensitivity argument · Snowman safety is an
+  analytical bound, no empirical witness · the adversary spares the view-0
+  leader · compute/bandwidth not modeled
+- `▶` **future work**: BLS/HotStuff-style threshold signatures ·
+  saturation-throughput model · adaptive timeouts in the timeout-stressed
+  regime · empirical witness for ε · extending the harness to the DAG
+  family (Narwhal+Tusk)
 
-`▶` — **NEO KẾT (thuộc nguyên văn):**
-> "Đóng góp của khóa luận là một mechanism map của mặt trận
-> performance–security — không phải việc gọi tên một người thắng duy nhất."
+`▶` — **CLOSING ANCHOR (memorize verbatim):**
+> "The contribution of this thesis is a mechanism map of the
+> performance–security frontier — not the naming of a single winner."
 
 `▶ → S12`
 
 ---
 
-## S12 · Cảm ơn — 14:00
+## S12 · Thank you — 14:00
 
-**NEO:**
-> "Em xin cảm ơn hội đồng đã lắng nghe. Em sẵn sàng nhận câu hỏi ạ."
+**ANCHOR:**
+> "Thank you, committee members, for your attention. I am ready for your
+> questions."
 
-*(Q&A: dùng ↓/↑ nhảy slide, chuột click chip/tab để mở đúng diagram/kết quả
-đang được hỏi.)*
+*(Q&A: use ↓/↑ to jump slides, click chips/tabs with the mouse to open
+whichever diagram/result is being asked about.)*
 
 ---
 
-## Ghi chú tập luyện
+## Practice notes
 
-- Thuộc trước: 2 neo/slide (~24 câu) + 2 neo đặc biệt (ý lõi S9, neo kết S11).
-- Tập với deck mở: mỗi beat = một Space — thứ tự bấm chính là mục lục bài nói.
-- Cheat sheet in tay: TRÍCH SAU khi tập xong vòng đầu — chỉ gồm những chỗ
-  hay quên, không trích trước.
+- Memorize first: 2 anchors/slide (~24 sentences) + 2 special anchors (S9
+  core idea, S11 closing).
+- Practice with the deck open: each beat = one Space — the press order IS
+  the talk's table of contents.
+- Handheld cheat sheet: EXTRACT it AFTER the first full practice pass —
+  only the spots you keep forgetting, never extract in advance.
