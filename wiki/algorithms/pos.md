@@ -225,6 +225,22 @@ corresponding code lands:
 - **Slashing *penalty* application / stake burn.** Detection records
   offenders, but no deposit is destroyed and no stake is removed from the
   active set. There is no penalty-magnitude knob.
+- **Inactivity leak (liveness recovery).** FFG's answer to a `> 1/3`
+  crash-fail: once checkpoints stop finalising, every epoch a validator
+  fails to vote it loses `D·p` of its deposit (`0 < p < 1`), until the
+  validators still voting hold a `≥ 2/3` supermajority of the remaining
+  stake and finality resumes — recovery in epochs, not rounds. The paper
+  classes it as an *extension* to the core gadget (Conclusions, p. 9),
+  and it is not free: under a partition each side leaks the other side's
+  deposits, so **two conflicting checkpoints can finalise with no
+  validator slashed** (paper Fig. 6), weakening [[#accountable-safety]] —
+  the prescribed client rule is to favour whichever finalised checkpoint
+  was seen first. Source: `raw/casper.pdf` §4.2 "Catastrophic Crashes"
+  (p. 8), verified 2026-07-15;
+  [[sources/2026-04-21_buterin-griffith-casper-ffg-2017]]. The simulator
+  implements no liveness-recovery mechanism of any kind, so "the
+  simulated gadget has no recovery path" claims (ch4 §4.3 loss results)
+  are accurate for the core protocol and silent about deployed Gasper.
 - **Safety-cost budget.** Because no stake is burned, the simulator does
   *not* report the `~α/3`-of-stake economic cost of a safety attack
   described under [[#behaviour-under-adversarial-conditions]]. That metric
