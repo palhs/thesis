@@ -1,8 +1,25 @@
 # Speaking script — thesis defense (15 minutes)
 
-Deck: `slides/thesis-defense.html` · 12 slides · core **14:00** + ~1:30 optional beats.
+Deck: `slides/thesis-defense.html` · 13 slides · core **14:45** + ~1:30 optional beats.
 This is the script to MEMORIZE via the anchor-skeleton structure. Q&A prep is a
-separate session, kept in a separate file — not here.
+separate session, kept in `slides/qa-prep.md` — not here.
+
+2026-07-14 — **new slide S2B "The three contenders"** (position 03/13): intro
+cards for PBFT · Casper FFG · Snowman — year, authors, one-line mechanism,
+where each runs in production — plus the colour-legend line. **4 new beats**;
+every timing below it shifted **+0:45**, and the S8 cut-rule threshold moved
+**8:00 → 8:45**. Core is now 14:45 of a 15:00 slot — the next rehearsal pass
+should reclaim ~45 s (candidates: S5 per-protocol intros now that S2B carries
+the introductions, and the S8 cuttable beats).
+
+2026-07-14 (later) — **S5 PBFT pane now shows view-change** (the committee
+will probe recovery; S8's loss ranking leans on it). Beat count unchanged
+(still 4): PREPARE and COMMIT merged into one beat ("two identical all-to-all
+rounds"), freeing the last beat for a view-change vignette — the happy path
+**fades out entirely** (scene swap, not a dim), the primary goes silent,
+timeouts fire, VIEW-CHANGE (all-to-all) elects N1, the block replays. The
+spec strip gained a **recovery** field on all three panes. S5 stays 2:00 —
+no downstream retiming.
 
 2026-07-14 — **detail layer** (advisor feedback "slides carry too little
 information"): the deck gained a spec strip (S5), secondary numbers in
@@ -28,7 +45,7 @@ The `📎` note under each slide lists what newly appears.
   - Space / → / PageDown = next step · Shift+Space / ← / PageUp = step back
   - ↓ / ↑ = jump whole slides (use in Q&A)
 - `(cuttable)` = optional beat. **The single cut rule: if you enter S8 later
-  than 8:00 → drop every `(cuttable)` beat from there on.** No other
+  than 8:45 → drop every `(cuttable)` beat from there on.** No other
   decisions exist.
 - Timing is written at the top of each slide: `enter · speak · leave`. Glance
   once at each slide transition.
@@ -45,8 +62,8 @@ The `📎` note under each slide lists what newly appears.
 > Delay and Adversarial Conditions* — a simulation-based comparative study,
 > carried out under the supervision of Dr. Giang Anh Tuan."
 
-- three protocols — **PBFT** (yellow) · **Casper FFG** (purple) · **Snowman**
-  (green) — these three colors persist across every slide
+- three protocols — **PBFT** (amber) · **Casper FFG** (violet) · **Snowman**
+  (ice) — name them only; S2B introduces them properly
 
 **TRANSITION ANCHOR:**
 > "Let me begin with why this thesis exists."
@@ -76,15 +93,40 @@ The `📎` note under each slide lists what newly appears.
 > single harness, stressing all three families in exactly the same way.
 > That is what this thesis does."
 
+`▶ → S2B`
+
+---
+
+## S2B · The three contenders — enter 2:00 · speak 0:45 · leave 2:45
+
+**OPENING ANCHOR:**
+> "The three protocols under test — one representative per family, from
+> three different eras, all running real networks today."
+
+- `▶` **PBFT — 1999**, Castro & Liskov (MIT) — the first practical Byzantine
+  fault-tolerant protocol; its descendants run **Cosmos** (Tendermint) and
+  **Diem → Aptos** (HotStuff)
+- `▶` **Casper FFG — 2017**, Buterin & Griffith — a finality gadget laid over
+  a running chain; the finality layer inside Gasper, securing **Ethereum**
+  mainnet since the Merge, **09/2022**
+- `▶` **Snowman — 2019**, "Team Rocket" / Ava Labs — consensus by repeated
+  random polls; the production engine of **Avalanche** — C-Chain & P-Chain —
+  since **2020**
+- `▶` (legend line appears — point at the dots) one colour per protocol —
+  **amber · violet · ice** — they tag every chart to the end of the talk
+
+**TRANSITION ANCHOR:**
+> "Three live networks — so can't we just read their published numbers side
+> by side? Let's try."
+
 `▶ → S3`
 
 ---
 
-## S3 · Three yardsticks that can't be placed side by side — enter 2:00 · speak 0:45 · leave 2:45
+## S3 · Three yardsticks that can't be placed side by side — enter 2:45 · speak 0:45 · leave 3:30
 
 **OPENING ANCHOR:**
-> "No one has answered that question, because today the three families are
-> measured with three different yardsticks."
+> "Today the three families are measured with three different yardsticks."
 
 - `▶` PBFT-style reports **throughput** — ops/s on low-latency LANs — says
   nothing about finality delay
@@ -103,7 +145,7 @@ The `📎` note under each slide lists what newly appears.
 
 ---
 
-## S4 · The goal — 5 questions — enter 2:45 · speak 0:45 · leave 3:30
+## S4 · The goal — 5 questions — enter 3:30 · speak 0:45 · leave 4:15
 
 **OPENING ANCHOR:**
 > "The goal fits in one line: one simulator, three protocols, one shared set
@@ -123,7 +165,7 @@ The `📎` note under each slide lists what newly appears.
 
 ---
 
-## S5 · Three families, three protocols — enter 3:30 · speak 2:00 · leave 5:30
+## S5 · Three families, three protocols — enter 4:15 · speak 2:00 · leave 6:15
 
 *(opens on the PBFT diagram: 4 nodes already visible)*
 
@@ -134,12 +176,16 @@ The `📎` note under each slide lists what newly appears.
 **PBFT** — n=4, node 3 offline (f=1):
 - `▶` client sends a request to the **primary** → primary broadcasts
   **PRE-PREPARE**
-- `▶` **PREPARE all-to-all** — every node messages every node → this is the
-  source of the **O(n²)** cost
-- `▶` **COMMIT all-to-all** — a second round, identical
+- `▶` **PREPARE**, then **COMMIT** — two identical **all-to-all** rounds,
+  every node messages every node → this is the source of the **O(n²)** cost
 - `▶` decided when each phase reaches quorum **2f+1** — that is **3 of 4**
   nodes with matching votes, even with 1 node dead; finality is
   **deterministic** — once committed, permanent
+- `▶` (scene swaps — the happy path fades out, the fault scene plays) the
+  OTHER fault — the **primary** goes silent: replicas **time out** →
+  **VIEW-CHANGE**, itself an all-to-all round, elects a new primary → the
+  block replays and finishes. **This is PBFT's recovery path — hold onto it
+  for the loss results**
 
 `▶` (deck auto-switches to the **Casper FFG** chip):
 > "Second — Casper FFG, Ethereum's finality layer."
@@ -171,12 +217,16 @@ The `📎` note under each slide lists what newly appears.
 
 📎 *New on the slide (pre-rendered per pane, no need to read aloud): a spec
 strip under the caption — synchrony · proposer · quorum · finality ·
-pressure point (from Table 2.1). If the committee asks "how else do they
-differ," point here.*
+pressure point (from Table 2.1) · **recovery** (view-change / none — waits an
+epoch / re-poll only, no fallback). If the committee asks "how else do they
+differ" or presses on recovery, point here. For the recovery question
+specifically there is a 4th, MOUSE-ONLY chip — **Recovery ▸ Q&A** (dashed
+border) — with a three-panel comparison; Space never enters it, so it is
+invisible to the 15-minute talk. Spoken answer: `qa-prep.md` Q1.*
 
 ---
 
-## S6 · One harness — enter 5:30 · speak 1:15 · leave 6:45
+## S6 · One harness — enter 6:15 · speak 1:15 · leave 7:30
 
 *(opens with the config box already visible)*
 
@@ -210,7 +260,7 @@ it only if asked about statistical confidence.*
 
 ---
 
-## S7 · Three run families — enter 6:45 · speak 0:45 · leave 7:30
+## S7 · Three run families — enter 7:30 · speak 0:45 · leave 8:15
 
 **OPENING ANCHOR:**
 > "Three run families — each sweeps one axis while the other axes stay
@@ -243,10 +293,10 @@ it only if asked about statistical confidence.*
 
 ---
 
-## S8 · Results — 4 tabs — enter 7:30 · speak 4:00 (+1:30 optional) · leave 11:30
+## S8 · Results — 4 tabs — enter 8:15 · speak 4:00 (+1:30 optional) · leave 12:15
 
 **⏱ THE ONLY DECISION POINT: check the clock when entering this slide.
-Later than 8:00 → drop every `(cuttable)` beat from here on.**
+Later than 8:45 → drop every `(cuttable)` beat from here on.**
 
 **OPENING ANCHOR:**
 > "The results sit in four tabs, in the same order as the three run
@@ -306,7 +356,7 @@ Later than 8:00 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S9 · RQ5 — no one dominates — enter 11:30 · speak 1:00 · leave 12:30
+## S9 · RQ5 — no one dominates — enter 12:15 · speak 1:00 · leave 13:15
 
 - `▶` an **8-axis** radar from Table 5.1 — ordinal ranking, illustrative
   only; the table in the report is the evidence *(below the radar there is
@@ -333,7 +383,7 @@ Later than 8:00 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S10 · Selection map — enter 12:30 · speak 0:40 · leave 13:10
+## S10 · Selection map — enter 13:15 · speak 0:40 · leave 13:55
 
 - `▶` if the main threat requires **accountability** → **Casper FFG** —
   slashing prices a safety violation at ≥⅓ of stake
@@ -354,7 +404,7 @@ Later than 8:00 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S11 · Limitations & future work — enter 13:10 · speak 0:50 · leave 14:00
+## S11 · Limitations & future work — enter 13:55 · speak 0:50 · leave 14:45
 
 - `▶` **limitations**: simplified implementations, one representative per
   family — conclusions are about THESE protocols, not abstract families ·
@@ -374,7 +424,7 @@ Later than 8:00 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S12 · Thank you — 14:00
+## S12 · Thank you — 14:45
 
 **ANCHOR:**
 > "Thank you, committee members, for your attention. I am ready for your
@@ -387,7 +437,7 @@ whichever diagram/result is being asked about.)*
 
 ## Practice notes
 
-- Memorize first: 2 anchors/slide (~24 sentences) + 2 special anchors (S9
+- Memorize first: 2 anchors/slide (~26 sentences) + 2 special anchors (S9
   core idea, S11 closing).
 - Practice with the deck open: each beat = one Space — the press order IS
   the talk's table of contents.

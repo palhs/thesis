@@ -4,8 +4,8 @@ Status: BUILT (2026-07-08). Style chosen from 3 previews: custom wildcard
 **"Consensus Lab"** — dark lab canvas (#0C1118), Fraunces (display serif) +
 Azeret Mono (chrome), protocol hues `--c-pbft:#E8A33D` (amber) ·
 `--c-ffg:#9D8CFF` (violet) · `--c-snowman:#5FD4E8` (ice cyan).
-Deck: `slides/thesis-defense.html` (single self-contained file, 12 slides =
-the 11 below + S12 "Thank you for listening", arrow-key nav, all interactions
+Deck: `slides/thesis-defense.html` (single self-contained file, 13 slides =
+the 12 below + S12 "Thank you for listening", arrow-key nav, all interactions
 per the inventory below; inline edit via E, Ctrl/Cmd+S exports). All slides +
 all chip/tab states visually QA'd at 1920×1080. Fonts (Fraunces + Azeret Mono)
 are inlined as base64 woff2 — the deck is fully offline; no network needed at
@@ -31,15 +31,74 @@ reuse existing data-t thresholds. Script updated with 📎 notes only. QA'd
 at 1920×1080 via Playwright: all panes/tabs full-reveal + 85-press Space
 walkthrough, no JS errors.
 
+2026-07-14 (later): **new slide S2B "The three contenders"** (author request:
+introduce the three protocols before their legend colours carry meaning).
+Inserted between S2 and S3 as position 03/13, id `s2b`. Three cards, one per
+protocol — year (big numeral), authors, one-line mechanism, "in the wild"
+deployments — plus a closing colour-legend line. Facts cross-checked against
+wiki (`algorithms/pbft`, `pos`, `avalanche`); source footer `report §2.2`.
+Deck changes: `#s2b` CSS block, section HTML, all `NN / 12` counters
+renumbered to `/ 13`, STEPS entry `s2b: [350, 650, 950, 1500, ∞]` (4 beats:
+card ×3 + legend). Script: new S2B section, all later timings +0:45, cut
+rule 8:00 → 8:45, core now 14:45 — rehearsal should reclaim ~45 s.
+Step-mode QA'd in browser (entry + 4 presses + advance); layout verified
+within the 1080px canvas.
+
+2026-07-14 (later still): **S5 PBFT pane gained a view-change vignette**
+(author: committee will probe recovery — S8's loss ranking and S10's
+"only one with a recovery path" leaned on a mechanism never shown). Beat 4
+is a **scene swap**: the whole happy path is wrapped in one group and the
+view-change vignette in a second, both sharing `data-x="pbx"` — turning the
+vignette on fades the happy path out entirely. (First attempt used a
+semi-transparent veil rect; rejected — ghosted text interleaved with the
+vignette labels.) The vignette: N3 back online (so {N1,N2,N3} honestly
+reaches 2f+1 = 3), N0 goes silent (red ✕ on the lane, clear of the label),
+timeout Δ column, VIEW-CHANGE all-to-all, NEW-VIEW (N1 = primary), phases
+replay, "liveness restored" badge. Two-line column-spaced top labels.
+QA'd 2026-07-15 via headless-Edge Playwright screenshots (see resume note 0):
+beat 3 confirms the wrapped happy path is intact, beat 4 confirms a
+ghost-free vignette (text bounding boxes measured, 0 overlaps), and
+stepBack restores scene 1 (happy on, vignette off).
+
+2026-07-15: **S5 gained a 4th, mouse-only chip — "Recovery ▸ Q&A"** (dashed
+border), a Q&A backup pane for the anticipated committee question "PBFT has
+view-change — what do the other two do?" (`slides/qa-prep.md` Q1). Three
+panels: PBFT rotate-the-role (✕ on N0 → arc to N1), Casper FFG
+bleed-the-absentees (stake bars draining at −D·p/epoch until voters ≥ ⅔ —
+inactivity leak, FFG §4.2 "Catastrophic Crashes", flagged in red as an
+extension NOT in the simulated core and as trading accountable safety away,
+paper Fig. 6), Snowman resample-and-wait (failed α_c polls just repeat; the
+same loop succeeds when the network heals). Unifying line ties to S9. The
+chip is deliberately absent from `PANES.s5.order`, so Space never enters
+the pane — it opens only by mouse click during Q&A; `dia-recovery` has no
+STEPS entry, so it autoplays its cascade on click. Facts verified against
+`raw/casper.pdf` (see TASKS.md Backlog: wiki ingest still pending).
+Beat count preserved by merging the PREPARE and COMMIT beats (they were
+"a second round, identical") — `STEPS['dia-pbft']` is now
+`[400, 1400, 3200, 3600, ∞]`; S5 duration unchanged, no script retiming.
+All three spec strips gained a terse **recovery** field (view-change /
+none — waits an epoch / re-poll only, no fallback) — kept short so the
+strip stays inside the 1920 stage (QA'd: right edges 1356/1536/1618).
+Step-back from the vignette cleanly restores the decided state.
+
 ## How to resume in a new session
 
-0. **Preview server quirk (2026-07-14):** the in-app preview helper cannot
-   read under `~/Desktop` (macOS permission), so `.claude/launch.json`
-   serves a COPY of the deck from `~/.cache/thesis-slide-previews/` on
-   port 4173. After editing `slides/thesis-defense.html`, re-sync before
-   previewing: `cp slides/thesis-defense.html ~/.cache/thesis-slide-previews/`.
-   (Playwright/one-off QA can instead serve `slides/` directly from a
-   normal shell, which does have Desktop access.)
+0. **Preview / QA tooling is per-machine:**
+   - macOS (2026-07-14): the in-app preview helper cannot read under
+     `~/Desktop` (permission), so `.claude/launch.json` serves a COPY of
+     the deck from `~/.cache/thesis-slide-previews/` on port 4173. After
+     editing `slides/thesis-defense.html`, re-sync before previewing:
+     `cp slides/thesis-defense.html ~/.cache/thesis-slide-previews/`.
+     (Playwright/one-off QA can instead serve `slides/` directly from a
+     normal shell, which does have Desktop access.)
+   - Windows (2026-07-15): serve the deck with `python -m http.server 8641`
+     from `slides/` and open `http://localhost:8641/thesis-defense.html`.
+     The in-app browser pane can VIEW and script the deck but its
+     screenshot capture times out (the inlined woff2 fonts stall the
+     compositor) — for visual QA use Python Playwright driving installed
+     Edge, no browser download needed:
+     `p.chromium.launch(channel="msedge", headless=True)`, `deck.show(i)`
+     + `stepForward(root)` via `page.evaluate`, then `page.screenshot`.
 
 1. Invoke `Skill: frontend-slides` (this deck is built with it; fixed 1920×1080
    stage, single self-contained HTML, arrow-key navigation).
@@ -68,7 +127,7 @@ walkthrough, no JS errors.
   Vietnamese, slide text in **English** (matches the submitted report).
 - Charts are **redrawn in HTML/SVG from numbers stated in drafts/** (no PDF
   embeds, no invented data).
-- 11 slides, 4 acts.
+- 12 slides, 4 acts.
 
 ## Unified diagram design system (applies to S5, S6, S7, S8, S9)
 
@@ -102,9 +161,9 @@ and reuse it everywhere:
 - Charts remain honest: axis values only from drafts/ numbers; log axes
   labelled as such.
 
-## Deck outline (11 slides)
+## Deck outline (12 slides)
 
-### Act 1 — Premise & purpose (~4 min)
+### Act 1 — Premise & purpose (~4.75 min)
 
 **S1 · Title** (30s)
 Thesis title, author, supervisor, date.
@@ -119,7 +178,22 @@ Thesis title, author, supervisor, date.
   disturbances so you cannot isolate which condition triggers which failure.
 - Slide ends on the open question that drives the deck: **"Which condition
   breaks which protocol? Answering needs one harness that stresses all three
-  families the same way."** → transitions to S3.
+  families the same way."** → transitions to S2B.
+
+**S2B · The three contenders** (45s) — ch2 §2.2; facts cross-checked against
+wiki `algorithms/pbft` · `pos` · `avalanche`
+- Three cards, one per protocol, border + big year numeral in the protocol's
+  legend colour. Each card: year · authors · family tag · one-line mechanism ·
+  "in the wild" deployments:
+  - **PBFT — 1999**, Castro & Liskov (MIT, OSDI '99), quorum-BFT family;
+    descendants run Cosmos (Tendermint) and Diem → Aptos (HotStuff).
+  - **Casper FFG — 2017**, Buterin & Griffith, PoS-finality family; finality
+    layer inside Gasper, on Ethereum mainnet since the Merge (09/2022).
+  - **Snowman — 2019**, "Team Rocket" / Cornell / Ava Labs, sampling family;
+    production engine of Avalanche (C-Chain & P-Chain) since 2020.
+- Closing legend line with colour dots: one colour per protocol — amber ·
+  violet · ice — tags every chart from here to the end.
+- Static cards, no chips; 4 step-mode beats (card ×3 + legend line).
 
 **S3 · The gap: no common lens to compare the three families** (1 min) —
 drafts/ch2 §2.3–2.4
@@ -156,7 +230,10 @@ drafts/ch3 §3.3 (Figures 3.2/3.3/3.4 descriptions), ch2 Table 2.1
   - **PBFT**: n=4 validators, Node 3 offline. Animate client→primary request,
     PRE-PREPARE broadcast, all-to-all PREPARE, all-to-all COMMIT; block decided
     at 2f+1 = 3 matching votes per phase. Caption: leader-driven, two all-to-all
-    phases, deterministic finality, O(n²) messages.
+    phases, deterministic finality, O(n²) messages. Final beat: **view-change
+    vignette** — happy path fades out (scene swap), primary goes silent (N3 back online), timeouts
+    → VIEW-CHANGE all-to-all → NEW-VIEW (N1 = primary) → phases replay →
+    "liveness restored". Grounds the "recovery path" claims in S8-loss and S10.
   - **Casper FFG**: checkpoint chain over epochs. Animate attestations
     accumulating on a link; checkpoint turns *justified* at ≥⅔ stake, turns
     *finalized* when its child is justified; one pending checkpoint left
@@ -262,8 +339,10 @@ ch1 §1.6
 
 ## Timing budget (≈15 min)
 
-S1 0.5 · S2 1.5 · S3 1 · S4 1 · S5 2 · S6 1.5 · S7 1 · S8 4.5 · S9 1.25 ·
-S10 0.75 · S11 1 → ≈ 15.5 min (trim in rehearsal; S8 tabs are the flex zone).
+S1 0.5 · S2 1.5 · S2B 0.75 · S3 1 · S4 1 · S5 2 · S6 1.5 · S7 1 · S8 4.5 ·
+S9 1.25 · S10 0.75 · S11 1 → ≈ 16.25 min (trim in rehearsal; S8 tabs are the
+flex zone, and S5's per-protocol intros can shrink now that S2B introduces
+the protocols).
 
 ## Interaction inventory (for build QA)
 
@@ -278,9 +357,10 @@ is split into steps whose boundaries are the beats of
 - Shift+Space / ← / PgUp: step back; at step 0 goes to the previous pane
   (fully revealed), then the previous slide.
 - ↓ / ↑: whole-slide jump (for Q&A). Home/End unchanged.
-- S5: 3 protocol chips · S7: 3 family chips · S8: 4 result tabs — all still
-  mouse-clickable for Q&A jumps; clicking one resets that pane to its entry
-  step. S6 svg click replays from entry.
+- S5: 3 protocol chips + 1 mouse-only Q&A chip (Recovery — dashed border,
+  not in `PANES.s5.order`, Space never enters it) · S7: 3 family chips ·
+  S8: 4 result tabs — all still mouse-clickable for Q&A jumps; clicking one
+  resets that pane to its entry step. S6 svg click replays from entry.
 - Step boundaries live in the `STEPS` map (deck JS), keyed by root id /
   `tab-<key>`; thresholds are `data-t` values. Editing a diagram's timings
   may require updating its `STEPS` row + the matching script beats.

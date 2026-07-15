@@ -316,6 +316,31 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 #s2 .stem { stroke:var(--line); stroke-width:1.5; }
 
 /* ===========================================
+   S2B — MEET THE CONTENDERS (three protocol cards)
+   =========================================== */
+#s2b .cols { display:flex; gap:36px; margin-top:44px; }
+#s2b .col {
+  flex:1; border:1.5px solid var(--line); border-radius:18px; background:var(--panel-2);
+  padding:34px 36px; min-height:460px; position:relative;
+}
+#s2b .col .yr {
+  font-family:var(--serif); font-weight:300; font-size:64px; line-height:1;
+  letter-spacing:-.02em; margin-bottom:10px;
+}
+#s2b .col h3 { font-family:var(--serif); font-weight:500; font-size:33px; margin-bottom:4px; }
+#s2b .col .fam { font-size:16px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:18px; }
+#s2b .col .who { font-size:18px; color:var(--ink-dim); margin-bottom:20px; }
+#s2b .col .what { font-size:20px; line-height:1.55; }
+#s2b .col .live { margin-top:22px; padding-top:20px; border-top:1px dashed var(--line);
+                  font-size:18px; line-height:1.55; color:var(--ink-dim); }
+#s2b .col .live .lbl { display:block; font-size:14px; letter-spacing:.2em; text-transform:uppercase;
+                       color:var(--ink-faint); margin-bottom:8px; }
+#s2b .col .live b { font-weight:500; color:var(--ink); }
+#s2b .legend { margin-top:40px; font-family:var(--serif); font-size:29px; font-weight:300; line-height:1.45; }
+#s2b .legend .dot { display:inline-block; width:16px; height:16px; border-radius:50%;
+                    margin:0 6px 0 14px; vertical-align:baseline; }
+
+/* ===========================================
    S3 — THE GAP (three columns)
    =========================================== */
 #s3 .cols { display:flex; gap:36px; margin-top:44px; }
@@ -505,7 +530,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s2">
   <div class="wrap">
-    <div class="kick"><span>Act 1 · Premise</span><span class="r">02 / 12</span></div>
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">02 / 13</span></div>
     <h2 class="stitle st" data-t="100">Proven safe. <em>Still halting.</em></h2>
 
     <!-- incident timeline 2021 → 2025 -->
@@ -579,11 +604,62 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
 </section>
 
 <!-- ════════════════════════════════════════════
+     S2B · MEET THE CONTENDERS  (ch2 §2.2)
+     ════════════════════════════════════════════ -->
+<section class="slide" id="s2b">
+  <div class="wrap">
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">03 / 13</span></div>
+    <h2 class="stitle st" data-t="100">The three <em>contenders</em></h2>
+    <div class="cols">
+      <div class="col st" data-t="350" style="border-color:var(--c-pbft)">
+        <div class="yr" style="color:var(--c-pbft)">1999</div>
+        <h3 style="color:var(--c-pbft)">PBFT</h3>
+        <div class="fam">quorum-BFT family</div>
+        <div class="who">Castro &amp; Liskov · MIT, OSDI '99</div>
+        <div class="what">The first <b>practical</b> Byzantine fault-tolerant protocol:
+          3f+1 replicas, three voting phases, finality that is instant and deterministic.</div>
+        <div class="live"><span class="lbl">in the wild</span>
+          Blueprint of the whole quorum line — its descendants run
+          <b>Cosmos</b> (Tendermint) and <b>Diem&nbsp;→&nbsp;Aptos</b> (HotStuff).</div>
+      </div>
+      <div class="col st" data-t="650" style="border-color:var(--c-ffg)">
+        <div class="yr" style="color:var(--c-ffg)">2017</div>
+        <h3 style="color:var(--c-ffg)">Casper FFG</h3>
+        <div class="fam">PoS-finality family</div>
+        <div class="who">Buterin &amp; Griffith · Ethereum Foundation</div>
+        <div class="what">A <b>finality gadget</b>: stake-weighted votes laid over a running
+          chain finalise checkpoints epoch by epoch — misbehave and your stake is slashed.</div>
+        <div class="live"><span class="lbl">in the wild</span>
+          The finality layer inside Gasper — securing <b>Ethereum</b> mainnet
+          since the Merge (09/2022).</div>
+      </div>
+      <div class="col st" data-t="950" style="border-color:var(--c-snowman)">
+        <div class="yr" style="color:var(--c-snowman)">2019</div>
+        <h3 style="color:var(--c-snowman)">Snowman</h3>
+        <div class="fam">sampling family · Avalanche</div>
+        <div class="who">"Team Rocket" · formalised at Cornell, built by Ava Labs</div>
+        <div class="what">Consensus by <b>repeated random polls</b>: each node samples K peers
+          until confidence builds; finality is probabilistic — 1&nbsp;−&nbsp;ε.</div>
+        <div class="live"><span class="lbl">in the wild</span>
+          The production engine of <b>Avalanche</b> — C-Chain &amp; P-Chain
+          since mainnet launch (2020).</div>
+      </div>
+    </div>
+    <div class="legend st" data-t="1500">One colour per protocol —
+      <span class="dot" style="background:var(--c-pbft)"></span>amber,
+      <span class="dot" style="background:var(--c-ffg)"></span>violet,
+      <span class="dot" style="background:var(--c-snowman)"></span>ice —
+      they tag every chart from here to the end.</div>
+  </div>
+  <div class="src">report §2.2</div>
+</section>
+
+<!-- ════════════════════════════════════════════
      S3 · THE GAP  (ch2 §2.3–2.4)
      ════════════════════════════════════════════ -->
 <section class="slide" id="s3">
   <div class="wrap">
-    <div class="kick"><span>Act 1 · Premise</span><span class="r">03 / 12</span></div>
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">04 / 13</span></div>
     <h2 class="stitle st" data-t="100">Put the three families side by side <em>today</em> — and you get this</h2>
     <div class="cols">
       <div class="col st" data-t="350" style="border-color:var(--c-pbft)">
@@ -616,7 +692,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s4">
   <div class="wrap">
-    <div class="kick"><span>Act 1 · Premise</span><span class="r">04 / 12</span></div>
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">05 / 13</span></div>
     <h2 class="stitle st" data-t="100">The goal</h2>
     <div class="goal st" data-t="250"><b>One simulator</b> · three protocols · matched assumptions.</div>
     <div class="rqs">
@@ -636,13 +712,16 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s5">
   <div class="wrap">
-    <div class="kick"><span>Act 2 · The simulation</span><span class="r">05 / 12</span></div>
+    <div class="kick"><span>Act 2 · The simulation</span><span class="r">06 / 13</span></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle">Three families, <em>three protocols</em></h2>
       <div class="chiprow" id="s5chips">
         <button class="chip act" data-c="pbft">PBFT</button>
         <button class="chip" data-c="ffg">Casper FFG</button>
         <button class="chip" data-c="snowman">Snowman</button>
+        <!-- Q&A backup pane — mouse-only: not in PANES.s5.order, so the
+             Space walk of the talk never enters it -->
+        <button class="chip" data-c="recovery" style="border-style:dashed" title="Q&amp;A backup — recovery mechanisms compared">Recovery ▸ Q&amp;A</button>
       </div>
     </div>
 
@@ -657,6 +736,9 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
 
       <!-- ── PBFT: n=4, node 3 offline; request → pre-prepare → prepare → commit ── -->
       <g class="dia actv" id="dia-pbft">
+        <!-- scene 1: happy path. data-x pairs it with the view-change scene:
+             when the vignette turns on at beat 4, this whole group fades out. -->
+        <g class="stf" data-t="0" data-x="pbx">
         <!-- phase labels -->
         <g class="tm stf" data-t="150" text-anchor="middle">
           <text x="330" y="34">request</text><text x="545" y="34">PRE-PREPARE</text>
@@ -717,6 +799,66 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text x="1355" y="494" text-anchor="middle" fill="var(--c-pbft)">block decided</text>
           <text class="tm" x="1355" y="519" text-anchor="middle">2f+1 = 3 matching votes</text>
         </g>
+        </g><!-- /scene 1: happy path -->
+
+        <!-- ── scene 2 (beat 4): view-change — the OTHER fault, the primary
+             goes silent. Shares data-x with scene 1, so turning this on
+             fades the happy path out entirely (no ghost text underneath).
+             N3 is back online so {N1,N2,N3} still reaches quorum 2f+1 = 3.
+             Top label row (y 70/92) is two-line and column-spaced. ── -->
+        <g class="stf" data-t="3600" data-x="pbx">
+        <g class="stf" data-t="3700">
+          <text class="tb" x="830" y="34" text-anchor="middle" fill="var(--c-pbft)">the other fault — the primary goes silent</text>
+          <line class="lane off" x1="240" y1="196" x2="1420" y2="196"/>
+          <line class="lane" x1="240" y1="312" x2="1420" y2="312"/>
+          <line class="lane" x1="240" y1="428" x2="1420" y2="428"/>
+          <line class="lane" x1="240" y1="544" x2="1420" y2="544"/>
+          <text class="tl" x="60" y="202" fill="var(--ink-faint)">N0 <tspan class="ts">· primary — silent</tspan></text>
+          <text class="tl" x="60" y="318">N1</text>
+          <text class="tl" x="60" y="434">N2</text>
+          <text class="tl" x="60" y="550">N3 <tspan class="ts">· back online</tspan></text>
+        </g>
+        <g class="stf" data-t="3900" stroke="var(--bad)" stroke-width="3">
+          <line x1="461" y1="182" x2="489" y2="210"/><line x1="489" y1="182" x2="461" y2="210"/>
+        </g>
+        <g class="stf" data-t="4300">
+          <text class="tm" x="500" y="70" text-anchor="middle" style="fill:var(--bad)">timeout Δ</text>
+          <text class="ts" x="525" y="292" style="fill:var(--bad)">Δ</text>
+          <text class="ts" x="525" y="408" style="fill:var(--bad)">Δ</text>
+          <text class="ts" x="525" y="524" style="fill:var(--bad)">Δ</text>
+        </g>
+        <g class="stf" data-t="4700" text-anchor="middle">
+          <text class="tm" x="645" y="70" style="fill:var(--ink)">VIEW-CHANGE</text>
+          <text class="ts" x="645" y="92" style="fill:var(--ink-dim)">all-to-all · 2f+1 = 3</text>
+        </g>
+        <g style="stroke:var(--c-pbft)">
+          <line class="msg std" data-t="4700" marker-end="url(#m-p)" x1="560" y1="312" x2="680" y2="428"/>
+          <line class="msg std" data-t="4780" marker-end="url(#m-p)" x1="560" y1="312" x2="700" y2="544"/>
+          <line class="msg std" data-t="4860" marker-end="url(#m-p)" x1="580" y1="428" x2="700" y2="312"/>
+          <line class="msg std" data-t="4940" marker-end="url(#m-p)" x1="580" y1="428" x2="710" y2="544"/>
+          <line class="msg std" data-t="5020" marker-end="url(#m-p)" x1="600" y1="544" x2="720" y2="312"/>
+          <line class="msg std" data-t="5100" marker-end="url(#m-p)" x1="600" y1="544" x2="730" y2="428"/>
+        </g>
+        <g class="stf" data-t="5500" text-anchor="middle">
+          <text class="tm" x="940" y="70" style="fill:var(--ink)">NEW-VIEW</text>
+          <text class="ts" x="940" y="92" style="fill:var(--ink-dim)">N1 = primary</text>
+          <circle cx="850" cy="312" r="16" fill="none" stroke="var(--c-pbft)" stroke-width="2.5"/>
+        </g>
+        <g style="stroke:var(--c-pbft)">
+          <line class="msg std" data-t="5700" marker-end="url(#m-p)" x1="880" y1="312" x2="1000" y2="428"/>
+          <line class="msg std" data-t="5780" marker-end="url(#m-p)" x1="880" y1="312" x2="1020" y2="544"/>
+          <line class="msg std" data-t="6200" marker-end="url(#m-p)" x1="1080" y1="312" x2="1200" y2="428"/>
+          <line class="msg std" data-t="6280" marker-end="url(#m-p)" x1="1080" y1="312" x2="1220" y2="544"/>
+        </g>
+        <g class="stf" data-t="6300" text-anchor="middle">
+          <text class="tm" x="1160" y="70" style="fill:var(--ink)">…phases replay</text>
+        </g>
+        <g class="bdg stf" data-t="6700">
+          <rect x="1250" y="464" width="290" height="72" style="stroke:var(--c-pbft)"/>
+          <text x="1395" y="494" text-anchor="middle" fill="var(--c-pbft)">liveness restored</text>
+          <text class="tm" x="1395" y="519" text-anchor="middle">same 2f+1 quorum</text>
+        </g>
+        </g><!-- /scene 2: view-change -->
       </g>
 
       <!-- ── Casper FFG: checkpoint chain over epochs ── -->
@@ -867,6 +1009,85 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text class="tm" x="940" y="462" text-anchor="middle">ε ≤ (1 − α_c/K)^β</text>
         </g>
       </g>
+
+      <!-- ── RECOVERY (Q&A backup, mouse-only chip — not in the Space order):
+           three recovery philosophies side by side. No STEPS entry, so the
+           whole pane autoplays its data-t cascade on click. ── -->
+      <g class="dia" id="dia-recovery">
+        <!-- column dividers -->
+        <g class="stf" data-t="0">
+          <line class="lane" x1="520" y1="60" x2="520" y2="520"/>
+          <line class="lane" x1="1040" y1="60" x2="1040" y2="520"/>
+        </g>
+
+        <!-- ── panel 1: PBFT — rotate the role ── -->
+        <g class="stf" data-t="100">
+          <text class="tb" x="260" y="40" text-anchor="middle" fill="var(--c-pbft)">PBFT · rotate the role</text>
+          <circle class="nd" cx="110" cy="240" r="26"/>
+          <circle cx="260" cy="240" r="26" fill="var(--panel)" stroke="var(--c-pbft)" stroke-width="2.5"/>
+          <circle class="nd" cx="410" cy="240" r="26"/>
+          <text class="tm" x="110" y="296" text-anchor="middle">N0</text>
+          <text class="tm" x="260" y="296" text-anchor="middle" fill="var(--c-pbft)">N1 · new leader</text>
+          <text class="tm" x="410" y="296" text-anchor="middle">N2</text>
+          <g stroke="var(--bad)" stroke-width="3">
+            <line x1="96" y1="226" x2="124" y2="254"/><line x1="124" y1="226" x2="96" y2="254"/>
+          </g>
+          <path d="M 130 200 Q 185 150 240 200" fill="none" style="stroke:var(--c-pbft)" stroke-width="2.5" marker-end="url(#m-p)"/>
+          <text class="tm" x="185" y="140" text-anchor="middle">view-change</text>
+          <text class="ts" x="260" y="380" text-anchor="middle">timeout Δ → VIEW-CHANGE (all-to-all) → round replays</text>
+          <text class="ts" x="260" y="470" text-anchor="middle" fill="var(--c-pbft)">structural · recovers in rounds</text>
+          <text class="ts" x="260" y="496" text-anchor="middle">shown live: PBFT pane, last beat</text>
+        </g>
+
+        <!-- ── panel 2: Casper FFG — bleed the absentees ── -->
+        <g class="stf" data-t="500">
+          <text class="tb" x="780" y="40" text-anchor="middle" fill="var(--c-ffg)">Casper FFG · bleed the absentees</text>
+          <!-- stake bars: two voting (full), two silent (draining) -->
+          <g>
+            <rect x="600" y="180" width="52" height="180" fill="var(--c-ffg)" fill-opacity="0.85"/>
+            <rect x="672" y="180" width="52" height="180" fill="var(--c-ffg)" fill-opacity="0.85"/>
+            <rect x="744" y="180" width="52" height="180" fill="none" stroke="var(--ink-faint)" stroke-dasharray="5 5"/>
+            <rect x="744" y="290" width="52" height="70"  fill="var(--ink-faint)" fill-opacity="0.5"/>
+            <rect x="816" y="180" width="52" height="180" fill="none" stroke="var(--ink-faint)" stroke-dasharray="5 5"/>
+            <rect x="816" y="290" width="52" height="70"  fill="var(--ink-faint)" fill-opacity="0.5"/>
+            <path d="M 770 210 L 770 270" stroke="var(--bad)" stroke-width="2.5" marker-end="url(#m-d)"/>
+            <path d="M 842 210 L 842 270" stroke="var(--bad)" stroke-width="2.5" marker-end="url(#m-d)"/>
+          </g>
+          <text class="ts" x="662" y="386" text-anchor="middle" style="fill:var(--c-ffg)">voting</text>
+          <text class="ts" x="806" y="386" text-anchor="middle" style="fill:var(--ink-dim)">silent · −D·p / epoch</text>
+          <text class="tm" x="950" y="262" text-anchor="middle" fill="var(--c-ffg)">voters ≥ ⅔</text>
+          <text class="tm" x="950" y="286" text-anchor="middle" fill="var(--c-ffg)">again → ✓</text>
+          <text class="ts" x="780" y="440" text-anchor="middle">inactivity leak — FFG §4.2 "Catastrophic Crashes"</text>
+          <text class="ts" x="780" y="470" text-anchor="middle" fill="var(--c-ffg)">economic · recovers in epochs</text>
+          <text class="ts" x="780" y="496" text-anchor="middle" style="fill:var(--bad)">extension — NOT in the simulated core (→ S11)</text>
+          <text class="ts" x="780" y="522" text-anchor="middle" style="fill:var(--bad)">and it trades accountable safety away (paper Fig. 6)</text>
+        </g>
+
+        <!-- ── panel 3: Snowman — resample and wait ── -->
+        <g class="stf" data-t="900">
+          <text class="tb" x="1300" y="40" text-anchor="middle" fill="var(--c-snowman)">Snowman · resample and wait</text>
+          <circle cx="1120" cy="240" r="26" fill="var(--panel)" stroke="var(--c-snowman)" stroke-width="2.5"/>
+          <text class="tm" x="1120" y="296" text-anchor="middle">v</text>
+          <!-- three rounds: two failing samples, one healed -->
+          <g style="stroke:var(--c-snowman)" stroke-width="2" opacity="0.55">
+            <line x1="1150" y1="228" x2="1210" y2="150"/><line x1="1150" y1="240" x2="1215" y2="240"/><line x1="1150" y1="252" x2="1210" y2="330"/>
+          </g>
+          <text class="ts" x="1240" y="150" fill="var(--bad)">✗</text><text class="ts" x="1240" y="245" fill="var(--bad)">✗</text><text class="ts" x="1240" y="335" fill="var(--bad)">✗</text>
+          <text class="ts" x="1235" y="390" text-anchor="middle">α_c missed → just poll again</text>
+          <g style="stroke:var(--c-snowman)" stroke-width="2.5">
+            <line x1="1150" y1="228" x2="1400" y2="130"/><line x1="1150" y1="240" x2="1420" y2="240"/><line x1="1150" y1="252" x2="1400" y2="350"/>
+          </g>
+          <text class="tm" x="1440" y="135" fill="var(--c-snowman)">✓</text><text class="tm" x="1450" y="245" fill="var(--c-snowman)">✓</text><text class="tm" x="1440" y="355" fill="var(--c-snowman)">✓</text>
+          <text class="ts" x="1300" y="424" text-anchor="middle">network heals → the same loop succeeds</text>
+          <text class="ts" x="1300" y="470" text-anchor="middle" fill="var(--c-snowman)">statistical · every round is already a retry</text>
+          <text class="ts" x="1300" y="496" text-anchor="middle">no timer, no role — nothing forces progress</text>
+        </g>
+
+        <!-- ── unifying line ── -->
+        <g class="stf" data-t="1400">
+          <text class="tl" x="780" y="580" text-anchor="middle"><tspan fill="var(--c-pbft)">rotate the role</tspan> · <tspan fill="var(--c-ffg)">bleed the absentees</tspan> · <tspan fill="var(--c-snowman)">resample and wait</tspan> — the recovery style mirrors the design choice (→ S9)</text>
+        </g>
+      </g>
     </svg>
     </div>
 
@@ -878,6 +1099,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <span>quorum <b>⅔ of n (2f+1)</b></span>
         <span>finality <b>ε = 0</b></span>
         <span>pressure point <b>leader failure</b> (liveness) · <b>n/3</b> (safety)</span>
+        <span>recovery <b>view-change</b></span>
       </div>
     </div>
     <div class="cappane" data-p="ffg">
@@ -888,6 +1110,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <span>quorum <b>⅔ of total stake</b></span>
         <span>finality <b>ε = 0</b></span>
         <span>pressure point <b>checkpoint delay</b> (liveness) · <b>⅓ stake burn</b> (safety)</span>
+        <span>recovery <b>none — waits an epoch</b></span>
       </div>
     </div>
     <div class="cappane" data-p="snowman">
@@ -898,7 +1121,14 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <span>quorum <b>α_c ≈ 80% of K sample</b></span>
         <span>finality <b>ε &gt; 0, bounded</b></span>
         <span>pressure point <b>counter stall</b> (liveness) · <b>ε bound</b> (safety)</span>
+        <span>recovery <b>re-poll only, no fallback</b></span>
       </div>
+    </div>
+    <div class="cappane" data-p="recovery">
+      <div class="cap"><b>Q&amp;A backup — three recovery philosophies.</b> PBFT rotates the faulty <b>role</b> (rounds).
+        The FFG core gadget has none; production Gasper adds the paper's §4.2 extension — the <b>inactivity leak</b> (epochs),
+        which buys liveness by weakening accountable safety. Snowman <b>re-samples</b> every round — an implicit retry
+        with nothing to force progress meanwhile. Simulated scope = the cores only (→ S11).</div>
     </div>
   </div>
   <div class="src">report §3.3 · Table 2.1</div>
@@ -910,7 +1140,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s6">
   <div class="wrap">
-    <div class="kick"><span>Act 2 · The simulation</span><span class="r">06 / 12</span></div>
+    <div class="kick"><span>Act 2 · The simulation</span><span class="r">07 / 13</span></div>
     <h2 class="stitle">One harness — <em>only the protocol slot varies</em></h2>
 
     <svg width="1728" height="700" viewBox="0 0 1560 632" aria-label="Simulation harness pipeline" id="s6svg" style="cursor:pointer">
@@ -985,7 +1215,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s7">
   <div class="wrap">
-    <div class="kick"><span>Act 2 · The simulation</span><span class="r">07 / 12</span></div>
+    <div class="kick"><span>Act 2 · The simulation</span><span class="r">08 / 13</span></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle">Three run families, <em>one axis each</em></h2>
       <div class="chiprow" id="s7chips">
@@ -1109,7 +1339,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s8">
   <div class="wrap">
-    <div class="kick"><span>Act 3 · Results</span><span class="r">08 / 12</span></div>
+    <div class="kick"><span>Act 3 · Results</span><span class="r">09 / 13</span></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle" style="font-size:52px">Results</h2>
       <div class="chiprow" id="s8tabs">
@@ -1289,7 +1519,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s9">
   <div class="wrap">
-    <div class="kick"><span>Act 4 · Insight</span><span class="r">09 / 12</span></div>
+    <div class="kick"><span>Act 4 · Insight</span><span class="r">10 / 13</span></div>
     <h2 class="stitle">RQ5 — <em>no protocol dominates</em></h2>
     <div class="cols">
       <div>
@@ -1365,7 +1595,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s10">
   <div class="wrap">
-    <div class="kick"><span>Act 4 · Insight</span><span class="r">10 / 12</span></div>
+    <div class="kick"><span>Act 4 · Insight</span><span class="r">11 / 13</span></div>
     <h2 class="stitle st" data-t="100">A <em>selection map</em>, not a winner</h2>
     <div class="maps">
       <div class="map st" data-t="350" style="border-color:var(--c-ffg)">
@@ -1403,7 +1633,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s11">
   <div class="wrap">
-    <div class="kick"><span>Act 4 · Closing</span><span class="r">11 / 12</span></div>
+    <div class="kick"><span>Act 4 · Closing</span><span class="r">12 / 13</span></div>
     <h2 class="stitle st" data-t="100">Limitations &amp; future work</h2>
     <div class="cols">
       <div class="col lim st" data-t="350">
@@ -1440,7 +1670,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s12">
   <div class="wrap">
-    <div class="kick"><span>USTH · ICT — Bachelor Thesis Defense</span><span class="r">12 / 12</span></div>
+    <div class="kick"><span>USTH · ICT — Bachelor Thesis Defense</span><span class="r">13 / 13</span></div>
   </div>
   <h1 class="thanks st" data-t="100">Thank you<br><em>for listening.</em></h1>
   <div class="tsub st" data-t="500">Questions are welcome.</div>
@@ -1521,9 +1751,10 @@ function playSeq(root) {
    =========================================== */
 const STEPS = {
   's2':          [500, 950, 1350, 1900, 2400, Infinity],
+  's2b':         [350, 650, 950, 1500, Infinity],
   's3':          [350, 600, 850, 1300, Infinity],
   's4':          [500, 700, 900, 1100, 1300, Infinity],
-  'dia-pbft':    [400, 1400, 2200, 3200, Infinity],
+  'dia-pbft':    [400, 1400, 3200, 3600, Infinity],
   'dia-ffg':     [700, 2400, 2900, 3300, Infinity],
   'dia-snowman': [380, 1380, 2800, 3800, Infinity],
   's6':          [600, 1300, 1700, 2400, 2900, 3300, Infinity],
