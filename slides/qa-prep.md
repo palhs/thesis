@@ -66,8 +66,8 @@ chip is not in the Space order — it opens only by mouse click, so the
 - Leak-weakens-accountability: same §4.2 — two conflicting finalized
   checkpoints, no slashing, validators "should simply favor whatever
   finalized checkpoint [they] saw first" (paper's Figure 6).
-- Wiki ingest still pending (Backlog, 2026-07-15) so drafts can cite it;
-  this file's quotes are verified against the raw PDF directly.
+- Wiki-backed since 2026-07-15: `wiki/algorithms/pos.md` carries the leak
+  under "Not implemented (deferred)" with the same section/page references.
 - 05/2023 stall specifics: the leak activated during the incident but the
   stall also ended via client fixes — say "the leak is the in-protocol
   part of how mainnet recovers", do not attribute that incident's end to
