@@ -1,6 +1,6 @@
 # Speaking script — thesis defense (15 minutes)
 
-Deck: `slides/thesis-defense.html` · 13 slides · core **14:45** + ~1:30 optional beats.
+Deck: `slides/thesis-defense.html` · 13 slides · core **15:10** + ~1:30 optional beats.
 This is the script to MEMORIZE via the anchor-skeleton structure. Q&A prep is a
 separate session, kept in `slides/qa-prep.md` — not here.
 
@@ -28,6 +28,46 @@ count and Space order are UNCHANGED** — every new annotation is either
 static or reveals with an existing beat. Speaking rule: the detail layer is
 FOR THE COMMITTEE TO READ, not to be read aloud; only point at it when asked.
 The `📎` note under each slide lists what newly appears.
+
+2026-07-16 — **S10 callback reworded** (deck + this script). The old line —
+"each opening incident is a protocol at its structural limit" — over-claimed:
+Solana (Tower BFT) and Sui (Narwhal/Bullshark) are not among the three tested
+families. New line credits Ethereum + Cosmos as in-scope and frames Solana +
+Sui as same-phenomenon motivation beyond the harness. Spoken defense for the
+scope question added as `qa-prep.md` **Q2**. Beat count and timing unchanged.
+
+2026-07-16 (later) — **S2 beats reworded** to the rehearsed spoken flow: the
+Cosmos/Sui beat now closes with the service-interruption consequence, and the
+text-box beat runs proofs-not-wrong → assumptions → many disturbances at once
+(delay · loss · malicious nodes) → can't attribute. The opening anchor also
+dropped the "— proven safe" echo (the slide title already carries it); beat
+count, Space order, and timing unchanged.
+
+2026-07-16 (later) — **S8 gained three spoken glosses** (terms that first
+appear at S8 and carry the main argument): per-validator counts on Tab A
+(reconciles 2n with S5's O(n²) — verified against ch3 §"total_msgs_per_acu"),
+fork + liveness/safety on Tab B-Loss, equivocation on Tab C. Detail-layer
+terms (goodput, φ*, success rate, AURC) are deliberately NOT glossed in the
+talk — they are Q&A material, listed in `qa-prep.md` **Q4**. Beat count,
+Space order, and timing unchanged (glosses are half-sentence).
+
+2026-07-16 (later) — **S4 beats RQ3–RQ5 reworded plain-first**: those beats
+now give the plain-language meaning first and land on the slide's term
+(committed unit, adversary), since ACU is only defined at S6. RQ1/RQ2 keep
+their original compact phrasing (finality and throughput are already glossed
+by S2/S3). Slide text unchanged — it matches report §1.3. Beat count, Space
+order, and timing unchanged.
+
+2026-07-18 — **S9 †-caveat now SPOKEN + S11 sixth limitation** (deck-vs-report
+alignment pass). S9: the two non-measured axes (accountable · equivocation)
+carry a **†** on the radar and a third note line under it; the caveat is
+spoken in full (+0:20) — report §5.3 states it prominently, so the committee
+hears it from us before they can ask. S11: the permanent-loss limitation from
+ch6 §6.2 restored as a sixth bullet and one spoken clause (+0:05) — it is the
+shield for the FFG-collapses-at-5%-loss headline. No new beats or Space
+presses; S9→S12 timings shifted **+0:25**, core now **15:10** of a 15:00
+slot — the pending reclaim (2026-07-14 entry: S5 intros, S8 cuttable beats)
+grows to ~70 s.
 
 ## How to use
 
@@ -75,18 +115,20 @@ The `📎` note under each slide lists what newly appears.
 ## S2 · Proven safe. Still halting. — enter 0:30 · speak 1:30 · leave 2:00
 
 **OPENING ANCHOR:**
-> "Layer-1 consensus protocols all come with safety proofs — proven safe.
-> But here are four years of real-world operation."
+> "Layer-1 consensus protocols all come with safety proofs. But here are
+> four years of real-world operation."
 
 - `▶` Solana — network-wide halt **17 hours, Sep 2021** — then again
   **Apr 2022 · Feb 2023 · Feb 2024**
 - `▶` Ethereum — **7-block** reorg, **May 2022** · finality stall across
   multiple epochs **May 2023**
-- `▶` Cosmos Hub halt **Jun 2024** · Sui validator crash-loop **Nov 2024**
-- `▶` (text box) — the proofs are NOT wrong; what breaks are the proofs'
-  **assumptions**: bounded delay, enough honest validators — routinely
-  violated in deployment; real networks mix multiple disturbances at once →
-  impossible to isolate which condition caused which incident
+- `▶` Cosmos Hub halt **Jun 2024** · Sui validator crash-loop **Nov 2024** —
+  each incident interrupts the services built on top
+- `▶` (text box) — the proofs are NOT wrong; what breaks are their
+  **assumptions** — bounded delay, enough honest validators; in real
+  operation many disturbances act at once — network delay, message loss,
+  malicious nodes — so it's very hard to tell which condition caused which
+  failure
 
 `▶` (big question appears) — **TRANSITION ANCHOR:**
 > "So: which condition breaks which protocol? Answering that requires a
@@ -151,11 +193,17 @@ The `📎` note under each slide lists what newly appears.
 > "The goal fits in one line: one simulator, three protocols, one shared set
 > of assumptions."
 
+*(spoken rule for this slide: plain words first, then land on the slide's
+term — the audience hears the meaning and sees the word)*
+
 - `▶` **WHEN** — when the network slows down, how much does finality slow → RQ1
 - `▶` **WHAT** — what happens to throughput as the Byzantine fraction rises → RQ2
-- `▶` **HOW MUCH** — how many messages does each unit of commit cost → RQ3
-- `▶` **WHO** — which adversary breaks which protocol, on which property → RQ4
-- `▶` **WHICH** — does any protocol win across the board → RQ5
+- `▶` **HOW MUCH** — for every block the network commits, how many messages
+  did it have to send — the cost per **committed unit** (defined precisely
+  on the harness slide) → RQ3
+- `▶` **WHO** — which kind of attacker — **adversary** — breaks which
+  protocol, and what does it break: speed, or safety → RQ4
+- `▶` **WHICH** — after all of that, does any protocol **win overall** → RQ5
 
 **TRANSITION ANCHOR:**
 > "Before measuring, we need to see just how differently these three
@@ -305,8 +353,10 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
 **Tab A — Scaling (RQ3)** (open by default):
 - `▶` messages per ACU at **n = 25**, log axis: Casper FFG **≈29** ·
   PBFT **≈50** · Snowman **≈601**
-- `▶` measured trends match the theory — **1.15n · 2n · 2Kβ** — the
-  **order-of-magnitude** gap is the price of subsampling
+- `▶` measured trends match the theory — **1.15n · 2n · 2Kβ** — these are
+  **per-validator** counts: PBFT's **2n**, times n validators, is exactly
+  the **O(n²)** total from the diagram slide; the **order-of-magnitude**
+  gap is the price of subsampling
 - `▶` (cuttable) latency is flat in n — PBFT & Snowman **≈1 s**, FFG
   **≈5 s** due to epoch-granularity finality; goodput **≈95 · 95 · 80 tx/s**
   out of 100 offered *(this beat now also reveals the stat box on the
@@ -331,7 +381,9 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
   neither) *(slide also notes: at n=25 PBFT ≈ Snowman — AURC tie 0.351 vs
   0.369; if the committee asks whether the ranking is stable in n, point at
   this line)*
-- `▶` no protocol forks — loss consumes **liveness**, not **safety**;
+- `▶` no protocol **forks** — the chain never splits into two conflicting
+  histories; loss consumes **liveness** — the chain stops making progress —
+  not **safety** — nothing already committed is ever contradicted;
   (cuttable) the survivors pay **×2–3.5** latency
 
 `▶` (switch to tab **C — Adversarial, RQ2+RQ4** — 3×3 matrix):
@@ -341,7 +393,8 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
 - `▶` **silent**: PBFT clean up to **φ = 0.33**, quorum cliff at **0.40** ·
   FFG decays gradually toward **0.33** · Snowman starves first — survival
   depth **φ\* = 0.10 / 0.20**
-- `▶` **equivocation** (beyond ⅓): PBFT **forks** deterministically at
+- `▶` **equivocation** — a node sends conflicting votes for two blocks at
+  once — (beyond ⅓): PBFT **forks** deterministically at
   **0.40** — NOT attributable · FFG does not fork — **≥⅓ of stake is
   slashable**, accountable · Snowman has no fork surface — bound
   **ε ≈ 5×10⁻¹⁵ / 3×10⁻¹¹**
@@ -356,13 +409,25 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S9 · RQ5 — no one dominates — enter 12:15 · speak 1:00 · leave 13:15
+## S9 · RQ5 — no one dominates — enter 12:15 · speak 1:20 · leave 13:35
 
 - `▶` an **8-axis** radar from Table 5.1 — ordinal ranking, illustrative
   only; the table in the report is the evidence *(below the radar there is
-  now a "best per axis" line — Table 5.1's Best column colored by protocol;
-  each insight block on the right gained a stat line. Both are for the
-  committee to read.)*
+  now a "best per axis" line — Table 5.1's Best column colored by protocol —
+  plus a **† note** on the two non-measured axes; each insight block on the
+  right gained a stat line. The first and last are for the committee to
+  read; the † caveat is SPOKEN, next.)*
+
+*(same beat — no new press)* **the † caveat, spoken (~0:20, point at the
+† note under the radar):**
+> "One caveat before the verdict: two of these eight axes are not measured
+> contests. Accountable safety — Casper FFG holds it **by definition**: only
+> a slashing protocol can attribute a failure. Equivocation safety — Snowman
+> ranks first on an **analytical bound**, a number of order ten-to-the-minus-
+> fifteen my simulator can never witness. Strip those two, and PBFT and
+> Casper FFG each still hold two measured corners — **Snowman holds none**;
+> its place on the frontier rests entirely on that unwitnessed ε. So
+> no-dominance is the honest verdict — but it is not a symmetric one."
 
 `▶` — **CORE-IDEA ANCHOR (memorize verbatim):**
 > "The central finding: the SAME design choice produces both each
@@ -383,7 +448,7 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S10 · Selection map — enter 13:15 · speak 0:40 · leave 13:55
+## S10 · Selection map — enter 13:35 · speak 0:40 · leave 14:15
 
 - `▶` if the main threat requires **accountability** → **Casper FFG** —
   slashing prices a safety violation at ≥⅓ of stake
@@ -391,8 +456,11 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
   a recovery path
 - `▶` need **equivocation resistance** → **Snowman** — no fork surface to
   attack
-- `▶` (callback) each incident on the opening slide is exactly one protocol
-  hitting its **structural limit**
+- `▶` (callback) the opening incidents, revisited — **Ethereum** and
+  **Cosmos** run the two families whose **structural limits** the results
+  just mapped; **Solana** and **Sui** show the same failure class in
+  families **outside the harness** — motivation, not scope (if pressed:
+  `qa-prep.md` Q2)
 - `▶` contributions: simulator · **3** implementations · dataset + analysis ·
   methodology — extending Gervais et al. from PoW to the BFT families
 
@@ -404,13 +472,14 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S11 · Limitations & future work — enter 13:55 · speak 0:50 · leave 14:45
+## S11 · Limitations & future work — enter 14:15 · speak 0:55 · leave 15:10
 
 - `▶` **limitations**: simplified implementations, one representative per
   family — conclusions are about THESE protocols, not abstract families ·
   **n ≤ 25**, beyond that is a sensitivity argument · Snowman safety is an
-  analytical bound, no empirical witness · the adversary spares the view-0
-  leader · compute/bandwidth not modeled
+  analytical bound, no empirical witness · loss is a PERMANENT drop — no
+  retransmission, so the loss curves are upper bounds on fragility · the
+  adversary spares the view-0 leader · compute/bandwidth not modeled
 - `▶` **future work**: BLS/HotStuff-style threshold signatures ·
   saturation-throughput model · adaptive timeouts in the timeout-stressed
   regime · empirical witness for ε · extending the harness to the DAG
@@ -424,7 +493,7 @@ Later than 8:45 → drop every `(cuttable)` beat from here on.**
 
 ---
 
-## S12 · Thank you — 14:45
+## S12 · Thank you — 15:10
 
 **ANCHOR:**
 > "Thank you, committee members, for your attention. I am ready for your

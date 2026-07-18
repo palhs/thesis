@@ -378,10 +378,10 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 .cappane { display:none; }
 .cappane.actv { display:block; }
 /* spec strip — Table 2.1 fields not carried by the diagram (reading layer, no steps) */
-.spec { display:flex; gap:10px; margin-top:8px; }
+.spec { display:flex; flex-wrap:wrap; gap:6px 8px; margin-top:8px; }
 .spec span {
-  font-size:15px; letter-spacing:.02em; color:var(--ink-dim); white-space:nowrap;
-  border:1px solid var(--line); border-radius:8px; padding:5px 12px;
+  font-size:13.5px; letter-spacing:.02em; color:var(--ink-dim); white-space:nowrap;
+  border:1px solid var(--line); border-radius:8px; padding:4px 8px;
 }
 .spec span b { color:var(--ink); font-weight:500; }
 
@@ -558,6 +558,12 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <g class="ev stf" data-t="750">
         <circle cx="525" cy="250" r="8"/><circle cx="808" cy="250" r="8"/><circle cx="1148" cy="250" r="8"/>
         <line class="stem" x1="525" y1="250" x2="525" y2="330"/>
+        <!-- dashed bracket tying the 02/2023 and 02/2024 recurrences to the shared label -->
+        <line class="stem" stroke-dasharray="4 5" x1="808"  y1="258" x2="808"  y2="315"/>
+        <line class="stem" stroke-dasharray="4 5" x1="1148" y1="258" x2="1148" y2="315"/>
+        <!-- horizontal run breaks around x=923 so it does not appear to include the Ethereum 05/2023 stem -->
+        <line class="stem" stroke-dasharray="4 5" x1="525" y1="315" x2="908" y2="315"/>
+        <line class="stem" stroke-dasharray="4 5" x1="938" y1="315" x2="1148" y2="315"/>
         <text class="ts" x="525" y="352" text-anchor="middle">halts again</text>
         <text class="ts" x="525" y="374" text-anchor="middle">04/2022 · 02/2023 · 02/2024</text>
       </g>
@@ -1107,7 +1113,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <div class="spec">
         <span>synchrony <b>partial</b></span>
         <span>proposer <b>stake-weighted</b></span>
-        <span>quorum <b>⅔ of total stake</b></span>
+        <span>quorum <b>⅔ of stake</b></span>
         <span>finality <b>ε = 0</b></span>
         <span>pressure point <b>checkpoint delay</b> (liveness) · <b>⅓ stake burn</b> (safety)</span>
         <span>recovery <b>none — waits an epoch</b></span>
@@ -1116,9 +1122,9 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
     <div class="cappane" data-p="snowman">
       <div class="cap"><b>Leaderless subsampling</b> · probabilistic finality ε ≤ (1−α_c/K)^β · <b>per-validator cost independent of n</b> — each validator only ever talks to K sampled peers per round.</div>
       <div class="spec">
-        <span>synchrony <b>asynchronous</b></span>
+        <span>synchrony <b>async</b></span>
         <span>proposer <b>round-robin</b></span>
-        <span>quorum <b>α_c ≈ 80% of K sample</b></span>
+        <span>quorum <b>α_c ≈ 0.8K</b></span>
         <span>finality <b>ε &gt; 0, bounded</b></span>
         <span>pressure point <b>counter stall</b> (liveness) · <b>ε bound</b> (safety)</span>
         <span>recovery <b>re-poll only, no fallback</b></span>
@@ -1347,6 +1353,9 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <button class="chip" data-tab="bd">B — Delay</button>
         <button class="chip" data-tab="bl">B — Loss</button>
         <button class="chip" data-tab="c">C — Adversarial</button>
+        <!-- Q&A backup pane — mouse-only: not in PANES.s8.order, so the
+             Space walk of the talk never enters it -->
+        <button class="chip" data-tab="sw" style="border-style:dashed" title="Q&amp;A backup — full scaling sweep n = 4 → 25">Sweep ▸ Q&amp;A</button>
       </div>
     </div>
 
@@ -1394,7 +1403,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text x="1354" y="388" text-anchor="middle" style="font-size:15px;font-weight:400" fill="var(--ink-dim)">goodput ≈ 95 · 95 · 80 tx/s</text>
         </g>
       </svg>
-      <div class="take st" data-t="1900"><b>Cheapest: Casper FFG.</b> Measured trends match published asymptotics (2n · 1.15n · 2Kβ).
+      <div class="take st" data-t="1900"><b>Cheapest: Casper FFG.</b> Measured trends match published asymptotics (2n · 1.125n · 2Kβ).
         Secondary: latency is flat in n — PBFT &amp; Snowman ≈ 1 s, FFG ≈ 5 s (epoch-granularity finality); goodput ≈ 95 vs ≈ 80 tx/s. <span style="color:var(--ink-faint)">§4.2</span></div>
     </div>
 
@@ -1510,6 +1519,75 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <span style="color:var(--ink-faint)">— outcome per strategy × protocol · φ ∈ {0…0.30} (+0.40/0.50 equiv.) · n ∈ {10, 25} · 20–30 seeds · §4.4, Table 4.1</span>
       </div>
     </div>
+
+    <!-- ── SWEEP (Q&A backup, mouse-only chip — not in the Space order):
+         full Family-A sweep n ∈ {4, 7, 10, 16, 25} behind Tab A's n = 25
+         endpoint bars. No STEPS entry, so the pane autoplays on click.
+         Data: results/baseline/aggregated.csv (total_msgs_per_acu_mean);
+         thesis Figure 4.1 (theory_vs_measured.pdf). y = 590 − 165·log10(v);
+         x(n) = 240 + (n−4)·58.1 ── -->
+    <div class="tabpane" data-tab="sw">
+      <svg width="1728" height="600" viewBox="0 0 1560 542" aria-label="Messages per committed unit versus validator count 4 to 25, measured markers on predicted asymptotic lines, log scale">
+        <text class="tl" x="60" y="46">full sweep — messages per committed unit, n = 4 → 25 <tspan class="ts">(log scale)</tspan></text>
+        <text class="ts" x="60" y="78">markers = measured (20 seeds/cell) · dashed = published asymptotic — Tab A's bars are this chart's right edge</text>
+        <!-- axes + grid -->
+        <g class="stf" data-t="0">
+          <line class="gridl" x1="240" y1="425" x2="1460" y2="425"/><text class="ts" x="210" y="431" text-anchor="end">10</text>
+          <line class="gridl" x1="240" y1="260" x2="1460" y2="260"/><text class="ts" x="210" y="266" text-anchor="end">100</text>
+          <line class="gridl" x1="240" y1="95"  x2="1460" y2="95"/><text class="ts" x="210" y="101" text-anchor="end">1000</text>
+          <line class="axis" x1="240" y1="80" x2="240" y2="500"/>
+          <line class="axis" x1="240" y1="500" x2="1460" y2="500"/>
+          <g class="ts" text-anchor="middle">
+            <text x="196" y="530" text-anchor="end">n =</text>
+            <text x="240" y="530">4</text><text x="414" y="530">7</text><text x="589" y="530">10</text><text x="937" y="530">16</text><text x="1460" y="530">25</text>
+          </g>
+        </g>
+        <!-- dashed predictions: PBFT 2n · FFG 1.125n · Snowman 2Kβ (K = min(20, n−1), β = 15) -->
+        <g class="stf" data-t="250">
+          <path class="msg dim" style="stroke:var(--c-pbft)" d="M240,441 L414,401 L589,375 L937,342 L1460,310"/>
+          <path class="msg dim" style="stroke:var(--c-ffg)" d="M240,482 L414,442 L589,417 L937,383 L1460,351"/>
+          <path class="msg dim" style="stroke:var(--c-snowman)" d="M414,218 L589,189 L937,152 L1460,132"/>
+        </g>
+        <!-- measured lines + markers -->
+        <path class="msg std" data-t="450" style="--len:1300;stroke:var(--c-pbft)" d="M240,446 L414,402 L589,376 L937,342 L1460,310"/>
+        <g class="stf" data-t="700" style="stroke:#0C1118;stroke-width:2">
+          <circle cx="240" cy="446" r="6.5" fill="var(--c-pbft)"/><circle cx="414" cy="402" r="6.5" fill="var(--c-pbft)"/><circle cx="589" cy="376" r="6.5" fill="var(--c-pbft)"/><circle cx="937" cy="342" r="6.5" fill="var(--c-pbft)"/><circle cx="1460" cy="310" r="6.5" fill="var(--c-pbft)"/>
+        </g>
+        <text class="tm stf" data-t="700" x="246" y="426" fill="var(--c-pbft)">PBFT</text>
+        <path class="msg std" data-t="850" style="--len:1300;stroke:var(--c-ffg)" d="M240,472 L414,434 L589,410 L937,379 L1460,348"/>
+        <g class="stf" data-t="1100" style="stroke:#0C1118;stroke-width:2">
+          <circle cx="240" cy="472" r="6.5" fill="var(--c-ffg)"/><circle cx="414" cy="434" r="6.5" fill="var(--c-ffg)"/><circle cx="589" cy="410" r="6.5" fill="var(--c-ffg)"/><circle cx="937" cy="379" r="6.5" fill="var(--c-ffg)"/><circle cx="1460" cy="348" r="6.5" fill="var(--c-ffg)"/>
+        </g>
+        <text class="tm stf" data-t="1100" x="424" y="464" fill="var(--c-ffg)">Casper FFG</text>
+        <path class="msg std" data-t="1250" style="--len:1100;stroke:var(--c-snowman)" d="M414,218 L589,189 L937,152 L1460,132"/>
+        <g class="stf" data-t="1500" style="stroke:#0C1118;stroke-width:2">
+          <circle cx="414" cy="218" r="6.5" fill="var(--c-snowman)"/><circle cx="589" cy="189" r="6.5" fill="var(--c-snowman)"/><circle cx="937" cy="152" r="6.5" fill="var(--c-snowman)"/><circle cx="1460" cy="132" r="6.5" fill="var(--c-snowman)"/>
+        </g>
+        <text class="tm stf" data-t="1500" x="418" y="200" fill="var(--c-snowman)">Snowman</text>
+        <!-- endpoint values = Tab A's bars -->
+        <g class="tb stf" data-t="1500">
+          <text x="1474" y="138" fill="var(--c-snowman)">≈ 601</text>
+          <text x="1474" y="316" fill="var(--c-pbft)">≈ 50</text>
+          <text x="1474" y="354" fill="var(--c-ffg)">≈ 29</text>
+        </g>
+        <g class="bdg stf" data-t="1700">
+          <rect x="560" y="84" width="640" height="52" style="stroke:var(--ink-dim)"/>
+          <text x="880" y="117" text-anchor="middle">same ranking at every n — markers sit on the dashed predictions</text>
+        </g>
+        <g class="bdg stf" data-t="2000">
+          <rect x="800" y="412" width="600" height="76" style="stroke:var(--c-ffg)"/>
+          <text x="1100" y="442" text-anchor="middle" style="font-size:16px" fill="var(--c-ffg)">Casper FFG reads slightly above 1.125n</text>
+          <text class="ts" x="1100" y="470" text-anchor="middle">fixed per-run overhead, visible only on the smallest base — §4.2</text>
+        </g>
+        <g class="stf" data-t="2200">
+          <circle cx="240" cy="268" r="7" fill="none" stroke="var(--c-snowman)" stroke-dasharray="3 3" opacity=".6"/>
+          <text class="ts" x="256" y="274">Snowman has no n = 4 point — K = min(20, n−1) degenerates to unanimity</text>
+          <text class="ts" x="1450" y="108" text-anchor="end">K caps at 20 above n = 21 — the 2Kβ line flattens just past the sweep</text>
+        </g>
+      </svg>
+      <div class="take st" data-t="2300"><b>Same verdict at every n.</b> Casper FFG cheapest, Snowman an order of magnitude out — from 4 through 25, not just at the endpoint.
+        PBFT and Snowman sit on their predictions (2n − 2/n · 2Kβ, β = 15); FFG reads slightly high — a fixed per-run overhead on the smallest message base. <span style="color:var(--ink-faint)">§4.2 · Fig 4.1</span></div>
+    </div>
   </div>
   <div class="src">report §4.2–4.4</div>
 </section>
@@ -1545,8 +1623,8 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
             <text x="608" y="516" text-anchor="start">loss resilience</text>
             <text x="430" y="590" text-anchor="middle">delayed-voting liveness</text>
             <text x="252" y="516" text-anchor="end">silence liveness</text>
-            <text x="184" y="336" text-anchor="end">equivocation safety</text>
-            <text x="252" y="150" text-anchor="end">accountable safety</text>
+            <text x="184" y="336" text-anchor="end">equivocation safety †</text>
+            <text x="252" y="150" text-anchor="end">accountable safety †</text>
           </g>
           <!-- PBFT [3,2,2,3,3,3,1,1] -->
           <polygon class="stf" data-t="300" points="430,100 538.4,221.6 583.3,330 592.6,492.6 430,560 267.4,492.6 353.3,330 375.8,275.8" fill="var(--c-pbft)" fill-opacity=".13" stroke="none"/>
@@ -1566,6 +1644,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         </svg>
         <div class="note">8 axes of Table 5.1 · ordinal rank, outer ring = best, ties shared — <b>illustrative; the table is the evidence</b> (§5.2)</div>
         <div class="note">best per axis — latency <b style="color:var(--c-pbft)">PBFT</b>·<b style="color:var(--c-snowman)">SNW</b> · overhead <b style="color:var(--c-ffg)">FFG</b> · delay <b style="color:var(--c-ffg)">FFG</b> · loss <b style="color:var(--c-pbft)">PBFT</b> (n=10) · delayed-voting <b style="color:var(--c-pbft)">PBFT</b> · silence <b style="color:var(--c-pbft)">PBFT</b>·<b style="color:var(--c-ffg)">FFG</b> · equivocation <b style="color:var(--c-snowman)">SNW</b> · accountable <b style="color:var(--c-ffg)">FFG</b></div>
+        <div class="note">† not measured contests — <b>accountable</b> is definitional, <b>equivocation</b> an analytical bound; strip both and <b style="color:var(--c-snowman)">Snowman</b> holds no measured corner — its non-domination rests on the unwitnessed ε (§5.3)</div>
       </div>
       <div class="insight">
         <h3 class="st" data-t="1600">The same design choice creates<br>both the strength and the weakness</h3>
@@ -1617,7 +1696,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <div class="why">no fork surface to attack — safety bounded by ε, exponentially small in β</div>
       </div>
     </div>
-    <div class="callback st" data-t="1200">Each opening incident is a protocol at its structural limit.</div>
+    <div class="callback st" data-t="1200">Ethereum and Cosmos hit their structural limits — Solana and Sui, the same failure class beyond this harness.</div>
     <div class="contrib st" data-t="1500">
       <span class="c">contribution · discrete-event simulator</span>
       <span class="c">3 protocol implementations</span>
@@ -1642,6 +1721,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <li>Simplified, one-per-family implementations — verdicts are about these protocols, not the families in the abstract</li>
           <li>n ≤ 25 — beyond that, a sensitivity argument, not data</li>
           <li>Snowman safety by analytical bound, never empirically witnessed</li>
+          <li>Packet loss = permanent drop, no retransmission — loss curves are upper bounds on fragility</li>
           <li>Adversary placement spares the view-0 leader</li>
           <li>No compute / bandwidth cost model</li>
         </ul>
