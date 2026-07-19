@@ -1,6 +1,6 @@
 # Speaking script — thesis defense (10 minutes)
 
-Deck: `slides/thesis-defense.html` · **11 talk slides + 2 Q&A appendix slides** ·
+Deck: `slides/thesis-defense.html` · **11 talk slides + 3 Q&A appendix slides** ·
 core **9:50** of a 10:00 slot.
 This is the script to MEMORIZE via the anchor-skeleton structure. Q&A prep is a
 separate session, kept in `slides/qa-prep.md` — not here.
@@ -19,6 +19,39 @@ frozen as `thesis-defense-old.html` / `defense-script-old.md`. What changed:
   detail (latency/goodput stat box, delay-vs-messages badge, tail numbers) now
   reveals together with the preceding press, as a reading layer only.
 - **S7 collapsed to one press per family** (was three).
+- **S6 recut 6 → 4 presses** (same day, three passes): pass 2 fixed the
+  press structure (one idea per press) and the diagram's self-contradiction
+  — the slot no longer sits inside a box labelled "fixed infrastructure";
+  the outer box is now **simulator** with a solid-border **fixed core**
+  ("identical in every run") and the dashed **swapped per run / protocol
+  under test** slot. Visual code: solid = fixed, dashed = varies. Pass 3
+  made the slide tell the machine's story in execution order (mechanics
+  verified against `src/config/factory.py`, `src/network/network.py`,
+  `src/event_log/logger.py`, `src/output/aggregate.py`): config drawn as a
+  **stack** ("one config = one scenario") → ① build from the config's
+  constants → ② the **run loop** (scheduler → protocol → network → back on
+  the queue, logger tapping) drawn as three marching arrows, ending in one
+  result row → ③ the one-variable punch (matching dashed ring on the
+  config's `protocol` field + attribution badge) → ④ ×20 seeds → new
+  **aggregate box** (mean · 95% CI per scenario), ACU folded into the same
+  beat. Cost: S6 0:45 → 0:55, funded by compressing S7 0:25 → 0:15.
+  Final polish: beats re-anchored on the config's five fields — ① names
+  what each of four fields sets in the machine (n → validators, timeline →
+  network, adversary → flipped validators, seed → RNG) and holds back
+  `protocol`, which ③ pays off as the slot-filler; the opening anchor now
+  carries the whole arc ("a config goes in, one aggregated line comes
+  out"). The S7 compression that funded this was later undone by the S5
+  view-change move — see that bullet.
+- **S5 PBFT view-change vignette moved to appendix A3** (2026-07-19, after
+  the S6 recut): the fault scene was the only mid-walkthrough register
+  switch — the other two protocols read happy-path only — so the PBFT pane
+  now matches them: 3 presses, mechanism only. The full animated sequence
+  lives on as **appendix slide A3** (autoplays on entry, ↓ only), and the
+  Recovery ▸ Q&A chip's PBFT panel points to it. First spoken mention of
+  view-change is now the S8 loss beat, which self-glosses ("view-change
+  rotates the leader"). Timing: S5 1:30 → 1:20; the freed 10 s refunds
+  S7 back to 0:25 (undoing the compression that funded S6) — S8 still
+  enters at 4:40.
 - Everything else kept its press structure; the speech is compressed.
 - New safety valve (replaces the old S8 cut rule): **enter S8 later than 5:10 →
   drop the two remaining `(cuttable)` beats** (S10 callback, S11 future-work).
@@ -125,12 +158,13 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
 
 ---
 
-## S5 · Three families, three protocols — enter 2:00 · speak 1:30 · leave 3:30
+## S5 · Three families, three protocols — enter 2:00 · speak 1:20 · leave 3:20
 
 *(opens on the PBFT diagram: 4 nodes already visible. The pane-opening
 anchors now carry the protocol introductions that used to live on S2B —
 year, authors, where it runs — one breath each, then straight into the
-mechanism.)*
+mechanism. All three panes are now **happy-path only** — the same register
+throughout; PBFT's fault scene lives in appendix A3.)*
 
 **OPENING ANCHOR:**
 > "For each family I picked one representative. First — PBFT, 1999, Castro
@@ -144,10 +178,6 @@ mechanism.)*
   the source of the **O(n²)** cost
 - `▶` decided at quorum **2f+1** — **3 of 4** — even with 1 node dead;
   finality **deterministic**, once committed, permanent
-- `▶` (scene swaps — happy path fades out, fault scene plays) the **primary**
-  goes silent: replicas **time out** → **VIEW-CHANGE**, itself all-to-all,
-  elects a new primary → the block replays. **PBFT's recovery path — hold
-  onto it for the loss results**
 
 `▶` (deck auto-switches to the **Casper FFG** chip):
 > "Second — Casper FFG, 2017, Buterin and Griffith: Ethereum's finality
@@ -180,33 +210,62 @@ mechanism.)*
 📎 *On the slide, no need to read aloud: spec strip under the caption
 (synchrony · proposer · quorum · finality · pressure point · recovery, from
 Table 2.1). For recovery questions there is a 4th, MOUSE-ONLY chip —
-**Recovery ▸ Q&A** (dashed border) — Space never enters it. Spoken answer:
+**Recovery ▸ Q&A** (dashed border) — Space never enters it; the animated
+PBFT view-change sequence is **appendix A3** (↓). Spoken answer:
 `qa-prep.md` Q1.*
 
 ---
 
-## S6 · One harness — enter 3:30 · speak 0:45 · leave 4:15
+## S6 · One harness — enter 3:20 · speak 0:55 · leave 4:15
 
-*(opens with the config box already visible; several presses here are
-half-sentences — keep moving)*
+*(opens with the config stack already visible; **4 presses, one full idea
+each**, telling the machine's story in execution order: generate configs →
+① build from the constants → ② the run loop driven by them → ③ the
+held-back field fills the slot → ④ repeat & aggregate. The extra 10 s over
+the old cut is funded by the S5 view-change move. No half-sentences:
+finish each idea, then press.)*
 
 **OPENING ANCHOR:**
-> "Every experiment runs through exactly one pipeline."
+> "Every experiment runs through exactly one pipeline: a config goes in,
+> one aggregated line comes out."
 
-- (already visible) config = protocol · n · timeline · adversary · seed
-- `▶` **fixed** infrastructure: virtual-time scheduler — deterministic ·
-  configurable delay/loss · logger *(half-sentence)*
-- `▶` exactly ONE swappable spot: the **protocol slot**
-- `▶` each run → **one result row** with **commit_hash + seed** —
-  reproducible
-- `▶` **×20 seeds** per cell *(slide notes 30 near threshold — don't read)*
-- `▶` identical infrastructure ⇒ differences **attributable to the protocol**
-- `▶` the common denominator — **ACU, atomic commit unit**: 1 PBFT block ≡
-  1 finalized FFG checkpoint ≡ 1 accepted Snowman block — every cost and
-  latency is measured in this unit
+- (already visible) **step 0 — generate the configs**: 5 fields — protocol ·
+  n · timeline · adversary · seed; **one config = one scenario**, sweeping
+  the fields generates the whole grid *(spoken word "config", not "file" —
+  the sweep script generates the cells)*
+- `▶` **① BUILD**: launching one config **builds the simulator with its
+  values as the machine's constants** — **n** spawns the validators · the
+  **timeline** arms the network with its delay/loss phases · the
+  **adversary** flips that fraction of validators to a Byzantine behavior ·
+  the **seed** pins every random draw — fully deterministic. *(the one
+  field left — protocol — drops into the dashed slot; name it, hold the
+  "why dashed" for press ③)*
+- `▶` **② THE RUN LOOP** *(three marching arrows appear — trace them with
+  the pointer)*: those constants now drive the loop — the **scheduler**
+  pops the earliest event in **virtual time** and hands it to the protocol
+  → the protocol answers with messages into the **network**, which rolls
+  drop and delay **from the config's current timeline phase** and puts
+  each delivery **back on the queue** → the **logger** records every event
+  as it passes; when the run stops → the log condenses to **one result
+  row**, stamped **commit_hash + seed** — re-runnable bit-for-bit
+- `▶` **③ THE ONE VARIABLE** *(the config's `protocol` field gets the same
+  dashed ring as the slot — point at both)*: the held-back field pays off —
+  four fields set the machine, this one only fills the slot; the loop is
+  **identical in every scenario**; **dashed border = the one thing that
+  swaps** — the **protocol under test** ⇒ output differences are
+  **attributable to the protocol**
+- `▶` **④ REPEAT & AGGREGATE**: rerun **×20 seeds** per cell *(slide notes
+  30 near threshold — don't read)*; the twenty result rows collapse to
+  **mean + 95% CI** per scenario — every count in the common unit, **ACU,
+  atomic commit unit**: 1 PBFT block ≡ 1 finalized FFG checkpoint ≡
+  1 accepted Snowman block
 
-📎 *ACU caption carries the aggregation sentence — 95% Student-t · 95%
-Wilson. Point at it only if asked about statistical confidence.*
+📎 *ACU caption carries the CI detail — 95% Student-t · 95% Wilson. Point
+at it only if asked about statistical confidence.*
+
+📎 *Lost mid-slide? The recovery line that always works: "configs → build
+from the constants → loop in virtual time → protocol fills the dashed
+slot → twenty seeds → aggregate."*
 
 **TRANSITION ANCHOR:**
 > "On that harness, three experiment families — each sweeping exactly one
@@ -218,7 +277,8 @@ Wilson. Point at it only if asked about statistical confidence.*
 
 ## S7 · Three run families — enter 4:15 · speak 0:25 · leave 4:40
 
-*(one press now reveals a whole family pane — one breath per pane)*
+*(one press reveals a whole family pane — one breath per pane; the footer
+and details are a reading layer only)*
 
 **OPENING ANCHOR:**
 > "Three run families — each sweeps one axis while everything else stays
@@ -383,7 +443,12 @@ S10 callback, S11 future work).**
 - **A2 · Three yardsticks** — the old S3 gap slide: what each family
   reports, what each number omits, the Gervais et al. precedent. Jump here
   for "what exactly is the research gap / why not use published numbers".
-- Both autoplay their full reveal on entry — no stepping needed.
+- **A3 · PBFT view-change** — the animated fault vignette that used to be
+  the PBFT pane's 4th press: primary silent → timeout Δ → VIEW-CHANGE
+  (all-to-all, 2f+1) → NEW-VIEW → phases replay. Jump here for "what
+  exactly is the recovery path" or to back up the S8 loss result; the
+  compare-all-three view stays on the S5 Recovery ▸ Q&A chip.
+- All three autoplay their full reveal on entry — no stepping needed.
 - Plus, on S5: the mouse-only **Recovery ▸ Q&A** chip (dashed border).
 - Corner badge shows `Q&A appendix` instead of a slide number, so the
   committee sees these are backup, not skipped content.

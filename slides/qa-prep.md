@@ -8,8 +8,8 @@ spoken answer → what to point at → verify-before-quoting notes.
 
 ## Q1 · "PBFT has view-change — what do Casper FFG and Snowman do when they stall?"
 
-*Trigger: S5 view-change vignette + the S5 spec-strip `recovery` field, or
-the S8-loss ranking. A sharp committee will also connect S2 (Ethereum's
+*Trigger: the S5 spec-strip `recovery` field, the S8-loss ranking, or the
+view-change vignette (now appendix A3). A sharp committee will also connect S2 (Ethereum's
 05/2023 finality stall RECOVERED on mainnet) with the FFG "recovery none"
 label and probe the apparent contradiction.*
 
@@ -37,10 +37,11 @@ resample and wait — the recovery style mirrors each family's design choice.*
 **Point at:** S5's mouse-only **Recovery ▸ Q&A** chip (4th chip, dashed
 border — a three-panel visual built for exactly this question: rotate the
 role / bleed the absentees / resample and wait, with the leak's safety cost
-in red). Also: S5 PBFT beat 4 (vignette), the three spec-strip `recovery`
-fields, S8 Loss tab for the consequence, S11 for the scope boundary. The
-chip is not in the Space order — it opens only by mouse click, so the
-10-minute talk never touches it.
+in red). Also: appendix A3 (the animated view-change vignette, ↓ past
+Thank-you), the three spec-strip `recovery` fields, S8 Loss tab for the
+consequence, S11 for the scope boundary. The chip is not in the Space
+order — it opens only by mouse click, so the 10-minute talk never
+touches it.
 
 **If pressed further ("doesn't the leak fix FFG's weakness?"):**
 
