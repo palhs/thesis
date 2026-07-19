@@ -507,7 +507,6 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
     <span class="pill" style="border-color:var(--c-pbft);color:var(--c-pbft)">PBFT</span>
     <span class="pill" style="border-color:var(--c-ffg);color:var(--c-ffg)">Casper FFG</span>
     <span class="pill" style="border-color:var(--c-snowman);color:var(--c-snowman)">Snowman</span>
-    <span style="align-self:center;font-size:17px;color:var(--ink-faint);letter-spacing:.04em;margin-left:12px">— one colour per protocol, on every chart</span>
   </div>
   <svg class="net" width="720" height="760" viewBox="0 0 720 760" aria-hidden="true">
     <path class="path std" data-t="700"  style="--len:1600;stroke:var(--c-pbft)"    d="M120,120 L420,220 L620,120 M120,120 L620,120 M120,120 L340,420"/>
@@ -531,7 +530,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s2">
   <div class="wrap">
-    <div class="kick"><span>Act 1 · Premise</span><span class="r">02 / 11</span></div>
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">02 / 13</span></div>
     <h2 class="stitle st" data-t="100">Proven safe. <em>Still halting.</em></h2>
 
     <!-- incident timeline 2021 → 2025 -->
@@ -604,10 +603,94 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       which condition triggered which failure.
     </div>
     <div class="bigq st" data-t="2400">Which condition breaks <em>which</em> protocol?<br>
-      <span style="font-size:30px;color:var(--ink-dim)">Each family grades itself on its own yardstick — answering needs one harness that stresses all three the same way.</span>
+      <span style="font-size:30px;color:var(--ink-dim)">Answering needs one harness that stresses all three families the same way.</span>
     </div>
   </div>
   <div class="src">report §1.2</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     S2B · MEET THE CONTENDERS  (ch2 §2.2)
+     ════════════════════════════════════════════ -->
+<section class="slide" id="s2b">
+  <div class="wrap">
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">03 / 13</span></div>
+    <h2 class="stitle st" data-t="100">The three <em>contenders</em></h2>
+    <div class="cols">
+      <div class="col st" data-t="350" style="border-color:var(--c-pbft)">
+        <div class="yr" style="color:var(--c-pbft)">1999</div>
+        <h3 style="color:var(--c-pbft)">PBFT</h3>
+        <div class="fam">quorum-BFT family</div>
+        <div class="who">Castro &amp; Liskov · MIT, OSDI '99</div>
+        <div class="what">The first <b>practical</b> Byzantine fault-tolerant protocol:
+          3f+1 replicas, three voting phases, finality that is instant and deterministic.</div>
+        <div class="live"><span class="lbl">in the wild</span>
+          Blueprint of the whole quorum line — its descendants run
+          <b>Cosmos</b> (Tendermint) and <b>Diem&nbsp;→&nbsp;Aptos</b> (HotStuff).</div>
+      </div>
+      <div class="col st" data-t="650" style="border-color:var(--c-ffg)">
+        <div class="yr" style="color:var(--c-ffg)">2017</div>
+        <h3 style="color:var(--c-ffg)">Casper FFG</h3>
+        <div class="fam">PoS-finality family</div>
+        <div class="who">Buterin &amp; Griffith · Ethereum Foundation</div>
+        <div class="what">A <b>finality gadget</b>: stake-weighted votes laid over a running
+          chain finalise checkpoints epoch by epoch — misbehave and your stake is slashed.</div>
+        <div class="live"><span class="lbl">in the wild</span>
+          The finality layer inside Gasper — securing <b>Ethereum</b> mainnet
+          since the Merge (09/2022).</div>
+      </div>
+      <div class="col st" data-t="950" style="border-color:var(--c-snowman)">
+        <div class="yr" style="color:var(--c-snowman)">2019</div>
+        <h3 style="color:var(--c-snowman)">Snowman</h3>
+        <div class="fam">sampling family · Avalanche</div>
+        <div class="who">"Team Rocket" · formalised at Cornell, built by Ava Labs</div>
+        <div class="what">Consensus by <b>repeated random polls</b>: each node samples K peers
+          until confidence builds; finality is probabilistic — 1&nbsp;−&nbsp;ε.</div>
+        <div class="live"><span class="lbl">in the wild</span>
+          The production engine of <b>Avalanche</b> — C-Chain &amp; P-Chain
+          since mainnet launch (2020).</div>
+      </div>
+    </div>
+    <div class="legend st" data-t="1500">One colour per protocol —
+      <span class="dot" style="background:var(--c-pbft)"></span>amber,
+      <span class="dot" style="background:var(--c-ffg)"></span>violet,
+      <span class="dot" style="background:var(--c-snowman)"></span>ice —
+      they tag every chart from here to the end.</div>
+  </div>
+  <div class="src">report §2.2</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     S3 · THE GAP  (ch2 §2.3–2.4)
+     ════════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="wrap">
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">04 / 13</span></div>
+    <h2 class="stitle st" data-t="100">Put the three families side by side <em>today</em> — and you get this</h2>
+    <div class="cols">
+      <div class="col st" data-t="350" style="border-color:var(--c-pbft)">
+        <h3 style="color:var(--c-pbft)">PBFT-style</h3>
+        <div class="re">reports <b>throughput</b><br>— ops/s on a low-latency LAN</div>
+        <div class="no">says nothing about finality delay</div>
+      </div>
+      <div class="col st" data-t="600" style="border-color:var(--c-ffg)">
+        <h3 style="color:var(--c-ffg)">PoS finality</h3>
+        <div class="re">reports <b>finality delay</b><br>— ~12 minutes, 2 epochs</div>
+        <div class="no">says nothing about throughput</div>
+      </div>
+      <div class="col st" data-t="850" style="border-color:var(--c-snowman)">
+        <h3 style="color:var(--c-snowman)">Avalanche-style</h3>
+        <div class="re">reports <b>safety probability ε</b><br>— at one fixed (K, β) parameter set</div>
+        <div class="no">the number moves if parameters move</div>
+      </div>
+    </div>
+    <div class="punch st" data-t="1300">
+      Measurements are plentiful — and designed never to sit next to each other. Surveys only juxtapose
+      others' numbers; the one matched-harness precedent (Gervais et&nbsp;al.) covers Proof-of-Work only.
+      <em>No overall view exists. So build one.</em>
+    </div>
+  </div>
+  <div class="src">report §2.3–2.4</div>
 </section>
 
 <!-- ════════════════════════════════════════════
@@ -615,7 +698,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s4">
   <div class="wrap">
-    <div class="kick"><span>Act 1 · Premise</span><span class="r">03 / 11</span></div>
+    <div class="kick"><span>Act 1 · Premise</span><span class="r">05 / 13</span></div>
     <h2 class="stitle st" data-t="100">The goal</h2>
     <div class="goal st" data-t="250"><b>One simulator</b> · three protocols · matched assumptions.</div>
     <div class="rqs">
@@ -635,7 +718,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s5">
   <div class="wrap">
-    <div class="kick"><span>Act 2 · The simulation</span><span class="r">04 / 11</span></div>
+    <div class="kick"><span>Act 2 · The simulation</span><span class="r">06 / 13</span></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle">Three families, <em>three protocols</em></h2>
       <div class="chiprow" id="s5chips">
@@ -1063,7 +1146,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s6">
   <div class="wrap">
-    <div class="kick"><span>Act 2 · The simulation</span><span class="r">05 / 11</span></div>
+    <div class="kick"><span>Act 2 · The simulation</span><span class="r">07 / 13</span></div>
     <h2 class="stitle">One harness — <em>only the protocol slot varies</em></h2>
 
     <svg width="1728" height="700" viewBox="0 0 1560 632" aria-label="Simulation harness pipeline" id="s6svg" style="cursor:pointer">
@@ -1138,7 +1221,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s7">
   <div class="wrap">
-    <div class="kick"><span>Act 2 · The simulation</span><span class="r">06 / 11</span></div>
+    <div class="kick"><span>Act 2 · The simulation</span><span class="r">08 / 13</span></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle">Three run families, <em>one axis each</em></h2>
       <div class="chiprow" id="s7chips">
@@ -1262,7 +1345,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s8">
   <div class="wrap">
-    <div class="kick"><span>Act 3 · Results</span><span class="r">07 / 11</span></div>
+    <div class="kick"><span>Act 3 · Results</span><span class="r">09 / 13</span></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle" style="font-size:52px">Results</h2>
       <div class="chiprow" id="s8tabs">
@@ -1514,7 +1597,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s9">
   <div class="wrap">
-    <div class="kick"><span>Act 4 · Insight</span><span class="r">08 / 11</span></div>
+    <div class="kick"><span>Act 4 · Insight</span><span class="r">10 / 13</span></div>
     <h2 class="stitle">RQ5 — <em>no protocol dominates</em></h2>
     <div class="cols">
       <div>
@@ -1591,7 +1674,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s10">
   <div class="wrap">
-    <div class="kick"><span>Act 4 · Insight</span><span class="r">09 / 11</span></div>
+    <div class="kick"><span>Act 4 · Insight</span><span class="r">11 / 13</span></div>
     <h2 class="stitle st" data-t="100">A <em>selection map</em>, not a winner</h2>
     <div class="maps">
       <div class="map st" data-t="350" style="border-color:var(--c-ffg)">
@@ -1629,7 +1712,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s11">
   <div class="wrap">
-    <div class="kick"><span>Act 4 · Closing</span><span class="r">10 / 11</span></div>
+    <div class="kick"><span>Act 4 · Closing</span><span class="r">12 / 13</span></div>
     <h2 class="stitle st" data-t="100">Limitations &amp; future work</h2>
     <div class="cols">
       <div class="col lim st" data-t="350">
@@ -1667,7 +1750,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
      ════════════════════════════════════════════ -->
 <section class="slide" id="s12">
   <div class="wrap">
-    <div class="kick"><span>USTH · ICT — Bachelor Thesis Defense</span><span class="r">11 / 11</span></div>
+    <div class="kick"><span>USTH · ICT — Bachelor Thesis Defense</span><span class="r">13 / 13</span></div>
   </div>
   <h1 class="thanks st" data-t="100">Thank you<br><em>for listening.</em></h1>
   <div class="tsub st" data-t="500">Questions are welcome.</div>
@@ -1692,91 +1775,6 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <circle class="node pulse" cx="620" cy="640" r="20" style="animation-delay:1.3s"/>
     </g>
   </svg>
-</section>
-
-
-<!-- ════════════════════════════════════════════
-     S2B · MEET THE CONTENDERS  (ch2 §2.2)
-     ════════════════════════════════════════════ -->
-<section class="slide appendix" id="s2b">
-  <div class="wrap">
-    <div class="kick"><span>Appendix · Q&amp;A backup</span><span class="r">A1</span></div>
-    <h2 class="stitle st" data-t="100">The three <em>contenders</em></h2>
-    <div class="cols">
-      <div class="col st" data-t="350" style="border-color:var(--c-pbft)">
-        <div class="yr" style="color:var(--c-pbft)">1999</div>
-        <h3 style="color:var(--c-pbft)">PBFT</h3>
-        <div class="fam">quorum-BFT family</div>
-        <div class="who">Castro &amp; Liskov · MIT, OSDI '99</div>
-        <div class="what">The first <b>practical</b> Byzantine fault-tolerant protocol:
-          3f+1 replicas, three voting phases, finality that is instant and deterministic.</div>
-        <div class="live"><span class="lbl">in the wild</span>
-          Blueprint of the whole quorum line — its descendants run
-          <b>Cosmos</b> (Tendermint) and <b>Diem&nbsp;→&nbsp;Aptos</b> (HotStuff).</div>
-      </div>
-      <div class="col st" data-t="650" style="border-color:var(--c-ffg)">
-        <div class="yr" style="color:var(--c-ffg)">2017</div>
-        <h3 style="color:var(--c-ffg)">Casper FFG</h3>
-        <div class="fam">PoS-finality family</div>
-        <div class="who">Buterin &amp; Griffith · Ethereum Foundation</div>
-        <div class="what">A <b>finality gadget</b>: stake-weighted votes laid over a running
-          chain finalise checkpoints epoch by epoch — misbehave and your stake is slashed.</div>
-        <div class="live"><span class="lbl">in the wild</span>
-          The finality layer inside Gasper — securing <b>Ethereum</b> mainnet
-          since the Merge (09/2022).</div>
-      </div>
-      <div class="col st" data-t="950" style="border-color:var(--c-snowman)">
-        <div class="yr" style="color:var(--c-snowman)">2019</div>
-        <h3 style="color:var(--c-snowman)">Snowman</h3>
-        <div class="fam">sampling family · Avalanche</div>
-        <div class="who">"Team Rocket" · formalised at Cornell, built by Ava Labs</div>
-        <div class="what">Consensus by <b>repeated random polls</b>: each node samples K peers
-          until confidence builds; finality is probabilistic — 1&nbsp;−&nbsp;ε.</div>
-        <div class="live"><span class="lbl">in the wild</span>
-          The production engine of <b>Avalanche</b> — C-Chain &amp; P-Chain
-          since mainnet launch (2020).</div>
-      </div>
-    </div>
-    <div class="legend st" data-t="1500">One colour per protocol —
-      <span class="dot" style="background:var(--c-pbft)"></span>amber,
-      <span class="dot" style="background:var(--c-ffg)"></span>violet,
-      <span class="dot" style="background:var(--c-snowman)"></span>ice —
-      they tag every chart from here to the end.</div>
-  </div>
-  <div class="src">report §2.2</div>
-</section>
-
-<!-- ════════════════════════════════════════════
-     S3 · THE GAP  (ch2 §2.3–2.4)
-     ════════════════════════════════════════════ -->
-<section class="slide appendix" id="s3">
-  <div class="wrap">
-    <div class="kick"><span>Appendix · Q&amp;A backup</span><span class="r">A2</span></div>
-    <h2 class="stitle st" data-t="100">Put the three families side by side <em>today</em> — and you get this</h2>
-    <div class="cols">
-      <div class="col st" data-t="350" style="border-color:var(--c-pbft)">
-        <h3 style="color:var(--c-pbft)">PBFT-style</h3>
-        <div class="re">reports <b>throughput</b><br>— ops/s on a low-latency LAN</div>
-        <div class="no">says nothing about finality delay</div>
-      </div>
-      <div class="col st" data-t="600" style="border-color:var(--c-ffg)">
-        <h3 style="color:var(--c-ffg)">PoS finality</h3>
-        <div class="re">reports <b>finality delay</b><br>— ~12 minutes, 2 epochs</div>
-        <div class="no">says nothing about throughput</div>
-      </div>
-      <div class="col st" data-t="850" style="border-color:var(--c-snowman)">
-        <h3 style="color:var(--c-snowman)">Avalanche-style</h3>
-        <div class="re">reports <b>safety probability ε</b><br>— at one fixed (K, β) parameter set</div>
-        <div class="no">the number moves if parameters move</div>
-      </div>
-    </div>
-    <div class="punch st" data-t="1300">
-      Measurements are plentiful — and designed never to sit next to each other. Surveys only juxtapose
-      others' numbers; the one matched-harness precedent (Gervais et&nbsp;al.) covers Proof-of-Work only.
-      <em>No overall view exists. So build one.</em>
-    </div>
-  </div>
-  <div class="src">report §2.3–2.4</div>
 </section>
 
 </main>
@@ -1831,23 +1829,20 @@ function playSeq(root) {
    next chip/tab in script order, then to the next slide.
    Script: slides/defense-script.md — beats match presses 1:1.
    =========================================== */
-/* 10-minute cut (2026-07-19): s2b/s3 have no STEPS entry — they are appendix
-   slides now, reached only via ↓ in Q&A, and autoplay on entry.
-   fam-* collapsed to one press per family; the former cuttable third steps of
-   tab-a / tab-bd merged into the preceding press (detail stays visible as a
-   reading layer, no dedicated beat). */
 const STEPS = {
   's2':          [500, 950, 1350, 1900, 2400, Infinity],
+  's2b':         [350, 650, 950, 1500, Infinity],
+  's3':          [350, 600, 850, 1300, Infinity],
   's4':          [500, 700, 900, 1100, 1300, Infinity],
   'dia-pbft':    [400, 1400, 3200, 3600, Infinity],
   'dia-ffg':     [700, 2400, 2900, 3300, Infinity],
   'dia-snowman': [380, 1380, 2800, 3800, Infinity],
   's6':          [600, 1300, 1700, 2400, 2900, 3300, Infinity],
-  'fam-A':       [200, Infinity],
-  'fam-B':       [200, Infinity],
-  'fam-C':       [200, Infinity],
-  'tab-a':       [200, 1500, Infinity],
-  'tab-bd':      [200, 1400, Infinity],
+  'fam-A':       [200, 1100, 1300, Infinity],
+  'fam-B':       [200, 1100, 1300, Infinity],
+  'fam-C':       [200, 1150, 1300, Infinity],
+  'tab-a':       [200, 1500, 1900, Infinity],
+  'tab-bd':      [200, 1400, 2100, Infinity],
   'tab-bl':      [300, 1900, 2100, Infinity],
   'tab-c':       [300, 600, 900, 1200, Infinity],
   's9':          [300, 1600, 1800, 2100, 2400, Infinity],
@@ -2063,9 +2058,6 @@ class SlidePresentation {
     const slide = this.slides[this.current];
     if (stepForward(activeRoot(slide))) return;
     if (paneShift(slide.id, 1)) return;
-    // the spoken talk ends at s12 — Space never enters the appendix (↓/End/mouse only)
-    const nxt = this.slides[this.current + 1];
-    if (nxt && nxt.classList.contains('appendix') && !slide.classList.contains('appendix')) return;
     this.show(this.current + 1);
   }
   prev() {
@@ -2084,9 +2076,7 @@ class SlidePresentation {
       s.classList.toggle('active', k === n);
       s.classList.toggle('visible', k === n);
     });
-    const mains = [...this.slides].filter(s => !s.classList.contains('appendix')).length;
-    document.getElementById('pagenum').textContent =
-      this.slides[n].classList.contains('appendix') ? 'Q&A appendix' : (n + 1) + ' / ' + mains;
+    document.getElementById('pagenum').textContent = (n + 1) + ' / ' + this.slides.length;
     this.enter(this.slides[n]);
   }
   enter(slide) {

@@ -1,7 +1,7 @@
 # Q&A prep — thesis defense
 
 Companion to `defense-script.md` (its header points here; the script holds
-only the 15-minute talk). Format per entry: expected question → ~30-second
+only the 10-minute talk). Format per entry: expected question → ~30-second
 spoken answer → what to point at → verify-before-quoting notes.
 
 ---
@@ -40,7 +40,7 @@ role / bleed the absentees / resample and wait, with the leak's safety cost
 in red). Also: S5 PBFT beat 4 (vignette), the three spec-strip `recovery`
 fields, S8 Loss tab for the consequence, S11 for the scope boundary. The
 chip is not in the Space order — it opens only by mouse click, so the
-15-minute talk never touches it.
+10-minute talk never touches it.
 
 **If pressed further ("doesn't the leak fix FFG's weakness?"):**
 
@@ -106,7 +106,7 @@ more module in the protocol slot, not a new thesis.*
 **Verify-before-quoting notes:**
 
 - Scope mapping: Ethereum → Casper FFG (tested directly); Cosmos Hub →
-  Tendermint, PBFT lineage (S2B says this on-slide); Solana → Tower BFT +
+  Tendermint, PBFT lineage (appendix slide A1 — the old S2B — says this on-slide; ↓ past Thank-you); Solana → Tower BFT +
   Proof of History (NOT implemented); Sui → Narwhal/Bullshark, DAG family
   (NOT implemented; S11 lists Narwhal+Tusk as future work).
 - The wiki has **no page on Solana or Tower BFT** (checked 2026-07-16) — do
@@ -183,7 +183,7 @@ where the law is checked.*
 **Point at:** S8's mouse-only **Sweep ▸ Q&A** chip (5th chip, dashed
 border) — the full 4 → 25 line chart, measured markers over dashed
 predictions, log scale; mirrors thesis Figure 4.1. The chip is not in the
-Space order — it opens only by mouse click, so the 15-minute talk never
+Space order — it opens only by mouse click, so the 10-minute talk never
 touches it.
 
 **If pressed further ("and beyond 25?"):**
