@@ -352,6 +352,12 @@ S10 callback, S11 future work).**
 
 `▶ → S9`
 
+📎 *On S8 there is a 5th, MOUSE-ONLY chip — **Sweep ▸ Q&A** — Space never
+enters it. It holds the full Family-A sweep (messages per ACU, n = 4 → 25,
+log scale): measured markers sitting on the dashed published asymptotics,
+same ranking at every n. Jump here for "does the ranking hold at every n,
+or only at n = 25?".*
+
 ---
 
 ## S9 · RQ5 — no one dominates — enter 7:40 · speak 0:55 · leave 8:35
@@ -450,6 +456,8 @@ S10 callback, S11 future work).**
   compare-all-three view stays on the S5 Recovery ▸ Q&A chip.
 - All three autoplay their full reveal on entry — no stepping needed.
 - Plus, on S5: the mouse-only **Recovery ▸ Q&A** chip (dashed border).
+- Plus, on S8: the mouse-only **Sweep ▸ Q&A** chip — the full n = 4 → 25
+  sweep behind Tab A's endpoint bars (see the 📎 note under S8).
 - Corner badge shows `Q&A appendix` instead of a slide number, so the
   committee sees these are backup, not skipped content.
 
