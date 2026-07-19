@@ -312,9 +312,14 @@ S10 callback, S11 future work).**
 - `▶` messages per ACU at **n = 25**, log axis: Casper FFG **≈29** ·
   PBFT **≈50** · Snowman **≈601**
 - `▶` trends match theory — **1.15n · 2n · 2Kβ**, **per-validator**: PBFT's
-  **2n** × n validators = the **O(n²)** from the diagram slide; the
+  **2n** × n validators = the **O(n²)** from the diagram slide; FFG is
+  cheapest because the epoch votes **once** — one attestation round per
+  epoch against PBFT's two all-to-all phases per block — and that same
+  epoch pacing is why its finality is **≈5 s**, not 1 s: cheap and slow are
+  one design choice; the
   **order-of-magnitude** gap is the price of subsampling *(this press also
-  reveals the latency/goodput stat box — reading layer, do NOT speak it)*
+  reveals the latency/goodput stat box — reading layer, do NOT speak its
+  numbers beyond the ≈5 s already used; full glosses live in qa-prep Q7)*
 
 `▶` (switch to tab **B — Delay, RQ1**, 2 presses):
 - `▶` slowdown vs. zero-delay baseline: FFG **×1.3** · PBFT **×1.9** —

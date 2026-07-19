@@ -270,3 +270,86 @@ replay if pressed.
   is an interpretive gloss, not a report claim — flag it as a reading if
   challenged; the report states CAP only as the general cost of partition
   (§2.1).
+
+---
+
+## Q7 · "Why is Casper FFG the cheapest — and isn't its 5-second finality a separate flaw?"
+
+*Trigger: S8 Tab A's takeaway line ("Cheapest: Casper FFG.") plus the stat
+box putting FFG's finality at ≈ 5 s against ≈ 1 s for the other two — the
+two facts sit side by side on the slide, and a committee member may ask
+either why the cheapness holds or whether the latency is an unrelated
+defect. Also reachable from S9's FFG mini ("epoch-paced finality is
+cheapest and least delay-sensitive").*
+
+**Spoken answer (~30 s):**
+
+> Not aggregation — my simulator follows the 2017 paper: every validator
+> broadcasts its own signed attestation to every peer, the same all-to-all
+> O(n²) pattern PBFT uses. The difference is how often the protocol votes.
+> PBFT pays two all-to-all phases — prepare, then commit — for every block.
+> Casper FFG votes once per epoch: a single attestation round, and that one
+> round's cost stands behind the epoch's finalized checkpoint. Same message
+> pattern, half the voting phases, paid at epoch rate instead of block
+> rate — that is the ≈ 29 versus ≈ 50 at n = 25. And the same epoch pacing
+> is the 5-second finality: checkpoints exist only at epoch boundaries and
+> need two rounds — justify, then finalise — so finality spans about two
+> and a half epochs. Cheap and slow are the two faces of one design
+> choice: epoch-paced finality.
+
+One-line close (ties to S9): *the FFG column of the radar is one decision
+seen from two axes — the epoch is both the discount and the delay.*
+
+**Point at:** S8 Tab A (takeaway line + the latency/goodput stat box —
+≈ 1 s · ≈ 1 s · ≈ 5 s); S9's FFG mini for the same coin stated as
+strength-and-weakness; S11's future-work line for BLS if aggregation
+comes up.
+
+**If pressed further ("so the 5 s is just your calibration?"):**
+
+> The absolute number is calibration-set, and I checked exactly that: a
+> slot-duration sensitivity sweep over 0.5, 1 and 2-second slots shows
+> finality is always five slot-durations — scale the slot, the number
+> scales with it. But across the whole realistic range it stays above the
+> ≈ 1-second per-block commit of the other two; the crossover would need
+> 0.2-second slots, below anything deployed. So the epoch-granularity gap
+> is structural, not a knob artifact.
+
+**If pressed further ("Ethereum is cheap because of BLS, though"):**
+
+> In production, yes — Gasper aggregates attestations with BLS, which
+> collapses the per-epoch cost from O(n²) toward O(n) and is what makes
+> hundreds of thousands of validators possible. I deliberately do not model
+> it: the paper's core gadget specifies individually-signed votes, and
+> aggregation is engineering on top. So the cheapness I measure is purely
+> the epoch pacing — and production FFG is cheaper still. Modelling BLS is
+> listed in future work.
+
+**Grounding — verified 2026-07-19:**
+- No aggregation, all-to-all, O(n²) per epoch: `wiki/algorithms/pos.md`
+  §Communication complexity — simulator follows the paper
+  (individually-signed `ATTESTATION` broadcast, measured `9·n(n−1)`
+  deliveries over the baseline window); analytical `≈ 1.125n` per ACU
+  after dividing by the per-epoch decisions; measured fit `1.145n + 0.7`,
+  within 2%. BLS explicitly not modelled; future-work plan
+  `docs/plans/2026-06-09-casper-bls-aggregation.kickoff.md`; S11 lists it.
+- One-phase-vs-two mechanism: `wiki/experiments/2026-06-08_baseline-cis.md`
+  — FFG's slope sits below PBFT's because of the rounds-to-decisions ratio
+  (one attestation phase against PBFT's two broadcast phases), "not
+  aggregation". Do NOT attribute the gap to vote batching across blocks:
+  the ACU for FFG is the finalized checkpoint, so the denominator already
+  counts epochs, not blocks.
+- Endpoint numbers: ≈ 29 vs ≈ 50 vs ≈ 601 at n = 25 —
+  `drafts/ch4_results.md` §4.2 (same figures as S8 Tab A).
+- Finality ≈ 5 s ≈ 2.5 epochs at slot = 1 s, slots/epoch = 2:
+  `drafts/ch4_results.md` §4.2 ("epoch-granularity finality, §3.3");
+  `wiki/experiments/2026-06-08_baseline-cis.md` for the 2.5-epoch reading.
+- Slot-sensitivity sweep: `wiki/experiments/2026-06-22_ffg-slot-sensitivity`
+  — finality is exactly `5·slot_duration` across `slot ∈ {0.5, 1, 2} s`
+  (n = 10, 3 seeds); crossover at 0.2 s is sub-realistic; run as the
+  robustness answer to the "knob-engineered" objection. The sweep is a
+  wiki/results artifact, not a report section — present it as a
+  verification run, not as a thesis figure.
+- The loss-fragility face of the same coin (two-epoch justify→finalise
+  dependency, no recovery path) is Q1's territory — hand off there rather
+  than re-deriving it.

@@ -5,45 +5,45 @@
 
 ## Con trỏ phiên học (state — `/learn` đọc & ghi vào đây)
 
-- **Module hiện tại:** 12 · adversary (Họ C)
-- **Bước trong module:** 6 (ghi sổ — XONG cả module: 2 paradigm tiêm, đảo-chiều chọn tập, parity crux tự-lực, đường ống 1 cell + adapter 3 hàm [ôn xong 3 mảnh mờ M11], Grill G5 3-posture + finding RQ4. Chốt câu hỏi hay của người học "PBFT miễn nhiễm delay vì sao?" → vì slow≤f_tol nên 7 node nhanh {0..6} tự đủ quorum, bỏ qua kẻ chậm; điều kiện n−k≥7 ⇒ k≤3 ⇒ f≤0.30 = biên sweep; f cao hơn thì stall thật. Snowman không hưởng vì poll lấy-mẫu-K phải đợi.)
+- **Module hiện tại:** 13 · output-analysis (tầng Phân tích)
+- **Bước trong module:** 6 (ghi sổ — XONG cả module: hai ranh-giới-reduce [per-trial trong adapter M11/M12 vs across-seed trong output/aggregate], Student-t + Wilson dạy-từ-đầu bằng số thật, chuỗi trách-nhiệm 5-file, byte-identical tầng phân tích. Grill G1–G6 tự-lực phần lớn, chạy chấm 33/33. **Phòng thủ §6 luyện NGAY trong buổi (5/5)** — M13 không để lại nợ.)
 - **Trạng thái:** đã xong <!-- chưa bắt đầu | đang học | đã xong -->
-- **Kế tiếp:** Module 13 · output-analysis (`src/output/`) — module đào-sâu chặng 6 Phân tích; guide `13-output-analysis.md` chưa sinh (⏳), sinh đúng lúc. CÒN NỢ tích lũy: Phòng thủ PT1–PT5 của M07/M08/M11/M12 chưa luyện thành lời → dồn `14-mock-defense`. ĐẾN HẠN vẫn treo: đọc-lại `wiki/concepts/key-findings.md` (F1–F10).
-- **Buổi gần nhất:** 2026-07-08 (Module 11 · delay Họ B — đã xong, đào sâu, Phòng thủ PT1–PT5 CHƯA luyện thành lời → dồn 14)
-- **Ghi chú nối tiếp (M11):** M11 `delay/` (Họ B) XONG — module đào-sâu đầu chặng
-  5. NẮM RẤT CHẮC (tự lực 9/9 clip): **clip.py** = MỘT luật data (`t≤W` cho MỌI
-  event, decided/delivery như nhau) + MỘT lớp ghi-sổ chỉ dán lên decided
-  (kept/tail/late). Chốt hiểu lầm cốt lõi người học vật lộn: **A (data kept) ≠ B
-  (stats)** — A nuôi mọi cột metric thật (latency/tps/goodput/overhead/safety), B
-  chỉ nuôi 1 cột biên-lai `clipped_fraction` + guard <5%, KHÔNG BAO GIỜ trộn vào A.
-  tail vs late: xét **first-decision của instance** so `scope_bound=W+one_round`
-  (≤→in-scope, đuôi t>W là tail vào mẫu số; >→late bỏ hẳn KHÔNG vào mẫu số). HAI
-  cặp số đừng lẫn: cặp-đồng-hồ (horizon 528 *chạy* vs W 480 *đo*, chênh=buffer 48)
-  ≠ cặp-ngưỡng-trong-clip (W chia kept/tail vs W+one_round chia in-scope/late).
-  CÒN MỜ (Feynman yếu, cần ôn đầu M12): (1) *không vẽ được đường ống một cell* —
-  `run_<proto>→clip_records→reducer→_build_row→1 dòng`; (2) window-denominator:
-  bắt đúng KẾT LUẬN (PBFT÷result.now≈528 bị dìm ~10%, fix về W=480; FFG/Snowman
-  no-op) nhưng lệch CƠ CHẾ — có HAI `t_max`: `run()`'s t_max (điều kiện dừng =528,
-  chung cả 3) ≠ `meta.t_max` (field mẫu số harness set=480); khác biệt nằm ở
-  *reducer chọn chia đại lượng nào* (pbft/summarise.py:67 result.now vs
-  pos/snowman meta.t_max), KHÔNG phải lời gọi run(); (3) adapter khớp run_grid:
-  điền đúng chỗ = BA HÀM THUẦN `_run_cell/_cell_key/_param_fingerprint`, KHÔNG
-  phải "timelines/commit_hash" (timelines=data config.py, commit_hash=tiêm qua
-  run_constants resolve-1-lần-ở-cha); `_run_cell` thuần = không wall-clock +
-  không cross-cell. ĐÃ CHẠY CHẤM (jobs=1, né class jobs>1 treo sandbox):
-  test_clip 9/9, test_window_denominator 5/5, test_sweep_equivalence
-  (TestPerCellInvariant + reproduces-committed-t46) 2/2. Bug clip +10% overhead
-  (chỉ-clip-decided) đã vá TRƯỚC commit → delay.csv commit 2ef410f7 có PBFT
-  overhead=19.80/49.99=đúng 2n (không lọt report; bug chỉ chạm tử-số-overhead,
-  không chạm latency/safety → F3 miễn nhiễm). Mở Module 12 `adversary/` (Họ C):
-  rời mạng-trung-thực(B) sang đối-thủ-chủ-đích(C); adapter TÁI DÙNG y khuôn M11
-  (run_grid + clip_records giữ nguyên), chỉ đổi config (trục f/φ) + runners (tiêm
-  Node.adversary) — ÔN 3 mảnh-mờ trên khi mở M12 vì chúng tái xuất. Guide
-  `12-adversary-family-c.md` chưa sinh (⏳). CÒN NỢ: Phòng thủ M11 PT1–PT5 (W/5%
-  không-tùy-tiện, FFG-rescale không-knob-engineer, PBFT-fix khôi-phục-công-bằng,
-  K≈n threat-defense-gold, ×12-15 bản-chất-tuần-tự) chưa luyện thành lời + PBFT
-  PT1–PT5(M07) + Casper PT1–PT5(M08) → dồn `14-mock-defense`. ĐẾN HẠN vẫn treo:
-  đọc-lại `wiki/concepts/key-findings.md` (F1–F10).
+- **Kế tiếp:** Module 14 · mock-defense (★ buổi tổng) — quay lại toàn bộ. Guide `14-mock-defense.md` chưa sinh (⏳), sinh đúng lúc. CÒN NỢ tích lũy: Phòng thủ PT1–PT5 của **M07/M08/M11/M12** chưa luyện thành lời → dồn `14` (M09 + M13 đã luyện, KHÔNG nợ). ĐẾN HẠN vẫn treo: đọc-lại `wiki/concepts/key-findings.md` (F1–F10) với con số cụ thể.
+- **Buổi gần nhất:** 2026-07-19 (Module 13 · output-analysis — đã xong, đào sâu, Phòng thủ luyện trong buổi)
+- **Ghi chú nối tiếp (M13):** M13 `output/` (tầng Phân tích) XONG — module đào-sâu
+  đóng chặng dữ-liệu. Trục xương sống: đây là tầng đứng SAU file long-format thô
+  (M11/M12 đẻ ra), kéo lên thành hình Ch4–5. NẮM CHẮC: **hai ranh-giới-reduce đừng
+  lẫn** — per-trial (adapter M11/M12 `summarise.py`, 1 dòng/cell) vs across-seed
+  (`output/aggregate`, 20 seed/scenario → 1 dòng wide). Chuỗi trách-nhiệm 5-file:
+  **khai-báo** (`schema.py`: `ScenarioMeta` thẻ-căn-cước + `COLUMN_ORDER`, KHÔNG
+  tính gì) → **điền** (reducer `summarise.py` + `csv.py`) → **gộp** (`analysis.py`:
+  `aggregate()` group theo `run_id` → mean + `ci_half=t·sem`; `by_metric` pivot cho
+  plot) → **ghi** (`aggregate.py` long→wide `aggregated.csv`) → **vẽ** (`plots.py`,
+  matplotlib headless). Nhánh phụ `metrics_view.py` = chiếu pass-through verbatim
+  string (T42, byte-identical, KHÔNG parse-format-lại). **Student-t + Wilson dạy
+  từ đầu** (người học chưa học 2 distribution): CI = mean ± t·sem; std chia k−1
+  (Bessel); sem=std/√k (thêm seed → √k → CI hẹp, muốn chắc gấp đôi phải ×4 seed);
+  t nở-cho-mẫu-nhỏ (df=19→t=2.093, dùng z=1.96 sẽ hẹp giả 6.4%); Wilson cho tỉ-lệ
+  0/1 (success_rate/ε), trung-thực-ở-biên (20/20→[0.839,1.0] không phải [1,1]).
+  **CI≈0 KHÔNG bug**: metric structural (latency/tps/overhead) tất định theo
+  (protocol,n) → cùng/khác seed y hệt → std=0 → CI bề-rộng-0; CHỈ `goodput` phụ
+  thuộc chuỗi tx Poisson theo seed (cv≈2.27%). Byte-identical tầng phân tích: CẢ
+  output/ là hàm THUẦN của CSV thô (0 RNG/0 wallclock — ngẫu nhiên chết ở thượng
+  nguồn simulator); ngoại lệ tinh: figure PDF không byte-hệt do matplotlib nhét
+  CreationDate → "PDF tracked, PNG regenerable", cái tất-định là NỘI DUNG số không
+  phải byte-file. ĐÃ CHẠY CHẤM: `make test-output` (2 FAIL ở `test_explain.py` —
+  casper-ffg n=4 theory-vs-measured lệch 14.6%, NGOÀI phạm vi M13); ba file M13
+  `test_aggregate/test_metrics/test_metrics_view` 33/33 xanh qua
+  `PYTHONPATH=src python3 -m unittest tests.output.*` (pytest bị path-collision
+  `tests/output/__init__.py`→dùng unittest hoặc make). Grill G1–G6 tự-lực phần lớn:
+  G1 group-run_id-không-pool (đúng); G2 CI hai-phía + identical→ci_half=0 (đúng
+  mean, học công thức tại chỗ); G3 k=1→else-branch std=sem=ci_half=0 né chia-0
+  (suýt, nói "âm" thực ra =0); G4 unbudgeted→KeyError fail-fast KHÔNG NaN (suýt,
+  đoán NaN → dạy NaN=thiếu-hợp-lệ vs exception=lỗi-phải-sửa); G5 pass-through byte
+  + test_round_trip_fidelity gãy nếu reformat (đúng, số thật commit_latency .9f
+  `5000.000001000`≠.6f); G6 goodput phẳng 94.82 vs tps dốc 3.8→23.75∝n artifact
+  (đúng, đóng câu M07). **Phòng thủ §6 (5/5) luyện NGAY trong buổi** (Student-t,
+  CI≈0, commit-vs-finality-latency, tps-artifact, byte-identical) → M13 KHÔNG nợ.
 - **Ghi chú cũ (M10):** M10 `common/`+`workload/` XONG (bản FAST-LANE theo yêu cầu người học đang gấp; guide `10-runner-sweep.md` đã sinh, bỏ đào-sâu + bỏ Phòng thủ, dồn reproducibility). Nắm chắc: HAI cửa ngõ — `run_to_completion(handle, t_max)` (một run, `t_max=None`→**quiescence**=hết-việc-hàng-đợi-rỗng hợp PBFT-honest, `t_max=<float>`→**deadline**=hết-giờ bắt-buộc cho Casper/Snowman vì chúng chạy vô tận không tự dừng) và `run_grid` (cả lưới). BỐN TRỤ byte-identical: (1) `run_cell` thuần no-wallclock-no-cross-cell; (2) sidecar vân tay, resume CHỈ khi schema+commit_hash+param_fingerprint đều khớp; (3) commit_hash resolve MỘT lần ở cha (worker tự resolve→bẩn cây giữa sweep→lẫn dòng dirty), cây git bẩn→resume vô hiệu; (4) collect=sort theo cell_key áp lại thứ tự toàn phần độc-lập-thứ-tự-worker. Câu thần chú: cell-thuần(base)+collect-sort(step)⇒induction-over-the-grid. Workload: một RNG blake2b `"workload:"+seed` rút THEO THỨ TỰ, mỗi cell ốc-đảo (constant KHÔNG rút RNG=round(rate×interval); poisson rút=Knuth). Đã CHẠY CHẤM: test_runner (t_max_none_quiescence ‖ t_max_float_deadline tách biệt, byte_identical), test_generator (constant_is_exact vs poisson_mean_in_tolerance, same/different-seed), test_sweep jobs=1 (CollectOrder/ResumeSkip/StaleGuards/NoTimingLeak). LƯU Ý sandbox: test_sweep có class jobs>1 (JobsEquivalence/Tiered/JobsClamp/WorkerException) — TREO trong sandbox, né; chỉ chạy class jobs=1. Mở Module 11 `delay/` (Họ B) — module ĐÀO SÂU (CÓ Phòng thủ trở lại), *ai gọi* run_grid: adapter delay, cell=`(protocol,timeline,n,seed)`, run_cell=`runner→clip→row`. Guide `11-delay-family-b.md` chưa sinh (⏳). CÒN NỢ: Phòng thủ PBFT PT1–PT5 (M07) + Casper PT1–PT5 (M08) → dồn `14-mock-defense`. ĐẾN HẠN vẫn treo: đọc-lại `wiki/concepts/key-findings.md` (F1–F10).
 - **Ghi chú cũ (M09):** M09 `snowman/` (Snowman/Avalanche) XONG — giao thức đào sâu thứ BA, đóng chặng giao thức. Nắm chắc: **no-quorum** (mỗi vòng chỉ hỏi K peer, khuếch đại metastability → hội tụ); **hai bộ đếm TÁCH BIỆT** — confidence[b] (α_p nuôi, tích lũy đơn điệu, → preference=argmax, quyết *hướng*) vs counter (α_c nuôi, α_c-liên-tiếp trên preference, → ACCEPT tại β, quyết *chốt*); counter CHỈ đo `agree[preference]` nên α_c của kẻ-không-phải-preference bị vứt; audit #5 = Snowball (argmax-confidence, flip khi *strictly exceed*, tie giữ đương kim) ≠ Snowflake (flip theo majority-vòng); biên safety `ε≤(1−α_c/K)^β` (cơ số α_c/K, mũ β) — công thức đóng từ Ava docs `[ava-docs]`, Theorem 4 (raw/avalanche.pdf) chỉ cho *tồn tại* cận; rescale `K=min(20,n−1)`; n=4 degenerate (α_c=K, unanimity, LOẠI khỏi bảng RQ). Mở Module 10 `common/`+`workload/` — module ĐỌC-GIAO-DIỆN (bỏ Phòng thủ, NHẤN reproducibility của sweep). Guide `10-runner-sweep.md` chưa sinh (⏳) — sinh đúng lúc. LƯU Ý sandbox: sweep `jobs>1` TREO trong Claude Code sandbox → chỉ chạy `jobs=1` in-sandbox. CÒN NỢ: Phòng thủ PBFT PT1–PT5 (M07) + Casper PT1–PT5 (M08) chưa luyện thành lời → dồn `14-mock-defense` (Snowman PT1–PT5 ĐÃ luyện buổi này, không nợ). ĐẾN HẠN: đọc-lại `wiki/concepts/key-findings.md` (F1–F10) giờ M09 xong.
 - **Ghi chú cũ (M07):** Chặng 2 khởi động — M07 `pbft/` XONG (đỉnh chặng 2 đạt: PBFT n=4 thật → 4 record `decided` → CSV, qua `build_run` trọn 5 tầng). Mở Module 08 `pos/` (Casper FFG) — giao thức ĐÀO SÂU thứ hai, module accountable-safety/slashing. Guide `08-casper-ffg.md` chưa sinh (⏳) — sinh đúng lúc, CÓ mục Phòng thủ. Khuôn giao thức (roles.md §Bài-báo-gốc): định vị đúng điều kiện SLASHING trong PDF `raw/` (Casper: hai slashing condition — no-double-vote + no-surround-vote) làm điểm gai, trích chương-câu, KHÔNG cày cả bài; proxy: `resources/*_DeepDive.md` + `wiki/algorithms/` + `wiki/sources/`. Câu mang từ M07: PBFT là baseline "an toàn ngay lập tức, quorum 2f+1, view-change O(n³) đắt"; đối chiếu Casper — finality *chậm hơn* (2 epoch) nhưng có *accountable safety* (chứng minh được AI vi phạm để phạt), khác hẳn PBFT (an toàn nhưng không quy-trách-nhiệm cá nhân). CÒN NỢ M07: chưa luyện mục Phòng thủ PBFT (PT1–PT5 trong guide 07 §6) — để dành cho buổi ôn `14-mock-defense`.
@@ -65,7 +65,7 @@
 | 10 · runner-sweep | 2026-07-08 | 4 | (FAST-LANE, module đọc-giao-diện) HAI cửa ngõ `run_to_completion`(một run; `t_max=None`→quiescence=hết-việc / `<float>`→deadline=hết-giờ) + `run_grid`(cả lưới); BỐN TRỤ byte-identical: run_cell-thuần / sidecar-vân-tay-resume-3-khớp / commit_hash-1-lần-ở-cha (bẩn-cây→tính-lại) / collect-sort-cell_key-áp-thứ-tự-toàn-phần; induction-over-the-grid = cell-thuần(base)+collect-sort(step); workload 1 RNG blake2b theo-thứ-tự mỗi cell ốc-đảo (constant no-RNG / poisson Knuth); jobs chỉ đổi THỨ TỰ chạy không đổi nội dung; đã chạy chấm runner+generator+sweep(jobs=1) | **H1 hiểu NGƯỢC lúc đầu**: tưởng quiescence là "timeout" — thực ra quiescence=hết-VIỆC (hàng đợi rỗng, giao thức tự dừng) ≠ deadline=hết-GIỜ (cưỡng bức); Snowman/Casper cần t_max vì chạy vô tận không tự quiesce — điểm này PHẢI ghim cho mock-defense; H3 ban đầu sót nửa-sau (chèn cell khác KHÔNG đổi batch vì mỗi cell seed độc lập); cần visual mới vỡ ra (module hơi thiếu-context nếu chỉ đọc chay) |
 | 11 · delay (Họ B) | 2026-07-08 | 3.5 | **clip.py xuất sắc (tự lực 9/9)**: MỘT luật data `t≤W` cho mọi event + lớp ghi-sổ kept/tail/late chỉ dán lên decided; A(data→mọi cột metric)≠B(stats→chỉ `clipped_fraction`+guard); tail vs late xét first-decision so W+one_round; guard 5%=biên-lai không-phải-metric; bug clip +10% vá trước commit không lọt report | Feynman yếu 3 mảnh (ôn đầu M12): (1) không vẽ được đường ống 1 cell; (2) window-denom đúng kết-luận sai cơ-chế (HAI t_max: run()-stop=528 chung vs meta.t_max=480 field; khác ở reducer chọn chia gì); (3) adapter điền BA HÀM THUẦN không phải timelines/commit_hash. HAI cặp số hay lẫn (đồng-hồ 528/480 vs ngưỡng-clip W/W+one_round) |
 | 12 · adversary (Họ C) | 2026-07-08 | 4 | Họ C khác Họ B ĐÚNG hai chỗ: config (thêm trục f/m) + runners (tiêm adversary). HAI PARADIGM TIÊM: network-wrap (delay/offline, `_wrap_outbound` chung, tráo `send/broadcast` SAU build, FSM sạch tuyệt đối; delay shift `t+=mult·ref`, offline drop) vs node-subclass (equivocate, override method phát-nội-dung LÚC build vì phải fork *nội dung* — seam wrap chỉ đổi thời-điểm/có-không, không chế được payload thứ 2). ĐẢO CHIỀU CHỌN TẬP: `slow_node_ids`=high-id chừa primary (liveness attack, mọi f<1⇒k<n⇒node0 an toàn) vs `byzantine_node_ids`=low-id ôm primary (safety attack cần primary+proposer trong tập ác). mult chỉ ở DelayProfile vì delay *dosed* (f=bao-nhiêu-kẻ, m=mỗi-kẻ-mạnh-cỡ-nào); offline/equivocate nhị phân. **PARITY CRUX (tự lực rất tốt)**: n10 b=4 fork (A gom {4,6,8}+{0,1,2,3}=7, B gom {5,7,9}+byz=7)/b=3 không (chỉ B đạt 7); contiguous-split fail (honest dồn 1 phía); điều kiện fork `b>f_tol`; parity=hàm thuần(n,id) không RNG; **người học tự bật "primary chẻ đôi sự thật, honest là nạn nhân không thấy hộp thư nhau"**. Byte-identical: shift/drop/parity đều tất định → 0 RNG adversary → replay hệt → safety signal SEED-INVARIANT (f_max=bracket không cần CI). Đường ống 1 cell: cổng-fingerprint→[runner→clip→reducer→_build_row]→sidecar→collect-sort→post-pass(finality_delay_ratio cross-cell)→csv; `_run_cell` THUẦN (no wall-clock/no cross-cell). Adapter=3 hàm `_run_cell/_cell_key/_param_fingerprint` (f,m vào fingerprint, seed=identity); commit_hash=run_constants resolve-1-lần-cha (KHÔNG phải hàm adapter). clip+reducer+window-denom-fix IMPORT THẲNG từ delay/. 3 POSTURE (F7–F10/RQ4): delay PBFT≈FFG miễn-nhiễm≪Snowman nổ 49–62× (poll tuần tự β=15); offline PBFT vách sạch f*=0.40 / FFG mượt (1−f) / Snowman vách αc DƯỚI ⅓ n-dependent (0.20@n10/0.33@n25, slack K−αc); equivocate PBFT fork(b>f_tol,conflicting=229)/FFG accountable(detect+slash, links bỏ target_hash)/Snowman kháng. Finding RQ4: no-dominance, thứ hạng ĐẢO khi đổi adversary. Chạy chấm: test_equivocate+test_determinism 16/16, test_runners+test_safety 15/15 | Bù tại buổi: (1) delay PBFT là *miễn nhiễm* không phải "chậm vừa" (đoán FFG<PBFT<Snow — sai chỗ PBFT); (2) FFG-accountable ở equivocate chưa nêu (chỉ nói PBFT-safety/Snowman-liveness); (3) dòng offline bỏ trống; (4) đường ống rơi 2 trạm (reducer/_build_row + collect-sort/post-pass) & đặt fingerprint nhầm thành "trạm" thay vì "cổng gác resume". CÒN NỢ: Phòng thủ PT1–PT5 §6 CHƯA luyện thành lời → dồn `14-mock-defense`. Điểm mạnh nổi bật: parity crux tự-lực + tự bật insight "leader chẻ đôi sự thật" |
-| 13 · output-analysis | | | | |
+| 13 · output-analysis | 2026-07-19 | 4 | Hai ranh-giới-reduce (per-trial adapter M11/M12 vs across-seed output/aggregate); chuỗi trách-nhiệm 5-file khai-báo(schema)→điền(reducer+csv)→gộp(analysis)→ghi(aggregate)→vẽ(plots); long(20 dòng/scenario, substrate append-được)↔wide(1 dòng, mean±CI feed plot); **Student-t** CI=mean±t·sem (std÷k−1 Bessel, sem=std/√k, df=19→t=2.093, z=1.96 hẹp giả 6.4%, ×4 seed để chắc gấp đôi) + **Wilson** cho tỉ-lệ trung-thực-ở-biên; CI≈0 không-bug (structural tất-định theo (protocol,n), chỉ goodput cv≈2.27% do Poisson-theo-seed); byte-identical tầng phân-tích (output/ hàm thuần, RNG chết ở thượng-nguồn; PDF metadata caveat); group theo run_id không-pool; k=1→else-branch né chia-0; bytes_per_acu unbudgeted→KeyError fail-fast (NaN=thiếu-hợp-lệ vs exception=lỗi); metrics_view pass-through verbatim byte-hệt; tps∝n artifact vs goodput phẳng (đóng M07). Grill 6/6 chạy chấm 33/33. **Phòng thủ 5/5 luyện trong buổi** | Đã học Student-t/Wilson từ ĐẦU tại buổi (chưa từng học 2 distribution) — cần ôn lại công thức khi vào M14; G3 nói "mẫu số âm" (thực ra =0); G4 đoán NaN (thực ra KeyError). ĐẾN HẠN treo: key-findings F1–F10 số cụ thể |
 | 14 · mock-defense | | | | |
 
 ## Nhật ký buổi học
@@ -76,6 +76,40 @@
 - Mờ: vì sao seq per-node đủ để không bao giờ so sánh tới phần tử event.
 - Theo dõi tiếp: xem lại khi học set_timer trong nodes.
 -->
+
+### [2026-07-19] Module 13 · output-analysis (đào-sâu · tầng Phân tích · đóng chặng dữ-liệu)
+- Thông: mở đầu bằng khung "đây là tầng ĐỨNG SAU file long-format thô (M11/M12 đẻ
+  ra), kéo lên thành hình Ch4–5". Chốt **hai ranh-giới-reduce đừng lẫn**: per-trial
+  (adapter `summarise.py`, 1 dòng/cell) vs across-seed (`output/aggregate`, 20 seed
+  → 1 dòng wide). Dựng **chuỗi trách-nhiệm 5-file** (người học tự tổng hợp gần đúng ở
+  Feynman): khai-báo(`schema.py`, KHÔNG tính)→điền(reducer+`csv.py`)→gộp(`analysis.py`)
+  →ghi(`aggregate.py`)→vẽ(`plots.py`); nhánh phụ `metrics_view` pass-through. Minh
+  hoạ bằng **DỮ LIỆU THẬT** `pbft-n7`: long 20 dòng-seed (latency/tps/overhead y hệt
+  mọi seed, chỉ goodput nhảy) → wide 1 dòng (commit_latency cv=0 CI[x,x] vs goodput
+  94.82±1.01). 
+- Cách học: người học YÊU CẦU trích thẳng wiki (output-format §2 pipeline + §13
+  latency Revisions + evaluation-metrics tps/goodput) — làm luôn. **Dạy Student-t +
+  Wilson TỪ ĐẦU** (người học chưa từng học 2 distribution, xin ví dụ số trực quan):
+  ráp CI=mean±t·sem trên đúng 20 goodput thật của pbft-n7 → khớp aggregated.csv
+  [93.81,95.83]; so z=1.96 hẹp giả 6.4%; Wilson 20/20→[0.839,1.0]. Grill G1–G6 CHẠY
+  THẬT chấm: G1 pool-vs-run_id trên FFG-n4 (n_runs 20 vs 40 bịa cỡ mẫu); G2
+  [8..12]→CI hai-phía + [10×5]→ci_half=0; G3 k=1→else-branch; G4 unbudgeted→KeyError;
+  G5 reformat .9f→.6f khác byte; G6 tps 3.8→23.75∝n vs goodput phẳng 94.82. Ba file
+  test M13 33/33 xanh (unittest; pytest path-collision). LƯU Ý: `make test-output` có
+  2 FAIL ở `test_explain.py` (casper-ffg n=4 theory-vs-measured 14.6%) — NGOÀI phạm
+  vi M13, ghi Backlog-cá-nhân nếu cần.
+- Vấp (nhẹ, đã vá tại buổi): (1) "chịu" ở câu file-nào-hàm-thuần → dạy CẢ output/ là
+  hàm thuần (RNG chết thượng-nguồn) + caveat PDF-metadata; (2) G3 nói "mẫu số âm"
+  (thực ra k−1=0, code né bằng nhánh else); (3) G4 đoán NaN (thực ra KeyError; NaN=
+  thiếu-hợp-lệ vs exception=lỗi-phải-sửa); (4) Feynman gọi goodput "data ngẫu nhiên"
+  → siết thành "phụ thuộc chuỗi tx Poisson theo seed". Điểm mạnh: G1/G2(mean)/G5/G6
+  tự-lực chắc; hỏi rất đúng chỗ (xin ví dụ số cho distribution, hỏi ranh-giới schema
+  vs analysis).
+- Mờ/để dành: công thức Student-t/Wilson mới học — ôn lại đầu M14. **Phòng thủ §6
+  (5/5) đã luyện NGAY trong buổi** (Student-t, CI≈0, commit-latency, tps-artifact,
+  byte-identical) → M13 KHÔNG dồn nợ. Câu mang sang **M14 (mock-defense, ★ buổi
+  tổng)**: gom Phòng thủ còn nợ M07/M08/M11/M12 + đọc-lại key-findings F1–F10 với con
+  số cụ thể — đóng cả hồ sơ, toàn cảnh lõi→giao-thức→sweep→thí-nghiệm→phân-tích đã đủ.
 
 ### [2026-07-08] Module 12 · adversary Họ C (đào-sâu · đối-thủ-chủ-đích · đóng phần sinh-số-liệu)
 - Thông: mở đầu bằng câu chốt "Họ C khác Họ B đúng HAI chỗ: config (trục f/m) +
