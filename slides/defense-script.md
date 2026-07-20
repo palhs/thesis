@@ -122,8 +122,8 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
 ## S2 · Proven safe. Still halting. — enter 0:30 · speak 0:50 · leave 1:20
 
 **OPENING ANCHOR:**
-> "Layer-1 consensus protocols all come with safety proofs. But here are
-> four years of real-world operation."
+> "Over the past few years, we have watched some of the largest networks in
+> the industry fail in production. A few examples."
 
 - `▶` (whole incident timeline cascades in on one press) — network after
   network, year after year: halts, reorgs, finality stalls — Solana,
@@ -131,22 +131,31 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
   on top *(sweep the timeline with one gesture; speak generically — the
   on-slide labels carry the dates and specifics, do not read the incidents
   out one by one)*
-- `▶` (text box) — the proofs are NOT wrong; what breaks are their
-  **assumptions** — bounded delay, enough honest validators; in real
-  operation delay, loss and malicious nodes act at once, so you cannot tell
-  which condition caused which failure
+- `▶` (text box) — and pinning down WHAT broke each of them is genuinely
+  hard: every one of these systems runs a protocol with a **safety proof**;
+  the proofs are NOT wrong — what breaks are their **assumptions** —
+  bounded delay, enough honest validators; in real operation delay, loss
+  and malicious nodes act **at once**, the conditions overlap, so you
+  cannot tell which condition caused which failure *(this beat is where the
+  slide title "Proven safe. Still halting." pays off — gesture at it)*
 
-`▶` (big question appears) — **TRANSITION ANCHOR** *(now also carries the old
-"yardsticks" slide — the sub-line on the slide backs it up)*:
-> "So: which condition breaks which protocol? You cannot answer it from
-> published numbers — each family grades itself on its own yardstick:
-> throughput here, finality delay there, a safety probability ε at one
-> parameter setting — numbers designed never to sit side by side. The one
-> matched harness before this, Gervais et al., covers Proof-of-Work only.
-> So I built one harness that stresses all three families in exactly the
-> same way."
+`▶` (big question appears) — **TRANSITION ANCHOR** *(carries the old
+"yardsticks" argument in compressed form — the sub-line on the slide backs
+it up)*:
+> "So: which condition breaks which protocol? Published numbers cannot
+> answer this — each family measures itself in its own way, so their
+> numbers can never be compared side by side. That is the gap: I built
+> one harness that tests all three families under exactly the same
+> conditions."
 
 `▶ → S4`
+
+📎 *Detail held back for Q&A, not spoken: the measure-it-differently
+examples (throughput vs. finality delay vs. ε at one parameter setting)
+are on the slide's sub-line; the prior-work point — the one matched
+harness before this, Gervais et al., covers Proof-of-Work only — lives on
+appendix A2 and `qa-prep.md`. Reach for it only if asked "why not use
+published numbers / what is the research gap".*
 
 ---
 
@@ -156,14 +165,19 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
 > "The goal fits in one line: one simulator, three protocols, one shared set
 > of assumptions. Five questions."
 
-*(one sentence per press — no elaboration; the slide text matches report §1.3)*
+*(one press = one full spoken question — each line on the slide IS a
+sentence that starts with the highlighted word; say it as a plain
+question, nothing more; slide text matches report §1.3)*
 
-- `▶` **WHEN** — the network slows: how much does finality slow → RQ1
-- `▶` **WHAT** — throughput as the Byzantine fraction rises → RQ2
-- `▶` **HOW MUCH** — messages paid per committed unit → RQ3
-- `▶` **WHO** — which adversary breaks which protocol — and does it break
-  speed, or safety → RQ4
-- `▶` **WHICH** — after all of that, does any protocol win overall → RQ5
+- `▶` "**WHEN** the network slows down — how much slower does finality
+  get?" → RQ1
+- `▶` "**WHAT** happens to throughput as more validators turn
+  malicious?" → RQ2
+- `▶` "**HOW MUCH** does each committed unit cost in messages?" → RQ3
+- `▶` "**WHO** breaks each protocol — which attacker, and does it break
+  speed or safety?" → RQ4
+- `▶` "**WHICH** protocol wins overall — does any of them dominate?"
+  → RQ5
 
 **TRANSITION ANCHOR:**
 > "Before measuring, we need to see just how differently these three
@@ -501,8 +515,10 @@ or only at n = 25?".*
 ## Practice notes
 
 - Memorize first: 2 anchors/slide (~22 sentences) + 2 special anchors (S9
-  core idea, S11 closing). The S2 transition anchor is the longest — it now
-  carries the whole "gap" argument; drill it until it is one breath.
+  core idea, S11 closing). The S2 transition anchor is three short moves —
+  question → each family measures itself differently → "that is the gap:
+  one harness"; if you can say those three moves, the sentence rebuilds
+  itself.
 - Practice with the deck open: each beat = one Space — the press order IS
   the talk's table of contents.
 - The old 15-minute rehearsal video (`defense-rehearsal.mp4`) no longer
