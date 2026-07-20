@@ -5,12 +5,35 @@
 
 ## Con trỏ phiên học (state — `/learn` đọc & ghi vào đây)
 
-- **Module hiện tại:** 13 · output-analysis (tầng Phân tích)
-- **Bước trong module:** 6 (ghi sổ — XONG cả module: hai ranh-giới-reduce [per-trial trong adapter M11/M12 vs across-seed trong output/aggregate], Student-t + Wilson dạy-từ-đầu bằng số thật, chuỗi trách-nhiệm 5-file, byte-identical tầng phân tích. Grill G1–G6 tự-lực phần lớn, chạy chấm 33/33. **Phòng thủ §6 luyện NGAY trong buổi (5/5)** — M13 không để lại nợ.)
-- **Trạng thái:** đã xong <!-- chưa bắt đầu | đang học | đã xong -->
-- **Kế tiếp:** Module 14 · mock-defense (★ buổi tổng) — quay lại toàn bộ. Guide `14-mock-defense.md` chưa sinh (⏳), sinh đúng lúc. CÒN NỢ tích lũy: Phòng thủ PT1–PT5 của **M07/M08/M11/M12** chưa luyện thành lời → dồn `14` (M09 + M13 đã luyện, KHÔNG nợ). ĐẾN HẠN vẫn treo: đọc-lại `wiki/concepts/key-findings.md` (F1–F10) với con số cụ thể.
-- **Buổi gần nhất:** 2026-07-19 (Module 13 · output-analysis — đã xong, đào sâu, Phòng thủ luyện trong buổi)
-- **Ghi chú nối tiếp (M13):** M13 `output/` (tầng Phân tích) XONG — module đào-sâu
+- **Module hiện tại:** 14 · mock-defense (★ buổi tổng — module CUỐI lộ trình)
+- **Bước trong module:** 5 (Grill — VÒNG A đã mở; đã hỏi A1/A2/A3, ĐANG CHỜ người học trả lời để chấm)
+- **Trạng thái:** đang học
+- **Ghi chú nối tiếp (M14):** Guide đã sinh đủ 7 mục: §3 **bộ số neo** (baseline
+  1000/5000ms · 94.8/79.6tps · overhead 2n/1.15n/2Kβ · W=480/guard5%/worst4.00% ·
+  t=2.093 · f*=0.40/0.20@n10/0.33@n25 · conflicting=229 · Snowman 12.2–12.6s ≈12–13×),
+  §5 mock defense **3 vòng** (A: số & F1–F10 nhanh · B: 20 câu Phòng thủ tồn đọng,
+  quay ngược M12→M11→M08→M07 · C: 5 câu cấp-luận-văn C1 vì-sao-mô-phỏng / C2
+  ba-trên-bốn-họ / C3 một-giao-thức-đại-diện-cả-họ / C4 đóng-góp-thật-sự / C5
+  sửa-một-giới-hạn), §6 ngân hàng 20 PT rút gọn, §7 Feynman tổng 3 bài nói.
+  Nguyên tắc xuyên buổi: **khai báo giới hạn trước khi bị hỏi; caveat = rào chắn
+  phạm vi, không phải lỗ hổng ẩn**; câu mạnh nhất có dạng "Có, và em công khai điều
+  đó — đây là chỗ nó được ghi". Nguồn đã nạp sẵn: key-findings F1–F10 + bảng
+  RQ→finding, ch6_conclusion §6.2 (6 gạch limitations) + §6.3, §6 của guide
+  07/08/11/12. **CẢNH BÁO đã nạp**: `SESSION-HANDOFF-2026-07-20-key-findings-audit.md`
+  — F6 sai cả ba (cơ chế = proposer-lottery *không* phải stake-margin; luật =
+  `(1−φ)²` không phải `(1−φ)`; metric = `success_rate` nhị phân "epoch 1 có
+  finalise không" *không* phải sustained throughput → RQ2 phải trích
+  `throughput_ratio`) và F8 headline "Snowman most delay-tolerant" **SAI**, mâu
+  thuẫn F10 (đúng: PBFT #1 ở 1.0×, Snowman #2 ở 62× — inversion là *intra*-protocol
+  "kiên nhẫn vô hạn: đức tính trước chậm, tử huyệt trước im lặng"); thêm 2 caveat
+  chưa nằm ở tầng findings: dose asymmetry (`ref` FFG=0.1s ⇒ m=10 là đòn yếu 10×)
+  và ô 62× bị clip **88.9%**. §3 bộ-số-neo của guide 14 vẫn chép headline F8 cũ —
+  quay bằng BẢN ĐÃ SỬA. TIẾN ĐỘ VÒNG A: đã hỏi A1 (Snowman n=16 = 14.1× PBFT, vì
+  sao) / A2 (CV=0 có phải bug) / A3 (F8 inversion — câu bẫy, chấm theo bản sửa).
+  CHƯA làm: chấm A1–A3, 7 câu A còn lại, vòng B (20 câu), vòng C (5 câu), Feynman tổng.
+- **Kế tiếp:** (không còn — M14 là module cuối; xong M14 là đóng lộ trình `learning/`)
+- **Buổi gần nhất:** 2026-07-20 (Module 14 · mock-defense — mở buổi, sinh guide, đang ở bước 1)
+- **Ghi chú cũ (M13 — đã xong):** M13 `output/` (tầng Phân tích) XONG — module đào-sâu
   đóng chặng dữ-liệu. Trục xương sống: đây là tầng đứng SAU file long-format thô
   (M11/M12 đẻ ra), kéo lên thành hình Ch4–5. NẮM CHẮC: **hai ranh-giới-reduce đừng
   lẫn** — per-trial (adapter M11/M12 `summarise.py`, 1 dòng/cell) vs across-seed

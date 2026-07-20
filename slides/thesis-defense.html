@@ -655,6 +655,12 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <marker id="m-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--c-ffg)"/></marker>
         <marker id="m-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--c-snowman)"/></marker>
         <marker id="m-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--ink-faint)"/></marker>
+        <!-- ordinary slot-block glyph (grey chain layer under FFG) -->
+        <g id="ffg-blk">
+          <rect width="34" height="28" rx="4" style="fill:var(--panel);stroke:var(--ink-dim);stroke-width:1.5"/>
+          <line x1="7" y1="10" x2="27" y2="10" style="stroke:var(--ink-faint);stroke-width:1.5"/>
+          <line x1="7" y1="18" x2="21" y2="18" style="stroke:var(--ink-faint);stroke-width:1.5"/>
+        </g>
       </defs>
 
       <!-- ── PBFT: n=4, node 3 offline; request → pre-prepare → prepare → commit.
@@ -760,35 +766,60 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
             <circle cx="990" cy="505" r="14"/>
           </g>
         </g>
+        <!-- press 1 — the chain underneath (grey layer): one proposer per slot adds
+             one block; transactions live in the blocks; a checkpoint is just the
+             epoch-boundary block. Grey = block production, purple = FFG votes. -->
+        <g class="stf" data-t="500">
+          <use href="#ffg-blk" x="332" y="196"/><use href="#ffg-blk" x="374" y="196"/><use href="#ffg-blk" x="416" y="196"/>
+        </g>
+        <g class="stf" data-t="650">
+          <use href="#ffg-blk" x="692" y="196"/><use href="#ffg-blk" x="734" y="196"/><use href="#ffg-blk" x="776" y="196"/>
+        </g>
+        <g class="stf" data-t="800">
+          <use href="#ffg-blk" x="1052" y="196"/><use href="#ffg-blk" x="1094" y="196"/><use href="#ffg-blk" x="1136" y="196"/>
+        </g>
+        <path class="msg std" data-t="1000" style="--len:500;stroke:var(--ink-dim)" marker-end="url(#m-d)" d="M710,486 C 720,420 740,320 748,236"/>
+        <g class="stf" data-t="1000">
+          <circle cx="710" cy="505" r="18" fill="none" stroke="var(--ink)" stroke-width="2"/>
+          <text class="ts" x="710" y="548" text-anchor="middle">proposer of the slot</text>
+        </g>
+        <path class="msg std" data-t="1200" style="--len:500;stroke:var(--ink-dim)" marker-end="url(#m-d)" d="M990,486 C 1010,420 1080,320 1106,236"/>
+        <g class="stf" data-t="1200">
+          <circle cx="990" cy="505" r="18" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        </g>
+        <g class="stf" data-t="1400">
+          <text class="ts" x="60" y="576">every slot: one proposer → one block — transactions live inside</text>
+          <text class="ts" x="60" y="600">checkpoint = the epoch-boundary block — FFG votes only on these</text>
+        </g>
         <!-- attestations on link C-1 → C0 -->
         <g style="stroke:var(--c-ffg)">
-          <path class="msg std" data-t="700"  style="--len:500" marker-end="url(#m-f)" d="M370,488 C 480,380 620,330 745,290"/>
-          <path class="msg std" data-t="800"  style="--len:500" marker-end="url(#m-f)" d="M510,488 C 590,400 660,340 750,296"/>
-          <path class="msg std" data-t="900"  style="--len:500" marker-end="url(#m-f)" d="M650,488 C 700,420 720,350 755,302"/>
-          <path class="msg std" data-t="1000" style="--len:500" marker-end="url(#m-f)" d="M790,488 C 780,420 770,360 762,306"/>
-          <path class="msg std" data-t="1100" style="--len:500" marker-end="url(#m-f)" d="M930,488 C 880,420 820,360 772,308"/>
+          <path class="msg std" data-t="2600" style="--len:500" marker-end="url(#m-f)" d="M370,488 C 480,380 620,330 745,290"/>
+          <path class="msg std" data-t="2700" style="--len:500" marker-end="url(#m-f)" d="M510,488 C 590,400 660,340 750,296"/>
+          <path class="msg std" data-t="2800" style="--len:500" marker-end="url(#m-f)" d="M650,488 C 700,420 720,350 755,302"/>
+          <path class="msg std" data-t="2900" style="--len:500" marker-end="url(#m-f)" d="M790,488 C 780,420 770,360 762,306"/>
+          <path class="msg std" data-t="3000" style="--len:500" marker-end="url(#m-f)" d="M930,488 C 880,420 820,360 772,308"/>
         </g>
-        <text class="ts stf" data-t="700" x="60" y="452">attestations accumulate on the link C₋₁ → C₀</text>
+        <text class="ts stf" data-t="2600" x="60" y="452">attestations accumulate on the link C₋₁ → C₀</text>
         <!-- stake meter -->
-        <g class="stf" data-t="1300">
+        <g class="stf" data-t="3200">
           <rect x="620" y="330" width="240" height="16" rx="8" fill="var(--panel)" stroke="var(--ink-faint)"/>
           <line x1="780" y1="322" x2="780" y2="354" stroke="var(--ink)" stroke-width="1.5"/>
           <text class="ts" x="780" y="376" text-anchor="middle">⅔ stake</text>
         </g>
-        <rect class="growx" data-t="1400" x="620" y="330" width="172" height="16" rx="8" fill="var(--c-ffg)"/>
+        <rect class="growx" data-t="3300" x="620" y="330" width="172" height="16" rx="8" fill="var(--c-ffg)"/>
         <!-- state flips (exclusive with the initial labels) -->
-        <g class="stf" data-t="2400" data-x="stC0">
+        <g class="stf" data-t="4100" data-x="stC0">
           <rect x="840" y="150" width="200" height="120" rx="14" fill="rgba(157,140,255,.14)" stroke="var(--c-ffg)" stroke-width="2"/>
           <text class="tl" x="940" y="200" text-anchor="middle">C₀</text>
           <text class="tm" x="940" y="228" text-anchor="middle" fill="var(--c-ffg)">justified ✓</text>
         </g>
-        <g class="stf" data-t="2900" data-x="stC1">
+        <g class="stf" data-t="4600" data-x="stC1">
           <rect x="480" y="150" width="200" height="120" rx="14" fill="rgba(157,140,255,.26)" stroke="var(--c-ffg)" stroke-width="2.5"/>
           <text class="tl" x="580" y="200" text-anchor="middle">C₋₁</text>
           <text class="tm" x="580" y="228" text-anchor="middle" fill="var(--c-ffg)">finalized ✓✓</text>
           <text class="ts" x="180" y="330">child justified ⇒ parent finalized</text>
         </g>
-        <g class="bdg stf" data-t="3300">
+        <g class="bdg stf" data-t="5100">
           <rect x="1170" y="330" width="350" height="66" style="stroke:var(--c-ffg)"/>
           <text x="1345" y="358" text-anchor="middle" fill="var(--c-ffg)">C₊₁ left unfinalized</text>
           <text class="tm" x="1345" y="382" text-anchor="middle">finality trails the chain tip</text>
@@ -967,7 +998,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       </div>
     </div>
     <div class="cappane" data-p="ffg">
-      <div class="cap"><b>Stake-weighted checkpoint finality</b> over epochs · deterministic · <b>~1.15n messages</b> · slashing makes a safety failure attributable to the validators who signed it.</div>
+      <div class="cap"><b>Finality gadget</b> — a slot-by-slot chain keeps producing blocks (grey); FFG votes only on epoch-boundary <b>checkpoints</b> · stake-weighted · deterministic · <b>~1.15n messages</b> · slashing makes a safety failure attributable.</div>
       <div class="spec">
         <span>synchrony <b>partial</b></span>
         <span>proposer <b>stake-weighted</b></span>
@@ -1829,6 +1860,113 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
   <div class="src">report §3.3 · Table 2.1</div>
 </section>
 
+<!-- ════════════════════════════════════════════
+     A4 · Q&A BACKUP — justified ≠ safe: the free escape,
+     and why the finality rule closes it (accountable safety).
+     Scenario: C justified on branch X at epoch e, never finalized;
+     next epoch votes the SAME source A to a LATER target D on branch Y
+     — no double vote (targets e ≠ e+1), no surround (same source) —
+     C is legally abandoned, nobody slashed. Once ⅔ sign C → C′
+     (direct child ⇒ C finalized), every escape link must double-vote
+     (second target at e+1) or surround (e−1 → e+2 around e → e+1).
+     ════════════════════════════════════════════ -->
+<section class="slide appendix" id="a4">
+  <div class="wrap">
+    <div class="kick"><span>Appendix · Q&amp;A backup</span><span class="r">A4</span></div>
+    <h2 class="stitle st" data-t="0">Justified ≠ safe — <em>the free escape, and the lock</em></h2>
+    <svg width="1728" height="661" viewBox="0 0 1560 596" aria-label="Casper FFG: a justified checkpoint legally abandoned; finalization makes abandonment slashable">
+      <defs>
+        <marker id="m-f4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--c-ffg)"/></marker>
+        <marker id="m-d4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--ink-faint)"/></marker>
+        <marker id="m-w4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--warn)"/></marker>
+        <marker id="m-b4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--bad)"/></marker>
+      </defs>
+
+      <!-- ① left panel — the free escape -->
+      <g class="stf" data-t="100">
+        <text class="tm" x="60" y="40" style="fill:var(--ink)">① the free escape — justified, then legally abandoned</text>
+        <text class="ts" x="165" y="240" text-anchor="middle">epoch e−1</text>
+        <text class="ts" x="475" y="105" text-anchor="middle">epoch e</text>
+        <text class="ts" x="725" y="105" text-anchor="middle">epoch e+1</text>
+        <rect class="nd" x="90" y="253" width="150" height="90" rx="12"/>
+        <text class="tl" x="165" y="292" text-anchor="middle">A</text>
+        <text class="tm" x="165" y="320" text-anchor="middle" fill="var(--c-ffg)">justified</text>
+        <rect class="nd" x="400" y="118" width="150" height="90" rx="12"/>
+        <text class="tl" x="475" y="157" text-anchor="middle">C</text>
+        <rect class="nd" x="650" y="118" width="150" height="90" rx="12" stroke-dasharray="6 6" style="stroke:var(--ink-faint)"/>
+        <text class="tl" x="725" y="157" text-anchor="middle" fill="var(--ink-faint)">C′</text>
+        <rect class="nd" x="650" y="400" width="150" height="90" rx="12"/>
+        <text class="tl" x="725" y="439" text-anchor="middle">D</text>
+        <text class="ts" x="815" y="163">branch X</text>
+        <text class="ts" x="815" y="445">branch Y</text>
+        <line class="lane" x1="240" y1="283" x2="400" y2="178"/>
+        <line class="lane" x1="550" y1="163" x2="650" y2="163"/>
+        <line class="lane" x1="240" y1="313" x2="650" y2="440"/>
+      </g>
+      <!-- vote 1: ⅔ justify C -->
+      <path class="msg std" data-t="600" style="--len:400;stroke:var(--c-ffg)" marker-end="url(#m-f4)" d="M245,265 C 300,185 340,165 394,152"/>
+      <g class="stf" data-t="600"><text class="ts" x="255" y="135" fill="var(--c-ffg)">supermajority link · ⅔ → target C</text></g>
+      <g class="stf" data-t="1000"><text class="tm" x="475" y="188" text-anchor="middle" fill="var(--c-ffg)">justified ✓</text></g>
+      <!-- finalize link never forms -->
+      <path class="msg std" data-t="1500" style="--len:200;stroke:var(--c-ffg);opacity:.45" stroke-dasharray="5 5" marker-end="url(#m-f4)" d="M555,140 C 585,114 615,110 645,126"/>
+      <g class="stf" data-t="1500">
+        <g stroke="var(--bad)" stroke-width="3"><line x1="590" y1="98" x2="610" y2="118"/><line x1="610" y1="98" x2="590" y2="118"/></g>
+        <text class="ts" x="600" y="82" text-anchor="middle" fill="var(--bad)">link C → C′ never reaches ⅔ (votes late)</text>
+      </g>
+      <!-- vote 2: next epoch, same source, later target -->
+      <path class="msg std" data-t="2100" style="--len:600;stroke:var(--warn)" marker-end="url(#m-w4)" d="M245,330 C 380,430 480,455 645,450"/>
+      <g class="stf" data-t="2100"><text class="ts" x="270" y="510" fill="var(--warn)">next epoch — same source A → target D (epoch e+1) · the chain moves on</text></g>
+      <g class="stf" data-t="2500"><text class="tm" x="725" y="470" text-anchor="middle" fill="var(--warn)">justified ✓</text></g>
+      <!-- the verdict -->
+      <g class="stf" data-t="2800">
+        <text class="tm" x="475" y="232" text-anchor="middle" fill="var(--bad)">abandoned — nobody slashed</text>
+        <text class="ts" x="90" y="540">targets e ≠ e+1 → not a double vote · same source A → not a surround</text>
+        <text class="ts" x="90" y="564">"justified" only means: one round passed</text>
+      </g>
+
+      <line class="lane stf" data-t="3300" x1="880" y1="60" x2="880" y2="560" stroke-dasharray="2 6"/>
+
+      <!-- ② right panel — finalize = lock the exits -->
+      <g class="stf" data-t="3300">
+        <text class="tm" x="920" y="40" style="fill:var(--ink)">② why the finality rule closes this door</text>
+        <rect class="nd" x="910" y="253" width="130" height="80" rx="12"/>
+        <text class="tl" x="975" y="300" text-anchor="middle">A</text>
+        <rect class="nd" x="1120" y="118" width="130" height="80" rx="12"/>
+        <text class="tl" x="1185" y="152" text-anchor="middle">C</text>
+        <rect class="nd" x="1330" y="118" width="130" height="80" rx="12"/>
+        <text class="tl" x="1395" y="152" text-anchor="middle">C′</text>
+        <rect class="nd" x="1330" y="400" width="130" height="80" rx="12" stroke-dasharray="6 6" style="stroke:var(--ink-faint)"/>
+        <text class="tl" x="1395" y="447" text-anchor="middle" fill="var(--ink-faint)">D</text>
+        <line class="lane" x1="1040" y1="283" x2="1120" y2="170"/>
+        <line class="lane" x1="1250" y1="158" x2="1330" y2="158"/>
+        <line class="lane" x1="1040" y1="300" x2="1330" y2="435"/>
+      </g>
+      <path class="msg std" data-t="3700" style="--len:200;stroke:var(--c-ffg)" marker-end="url(#m-f4)" d="M1255,140 C 1280,112 1310,108 1335,120"/>
+      <g class="stf" data-t="3700">
+        <text class="ts" x="1295" y="88" text-anchor="middle" fill="var(--c-ffg)">⅔ sign C → C′ (direct child)</text>
+        <text class="tm" x="1185" y="184" text-anchor="middle" fill="var(--c-ffg)">finalized ✓✓</text>
+      </g>
+      <path class="msg std" data-t="4300" style="--len:500;stroke:var(--bad)" stroke-dasharray="6 6" marker-end="url(#m-b4)" d="M1045,325 C 1150,425 1230,448 1325,442"/>
+      <g class="stf" data-t="4300">
+        <text class="ts" x="1000" y="520" fill="var(--bad)">escape now: source e−1 → target e+2 surrounds (e → e+1)</text>
+        <text class="ts" x="1000" y="544" fill="var(--bad)">or a second target at e+1 — a double vote</text>
+      </g>
+      <g class="bdg stf" data-t="4900">
+        <rect x="1180" y="240" width="340" height="72" style="stroke:var(--c-ffg)"/>
+        <text x="1350" y="270" text-anchor="middle" fill="var(--c-ffg)">no free exit — ⅓ stake slashable</text>
+        <text class="tm" x="1350" y="295" text-anchor="middle">accountable safety</text>
+      </g>
+    </svg>
+    <div class="cap st" data-t="5400">
+      <b>Justified</b> = one supermajority round — the next epoch may vote the <b>same source to a later
+      target</b> (no double vote, no surround) and legally strand C. <b>Finalization</b> (⅔ on C → its direct
+      child) closes exactly that exit: any later link that bypasses C must <b>surround or double-vote</b>
+      → ≥⅓ stake slashable. That is the accountable-safety theorem — the "⅓ stake burn" on S5's spec strip.
+    </div>
+  </div>
+  <div class="src">Casper FFG paper §2–3 · wiki/algorithms/pos</div>
+</section>
+
 </main>
 </div>
 
@@ -1881,7 +2019,7 @@ function playSeq(root) {
    next chip/tab in script order, then to the next slide.
    Script: slides/defense-script.md — beats match presses 1:1.
    =========================================== */
-/* 10-minute cut (2026-07-19): s2b/s3/a3 have no STEPS entry — they are appendix
+/* 10-minute cut (2026-07-19): s2b/s3/a3/a4 have no STEPS entry — they are appendix
    slides, reached only via ↓ in Q&A, and autoplay on entry. a3 holds the PBFT
    view-change vignette, moved out of dia-pbft (was its 4th press) so the three
    protocol panes read uniformly — 3 happy-path presses each for PBFT.
@@ -1893,12 +2031,21 @@ function playSeq(root) {
    ② the run loop (scheduler → protocol → network → back on the queue,
      three marching arrows) ending in one result row
    ③ the one-variable punch (dashed ring on config.protocol + attribution)
-   ④ repeat ×20 seeds → aggregate box (mean · 95% CI) + ACU caption. */
+   ④ repeat ×20 seeds → aggregate box (mean · 95% CI) + ACU caption.
+   s2 (2026-07-20): the three per-network incident beats (Solana / Ethereum /
+   Cosmos+Sui) merged into ONE press — the whole timeline cascades in on a
+   single Space (internal data-t pacing preserved); spoken generically
+   ("network after network"), the on-slide labels carry the specifics.
+   dia-ffg (2026-07-20): new FIRST press "the chain underneath" — grey
+   slot-blocks fill the gaps between checkpoints, two proposer arrows from
+   the validator row, caption "checkpoint = epoch-boundary block". Fixes the
+   "where do blocks/tx come from?" gap vs the PBFT pane. Colour code: grey =
+   block production, purple = FFG votes. FFG pane is now 5 presses. */
 const STEPS = {
-  's2':          [500, 950, 1350, 1900, 2400, Infinity],
+  's2':          [500, 1900, 2400, Infinity],
   's4':          [500, 700, 900, 1100, 1300, Infinity],
   'dia-pbft':    [400, 1400, 3200, Infinity],
-  'dia-ffg':     [700, 2400, 2900, 3300, Infinity],
+  'dia-ffg':     [500, 2600, 4100, 4600, 5100, Infinity],
   'dia-snowman': [380, 1380, 2800, 3800, Infinity],
   's6':          [600, 2000, 3600, 4200, Infinity],
   'fam-A':       [200, Infinity],

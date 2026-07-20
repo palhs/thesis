@@ -156,7 +156,7 @@ Snowman survives — finality only becomes expensive, up to ≈ 62× the control
 [[experiments/2026-06-14_delayed-voters]]. When the
 same fraction falls silent, polls can never collect `α_c` responses, so
 Snowman cliffs earliest of the three protocols
-[[experiments/2026-06-17_offline-validators]],
+[[experiments/2026-06-17_offline-validators]], 
 [[experiments/2026-06-19_adversary-comparison]].
 *Caveat:* the delayed and silent sets spare the view-0 primary, so these are
 adversaries that do not target a bootstrap proposer.

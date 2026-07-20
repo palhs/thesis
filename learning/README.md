@@ -103,7 +103,7 @@ tới buổi đó. Cập nhật trạng thái học trong `progress.md`.
 | `11-delay-family-b.md`   | 5 · Thí nghiệm | `delay/` | ✅ |
 | `12-adversary-family-c.md` | 5 · Thí nghiệm | `adversary/` | ✅ |
 | `13-output-analysis.md`  | 6 · Phân tích | `output/` | ✅ |
-| `14-mock-defense.md`     | ★ Tổng | quay lại toàn bộ (mock defense) | ⏳ |
+| `14-mock-defense.md`     | ★ Tổng | quay lại toàn bộ (mock defense) | ✅ |
 
 ## Nghi thức mỗi buổi (copy-paste để bắt đầu)
 

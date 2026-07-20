@@ -52,6 +52,21 @@ frozen as `thesis-defense-old.html` / `defense-script-old.md`. What changed:
   rotates the leader"). Timing: S5 1:30 → 1:20; the freed 10 s refunds
   S7 back to 0:25 (undoing the compression that funded S6) — S8 still
   enters at 4:40.
+- **S2 incident beats merged 3 → 1** (2026-07-20): the per-network presses
+  (Solana / Ethereum / Cosmos+Sui) are now one press that cascades the whole
+  timeline in; spoken generically — the point is "many networks fail", the
+  on-slide labels carry the specifics. S2 is now 3 presses total (incidents ·
+  frame · big question). Timing: S2 speak 1:00 → 0:50.
+- **S5 FFG pane gained a first press — "the chain underneath"** (2026-07-20):
+  grey slot-blocks fill the gaps between checkpoints, two proposer arrows
+  from the validator row, caption "checkpoint = epoch-boundary block".
+  Motivation: the pane opened on free-floating checkpoints, so the audience
+  couldn't tell where blocks/transactions come from (unlike PBFT's
+  client→primary flow). Colour code: grey = block production, purple = FFG
+  votes. FFG pane is now 5 presses; the opening anchor carries the PBFT
+  contrast ("PBFT decides each block; Casper finalizes checkpoints on a
+  chain it doesn't build"). Timing: S5 speak 1:20 → 1:30, funded by the S2
+  merge above — everything from S5's leave onward is unchanged.
 - Everything else kept its press structure; the speech is compressed.
 - New safety valve (replaces the old S8 cut rule): **enter S8 later than 5:10 →
   drop the two remaining `(cuttable)` beats** (S10 callback, S11 future-work).
@@ -104,18 +119,18 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
 
 ---
 
-## S2 · Proven safe. Still halting. — enter 0:30 · speak 1:00 · leave 1:30
+## S2 · Proven safe. Still halting. — enter 0:30 · speak 0:50 · leave 1:20
 
 **OPENING ANCHOR:**
 > "Layer-1 consensus protocols all come with safety proofs. But here are
 > four years of real-world operation."
 
-- `▶` Solana — network-wide halt **17 hours, Sep 2021** — then again
-  **Apr 2022 · Feb 2023 · Feb 2024**
-- `▶` Ethereum — **7-block** reorg, **May 2022** · finality stall across
-  multiple epochs **May 2023**
-- `▶` Cosmos Hub halt **Jun 2024** · Sui crash-loop **Nov 2024** — each one
-  interrupts the services built on top *(one sentence, do not linger)*
+- `▶` (whole incident timeline cascades in on one press) — network after
+  network, year after year: halts, reorgs, finality stalls — Solana,
+  Ethereum, Cosmos Hub, Sui — and each one interrupts the services built
+  on top *(sweep the timeline with one gesture; speak generically — the
+  on-slide labels carry the dates and specifics, do not read the incidents
+  out one by one)*
 - `▶` (text box) — the proofs are NOT wrong; what breaks are their
   **assumptions** — bounded delay, enough honest validators; in real
   operation delay, loss and malicious nodes act at once, so you cannot tell
@@ -135,7 +150,7 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
 
 ---
 
-## S4 · The goal — 5 questions — enter 1:30 · speak 0:30 · leave 2:00
+## S4 · The goal — 5 questions — enter 1:20 · speak 0:30 · leave 1:50
 
 **OPENING ANCHOR:**
 > "The goal fits in one line: one simulator, three protocols, one shared set
@@ -158,7 +173,7 @@ S10 callback rewording, S8 glosses…) is preserved in `defense-script-old.md`.
 
 ---
 
-## S5 · Three families, three protocols — enter 2:00 · speak 1:20 · leave 3:20
+## S5 · Three families, three protocols — enter 1:50 · speak 1:30 · leave 3:20
 
 *(opens on the PBFT diagram: 4 nodes already visible. The pane-opening
 anchors now carry the protocol introductions that used to live on S2B —
@@ -181,7 +196,13 @@ throughout; PBFT's fault scene lives in appendix A3.)*
 
 `▶` (deck auto-switches to the **Casper FFG** chip):
 > "Second — Casper FFG, 2017, Buterin and Griffith: Ethereum's finality
-> layer since the Merge."
+> layer since the Merge. And here is the key contrast with PBFT: PBFT
+> decides each block, one at a time, as it happens. Casper builds nothing —
+> it is a finality layer bolted onto a chain that keeps producing blocks."
+- `▶` (grey layer fills in) — every **slot**, one proposer adds one block;
+  **transactions live in those blocks**; a **checkpoint** is just the
+  epoch-boundary block — the grey chain grows regardless of FFG, FFG only
+  votes on the checkpoints *(grey = block production, purple = FFG votes)*
 - `▶` validators (weighted by **stake**) send attestations that accumulate
   on the link between two checkpoints; once **⅔ of stake**...
 - `▶` ...the checkpoint is **justified**
@@ -459,7 +480,16 @@ or only at n = 25?".*
   (all-to-all, 2f+1) → NEW-VIEW → phases replay. Jump here for "what
   exactly is the recovery path" or to back up the S8 loss result; the
   compare-all-three view stays on the S5 Recovery ▸ Q&A chip.
-- All three autoplay their full reveal on entry — no stepping needed.
+- **A4 · Justified ≠ safe** — two-panel Casper vignette. Panel ①: C justified
+  on branch X at epoch e, the finalize link C → C′ never reaches ⅔, and the
+  next epoch votes the *same source A to a later target D* on branch Y —
+  no double vote (targets e ≠ e+1), no surround (same source) — C is
+  legally abandoned, nobody slashed. Panel ②: once ⅔ sign C → C′ (direct
+  child ⇒ C finalized), every escape link must surround (e−1 → e+2 around
+  e → e+1) or double-vote (second target at e+1) → ≥⅓ slashable. Jump here
+  for "what does justified actually guarantee / why two rounds / what is
+  accountable safety".
+- All four autoplay their full reveal on entry — no stepping needed.
 - Plus, on S5: the mouse-only **Recovery ▸ Q&A** chip (dashed border).
 - Plus, on S8: the mouse-only **Sweep ▸ Q&A** chip — the full n = 4 → 25
   sweep behind Tab A's endpoint bars (see the 📎 note under S8).
