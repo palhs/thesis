@@ -496,15 +496,14 @@ or only at n = 25?".*
 - `▶` **limitations**, one breath — the slide holds the top three:
   we tested simplified versions, so results speak for THESE three
   protocols, not their whole families · at most **25 validators** — beyond
-  that, no data · Snowman's safety rests on a formula our experiments
-  never actually tested. Then ONE spoken-only guard, not on the slide:
-  loss is a PERMANENT drop — no retransmission — so the loss curves
-  are upper bounds on fragility *(keep this sentence — it shields the
-  FFG-collapses-at-5% headline; full limitation list lives in report ch. 6)*
-- `▶` (cuttable) **future work**, one sentence: test ε directly ·
-  add the signature aggregation real systems use · implement a new
-  protocol family *(kept vague on purpose — name DAG / Narwhal + Tusk
-  only if the jury asks which family)*
+  that, no data · loss is a PERMANENT drop — no retransmission — so the
+  loss curves are upper bounds on fragility *(this last one shields the
+  FFG-collapses-at-5% headline and answers "is prod like this?"; full
+  limitation list — incl. Snowman's unwitnessed ε — lives in report ch. 6)*
+- `▶` (cuttable) **future work**, one sentence: model bandwidth and
+  retransmission at larger networks · add the signature aggregation real
+  systems use · implement a new protocol family *(kept vague on purpose —
+  name DAG / Narwhal + Tusk only if the jury asks which family)*
 
 `▶` — **CLOSING ANCHOR (memorize verbatim):**
 > "The contribution of this thesis is a mechanism map of the
