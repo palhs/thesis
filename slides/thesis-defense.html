@@ -229,6 +229,7 @@ h2.stitle em { font-style:italic; font-weight:340; }
 }
 .chip:hover { color:var(--ink); border-color:var(--ink); }
 .chip.act { background:var(--ink); border-color:var(--ink); color:#0C1118; font-weight:500; }
+.chip .rqt { font-size:13px; opacity:.55; margin-left:8px; letter-spacing:.06em; }
 /* protocol-colored chips fill with the protocol hue when active */
 .chip[data-c="pbft"].act    { background:var(--c-pbft);    border-color:var(--c-pbft);    color:#191006; }
 .chip[data-c="ffg"].act     { background:var(--c-ffg);     border-color:var(--c-ffg);     color:#120e24; }
@@ -363,9 +364,8 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 #s4 .goal b { font-weight:500; color:var(--c-pbft); }
 #s4 .rqs { margin-top:46px; display:flex; flex-direction:column; gap:26px; }
 #s4 .rq { display:flex; align-items:baseline; gap:30px; }
-#s4 .rq .w { width:210px; font-size:26px; font-weight:500; letter-spacing:.08em; color:var(--c-snowman); }
 #s4 .rq .q { flex:1; font-family:var(--serif); font-weight:300; font-size:31px; }
-#s4 .rq .tag { font-size:17px; color:var(--ink-faint); border:1px solid var(--line); border-radius:999px; padding:5px 16px; }
+#s4 .rq .tag { width:76px; text-align:center; font-size:17px; letter-spacing:.08em; color:var(--c-snowman); border:1px solid var(--line); border-radius:999px; padding:5px 0; }
 
 /* ===========================================
    S5 / S7 / S8 — diagram stages with chip rows
@@ -377,6 +377,20 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 .cap b { color:var(--ink); font-weight:500; }
 .cappane { display:none; }
 .cappane.actv { display:block; }
+/* cue rail — speaker's reading line: the spoken beats as keyword clusters, in
+   narration order. Visible on entry (no data-t), so it never consumes a Space
+   press. Deliberately quiet: the audience reads the diagram, the speaker reads
+   this. NOT press-aligned — the rail spans all 4 s6 presses; it is the
+   defense-script.md § S6 "recovery line" made permanent on the slide. */
+.cuerail {
+  display:flex; align-items:baseline; gap:0 14px; flex-wrap:wrap;
+  margin-top:12px; padding-top:10px; border-top:1px solid var(--ink-faint);
+  font-family:var(--mono); font-size:16px; letter-spacing:.01em;
+  color:var(--ink-faint);
+}
+.cuerail i { font-style:normal; color:var(--ink); font-weight:500; }
+.cuerail s { text-decoration:none; color:var(--ink-faint); opacity:.5; }
+.cuerail b { flex-basis:100%; height:0; } /* forced break: 4 beats + 3 beats */
 /* spec strip — Table 2.1 fields not carried by the diagram (reading layer, no steps) */
 .spec { display:flex; flex-wrap:wrap; gap:6px 8px; margin-top:8px; }
 .spec span {
@@ -390,6 +404,24 @@ svg text { font-family:var(--mono); fill:var(--ink); }
 .tabpane.actv { display:block; }
 .take { font-size:21px; line-height:1.55; color:var(--ink-dim); margin-top:10px; width:1660px; }
 .take b { color:var(--ink); font-weight:500; }
+
+/* saybox — speaker's reading layer (S7/S8/S9): the defense-script beats
+   VERBATIM on the slide, visible on pane entry (no data-t → costs no Space
+   press). One ▶ line = one Space press; quoted bold lines = anchors spoken
+   as written; .dim = reading layer, do not speak. */
+.saybox {
+  margin-top:12px; padding:13px 22px; width:1660px;
+  border:1px solid var(--line); border-left:4px solid var(--c-pbft);
+  border-radius:12px; background:var(--panel-2);
+  font-size:20px; line-height:1.5; color:var(--ink);
+}
+.saybox p { margin:0 0 7px; }
+.saybox p:last-child { margin-bottom:0; }
+.saybox .bt { color:var(--c-snowman); font-weight:600; margin-right:10px; }
+.saybox .dim { color:var(--ink-faint); font-size:17px; }
+.saybox b { font-weight:500; }
+.saypane { display:none; }
+.saypane.actv { display:block; }
 
 /* S8 matrix */
 #mx { margin-top:26px; display:grid; grid-template-columns:250px 1fr 1fr 1fr; gap:10px; width:1680px; }
@@ -411,12 +443,13 @@ svg text { font-family:var(--mono); fill:var(--ink); }
    S9 — RADAR + insight
    =========================================== */
 #s9 .cols { display:flex; gap:40px; margin-top:8px; }
-#s9 .insight h3 { font-family:var(--serif); font-weight:500; font-size:34px; margin:14px 0 20px; }
-#s9 .mini { border-left:3px solid; padding:6px 0 6px 22px; margin-bottom:22px; font-size:20px; line-height:1.55; color:var(--ink-dim); width:760px; }
+#s9 .insight h3 { font-family:var(--serif); font-weight:500; font-size:29px; margin:8px 0 12px; }
+#s9 .mini { border-left:3px solid; padding:4px 0 4px 22px; margin-bottom:11px; font-size:19px; line-height:1.5; color:var(--ink-dim); width:760px; }
 #s9 .mini b { color:var(--ink); font-weight:500; }
-#s9 .mini .nm { font-size:21px; font-weight:500; display:block; margin-bottom:4px; }
-#s9 .mini .stat { display:block; margin-top:7px; font-size:17px; color:var(--ink-faint); letter-spacing:.02em; }
+#s9 .mini .nm { font-size:20px; font-weight:500; display:block; margin-bottom:3px; }
+#s9 .mini .stat { display:block; margin-top:4px; font-size:16px; color:var(--ink-faint); letter-spacing:.02em; }
 #s9 .note { font-size:16px; color:var(--ink-faint); margin-top:4px; }
+#s9 .note b { color:var(--ink-dim); font-weight:500; }
 
 /* ===========================================
    S10 — SELECTION MAP
@@ -619,11 +652,11 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
     <h2 class="stitle st" data-t="100">The goal</h2>
     <div class="goal st" data-t="250"><b>One simulator</b> · three protocols · matched assumptions.</div>
     <div class="rqs">
-      <div class="rq st" data-t="500"><span class="w">WHEN</span><span class="q">the network slows — how much does finality slow?</span><span class="tag">RQ1</span></div>
-      <div class="rq st" data-t="700"><span class="w">WHAT</span><span class="q">happens to throughput as the Byzantine fraction rises?</span><span class="tag">RQ2</span></div>
-      <div class="rq st" data-t="900"><span class="w">HOW MUCH</span><span class="q">does each committed unit cost in messages?</span><span class="tag">RQ3</span></div>
-      <div class="rq st" data-t="1100"><span class="w">WHO</span><span class="q">breaks each protocol — which adversary, which property?</span><span class="tag">RQ4</span></div>
-      <div class="rq st" data-t="1300"><span class="w">WHICH</span><span class="q">protocol wins overall — does any family dominate?</span><span class="tag">RQ5</span></div>
+      <div class="rq st" data-t="500"><span class="tag">RQ1</span><span class="q">How much does finality slow when the network slows?</span></div>
+      <div class="rq st" data-t="700"><span class="tag">RQ2</span><span class="q">How does throughput degrade as Byzantine nodes approach the fault threshold?</span></div>
+      <div class="rq st" data-t="900"><span class="tag">RQ3</span><span class="q">How many messages does one commit cost?</span></div>
+      <div class="rq st" data-t="1100"><span class="tag">RQ4</span><span class="q">Which adversary breaks which protocol — and which property?</span></div>
+      <div class="rq st" data-t="1300"><span class="tag">RQ5</span><span class="q">Does any protocol dominate?</span></div>
     </div>
   </div>
   <div class="src">report §1.3 · §1.5</div>
@@ -1133,6 +1166,17 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       Aggregation across seeds: <b>95% Student-t</b> (continuous) · <b>95% Wilson</b> (rates).
       <span style="color:var(--ink-faint)">&nbsp;(click diagram to replay)</span>
     </div>
+
+    <div class="cuerail">
+      <span><i>config</i> n · protocol · timeline · adversary</span><s>→</s>
+      <span><i>pop earliest</i> advance clock</span><s>→</s>
+      <span><i>node reacts</i> send · timer · decided</span><s>→</s>
+      <span><i>adversary</i> late · silent · equivocate</span>
+      <b></b>
+      <span><i>network</i> drop · partition · delay → back on queue</span><s>→</s>
+      <span><i>logger</i> every event · stop: drains or t_max</span><s>→</s>
+      <span><i>×20 seeds</i> mean · 95% CI</span>
+    </div>
   </div>
   <div class="src">report §3.2 · §3.5</div>
 </section>
@@ -1148,7 +1192,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <h2 class="stitle">Three run families, <em>one axis each</em></h2>
       <div class="chiprow" id="s7chips">
         <button class="chip act" data-f="A">A — Scaling</button>
-        <button class="chip" data-f="B">B — Delay</button>
+        <button class="chip" data-f="B">B — Delay &amp; Loss</button>
         <button class="chip" data-f="C">C — Adversarial</button>
       </div>
     </div>
@@ -1255,8 +1299,14 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       </g>
     </svg>
 
-    <div class="cap" style="margin-top:2px">
-      Shared across all cells: <b>Poisson 100 tx/s · 512-byte tx · 20 seeds/cell</b> (30 near-threshold C) · common random numbers → paired comparisons.
+    <div class="saybox" style="margin-top:2px">
+      <p><b>"Three run families — each sweeps one axis while everything else stays pinned."</b></p>
+      <p class="saypane actv" data-f="A"><span class="bt">▶ A — Scaling:</span>committee size <b>n = 4 → 25</b>, clean network, all honest → answers <b>RQ3</b>.</p>
+      <p class="saypane" data-f="B"><span class="bt">▶ B — Delay:</span>network timelines up to heavy-tail <b>1–5 s</b>, plus packet loss <b>5 / 10 / 20%</b>; committee pinned at n ∈ {10, 25} → answers <b>RQ1</b>.</p>
+      <p class="saypane" data-f="C"><span class="bt">▶ C — Adversarial:</span>adversary fraction <b>φ = 0 → 0.50</b> — φ = share of adversarial nodes (<b>0.33 = ⅓ of the nodes</b>, the classic BFT fault threshold); three behaviors — delayed-voting · silent · equivocation → answers <b>RQ2 · RQ4</b>.</p>
+      <p class="saypane" data-f="C"><b>"That is how we measure. Now the main part — the results."</b> <span class="dim">→ S8</span></p>
+      <p class="saypane dim" data-f="A">shared across all cells (read, don't speak): Poisson 100 tx/s · 512-byte tx · 20 seeds/cell (30 near-threshold C) · common random numbers → paired comparisons.</p>
+      <p class="saypane dim" data-f="B">shared across all cells (read, don't speak): Poisson 100 tx/s · 512-byte tx · 20 seeds/cell (30 near-threshold C) · common random numbers → paired comparisons.</p>
     </div>
   </div>
   <div class="src">report §3.4 · Table 3.2</div>
@@ -1271,10 +1321,10 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <h2 class="stitle" style="font-size:52px">Results</h2>
       <div class="chiprow" id="s8tabs">
-        <button class="chip act" data-tab="a">A — Scaling</button>
-        <button class="chip" data-tab="bd">B — Delay</button>
-        <button class="chip" data-tab="bl">B — Loss</button>
-        <button class="chip" data-tab="c">C — Adversarial</button>
+        <button class="chip act" data-tab="a">A — Scaling<span class="rqt">RQ3</span></button>
+        <button class="chip" data-tab="bd">B — Delay<span class="rqt">RQ1</span></button>
+        <button class="chip" data-tab="bl">B — Loss<span class="rqt">RQ1</span></button>
+        <button class="chip" data-tab="c">C — Adversarial<span class="rqt">RQ2·RQ4</span></button>
         <!-- Q&A backup pane — mouse-only: not in PANES.s8.order, so the
              Space walk of the talk never enters it -->
         <button class="chip" data-tab="sw" style="border-style:dashed" title="Q&amp;A backup — full scaling sweep n = 4 → 25">Sweep ▸ Q&amp;A</button>
@@ -1283,7 +1333,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
 
     <!-- ── Tab A: messages per committed unit (RQ3) ── -->
     <div class="tabpane actv" data-tab="a">
-      <svg width="1728" height="600" viewBox="0 0 1560 542" aria-label="Messages per committed unit at n=25, log scale">
+      <svg width="1728" height="490" viewBox="0 0 1560 542" aria-label="Messages per committed unit at n=25, log scale">
         <text class="tl" x="60" y="46">messages per committed unit — n = 25 <tspan class="ts">(log scale)</tspan></text>
         <!-- gridlines -->
         <g>
@@ -1313,25 +1363,18 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <text x="1105" y="150">≈ 2Kβ</text>
         </g>
         <text class="ts stf" data-t="1500" x="1460" y="46" text-anchor="end">measured trends match published asymptotics</text>
-        <g class="bdg stf" data-t="1700">
-          <rect x="1230" y="200" width="290" height="66" style="stroke:var(--c-snowman)"/>
-          <text x="1375" y="228" text-anchor="middle" fill="var(--c-snowman)">order-of-magnitude gap</text>
-          <text class="tm" x="1375" y="252" text-anchor="middle">the price of subsampling</text>
-        </g>
-        <g class="bdg stf" data-t="1900">
-          <rect x="1188" y="300" width="332" height="118" style="stroke:var(--ink-dim)"/>
-          <text x="1354" y="332" text-anchor="middle" style="font-size:16px" fill="var(--ink)">latency &amp; goodput flat in n</text>
-          <text x="1354" y="360" text-anchor="middle" style="font-size:15px;font-weight:400" fill="var(--ink-dim)"><tspan fill="var(--c-pbft)">PBFT</tspan> · <tspan fill="var(--c-snowman)">SNW</tspan> ≈ 1 s — <tspan fill="var(--c-ffg)">FFG</tspan> ≈ 5 s</text>
-          <text x="1354" y="388" text-anchor="middle" style="font-size:15px;font-weight:400" fill="var(--ink-dim)">goodput ≈ 95 · 95 · 80 tx/s</text>
-        </g>
       </svg>
-      <div class="take st" data-t="1900"><b>Cheapest: Casper FFG.</b> Measured trends match published asymptotics (2n · 1.125n · 2Kβ).
-        Secondary: latency is flat in n — PBFT &amp; Snowman ≈ 1 s, FFG ≈ 5 s (epoch-granularity finality); goodput ≈ 95 vs ≈ 80 tx/s. <span style="color:var(--ink-faint)">§4.2</span></div>
+      <div class="saybox">
+        <p><b>"The results sit in four tabs, in the same order as the three run families."</b></p>
+        <p><span class="bt">▶</span>Messages per committed unit at <b>n = 25</b>, log axis: <b style="color:var(--c-ffg)">Casper FFG ≈ 29</b> · <b style="color:var(--c-pbft)">PBFT ≈ 50</b> · <b style="color:var(--c-snowman)">Snowman ≈ 601</b>.</p>
+        <p><span class="bt">▶</span>Trends match theory — <b>1.15n · 2n · 2Kβ</b>, per-validator: PBFT's <b>2n</b> × n validators = the <b>O(n²)</b> from the diagram slide. FFG is cheapest because the epoch votes <b>once</b> — one attestation round per epoch against PBFT's two all-to-all phases per block — and that same epoch pacing is why its finality is <b>≈ 5 s</b>, not 1 s: <b>cheap and slow are one design choice</b>. The <b>order-of-magnitude</b> gap is the price of subsampling.</p>
+        <p class="dim">reading layer, don't speak: latency flat in n — PBFT · SNW ≈ 1 s, FFG ≈ 5 s · goodput ≈ 95 · 95 · 80 tx/s · §4.2</p>
+      </div>
     </div>
 
     <!-- ── Tab B: delay slowdown (RQ1) ── -->
     <div class="tabpane" data-tab="bd">
-      <svg width="1728" height="600" viewBox="0 0 1560 542" aria-label="Finality slowdown under delay vs zero-delay baseline">
+      <svg width="1728" height="490" viewBox="0 0 1560 542" aria-label="Finality slowdown under delay vs zero-delay baseline">
         <text class="tl" x="60" y="46">finality slowdown under moderate delay <tspan class="ts">(× zero-delay baseline)</tspan></text>
         <text class="ts" x="60" y="78">timelines: uniform 100–500 ms · heavy-tail (exponential) 1–5 s · n ∈ {10, 25}</text>
         <g>
@@ -1349,34 +1392,28 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <!-- x = 300 + v·70 -->
         <rect class="growx" data-t="200" x="300" y="118" width="91"  height="64" rx="10" fill="var(--c-ffg)"/>
         <rect class="growx" data-t="400" x="300" y="248" width="133" height="64" rx="10" fill="var(--c-pbft)"/>
-        <rect class="growx" data-t="600" x="300" y="378" width="840" height="64" rx="10" fill="var(--c-snowman)"/>
-        <rect class="growx" data-t="1400" x="1140" y="378" width="210" height="64" rx="10" fill="var(--c-snowman)" opacity=".38"/>
+        <rect class="growx" data-t="1400" x="300" y="378" width="840" height="64" rx="10" fill="var(--c-snowman)"/>
+        <rect class="growx" data-t="2300" x="1140" y="378" width="210" height="64" rx="10" fill="var(--c-snowman)" opacity=".38"/>
         <g class="tb">
           <text class="stf" data-t="1000" x="415" y="160" fill="var(--c-ffg)">×1.3</text>
           <text class="stf" data-t="1100" x="457" y="290" fill="var(--c-pbft)">×1.9</text>
-          <text class="stf" data-t="1600" x="1372" y="420" fill="var(--c-snowman)">×12–15</text>
+          <text class="stf" data-t="2500" x="1372" y="420" fill="var(--c-snowman)">×12–15</text>
         </g>
         <g class="ts stf" data-t="1200">
           <text x="415" y="185">round-bounded — insensitive to tail shape</text>
           <text x="457" y="315">round-bounded — near ×2.0 at n = 25</text>
         </g>
-        <g class="bdg stf" data-t="1900">
-          <rect x="830" y="310" width="640" height="52" style="stroke:var(--c-snowman)"/>
-          <text class="tm" x="1150" y="343" text-anchor="middle">each round waits on the <tspan fill="var(--ink)">slowest of K sampled peers</tspan></text>
-        </g>
-        <g class="bdg stf" data-t="2100">
-          <rect x="830" y="150" width="640" height="82" style="stroke:var(--ink-dim)"/>
-          <text class="tm" x="1150" y="184" text-anchor="middle" fill="var(--ink)">delay inflates time-to-finality, not message cost</text>
-          <text class="ts" x="1150" y="212" text-anchor="middle">msgs/unit: <tspan fill="var(--c-pbft)">PBFT</tspan> ±0.1% · <tspan fill="var(--c-snowman)">SNW</tspan> +2% · <tspan fill="var(--c-ffg)">FFG</tspan> −12%</text>
-        </g>
       </svg>
-      <div class="take st" data-t="2100"><b>Round-bounded protocols shrug; sampling pays.</b> Snowman's exponential-tail latency exceeds its uniform-tail latency
-        (15.3 s vs 12.6 s, n = 10) — the tail hits every round. Round-bounded pair: ≤ 3% apart across tail shapes. <span style="color:var(--ink-faint)">§4.3.1</span></div>
+      <div class="saybox">
+        <p><span class="bt">▶</span>Slowdown vs the zero-delay baseline: <b style="color:var(--c-ffg)">FFG ×1.3</b> · <b style="color:var(--c-pbft)">PBFT ×1.9</b>. Both wait only for the <b>fastest ⅔</b> — a quorum — so the slow stragglers never set the pace: the delay tail barely matters (the pair stays ≤ 3% apart across tail shapes). FFG least, because its <b>5-second epoch pace</b> swallows sub-second delays.</p>
+        <p><span class="bt">▶</span><b style="color:var(--c-snowman)">Snowman ×12–15</b> — the opposite rule: each round it polls a random sample and must hear back from <b>most of it</b>, and it needs <b>15 successful rounds in a row</b> — so it keeps running into the heavy tail, <b>round after round</b>. That is why its heavy-tail latency even exceeds its uniform-tail latency (<b>15.3 s vs 12.6 s</b>).</p>
+        <p class="dim">reading layer, don't speak: delay inflates time-to-finality, not message cost — msgs/unit PBFT ±0.1% · SNW +2% · FFG −12% · §4.3.1</p>
+      </div>
     </div>
 
     <!-- ── Tab B: packet loss (resilience) ── -->
     <div class="tabpane" data-tab="bl">
-      <svg width="1728" height="600" viewBox="0 0 1560 542" aria-label="Finalization rate vs packet loss, schematic of measured rates">
+      <svg width="1728" height="490" viewBox="0 0 1560 542" aria-label="Finalization rate vs packet loss, schematic of measured rates">
         <text class="tl" x="60" y="46">finalization rate vs packet loss <tspan class="ts">(shape of measured rates, n = 10 — §4.3.2)</tspan></text>
         <g>
           <line class="axis" x1="340" y1="80" x2="340" y2="460"/>
@@ -1408,9 +1445,11 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         </g>
         <text class="ts stf" data-t="1900" x="1455" y="230" text-anchor="end">at n = 25: PBFT ≈ Snowman — AURC tie (0.351 vs 0.369)</text>
       </svg>
-      <div class="take st" data-t="2100"><b>Only PBFT still finalizes at 20% loss</b> — it alone has a recovery path (view-change rotates the leader).
-        Snowman: in-round redundancy, no cross-round recovery → holds partially at 5%, cliffs by 10% (a clear plateau-then-cliff at n = 25). FFG: neither → collapses at the first 5% step.
-        <b>No protocol forks</b> — loss erodes liveness, not safety; survivors pay ×2–3.5 latency (FFG: only +3–10%, over the few seeds that still finalize). <span style="color:var(--ink-faint)">§4.3.2–4.3.3</span></div>
+      <div class="saybox">
+        <p><span class="bt">▶</span>Three finalization-rate curves across loss <b>0 → 20%</b>.</p>
+        <p><span class="bt">▶</span>Ranking <b style="color:var(--c-pbft)">PBFT</b> &gt; <b style="color:var(--c-snowman)">Snowman</b> &gt; <b style="color:var(--c-ffg)">FFG</b> — PBFT alone still finalizes at <b>20%</b>, because it alone has a recovery path: <b>view-change</b> rotates the leader. Snowman plateaus-then-cliffs at <b>10%</b>; FFG collapses at the first <b>5%</b> step — it has neither.</p>
+        <p><span class="bt">▶</span><b>No protocol forks</b> — the chain never splits: loss consumes <b>liveness</b> (progress stops), not <b>safety</b> (nothing committed is ever contradicted). <span class="dim">read only if asked: survivors pay ×2–3.5 latency · at n = 25 PBFT ≈ Snowman, AURC tie 0.351 vs 0.369 · §4.3.2–4.3.3</span></p>
+      </div>
     </div>
 
     <!-- ── Tab C: adversarial outcome matrix (RQ2+RQ4) ── -->
@@ -1439,6 +1478,9 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         <span><span class="sw" style="background:var(--warn)"></span>degrades</span>
         <span><span class="sw" style="background:var(--bad)"></span>breaks</span>
         <span style="color:var(--ink-faint)">— outcome per strategy × protocol · φ ∈ {0…0.30} (+0.40/0.50 equiv.) · n ∈ {10, 25} · 20–30 seeds · §4.4, Table 4.1</span>
+      </div>
+      <div class="saybox" style="margin-top:10px;padding:10px 22px">
+        <p><b>"Four tabs — no protocol wins all four. That is precisely the answer to RQ5."</b> <span class="dim">→ S9</span></p>
       </div>
     </div>
 
@@ -1567,24 +1609,27 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         </svg>
         <div class="note">8 axes of Table 5.1 · ordinal rank, outer ring = best, ties shared — <b>illustrative; the table is the evidence</b> (§5.2)</div>
         <div class="note">best per axis — latency <b style="color:var(--c-pbft)">PBFT</b>·<b style="color:var(--c-snowman)">SNW</b> · overhead <b style="color:var(--c-ffg)">FFG</b> · delay <b style="color:var(--c-ffg)">FFG</b> · loss <b style="color:var(--c-pbft)">PBFT</b> (n=10) · delayed-voting <b style="color:var(--c-pbft)">PBFT</b> · silence <b style="color:var(--c-pbft)">PBFT</b>·<b style="color:var(--c-ffg)">FFG</b> · equivocation <b style="color:var(--c-snowman)">SNW</b> · accountable <b style="color:var(--c-ffg)">FFG</b></div>
-        <div class="note">† not measured contests — <b>accountable</b> is definitional, <b>equivocation</b> an analytical bound; strip both and <b style="color:var(--c-snowman)">Snowman</b> holds no measured corner — its non-domination rests on the unwitnessed ε (§5.3)</div>
+        <div class="note">† <b>"One caveat: the two †-marked axes — accountable safety and equivocation safety — are not measured contests but a by-definition and an analytical result; strip them, and <span style="color:var(--c-snowman)">Snowman</span> holds no measured corner"</b> — its non-domination rests on the unwitnessed ε (§5.3)</div>
       </div>
       <div class="insight">
-        <h3 class="st" data-t="1600">The same design choice creates<br>both the strength and the weakness</h3>
+        <h3 class="st" data-t="1600">"The central finding: the SAME design choice produces both each protocol's strength and its weakness."</h3>
         <div class="mini st" data-t="1800" style="border-color:var(--c-snowman)">
-          <span class="nm" style="color:var(--c-snowman)">Snowman — K-peer subsampling</span>
-          keeps it <b>live under slow peers</b>, yet <b>starves it under silent ones</b> — the sample finds no quorum to talk to.
+          <span class="nm" style="color:var(--c-snowman)">▶ Snowman — K-peer subsampling</span>
+          <b>thrives when peers are slow, starves when peers are silent</b> — the sample finds no quorum to talk to.
           <span class="stat">delay ×12–15 yet live · silence φ* = 0.10 / 0.20 · ε ≈ 5×10⁻¹⁵ / 3×10⁻¹¹</span>
         </div>
         <div class="mini st" data-t="2100" style="border-color:var(--c-pbft)">
-          <span class="nm" style="color:var(--c-pbft)">PBFT — leader-quorum commit</span>
-          carries it through <b>delay, loss and silence</b>, yet <b>forks unaccountably</b> once equivocation passes the threshold.
+          <span class="nm" style="color:var(--c-pbft)">▶ PBFT — leader-quorum commit</span>
+          <b>rides out delay, loss and silence</b> — but past ⅓ equivocation it <b>forks with no attribution</b>.
           <span class="stat">alive at 20% loss · delayed-voting success 1.0 · deterministic fork at φ = 0.40</span>
         </div>
         <div class="mini st" data-t="2400" style="border-color:var(--c-ffg)">
-          <span class="nm" style="color:var(--c-ffg)">Casper FFG — epoch-paced finality</span>
-          is <b>cheapest and least delay-sensitive</b>, yet <b>first to collapse under loss</b> — while alone holding accountable safety.
+          <span class="nm" style="color:var(--c-ffg)">▶ Casper FFG — epoch-paced finality</span>
+          <b>cheapest, least delay-sensitive</b> — <b>first to collapse under loss</b>; in exchange, the ONLY one with accountable safety.
           <span class="stat">≈ 1.15n msgs/unit · delay ×1.3 · collapses at 5% loss · ≥ ⅓ stake slashable</span>
+        </div>
+        <div class="mini" style="border-color:var(--ink-faint);margin-bottom:0">
+          <b>"No winner — so how do you use these results? As a selection map."</b> <span style="color:var(--ink-faint)">→ S10</span>
         </div>
       </div>
     </div>
@@ -1641,22 +1686,17 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <div class="col lim st" data-t="350">
         <h3 style="color:var(--warn)">Limitations</h3>
         <ul>
-          <li>Simplified, one-per-family implementations — verdicts are about these protocols, not the families in the abstract</li>
-          <li>n ≤ 25 — beyond that, a sensitivity argument, not data</li>
-          <li>Snowman safety by analytical bound, never empirically witnessed</li>
-          <li>Packet loss = permanent drop, no retransmission — loss curves are upper bounds on fragility</li>
-          <li>Adversary placement spares the view-0 leader</li>
-          <li>No compute / bandwidth cost model</li>
+          <li>Simplified versions of each protocol</li>
+          <li>Networks of at most 25 validators</li>
+          <li>Snowman's safety from a formula (ε), never tested</li>
         </ul>
       </div>
       <div class="col fut st" data-t="700">
         <h3 style="color:var(--good)">Future work</h3>
         <ul>
-          <li>Production-level aggregation — BLS / HotStuff-style threshold signatures</li>
-          <li>Saturation-throughput model</li>
-          <li>Adaptive timeout in a timeout-stressing regime</li>
-          <li>Empirical witness for ε</li>
-          <li>Extend the harness to a DAG family (Narwhal + Tusk)</li>
+          <li>A direct test of ε</li>
+          <li>Signature aggregation (BLS / HotStuff-style)</li>
+          <li>A new protocol family implemented</li>
         </ul>
       </div>
     </div>
@@ -2040,10 +2080,14 @@ function playSeq(root) {
    slot-blocks fill the gaps between checkpoints, two proposer arrows from
    the validator row, caption "checkpoint = epoch-boundary block". Fixes the
    "where do blocks/tx come from?" gap vs the PBFT pane. Colour code: grey =
-   block production, purple = FFG votes. FFG pane is now 5 presses. */
+   block production, purple = FFG votes. FFG pane is now 5 presses.
+   s4 (2026-07-21): lead-word device (WHEN/WHAT/…) dropped — each line is a
+   plain full question, RQ pill moved left as the anchor column; the five
+   per-RQ presses merged into ONE press (internal data-t cascade preserved,
+   same pattern as the s2 incident merge). s4 is now 1 press. */
 const STEPS = {
   's2':          [500, 1900, 2400, Infinity],
-  's4':          [500, 700, 900, 1100, 1300, Infinity],
+  's4':          [500, Infinity],
   'dia-pbft':    [400, 1400, 3200, Infinity],
   'dia-ffg':     [500, 2600, 4100, 4600, 5100, Infinity],
   'dia-snowman': [380, 1380, 2800, 3800, Infinity],
@@ -2181,6 +2225,7 @@ function showFam(f) {
   s7cur = f;
   s7.querySelectorAll('#s7chips .chip').forEach(c => c.classList.toggle('act', c.dataset.f === f));
   s7.querySelectorAll('.dia').forEach(d => { d.classList.toggle('actv', d.id === 'fam-' + f); clearSeq(d); });
+  s7.querySelectorAll('.saypane').forEach(c => c.classList.toggle('actv', c.dataset.f === f));
   renderEntry(document.getElementById('fam-' + f));
 }
 s7.querySelectorAll('#s7chips .chip').forEach(c =>

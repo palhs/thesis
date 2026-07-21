@@ -5,6 +5,15 @@ core **9:50** of a 10:00 slot.
 This is the script to MEMORIZE via the anchor-skeleton structure. Q&A prep is a
 separate session, kept in `slides/qa-prep.md` — not here.
 
+2026-07-21 — **S7/S8/S9 now carry their spoken lines ON-SLIDE** (sayboxes):
+every anchor and per-press beat below for those three slides sits verbatim in a
+bordered reading box on the pane itself — visible on pane entry, costs no Space
+press, one ▶ line = one press. S7's box swaps its middle line with the A/B/C
+chips; S8's sits under each tab's chart (charts shrunk 600 → 490 px to fit);
+S9's opening line, † caveat, core anchor, per-protocol sentences and the
+transition all read directly off the slide. Memorization for S7–S9 is now
+optional — read the boxes.
+
 2026-07-19 — **RESTRUCTURED 15 → 10 MINUTES.** The 15-minute deck + script are
 frozen as `thesis-defense-old.html` / `defense-script-old.md`. What changed:
 
@@ -67,6 +76,30 @@ frozen as `thesis-defense-old.html` / `defense-script-old.md`. What changed:
   contrast ("PBFT decides each block; Casper finalizes checkpoints on a
   chain it doesn't build"). Timing: S5 speak 1:20 → 1:30, funded by the S2
   merge above — everything from S5's leave onward is unchanged.
+- **S4 RQ wording tightened + 5 presses merged → 1** (2026-07-21): the
+  WHEN/WHAT/HOW-MUCH/WHO/WHICH lead-word device is gone — each line is now a
+  plain full question (the RQ pill moved left as the anchor column), closer to
+  the report §1.5 phrasing; RQ5 is now the four-word "Does any protocol
+  dominate?", which S9 answers verbatim. All five lines cascade in on a
+  single Space (internal 200 ms pacing preserved — same pattern as the S2
+  incident merge). S4 is now 1 press. Timing unchanged (speak 0:30): reading
+  the five questions fills the slot; seconds saved become buffer at S5.
+  Follow-up same day: RQ2 re-worded "How much throughput do Byzantine nodes
+  cost?" → "How does throughput degrade as Byzantine nodes approach the
+  fault threshold?" — the first form promised a headline number the Tab C
+  matrix never shows (it shows degradation *shape*: immune / graceful decay /
+  starves, success rates + φ*); the new form matches both the pane and the
+  report §1.5 RQ2 phrasing. Also: the four S8 tab chips now carry small RQ
+  tags (A · RQ3, B-Delay · RQ1, B-Loss · RQ1, C · RQ2·RQ4) so the jury can
+  map tab → RQ without the spoken cue; Sweep ▸ Q&A stays untagged.
+- **S11 lists trimmed 6+5 → 3+3** (2026-07-21): limitations kept = simplified
+  one-per-family implementations · n ≤ 25 · ε never witnessed; future work
+  kept = empirical ε witness · threshold-signature aggregation · DAG family.
+  Dropped from the slide (still in report ch. 6): loss-is-permanent-drop,
+  view-0 adversary placement, no compute/bandwidth model, saturation
+  throughput, adaptive timeouts. The loss-permanent-drop clause survives as
+  a SPOKEN-ONLY guard in the S11 beat — it shields the FFG-collapses-at-5%
+  headline. Press structure unchanged (3 presses).
 - Everything else kept its press structure; the speech is compressed.
 - New safety valve (replaces the old S8 cut rule): **enter S8 later than 5:10 →
   drop the two remaining `(cuttable)` beats** (S10 callback, S11 future-work).
@@ -165,19 +198,17 @@ published numbers / what is the research gap".*
 > "The goal fits in one line: one simulator, three protocols, one shared set
 > of assumptions. Five questions."
 
-*(one press = one full spoken question — each line on the slide IS a
-sentence that starts with the highlighted word; say it as a plain
-question, nothing more; slide text matches report §1.3)*
+*(ONE press — all five questions cascade in, top to bottom; read them
+straight off the slide, one breath per line, nothing between them; slide
+text matches report §1.3)*
 
-- `▶` "**WHEN** the network slows down — how much slower does finality
-  get?" → RQ1
-- `▶` "**WHAT** happens to throughput as more validators turn
-  malicious?" → RQ2
-- `▶` "**HOW MUCH** does each committed unit cost in messages?" → RQ3
-- `▶` "**WHO** breaks each protocol — which attacker, and does it break
-  speed or safety?" → RQ4
-- `▶` "**WHICH** protocol wins overall — does any of them dominate?"
-  → RQ5
+- `▶` (five RQs cascade on one press) — read each line as a plain question:
+  "How much does finality slow when the network slows? How does throughput
+  degrade as Byzantine nodes approach the fault threshold? How many messages
+  does one commit cost? Which adversary breaks which protocol — and which
+  property?" — then land on the last line and hold it half a beat:
+  "**Does any protocol dominate?**" *(that question is answered verbatim
+  on S9)*
 
 **TRANSITION ANCHOR:**
 > "Before measuring, we need to see just how differently these three
@@ -359,9 +390,11 @@ S10 callback, S11 future work).**
 `▶` (switch to tab **B — Delay, RQ1**, 2 presses):
 - `▶` slowdown vs. zero-delay baseline: FFG **×1.3** · PBFT **×1.9** —
   round-bounded, insensitive to tail shape
-- `▶` Snowman **×12–15** — each round waits for the SLOWEST peer in the
-  K-peer sample *(this press also reveals the tail numbers + the
-  "delay costs time, not messages" badge — reading layer, do NOT speak)*
+- `▶` Snowman **×12–15** — each round polls a random sample and must hear
+  back from **most of it**, **15 successful rounds in a row** — so it keeps
+  running into the heavy tail, round after round *(this press also reveals
+  the tail numbers + the "delay costs time, not messages" badge — reading
+  layer, do NOT speak)*
 
 `▶` (switch to tab **B — Loss**, 3 presses):
 - `▶` three finalization-rate curves across loss **0 → 20%**
@@ -454,14 +487,18 @@ or only at n = 25?".*
 
 ## S11 · Limitations & future work — enter 9:05 · speak 0:35 · leave 9:40
 
-- `▶` **limitations**, one breath: simplified implementations, one
-  representative per family — conclusions are about THESE protocols ·
-  **n ≤ 25** · Snowman safety is an analytical bound, no empirical witness ·
-  loss is a PERMANENT drop — no retransmission, so the loss curves are
-  upper bounds on fragility *(keep this clause — it shields the
-  FFG-collapses-at-5% headline)* · compute/bandwidth not modeled
-- `▶` (cuttable) **future work**, one sentence: threshold signatures ·
-  saturation throughput · adaptive timeouts · empirical ε · the DAG family
+- `▶` **limitations**, one breath — the slide holds the top three:
+  we tested simplified versions, so results speak for THESE three
+  protocols, not their whole families · at most **25 validators** — beyond
+  that, no data · Snowman's safety rests on a formula our experiments
+  never actually tested. Then ONE spoken-only guard, not on the slide:
+  loss is a PERMANENT drop — no retransmission — so the loss curves
+  are upper bounds on fragility *(keep this sentence — it shields the
+  FFG-collapses-at-5% headline; full limitation list lives in report ch. 6)*
+- `▶` (cuttable) **future work**, one sentence: test ε directly ·
+  add the signature aggregation real systems use · implement a new
+  protocol family *(kept vague on purpose — name DAG / Narwhal + Tusk
+  only if the jury asks which family)*
 
 `▶` — **CLOSING ANCHOR (memorize verbatim):**
 > "The contribution of this thesis is a mechanism map of the

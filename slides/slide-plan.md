@@ -210,15 +210,18 @@ drafts/ch2 §2.3–2.4
   precedent (Gervais et al.) covers Proof-of-Work only. → no overall view;
   hence build one.
 
-**S4 · Goal + research questions as 5W1H** (1 min) — drafts/ch1 §1.3, §1.5
+**S4 · Goal + research questions** (1 min) — drafts/ch1 §1.3, §1.5
 - One simulator · three protocols · matched assumptions.
-- RQs recast as plain questions (keep RQ numbers as small tags for
-  traceability to the report):
-  - **WHEN** the network slows — how much does finality slow? (RQ1)
-  - **WHAT** happens to throughput as the Byzantine fraction rises? (RQ2)
-  - **HOW MUCH** does each committed unit cost in messages? (RQ3)
-  - **WHO** breaks each protocol — which adversary, which property? (RQ4)
-  - **WHICH** protocol wins overall — does any family dominate? (RQ5)
+- RQs recast as plain questions (RQ pill = left anchor column, for
+  traceability to the report). *(2026-07-21: the original 5W1H lead-word
+  device was dropped for precision; all five lines now cascade on one press —
+  see defense-script.md changelog.)*
+  - How much does finality slow when the network slows? (RQ1)
+  - How does throughput degrade as Byzantine nodes approach the fault
+    threshold? (RQ2)
+  - How many messages does one commit cost? (RQ3)
+  - Which adversary breaks which protocol — and which property? (RQ4)
+  - Does any protocol dominate? (RQ5)
 
 ### Act 2 — How the simulation is built & run (~4.5 min)
 
