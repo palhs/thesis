@@ -1443,12 +1443,18 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
           <rect x="480" y="120" width="540" height="52" style="stroke:var(--ink-dim)"/>
           <text class="tm" x="750" y="153" text-anchor="middle">resilience ranking: <tspan fill="var(--c-pbft)">PBFT</tspan> &gt; <tspan fill="var(--c-snowman)">Snowman</tspan> &gt; <tspan fill="var(--c-ffg)">FFG</tspan></text>
         </g>
-        <text class="ts stf" data-t="1900" x="1455" y="230" text-anchor="end">at n = 25: PBFT ≈ Snowman — AURC tie (0.351 vs 0.369)</text>
+        <!-- press 3: the price of resilience — PBFT per-unit message cost rises
+             with loss (view-change retries). Schematic of Fig A.3 (cost_of_survival). -->
+        <path class="msg stf" data-t="2100" style="stroke:var(--c-pbft);stroke-dasharray:8 6;opacity:.7" d="M340,448 L700,430 L1060,368 L1420,212"/>
+        <g class="stf" data-t="2300">
+          <text class="tm" x="1420" y="176" text-anchor="end" fill="var(--c-pbft)">PBFT msgs / committed unit ↗</text>
+          <text class="ts" x="1420" y="200" text-anchor="end">the cost of survival — view-change retries</text>
+        </g>
       </svg>
       <div class="saybox">
         <p><span class="bt">▶</span>Three finalization-rate curves across loss <b>0 → 20%</b>.</p>
         <p><span class="bt">▶</span>Ranking <b style="color:var(--c-pbft)">PBFT</b> &gt; <b style="color:var(--c-snowman)">Snowman</b> &gt; <b style="color:var(--c-ffg)">FFG</b> — PBFT alone still finalizes at <b>20%</b>, because it alone has a recovery path: <b>view-change</b> rotates the leader. Snowman plateaus-then-cliffs at <b>10%</b>; FFG collapses at the first <b>5%</b> step — it has neither.</p>
-        <p><span class="bt">▶</span><b>No protocol forks</b> — the chain never splits: loss consumes <b>liveness</b> (progress stops), not <b>safety</b> (nothing committed is ever contradicted). <span class="dim">read only if asked: survivors pay ×2–3.5 latency · at n = 25 PBFT ≈ Snowman, AURC tie 0.351 vs 0.369 · §4.3.2–4.3.3</span></p>
+        <p><span class="bt">▶</span><b>No protocol forks</b> — loss consumes <b>liveness</b> (progress stops), not <b>safety</b>. And <b>in exchange for resilience, PBFT pays more cost</b> — its messages per committed unit climb with loss (view-change retries; dashed line). <span class="dim">read only if asked: collapsing protocols inflate even faster → at 20% PBFT is also cheapest · survivors pay ×2–3.5 latency · n = 25 PBFT ≈ Snowman AURC tie · Fig A.3 · §4.3.2–4.3.3</span></p>
       </div>
     </div>
 
@@ -1470,7 +1476,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
 
         <div class="rl st" data-t="900">Equivocation<br><span style="color:var(--ink-faint);font-size:16px">above ⅓ threshold</span></div>
         <div class="cell bad st" data-t="950"><b>Deterministic fork at φ = 0.40</b> — unaccountable: PBFT cannot attribute it.</div>
-        <div class="cell good st" data-t="1000"><b>No fork; accountable</b> — ≥ ⅓ of stake provably slashable.</div>
+        <div class="cell warn st" data-t="1000"><b>Fork possible past ⅓ — but accountable:</b> any fork costs ≥ ⅓ of stake, provably slashable. Measured: no fork; slashable stake crosses ⅓ at φ = 0.40.</div>
         <div class="cell good st" data-t="1050"><b>No fork surface</b> — analytical bound ε ≈ 5×10⁻¹⁵ / 3×10⁻¹¹.</div>
       </div>
       <div class="legend st" data-t="1200">

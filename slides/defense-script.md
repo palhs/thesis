@@ -405,7 +405,11 @@ S10 callback, S11 future work).**
   asked about stability in n)*
 - `▶` no protocol **forks** — the chain never splits; loss consumes
   **liveness** — progress stops — not **safety** — nothing committed is
-  ever contradicted
+  ever contradicted. And **in exchange for resilience, PBFT pays more
+  cost** — msgs per committed unit climb with loss (view-change retries;
+  the dashed line that appears on this press) *(detail — collapsing
+  protocols inflate faster, PBFT cheapest at 20%, ×2–3.5 latency,
+  Fig A.3 — reading layer, do NOT speak)*
 
 `▶` (switch to tab **C — Adversarial, RQ2+RQ4** — 3×3 matrix, 4 presses):
 - `▶` **delayed voting**: PBFT immune, success **1.0** · FFG drops to
@@ -414,8 +418,10 @@ S10 callback, S11 future work).**
 - `▶` **silent**: PBFT clean up to **φ = 0.33**, quorum cliff at **0.40** ·
   FFG decays toward **0.33** · Snowman starves first — **φ\* = 0.10 / 0.20**
 - `▶` **equivocation** — conflicting votes for two blocks at once — beyond
-  ⅓: PBFT **forks** at **0.40**, NOT attributable · FFG does not fork —
-  **≥⅓ of stake slashable**, accountable · Snowman: no fork surface —
+  ⅓: PBFT **forks** at **0.40**, NOT attributable · FFG: a fork is
+  possible past ⅓, but **accountable** — any fork costs
+  **≥⅓ of stake, provably slashable**; measured: no fork, slashable stake
+  crosses ⅓ at 0.40 · Snowman: no fork surface —
   bound **ε ≈ 5×10⁻¹⁵ / 3×10⁻¹¹**
 - `▶` (legend appears — point) green holds · yellow degrades · red breaks
 
