@@ -658,6 +658,9 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
       <div class="rq st" data-t="1100"><span class="tag">RQ4</span><span class="q">Which adversary breaks which protocol — and which property?</span></div>
       <div class="rq st" data-t="1300"><span class="tag">RQ5</span><span class="q">Does any protocol dominate?</span></div>
     </div>
+    <div class="saybox" style="margin-top:34px">
+      <p><b>"What does each protocol pay — in finality time, throughput, and messages — when the network degrades and adversaries appear… and does any protocol win on every axis?"</b></p>
+    </div>
   </div>
   <div class="src">report §1.3 · §1.5</div>
 </section>
@@ -1405,7 +1408,7 @@ body.editing .slide.active { outline:2px dashed var(--warn); outline-offset:-6px
         </g>
       </svg>
       <div class="saybox">
-        <p><span class="bt">▶</span>Slowdown vs the zero-delay baseline: <b style="color:var(--c-ffg)">FFG ×1.3</b> · <b style="color:var(--c-pbft)">PBFT ×1.9</b>. Both wait only for the <b>fastest ⅔</b> — a quorum — so the slow stragglers never set the pace: the delay tail barely matters (the pair stays ≤ 3% apart across tail shapes). FFG least, because its <b>5-second epoch pace</b> swallows sub-second delays.</p>
+        <p><span class="bt">▶</span>Slowdown vs the zero-delay baseline: <b style="color:var(--c-ffg)">FFG ×1.3</b> · <b style="color:var(--c-pbft)">PBFT ×1.9</b>. Both wait only for the <b>fastest ⅔</b> — a quorum — so the slow stragglers never set the pace: the delay tail barely matters (the pair stays ≤ 3% apart across tail shapes).</p>
         <p><span class="bt">▶</span><b style="color:var(--c-snowman)">Snowman ×12–15</b> — the opposite rule: each round it polls a random sample and must hear back from <b>most of it</b>, and it needs <b>15 successful rounds in a row</b> — so it keeps running into the heavy tail, <b>round after round</b>. That is why its heavy-tail latency even exceeds its uniform-tail latency (<b>15.3 s vs 12.6 s</b>).</p>
         <p class="dim">reading layer, don't speak: delay inflates time-to-finality, not message cost — msgs/unit PBFT ±0.1% · SNW +2% · FFG −12% · §4.3.1</p>
       </div>

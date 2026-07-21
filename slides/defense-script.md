@@ -198,17 +198,16 @@ published numbers / what is the research gap".*
 > "The goal fits in one line: one simulator, three protocols, one shared set
 > of assumptions. Five questions."
 
-*(ONE press — all five questions cascade in, top to bottom; read them
-straight off the slide, one breath per line, nothing between them; slide
-text matches report §1.3)*
+*(ONE press — all five questions cascade in as a visual; do NOT read them
+one by one. Speak the one-sentence summary in the saybox, then land on the
+last line; slide text matches report §1.3)*
 
-- `▶` (five RQs cascade on one press) — read each line as a plain question:
-  "How much does finality slow when the network slows? How does throughput
-  degrade as Byzantine nodes approach the fault threshold? How many messages
-  does one commit cost? Which adversary breaks which protocol — and which
-  property?" — then land on the last line and hold it half a beat:
-  "**Does any protocol dominate?**" *(that question is answered verbatim
-  on S9)*
+- `▶` (five RQs cascade on one press) — speak the summary sentence:
+  "What does each protocol pay — in finality time, throughput, and
+  messages — when the network degrades and adversaries appear… and does
+  any protocol win on every axis?" — then land on the last line and hold
+  it half a beat: "**Does any protocol dominate?**" *(that question is
+  answered verbatim on S9)*
 
 **TRANSITION ANCHOR:**
 > "Before measuring, we need to see just how differently these three
